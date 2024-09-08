@@ -1,0 +1,6 @@
+{
+  "group": "acme.com",
+  "plural": "services",
+  "version": "v1",
+  "icon": "radar"
+}

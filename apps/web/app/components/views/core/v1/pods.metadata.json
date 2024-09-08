@@ -1,0 +1,8 @@
+{
+  "group": "core",
+  "plural": "pods",
+  "version": "v1",
+  "icon": "Box",
+  "description": "A Kubernetes resource object shown in a card, containing metadata, specifications, and status information with visual indicators for readability.",
+  "kind": "Pod"
+}

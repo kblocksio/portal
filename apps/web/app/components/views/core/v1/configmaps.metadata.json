@@ -1,0 +1,8 @@
+{
+  "group": "core",
+  "plural": "configmaps",
+  "version": "v1",
+  "icon": "Box",
+  "description": "ConfigMap holds configuration data for pods to consume. This component visualizes the details of a ConfigMap object, including metadata, data, and binary data.",
+  "kind": "ConfigMap"
+}

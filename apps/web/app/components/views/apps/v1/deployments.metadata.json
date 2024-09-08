@@ -1,0 +1,6 @@
+{
+  "group": "apps",
+  "plural": "deployments",
+  "version": "v1",
+  "icon": "box"
+}

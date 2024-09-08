@@ -1,0 +1,62 @@
+[
+  {
+    "group": "core",
+    "plural": "services",
+    "version": "v1",
+    "icon": "cloud"
+  },
+  {
+    "group": "core",
+    "plural": "secrets",
+    "version": "v1",
+    "icon": "Lock",
+    "description": "A component to visualize Kubernetes Secret objects, displaying metadata and sensitive data in an organized and human-friendly manner.",
+    "kind": "Secret"
+  },
+  {
+    "group": "core",
+    "plural": "pods",
+    "version": "v1",
+    "icon": "Box",
+    "description": "A Kubernetes resource object shown in a card, containing metadata, specifications, and status information with visual indicators for readability.",
+    "kind": "Pod"
+  },
+  {
+    "group": "core",
+    "plural": "configmaps",
+    "version": "v1",
+    "icon": "Box",
+    "description": "ConfigMap holds configuration data for pods to consume. This component visualizes the details of a ConfigMap object, including metadata, data, and binary data.",
+    "kind": "ConfigMap"
+  },
+  {
+    "group": "acme.com",
+    "plural": "workloads",
+    "version": "v1",
+    "icon": "package-deploy"
+  },
+  {
+    "group": "acme.com",
+    "plural": "topics",
+    "version": "v1",
+    "icon": "message-square"
+  },
+  {
+    "group": "acme.com",
+    "plural": "services",
+    "version": "v1",
+    "icon": "radar"
+  },
+  {
+    "group": "acme.com",
+    "plural": "repositories",
+    "version": "v1",
+    "icon": "file-box"
+  },
+  {
+    "group": "apps",
+    "plural": "deployments",
+    "version": "v1",
+    "icon": "box"
+  }
+]
