@@ -5,7 +5,7 @@ axios.defaults.baseURL = "http://localhost:3001"; // Replace with your server UR
 
 interface UseFetchResult<T> {
   data: T | null;
-  error: string | null;
+  error: Error | undefined;
   loading: boolean;
 }
 
@@ -14,7 +14,7 @@ export function useFetch<T = unknown>(
   options?: AxiosRequestConfig,
 ): UseFetchResult<T> {
   const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function useFetch<T = unknown>(
         const response = await axios.get<T>(url, options); // Make request using axios
         setData(response.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        setError(err instanceof Error ? err : new Error("An error occurred"));
       } finally {
         setLoading(false);
       }

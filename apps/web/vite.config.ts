@@ -3,17 +3,6 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  server: {
-    hmr: {
-      port: 8002, // Ensure the correct port is set for HMR
-    },
-  },
-  build: {
-    ssr: "node",
-  },
-  ssr: {
-    noExternal: ["lucide-react"], // Mark it as external so Vite transpiles it
-  },
   plugins: [
     remix({
       future: {
@@ -24,4 +13,15 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  optimizeDeps: {
+    include: ["lucide-react"],
+  },
+  ssr: {
+    noExternal: ["lucide-react"],
+  },
+  server: {
+    hmr: {
+      port: 8002,
+    },
+  },
 });

@@ -16,5 +16,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "react-resizable-panels": "^2.1.2"
+  }
 }

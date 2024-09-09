@@ -1,0 +1,12 @@
+{
+  "name": "@repo/shared",
+  "version": "0.0.0",
+  "description": "",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint \"**/*.ts\""
+  },
+  "author": "ainvoner"
+}

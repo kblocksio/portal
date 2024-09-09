@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import { config } from "dotenv";
 import cors from "cors";
-import { Params } from "./types";
+import { K8sRequestParams } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
 
 config();
@@ -19,7 +19,7 @@ app.use(
 
 const createRoutes = () => {
   app.get("/api", async (req, res) => {
-    const params = req.query as unknown as Params;
+    const params = req.query as unknown as K8sRequestParams;
 
     const url = [];
 

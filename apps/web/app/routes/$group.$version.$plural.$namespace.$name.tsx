@@ -1,12 +1,11 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useParams } from "@remix-run/react";
 import { useEffect, useMemo, useState } from "react";
-import { Skeleton } from "~/components/ui/skeleton";
+import invariant from "@remix-run/react/dist/invariant";
 
-const SERVER_URL = "http://localhost:3001";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  //nvariant(params.test_id, "Missing contactId param");
   const { group, version, plural } = params;
 
   // Construct query parameters if necessary (you can add more query parameters here)

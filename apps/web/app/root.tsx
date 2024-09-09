@@ -1,21 +1,22 @@
 import {
   Links,
+  LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  LiveReload,
 } from "@remix-run/react";
 import "./tailwind.css";
-import { Header } from "~/components/header";
-import { cn } from "~/lib/utils";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "~/components/ui/resizable";
 import { Sidebar } from "~/components/sidebar";
-export function Layout() {
+import { Header } from "~/components/header";
+import { cn } from "~/lib/utils";
+
+export default function App() {
   return (
     <html lang="en">
       <head>
@@ -29,7 +30,7 @@ export function Layout() {
           <Header />
           <div className="flex-grow overflow-hidden">
             <ResizablePanelGroup direction="horizontal" className="h-full">
-              <ResizablePanel defaultSize={14} minSize={14} collapsible>
+              <ResizablePanel defaultSize={20} minSize={20} collapsible>
                 <div className="h-full overflow-y-auto">
                   <div className="p-2">
                     <Sidebar />
@@ -37,22 +38,17 @@ export function Layout() {
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={86}>
+              <ResizablePanel defaultSize={80}>
                 <div className="h-full overflow-y-auto">
-                  <Outlet /> {/* Renders the routed page content */}
+                  <Outlet />
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
           </div>
           <ScrollRestoration />
           <Scripts />
-          {process.env.NODE_ENV === "development" && <LiveReload />}
         </div>
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Layout />;
 }

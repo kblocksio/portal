@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import apiGroups from "./api-groups.json";
-import { ApiGroup } from "../types";
+import { ApiGroup } from "@repo/shared";
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +29,7 @@ type MenuItem = {
   error?: Error;
 };
 
-function Indicator({ isOpen, item }: { isOpen: boolean; item: MenuItem }) {
+const Indicator = ({ isOpen, item }: { isOpen: boolean; item: MenuItem }) => {
   if (item.error) {
     return (
       <TooltipProvider>
@@ -52,10 +52,10 @@ function Indicator({ isOpen, item }: { isOpen: boolean; item: MenuItem }) {
   }
 
   return <ChevronDown className="h-4 w-4" />;
-}
+};
 
-function MenuItem({ item, level = 0 }: { item: MenuItem; level?: number }) {
-  const [isOpen, setIsOpen] = React.useState(false);
+const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
 
   if (item.children) {
@@ -122,20 +122,19 @@ function MenuItem({ item, level = 0 }: { item: MenuItem; level?: number }) {
       </div>
     </Link>
   );
-}
+};
 
-function SidebarSection({ api }: { api: ApiGroup }) {
-  const { data } = useFetch(`/api`, {
+const SidebarSection = ({ api }: { api: ApiGroup }) => {
+  const { data, loading, error } = useFetch<{ items: any }>(`/api`, {
     params: { group: api.group, version: api.version, plural: api.plural },
   });
   const [map, setMap] = useState<Record<string, any>>();
 
   useEffect(() => {
     if (!data) return; // Only run when data is available
-
     const myMap: Record<string, any> = {};
 
-    data?.items.forEach((item: any) => {
+    data.items.forEach((item: any) => {
       myMap[`${item.metadata.namespace}/${item.metadata.name}`] = item;
     });
 
@@ -157,14 +156,14 @@ function SidebarSection({ api }: { api: ApiGroup }) {
         label: api.plural,
         icon: Icon,
         children,
-        isLoading: false, //fix
-        error: undefined, //fix
+        isLoading: loading,
+        error: error,
       }}
     />
   );
-}
+};
 
-export function Sidebar() {
+export const Sidebar = () => {
   return (
     <nav>
       {apiGroups.map((api, index) => (
@@ -172,4 +171,4 @@ export function Sidebar() {
       ))}
     </nav>
   );
-}
+};

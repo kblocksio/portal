@@ -1,4 +1,4 @@
-export interface Params {
+export interface K8sRequestParams {
   group: string;
   version: string;
   plural: string;
@@ -7,8 +7,8 @@ export interface Params {
 }
 
 export type ApiGroup = {
-  group: string
-  version: string
-  icon: string
-  plural: string
-}
+  group: string;
+  version: string;
+  icon: string;
+  plural: string;
+};
