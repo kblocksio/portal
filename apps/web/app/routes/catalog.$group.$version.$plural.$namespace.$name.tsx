@@ -20,7 +20,7 @@ export default function Index() {
 
   useEffect(() => {
     import(
-      `../components/views/${params.group}/${params.version}/${params.plural}.tsx`
+      `../components/catalog/views/${params.group}/${params.version}/${params.plural}.tsx`
     ).then((module) => {
       setView(() => module.default);
     });
