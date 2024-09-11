@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import cors from "cors";
 import { K8sRequestParams } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
-
+import apiGroups from "./mock-data/api-groups.json";
 config();
 
 const port = process.env.PORT || 3001;
@@ -18,7 +18,7 @@ app.use(
 );
 
 const createRoutes = () => {
-  app.get("/api", async (req, res) => {
+  app.get("/api/resources", async (req, res) => {
     const params = req.query as unknown as K8sRequestParams;
 
     const url = [];
@@ -37,6 +37,11 @@ const createRoutes = () => {
     const data = await result.json();
     return res.status(200).json(data);
   });
+
+  app.get("/api/api-groups", async (req, res) => {
+    return res.status(200).json(apiGroups);
+  });
+
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

@@ -13,7 +13,7 @@ export const k8sFetcher = async (params: Params) => {
     plural: params.plural || "",
   }).toString();
   // Construct the full URL with query parameters
-  const url = `${SERVER_URL}/api?${queryParams}`;
+  const url = `${SERVER_URL}/api/resources?${queryParams}`;
 
   try {
     const res = await fetch(url); // Send the request to the server

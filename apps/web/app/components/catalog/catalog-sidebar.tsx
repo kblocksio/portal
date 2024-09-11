@@ -6,8 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import apiGroups from "../api-groups.json";
-import { ApiGroup } from "../../../../../packages/shared/src";
+import { ApiGroup } from "@repo/shared";
 import {
   Tooltip,
   TooltipContent,
@@ -15,7 +14,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useIcon } from "~/hooks/use-icon";
-import { Link, useHref, useLocation } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import { useEffect, useMemo, useState } from "react";
 import { useFetch } from "~/hooks/use-fetch";
 
@@ -125,7 +124,7 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
 };
 
 const SidebarSection = ({ api }: { api: ApiGroup }) => {
-  const { data, loading, error } = useFetch<{ items: any }>(`/api`, {
+  const { data, loading, error } = useFetch<{ items: any }>(`/api/resources`, {
     params: { group: api.group, version: api.version, plural: api.plural },
   });
   const { pathname } = useLocation();
@@ -164,7 +163,10 @@ const SidebarSection = ({ api }: { api: ApiGroup }) => {
   );
 };
 
-export const CatalogSidebar = () => {
+export interface CatalogSidebarProps {
+  apiGroups: ApiGroup[];
+}
+export const CatalogSidebar = ({ apiGroups }: CatalogSidebarProps) => {
   return (
     <nav>
       {apiGroups.map((api, index) => (
