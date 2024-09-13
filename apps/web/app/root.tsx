@@ -8,6 +8,7 @@ import {
 import "./tailwind.css";
 import { Header } from "~/components/header";
 import { cn } from "~/lib/utils";
+import { AppProvider } from "~/AppContext";
 
 export default function App() {
   return (
@@ -19,14 +20,16 @@ export default function App() {
         <Links />
       </head>
       <body className={cn("overflow-hidden")}>
-        <div className="flex h-screen flex-col">
-          <Header />
-          <div className="flex-grow overflow-hidden">
-            <Outlet />
+        <AppProvider>
+          <div className="flex h-screen flex-col">
+            <Header />
+            <div className="flex-grow overflow-hidden">
+              <Outlet />
+            </div>
+            <ScrollRestoration />
+            <Scripts />
           </div>
-          <ScrollRestoration />
-          <Scripts />
-        </div>
+        </AppProvider>
       </body>
     </html>
   );

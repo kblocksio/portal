@@ -1,9 +1,12 @@
 import express, { Express } from "express";
 import { config } from "dotenv";
 import cors from "cors";
-import { K8sRequestParams } from "@repo/shared";
+import { CRD, K8sRequestParams } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
 import apiGroups from "./mock-data/api-groups.json";
+import projects from "./mock-data/projects.json";
+import * as k8s from "@kubernetes/client-node";
+
 config();
 
 const port = process.env.PORT || 3001;
@@ -40,6 +43,58 @@ const createRoutes = () => {
 
   app.get("/api/api-groups", async (req, res) => {
     return res.status(200).json(apiGroups);
+  });
+
+  app.get("/api/projects", async (req, res) => {
+    return res.status(200).json(projects);
+  });
+
+  app.get("/api/kblocks", async (req, res) => {
+    const kc = new k8s.KubeConfig();
+    kc.loadFromDefault();
+    try {
+      if (!process.env.KBLOCKS_CONFIG_MAP_ANNOTATION) {
+        throw { message: "KBLOCKS_CONFIG_MAP_ANNOTATION is not set" };
+      }
+      if (!process.env.KBLOCKS_NAMESPACE) {
+        throw { message: "KBLOCKS_NAMESPACE is not set" };
+      }
+      if (!process.env.KBLOCKS_GROUP_NAME) {
+        throw { message: "KBLOCKS_GROUP_NAME is not set" };
+      }
+      const k8sCRDApi = kc.makeApiClient(k8s.ApiextensionsV1Api);
+      const crds = await k8sCRDApi.listCustomResourceDefinition();
+      const filteredCrds = crds.body.items.filter(
+        (crd) => crd.spec.group === process.env.KBLOCKS_GROUP_NAME,
+      );
+
+      const crdsResult: CRD[] = [];
+
+      for (const crd of filteredCrds) {
+        const result: CRD = {
+          kind: crd.spec.names.kind,
+        };
+        if (crd?.metadata?.annotations) {
+          const configmapName =
+            crd.metadata.annotations[process.env.KBLOCKS_CONFIG_MAP_ANNOTATION];
+          const k8sConfigMapApi = kc.makeApiClient(k8s.CoreV1Api);
+          const configMap = await k8sConfigMapApi.readNamespacedConfigMap(
+            configmapName,
+            process.env.KBLOCKS_NAMESPACE,
+          );
+          const crdConfigMap = configMap.body.data;
+          result.color = crdConfigMap?.color;
+          result.icon = crdConfigMap?.icon?.replace("heroicon://", "");
+          result.readme = crdConfigMap?.readme;
+          result.openApiSchema = crd.spec.versions[0]?.schema?.openAPIV3Schema;
+          crdsResult.push(result);
+        }
+      }
+      return res.status(200).json(crdsResult);
+    } catch (error) {
+      console.error(error);
+      return res.status(500);
+    }
   });
 
   app.listen(port, () => {

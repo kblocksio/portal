@@ -15,6 +15,11 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useEffect } from "react";
+import { useFetch } from "~/hooks/use-fetch";
+import { Project } from "@repo/shared";
+import { Combobox } from "~/components/combobox";
+import { useAppContext } from "~/AppContext";
 
 function Logo() {
   return (
@@ -27,15 +32,6 @@ function Logo() {
         height={24}
       />
     </a>
-  );
-}
-
-function SearchBar() {
-  return (
-    <div className="relative max-w-xs w-full">
-      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input placeholder="Search..." className="pl-8" />
-    </div>
   );
 }
 
@@ -127,13 +123,40 @@ function UserProfile() {
   );
 }
 
+const fallbackProject: Project = {
+  label: "All projects",
+  value: "all",
+  description:
+    "Below is a comprehensive list of all Kubernetes resources associated with the current account, spanning across all projects added to the application.",
+};
+
 export function Header() {
+  const [projects, setProjects] = React.useState([fallbackProject]);
+  const { data } = useFetch<Project[]>("/api/projects");
+  const { setSelectedProject } = useAppContext();
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    setProjects([fallbackProject, ...data]);
+  }, [data]);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       <div className="flex h-14 items-center">
         <Logo />
+        <div className={"pl-4"}>
+          <Combobox
+            items={projects}
+            fallbackItem={fallbackProject}
+            onChange={(value: string) => {
+              const currentProject = projects?.filter(
+                (project) => project.value === value,
+              );
+              setSelectedProject(currentProject[0]);
+            }}
+          />
+        </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <SearchBar />
           <NotificationBell />
           <UserProfile />
         </div>
