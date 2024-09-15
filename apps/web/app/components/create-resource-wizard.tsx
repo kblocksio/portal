@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Loader } from "lucide-react";
@@ -37,7 +37,9 @@ export const CreateResourceWizard = ({
   resources,
 }: CreateResourceWizardProps) => {
   const [step, setStep] = useState(1);
-  const [selectedResource, setSelectedResource] = useState<ResourceType | null>(null);
+  const [selectedResource, setSelectedResource] = useState<ResourceType | null>(
+    null,
+  );
 
   const handleResourceSelect = (resource: any) => {
     setSelectedResource(resource);
@@ -61,6 +63,14 @@ export const CreateResourceWizard = ({
     setSelectedResource(null);
   };
 
+  const SelectedResourceIcon = useMemo(() => {
+    return getIconComponent({ icon: selectedResource?.icon });
+  }, [selectedResource]);
+
+  const selectedResourceIconColor = useMemo(() => {
+    return getResourceIconColors({ color: selectedResource?.color });
+  }, [selectedResource]);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -72,9 +82,23 @@ export const CreateResourceWizard = ({
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>
-            {step === 1
-              ? "Select Resource Type"
-              : `Configure ${selectedResource?.kind || "Resource"}`}
+            {step === 1 ? (
+              "Select Resource Type"
+            ) : (
+              <div className="flex items-center space-x-4">
+                <div className="p-2 rounded-full">
+                  <SelectedResourceIcon
+                    className={`${selectedResourceIconColor} w-6 h-6`}
+                  />
+                </div>
+                <div>
+                  <CardTitle>New {selectedResource?.kind}</CardTitle>
+                  <CardDescription>
+                    {selectedResource?.description || "This is a description"}
+                  </CardDescription>
+                </div>
+              </div>
+            )}
           </DialogTitle>
         </DialogHeader>
         {step === 1 ? (
@@ -105,7 +129,7 @@ export const CreateResourceWizard = ({
             })}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 p-2">
             <AutoForm
               className={"overflow-auto max-h-[800px]"}
               formSchema={
@@ -114,6 +138,7 @@ export const CreateResourceWizard = ({
                 ) as ZodObjectOrWrapped
               }
             />
+
             <div className="flex justify-between">
               <Button variant="outline" onClick={handleBack}>
                 Back
