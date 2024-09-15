@@ -1,24 +1,25 @@
 import { useFetch } from "~/hooks/use-fetch";
-import { ApiGroup } from "@repo/shared";
+import { Condition, Resource, ResourceType } from "@repo/shared";
 import { Card } from "~/components/ui/card";
 import { CalendarIcon } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { cn } from "~/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { formatDistanceToNow } from "date-fns";
 
 export interface ProjectGroupProps {
-  apiGroup: ApiGroup;
+  resourceType: ResourceType;
   searchQuery?: string;
 }
-export const ProjectGroup = ({ apiGroup, searchQuery }: ProjectGroupProps) => {
-  const { data, loading } = useFetch<{ items: any }>(`/api/resources`, {
-    params: {
-      group: apiGroup.group,
-      version: apiGroup.version,
-      plural: apiGroup.plural,
-    },
+export const ProjectGroup = ({ resourceType, searchQuery }: ProjectGroupProps) => {
+  const { data, isLoading } = useFetch<{ items: Resource[] }>(`/api/resources`, {
+    group: resourceType.group,
+    version: resourceType.version,
+    plural: resourceType.plural,
   });
+
   const filteredData = useMemo(() => {
     if (!data) return null;
     if (!searchQuery) return data.items;
@@ -27,11 +28,19 @@ export const ProjectGroup = ({ apiGroup, searchQuery }: ProjectGroupProps) => {
     );
   }, [data, searchQuery]);
 
-  return !loading && (!filteredData || filteredData?.length === 0) ? null : (
+  const Icon = getIconComponent({ icon: resourceType.icon });
+  const iconColor = getResourceIconColors({
+    color: resourceType?.color,
+  });
+
+  return !isLoading && (!filteredData || filteredData?.length === 0) ? null : (
     <section className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">{apiGroup.plural}</h2>
-      <div className="space-y-4">
-        {loading && !filteredData && (
+      <div className="flex items-center mb-4">
+        <Icon className={`${iconColor} w-6 h-6 mr-2`} />
+        <h2 className="text-xl font-semibold">{resourceType.plural}</h2>
+      </div>
+      <div>
+        {isLoading && !filteredData && (
           <Card className="flex justify-between items-center p-4">
             <Skeleton className="h-6 w-32" />
             <div className="flex items-center space-x-4">
@@ -41,33 +50,100 @@ export const ProjectGroup = ({ apiGroup, searchQuery }: ProjectGroupProps) => {
             </div>
           </Card>
         )}
-        {!loading &&
+
+        {!isLoading &&
           filteredData &&
           filteredData.length > 0 &&
-          filteredData.map((item: any, index: number) => (
-            <Card key={index} className="flex justify-between items-center p-4">
-              <div>
-                <h3 className="font-bold">{item.metadata.name}</h3>
-                <p className="text-muted-foreground">
-                  some description here...
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-muted-foreground text-sm">
-                  <p>Last deployed by @ainvoner 2h ago</p>
-                  <p className="flex items-center">
-                    <CalendarIcon className="mr-1 h-4 w-4" /> Joined December
-                    2021
-                  </p>
-                </div>
-                <Button variant="outline">Action button</Button>
-                <Badge variant="default" className="bg-green-500 text-white">
-                  OK
-                </Badge>
-              </div>
-            </Card>
-          ))}
+          filteredData.map((item: Resource, index: number) => 
+            <ResourceCard 
+              key={index} 
+              item={item} 
+              isFirst={index === 0}
+              isLast={index === filteredData.length - 1}
+            />
+          )}
       </div>
     </section>
   );
 };
+
+function ResourceCard({ item, isFirst, isLast }: {  item: Resource; isFirst: boolean, isLast: boolean }) {
+  const borders = [];
+
+  borders.push('rounded-none');
+  borders.push('border-none');
+
+  if (isFirst) {
+    borders.push('rounded-t-lg');
+    // borders.push('rounded-b-none');
+  }
+
+  if (isLast) {
+    borders.push('rounded-b-lg');
+    // borders.push('rounded-t-none');
+  }
+
+  const readyCondition = item?.status?.conditions?.find((condition: any) => condition.type === "Ready");
+
+  return (
+    <Card className={`flex justify-between items-center p-2 hover:bg-gray-50 transition-colors duration-200 ${
+      borders.join(' ')
+    }`}>
+      <div className="flex items-center space-x-4">
+        <StatusBadge readyCondition={readyCondition} />
+        <div>
+          <div className="flex items-center">
+            <h3>
+              <span className="text-muted-foreground">{item.metadata.namespace}</span>
+              <span className="text-muted-foreground mx-1">·</span>
+              <span className="font-semibold">{item.metadata.name}</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center space-x-4">
+        <LastUpdated lastUpdated={readyCondition?.lastTransitionTime} />
+      </div>
+    </Card>
+  );
+}
+
+function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
+  if (!lastUpdated) return <></>;
+
+  const relativeTime = formatDistanceToNow(lastUpdated);
+
+  return (
+    <div className="text-muted-foreground text-sm">
+      <p className="flex items-center">
+        <CalendarIcon className="mr-1 h-4 w-4" />
+        {relativeTime}
+      </p>
+    </div>
+  );
+}
+
+function StatusBadge({ readyCondition }: { readyCondition?: Condition }) {
+  if (!readyCondition) return <></>;
+
+  const color = readyCondition.status === "True" ? "green" : "red";
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <div className={cn(
+            "ml-1",
+            "inline-block rounded-full",
+            "h-3 w-3",
+            `bg-${color}-500`,
+            "transition-transform duration-200 hover:scale-125"
+          )} />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{readyCondition.message}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
