@@ -13,8 +13,8 @@ import { ProjectGroups } from "~/components/project-groups";
 import { ResourceType } from "@repo/shared";
 
 export const loader = async () => {
-  return { 
-    resourceTypes: (await axios.get(`/api/types`)).data as ResourceType[], 
+  return {
+    resourceTypes: (await axios.get(`/api/types`)).data as ResourceType[],
   };
 };
 
@@ -39,7 +39,7 @@ export default function Index() {
   return (
     <div className="flex flex-col w-full h-full bg-slate-50 pl-32 pr-32 pt-12 pb-12 overflow-auto">
       <ProjectHeader selectedProject={selectedProject} />
-      <div className="flex items-center space-x-4 rounded-lg">
+      <div className="container mx-auto flex items-center space-x-4 rounded-lg">
         <div className="relative flex-grow">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -58,8 +58,11 @@ export default function Index() {
           isLoading={state === "loading"}
         />
       </div>
-      <div className={"mt-12"}>
-        <ProjectGroups resourceTypes={resourceTypes} searchQuery={searchQuery} />
+      <div className={"container mx-auto mt-12"}>
+        <ProjectGroups
+          resourceTypes={resourceTypes}
+          searchQuery={searchQuery}
+        />
       </div>
     </div>
   );
