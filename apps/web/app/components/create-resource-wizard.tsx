@@ -18,7 +18,7 @@ import { ResourceType } from "@repo/shared";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Loader } from "lucide-react";
 import AutoForm from "./ui/auto-form";
-import { convertJsonSchemaToZod } from "~/lib/utils";
+import { prepareOpenApiSchemaForAutoForm } from "~/lib/utils";
 import { ZodObjectOrWrapped } from "~/components/ui/auto-form/utils";
 
 export interface CreateResourceWizardProps {
@@ -107,8 +107,9 @@ export const CreateResourceWizard = ({
         ) : (
           <div className="space-y-4">
             <AutoForm
+              className={"overflow-auto max-h-[800px]"}
               formSchema={
-                convertJsonSchemaToZod(
+                prepareOpenApiSchemaForAutoForm(
                   selectedResource?.openApiSchema,
                 ) as ZodObjectOrWrapped
               }
