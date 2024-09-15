@@ -7,7 +7,21 @@ import apiGroups from "./mock-data/api-groups.json";
 import projects from "./mock-data/projects.json";
 import * as k8s from "@kubernetes/client-node";
 
-config();
+config({ path: `.env.${process.env.NODE_ENV ?? "dev"}` });
+
+const kblocksConfigMap = process.env.KBLOCKS_CONFIG_MAP_ANNOTATION;
+const kblocksNamespace = process.env.KBLOCKS_NAMESPACE;
+const kblocksGroupName = process.env.KBLOCKS_GROUP_NAME;
+
+if (!kblocksConfigMap) {
+  throw new Error("KBLOCKS_CONFIG_MAP_ANNOTATION is not set");
+}
+if (!kblocksNamespace) {
+  throw new Error("KBLOCKS_NAMESPACE is not set");
+}
+if (!kblocksGroupName) {
+  throw new Error("KBLOCKS_GROUP_NAME is not set");
+}
 
 const port = process.env.PORT || 3001;
 const app: Express = express();
@@ -53,19 +67,10 @@ const createRoutes = () => {
     const kc = new k8s.KubeConfig();
     kc.loadFromDefault();
     try {
-      if (!process.env.KBLOCKS_CONFIG_MAP_ANNOTATION) {
-        throw { message: "KBLOCKS_CONFIG_MAP_ANNOTATION is not set" };
-      }
-      if (!process.env.KBLOCKS_NAMESPACE) {
-        throw { message: "KBLOCKS_NAMESPACE is not set" };
-      }
-      if (!process.env.KBLOCKS_GROUP_NAME) {
-        throw { message: "KBLOCKS_GROUP_NAME is not set" };
-      }
       const k8sCRDApi = kc.makeApiClient(k8s.ApiextensionsV1Api);
       const crds = await k8sCRDApi.listCustomResourceDefinition();
       const filteredCrds = crds.body.items.filter(
-        (crd) => crd.spec.group === process.env.KBLOCKS_GROUP_NAME,
+        (crd) => crd.spec.group === kblocksGroupName,
       );
 
       const crdsResult: CRD[] = [];
@@ -76,11 +81,11 @@ const createRoutes = () => {
         };
         if (crd?.metadata?.annotations) {
           const configmapName =
-            crd.metadata.annotations[process.env.KBLOCKS_CONFIG_MAP_ANNOTATION];
+            crd.metadata.annotations[kblocksConfigMap];
           const k8sConfigMapApi = kc.makeApiClient(k8s.CoreV1Api);
           const configMap = await k8sConfigMapApi.readNamespacedConfigMap(
             configmapName,
-            process.env.KBLOCKS_NAMESPACE,
+            kblocksNamespace,
           );
           const crdConfigMap = configMap.body.data;
           result.color = crdConfigMap?.color;
