@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { useState } from "react";
-import { CRD } from "@repo/shared";
+import { ResourceType } from "@repo/shared";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Loader } from "lucide-react";
 import AutoForm from "./ui/auto-form";
@@ -26,7 +26,7 @@ export interface CreateResourceWizardProps {
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
   handleOnCreate: (resource: any) => void;
-  resources: CRD[];
+  resources: ResourceType[];
 }
 
 export const CreateResourceWizard = ({
@@ -37,7 +37,7 @@ export const CreateResourceWizard = ({
   resources,
 }: CreateResourceWizardProps) => {
   const [step, setStep] = useState(1);
-  const [selectedResource, setSelectedResource] = useState<CRD | null>(null);
+  const [selectedResource, setSelectedResource] = useState<ResourceType | null>(null);
 
   const handleResourceSelect = (resource: any) => {
     setSelectedResource(resource);

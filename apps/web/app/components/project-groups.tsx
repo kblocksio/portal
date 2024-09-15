@@ -1,15 +1,14 @@
-import { ApiGroup } from "@repo/shared";
+import { ResourceType } from "@repo/shared";
 import { ProjectGroup } from "~/components/project-group";
-import { useEffect } from "react";
 export interface ProjectEntitiesProps {
-  apiGroups: ApiGroup[];
+  resourceTypes: ResourceType[];
   searchQuery?: string;
 }
 export const ProjectGroups = ({
-  apiGroups,
+  resourceTypes,
   searchQuery,
 }: ProjectEntitiesProps) => {
-  return apiGroups.map((api, index) => (
-    <ProjectGroup key={index} apiGroup={api} searchQuery={searchQuery} />
+  return resourceTypes.map((resourceType, index) => (
+    <ProjectGroup key={index} resourceType={resourceType} searchQuery={searchQuery} />
   ));
 };

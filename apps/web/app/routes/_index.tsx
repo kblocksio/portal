@@ -10,16 +10,17 @@ import axios from "axios";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
+import { ResourceType } from "@repo/shared";
 
 export const loader = async () => {
-  const { data: kblocks } = await axios.get(`/api/kblocks`);
-  const { data: apiGroups } = await axios.get(`/api/api-groups`);
-  return { kblocks, apiGroups };
+  return { 
+    resourceTypes: (await axios.get(`/api/types`)).data as ResourceType[], 
+  };
 };
 
 export default function Index() {
   const { selectedProject } = useAppContext();
-  const { kblocks, apiGroups } = useLoaderData<typeof loader>();
+  const { resourceTypes } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,12 +54,12 @@ export default function Index() {
           isOpen={isOpen}
           handleOnOpenChange={setIsOpen}
           handleOnCreate={handleCreateResource}
-          resources={kblocks || []}
+          resources={resourceTypes || []}
           isLoading={state === "loading"}
         />
       </div>
       <div className={"mt-12"}>
-        <ProjectGroups apiGroups={apiGroups} searchQuery={searchQuery} />
+        <ProjectGroups resourceTypes={resourceTypes} searchQuery={searchQuery} />
       </div>
     </div>
   );

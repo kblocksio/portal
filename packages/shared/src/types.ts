@@ -1,4 +1,4 @@
-export interface K8sRequestParams {
+export interface ResourceQuery {
   group: string;
   version: string;
   plural: string;
@@ -6,12 +6,28 @@ export interface K8sRequestParams {
   name: string;
 }
 
-export type ApiGroup = {
-  group: string;
-  version: string;
-  icon: string;
-  plural: string;
-};
+export interface Condition {
+  type?: string;
+  status?: string;
+  lastTransitionTime?: string;
+  reason?: string;
+  message?: string;
+}
+
+export interface Resource {
+  metadata: {
+    name: string;
+    namespace?: string;
+    labels?: Record<string, string>;
+    annotations?: Record<string, string>;
+    creationTimestamp?: string;
+    uid?: string;
+    resourceVersion?: string;
+  };
+  status: {
+    conditions?: Condition[];
+  };
+}
 
 export type Project = {
   label: string;
@@ -19,7 +35,10 @@ export type Project = {
   description: string;
 };
 
-export interface CRD {
+export interface ResourceType {
+  group: string;
+  plural: string;
+  version: string;
   kind: string;
   description?: string;
   readme?: string;
