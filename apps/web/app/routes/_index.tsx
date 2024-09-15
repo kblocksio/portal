@@ -1,16 +1,13 @@
 /**
  * All projects view
  */
-import { CalendarIcon, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import axios from "axios";
 import { useLoaderData, useNavigation } from "@remix-run/react";
-import { Card } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 
@@ -39,7 +36,7 @@ export default function Index() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-slate-50 pl-32 pr-32 pt-12 pb-12">
+    <div className="flex flex-col w-full h-full bg-slate-50 pl-32 pr-32 pt-12 pb-12 overflow-auto">
       <ProjectHeader selectedProject={selectedProject} />
       <div className="flex items-center space-x-4 rounded-lg">
         <div className="relative flex-grow">
@@ -60,7 +57,7 @@ export default function Index() {
           isLoading={state === "loading"}
         />
       </div>
-      <div className={"overflow-auto mt-12"}>
+      <div className={"mt-12"}>
         <ProjectGroups apiGroups={apiGroups} searchQuery={searchQuery} />
       </div>
     </div>
