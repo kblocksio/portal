@@ -110,3 +110,5 @@ const createRoutes = () => {
 };
 
 createRoutes();
+
+module.exports = app;

@@ -9,3 +9,7 @@ dist-ssr
 .cache
 server/dist
 public/dist
+# Ignore Vercel build output and configuration files
+.vercel
+*/.vercel
+apps/web/.vercel
