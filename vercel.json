@@ -2,8 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "apps/web/package.json",
-      "use": "@vercel/remix"
+      "src": "apps/web/server.js",
+      "use": "@vercel/node"
     },
     {
       "src": "apps/server/src/index.ts",
@@ -17,7 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "apps/web/$1"
+      "dest": "apps/web/server.js"
     }
   ]
 }
