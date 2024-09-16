@@ -2,7 +2,7 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import FullReload from "vite-plugin-full-reload";
-import vercelPreset from "vite-plugin-vercel";
+import { vercelPreset } from "@vercel/remix/vite";
 
 const userConfig = defineConfig({
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
@@ -13,9 +13,9 @@ const userConfig = defineConfig({
         v3_relativeSplatPath: true,
         v3_throwAbortReason: true,
       },
+      presets: [vercelPreset()],
     }),
     tsconfigPaths(),
-    vercelPreset(),
   ],
   optimizeDeps: {
     include: ["lucide-react"],
