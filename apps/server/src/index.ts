@@ -111,4 +111,4 @@ const createRoutes = () => {
 
 createRoutes();
 
-module.exports = app;
+export default app;
