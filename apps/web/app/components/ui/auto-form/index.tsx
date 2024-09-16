@@ -1,4 +1,3 @@
-"use client";
 import { Form } from "~/components/ui/form";
 import React from "react";
 import { DefaultValues, FormState, useForm } from "react-hook-form";

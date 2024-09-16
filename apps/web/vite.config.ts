@@ -4,6 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import FullReload from "vite-plugin-full-reload";
 
 export default defineConfig({
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
   plugins: [
     remix({
       future: {
