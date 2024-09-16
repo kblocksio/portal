@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import FullReload from "vite-plugin-full-reload";
 
-export default defineConfig({
+const userConfig = defineConfig({
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   plugins: [
     remix({
@@ -14,7 +14,6 @@ export default defineConfig({
       },
     }),
     tsconfigPaths(),
-    FullReload(["**/*.tsx", "**/*.css", "**/*.json"]), // List of files to watch for full reload
   ],
   optimizeDeps: {
     include: ["lucide-react"],
@@ -27,10 +26,17 @@ export default defineConfig({
       // Use this option to specify which files to watch and trigger reloads
       usePolling: true, // Enables polling mode, useful for environments where filesystem events don't work well
     },
-    hmr: {
-      port: 8002,
-      // Adjust paths as needed based on your project structure
-      overlay: true,
-    },
   },
 });
+
+if (process.env.NODE_ENV !== "production") {
+  if (!userConfig.server) userConfig.server = {};
+  userConfig.server.hmr = {
+    port: 8002,
+    overlay: true,
+  };
+  if (!userConfig.plugins) userConfig.plugins = [];
+  userConfig.plugins.push(FullReload(["**/*.tsx", "**/*.css", "**/*.json"]));
+}
+
+export default userConfig;
