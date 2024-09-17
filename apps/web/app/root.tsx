@@ -9,6 +9,7 @@ import "./tailwind.css";
 import { Header } from "~/components/header";
 import { cn } from "~/lib/utils";
 import { AppProvider } from "~/AppContext";
+import { json } from "@remix-run/node";
 
 export default function App() {
   return (

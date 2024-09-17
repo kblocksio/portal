@@ -7,23 +7,25 @@ import {
 import { CatalogSidebar } from "~/components/catalog/catalog-sidebar";
 import { Outlet, useLoaderData } from "@remix-run/react";
 import axios from "axios";
-import { ApiGroup } from "@repo/shared";
 import { useEffect, useState } from "react";
-
-axios.defaults.baseURL = "http://localhost:3001";
+import { json } from "@remix-run/node";
 
 export const loader = async () => {
-  const { data } = await axios.get(`/api/api-groups`);
-  return data;
+  // const response = await fetch("/api/api-groups");
+  // const data = await response.json();
+  // return data;
+  return json({
+    apiGroups: [],
+  });
 };
 
 export default function Index() {
-  const [apiGroups, setApiGroups] = useState<ApiGroup[]>([]);
+  const [apiGroups, setApiGroups] = useState<any[]>([]);
   const data = useLoaderData<typeof loader>();
 
   useEffect(() => {
     if (!data) return;
-    setApiGroups(data);
+    setApiGroups(data.apiGroups);
   }, [data]);
 
   return (

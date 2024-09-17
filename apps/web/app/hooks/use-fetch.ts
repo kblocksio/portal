@@ -1,8 +1,6 @@
 import axios from "axios";
 import useSWR from "swr";
 
-axios.defaults.baseURL = "http://localhost:3001"; // Replace with your server URL
-
 export function useFetch<T = unknown>(
   url: string,
   params?: Record<string, string>,

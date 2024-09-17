@@ -4,8 +4,6 @@ export interface Params {
   plural: string;
 }
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
-
 export const k8sFetcher = async (params: Params) => {
   const queryParams = new URLSearchParams({
     group: params.group || "",
@@ -13,7 +11,7 @@ export const k8sFetcher = async (params: Params) => {
     plural: params.plural || "",
   }).toString();
   // Construct the full URL with query parameters
-  const url = `${SERVER_URL}/api/resources?${queryParams}`;
+  const url = `/api/resources?${queryParams}`;
 
   try {
     const res = await fetch(url); // Send the request to the server

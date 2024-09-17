@@ -6,19 +6,18 @@ import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import axios from "axios";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
-import { ResourceType } from "@repo/shared";
+import { getTypes } from "~/services/get-types";
 
 export const loader = async () => {
   return {
-    resourceTypes: (await axios.get(`/api/types`)).data as ResourceType[],
+    resourceTypes: await getTypes(),
   };
 };
 
-export default function Index() {
+export default function _index() {
   const { selectedProject } = useAppContext();
   const { resourceTypes } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
