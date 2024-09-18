@@ -10,6 +10,7 @@ import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { getTypes } from "~/services/get-types";
+import { ImportGHRepo } from "~/components/import-gh-repo";
 
 export const loader = async () => {
   return {
@@ -56,6 +57,7 @@ export default function _index() {
           resources={resourceTypes || []}
           isLoading={state === "loading"}
         />
+        <ImportGHRepo />
       </div>
       <div className={"container mx-auto mt-12"}>
         <ProjectGroups

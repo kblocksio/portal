@@ -79,22 +79,25 @@ export const CreateResourceWizard = ({
           {isLoading && <Loader className="h-5 w-5 ml-2" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? (
-              "Select Resource Type"
+              <>
+                Create a new resource
+                < p className="text-sm text-gray-500 mt-2">Select a resource type to add to your project</p>
+              </>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
                 <div className="p-2 rounded-full">
                   <SelectedResourceIcon
-                    className={`${selectedResourceIconColor} w-6 h-6`}
+                    className={`${selectedResourceIconColor} w-7 h-7`}
                   />
                 </div>
                 <div>
-                  <CardTitle>New {selectedResource?.kind}</CardTitle>
-                  <CardDescription>
-                    {selectedResource?.description || "This is a description"}
+                  <CardTitle>New {selectedResource?.kind} resource</CardTitle>
+                  <CardDescription className="mt-2">
+                    {selectedResource?.description || "This is a mock description"}
                   </CardDescription>
                 </div>
               </div>
@@ -102,7 +105,7 @@ export const CreateResourceWizard = ({
           </DialogTitle>
         </DialogHeader>
         {step === 1 ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4 max-h-[600px] overflow-auto">
             {resources.map((resource, index) => {
               const Icon = getIconComponent({ icon: resource.icon });
               const iconColor = getResourceIconColors({
@@ -114,8 +117,8 @@ export const CreateResourceWizard = ({
                   className="cursor-pointer hover:bg-accent"
                   onClick={() => handleResourceSelect(resource)}
                 >
-                  <CardHeader>
-                    <Icon className={`${iconColor} w-8 h-8 mb-2`} />
+                  <CardHeader className="flex flex-row space-x-2 p-4">
+                    <Icon className={`${iconColor} w-6 h-6`} />
                     <CardTitle>{resource.kind}</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -148,6 +151,6 @@ export const CreateResourceWizard = ({
           </div>
         )}
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
