@@ -9,7 +9,7 @@ import "./tailwind.css";
 import { Header } from "~/components/header";
 import { cn } from "~/lib/utils";
 import { AppProvider } from "~/AppContext";
-import { json } from "@remix-run/node";
+import "./styles/global.css";
 
 export default function App() {
   return (
@@ -20,7 +20,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className={cn("overflow-hidden")}>
+      <body className={cn("overflow-hidden font-inter")}>
         <AppProvider>
           <div className="flex h-screen flex-col">
             <Header />
