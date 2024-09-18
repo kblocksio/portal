@@ -1,7 +1,6 @@
 import * as React from "react";
-import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import { Bell, LogOut, Settings, User } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,7 @@ import { useFetch } from "~/hooks/use-fetch";
 import { Project } from "@repo/shared";
 import { Combobox } from "~/components/combobox";
 import { useAppContext } from "~/AppContext";
+import { useUser } from "~/hooks/use-user.jsx";
 
 function Logo() {
   return (
@@ -36,7 +36,7 @@ function Logo() {
 }
 
 function NotificationBell() {
-  const [notifications, setNotifications] = React.useState([
+  const [notifications] = React.useState([
     { id: 1, message: "New feature released!" },
     { id: 2, message: "You have a new message" },
     { id: 3, message: "Your subscription will expire soon" },
@@ -48,7 +48,7 @@ function NotificationBell() {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {notifications.length > 0 && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+            <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500" />
           )}
         </Button>
       </PopoverTrigger>
@@ -60,7 +60,7 @@ function NotificationBell() {
               key={notification.id}
               className="flex items-start gap-4 text-sm"
             >
-              <Bell className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <Bell className="text-muted-foreground mt-0.5 h-4 w-4" />
               <div className="grid gap-1">
                 <p>{notification.message}</p>
               </div>
@@ -72,15 +72,22 @@ function NotificationBell() {
   );
 }
 
-function UserProfile() {
-  const userName = "John Doe";
-  const userEmail = "john@example.com";
-  const initials = userName
+interface UserProfileProps {
+  name: string;
+  email: string;
+}
+
+function UserProfile(props: UserProfileProps) {
+  const initials = props.name
     .split(" ")
     .map((name) => name[0])
     .join("")
     .toUpperCase();
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random`;
+
+  const logOut = React.useCallback(async () => {
+    location.assign("/auth/sign-out");
+  }, []);
 
   return (
     <DropdownMenu>
@@ -88,7 +95,7 @@ function UserProfile() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarFallback>{initials}</AvatarFallback>
-            <AvatarImage src={avatarUrl} alt={`${userName}'s avatar`} />
+            <AvatarImage src={avatarUrl} alt={`${props.name}'s avatar`} />
           </Avatar>{" "}
         </Button>
       </DropdownMenuTrigger>
@@ -96,12 +103,12 @@ function UserProfile() {
         <div className="flex items-center justify-start gap-2 p-2">
           <img
             src={avatarUrl}
-            alt={`${userName}'s avatar`}
+            alt={`${props.name}'s avatar`}
             className="h-8 w-8 rounded-full"
           />
           <div className="flex flex-col space-y-1 leading-none">
-            <p className="font-medium">{userName}</p>
-            <p className="text-sm text-muted-foreground">{userEmail}</p>
+            <p className="font-medium">{props.name}</p>
+            <p className="text-muted-foreground text-sm">{props.email}</p>
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -114,7 +121,7 @@ function UserProfile() {
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={logOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
@@ -140,8 +147,9 @@ export function Header() {
     }
     setProjects([fallbackProject, ...data]);
   }, [data]);
+  const user = useUser();
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b px-4 backdrop-blur">
       <div className="flex h-14 items-center">
         <Logo />
         <div className={"pl-4"}>
@@ -158,7 +166,7 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <NotificationBell />
-          <UserProfile />
+          {user && <UserProfile name={user.name} email={user.email} />}
         </div>
       </div>
     </header>

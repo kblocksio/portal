@@ -4,18 +4,20 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { getTypes } from "~/services/get-types";
 import { ImportGHRepo } from "~/components/import-gh-repo";
+import { json } from "@remix-run/node";
+import { useSupabase } from "~/hooks/use-supabase.jsx";
 
 export const loader = async () => {
-  return {
+  return json({
     resourceTypes: await getTypes(),
-  };
+  });
 };
 
 export default function _index() {
@@ -36,18 +38,32 @@ export default function _index() {
     console.log("Creating resource", resource);
   };
 
+  const supabase = useSupabase();
+
+  const signIn = useCallback(async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+    console.log("supabase.auth.signInWithOAuth", { data, error });
+  }, [supabase.auth]);
+
   return (
-    <div className="flex flex-col w-full h-full bg-slate-50 pl-32 pr-32 pt-12 pb-12 overflow-auto">
+    <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
+      <button onClick={signIn}>Sign In</button>
+
       <ProjectHeader selectedProject={selectedProject} />
       <div className="container mx-auto flex items-center space-x-4 rounded-lg">
         <div className="relative flex-grow">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
           <Input
             type="text"
             placeholder="Search resource..."
             value={searchQuery}
             onChange={handleSearch}
-            className="pl-8 pr-4 py-2 h-10 w-full bg-color-wite"
+            className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
           />
         </div>
         <CreateResourceWizard
