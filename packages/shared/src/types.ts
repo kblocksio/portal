@@ -35,6 +35,12 @@ export type Project = {
   description: string;
 };
 
+export type Repository = {
+  name: string;
+  description: string;
+  owner: string;
+};
+
 export interface ResourceType {
   group: string;
   plural: string;
