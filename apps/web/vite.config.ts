@@ -2,8 +2,9 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { vercelPreset } from "@vercel/remix/vite";
+import FullReload from "vite-plugin-full-reload";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     remix({
       future: {
@@ -14,6 +15,7 @@ export default defineConfig({
       presets: [vercelPreset()],
     }),
     tsconfigPaths(),
+    mode === "development" && FullReload(["mock-data/**/*.json"]),
   ],
   optimizeDeps: {
     include: ["lucide-react"],
@@ -21,4 +23,4 @@ export default defineConfig({
   ssr: {
     noExternal: ["lucide-react"],
   },
-});
+}));
