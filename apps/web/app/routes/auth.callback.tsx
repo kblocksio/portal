@@ -1,9 +1,11 @@
-import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import {
   createServerClient,
   parseCookieHeader,
   serializeCookieHeader,
 } from "@supabase/ssr";
+import { SignInError } from "~/components/sign-in-error.jsx";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -34,11 +36,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      return redirect(next, { headers });
+    if (error) {
+      return json(
+        {
+          status: error.status,
+          code: error.code,
+          name: error.name,
+          message: error.message,
+        },
+        { status: 500 },
+      );
     }
+
+    return redirect(next, { headers });
   }
 
-  // return the user to an error page with instructions
-  return redirect("/auth/auth-code-error", { headers });
+  return json(
+    {
+      status: undefined,
+      code: undefined,
+      name: "Bad Request",
+      message: "Missing code parameter",
+    },
+    { status: 400 },
+  );
+}
+
+export default function AuthCallback() {
+  const error = useLoaderData<typeof loader>();
+
+  return (
+    <SignInError
+      status={error.status}
+      code={error.code}
+      name={error.name}
+      message={error.message}
+    />
+  );
 }
