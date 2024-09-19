@@ -8,35 +8,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") || "/";
 
-  if (code) {
-    const { supabase, headers } = createServerSupabase(request);
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (error) {
-      return json(
-        {
-          status: error.status,
-          code: error.code,
-          name: error.name,
-          message: error.message,
-        },
-        { status: 500 },
-      );
-    }
-
-    return redirect(next, { headers });
+  if (!code) {
+    return json(
+      {
+        status: undefined,
+        code: undefined,
+        name: "Bad Request",
+        message: "Missing code parameter",
+      },
+      { status: 400 },
+    );
   }
 
-  return json(
-    {
-      status: undefined,
-      code: undefined,
-      name: "Bad Request",
-      message: "Missing code parameter",
-    },
-    { status: 400 },
-  );
+  const { supabase, headers } = createServerSupabase(request);
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return json(
+      {
+        status: error.status,
+        code: error.code,
+        name: error.name,
+        message: error.message,
+      },
+      { status: 500 },
+    );
+  }
+
+  return redirect(next, { headers });
 }
 
 export default function AuthCallback() {
