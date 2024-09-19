@@ -6,22 +6,13 @@ import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
-import { getTypes } from "~/services/get-types";
 import { ImportGHRepo } from "~/components/import-gh-repo";
-import { json } from "@remix-run/node";
-
-export const loader = async () => {
-  return json({
-    resourceTypes: await getTypes(),
-  });
-};
 
 export default function _index() {
   const { selectedProject } = useAppContext();
-  const { resourceTypes } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,16 +46,13 @@ export default function _index() {
           isOpen={isOpen}
           handleOnOpenChange={setIsOpen}
           handleOnCreate={handleCreateResource}
-          resources={resourceTypes || []}
+          resources={[]}
           isLoading={state === "loading"}
         />
         <ImportGHRepo />
       </div>
       <div className={"container mx-auto mt-12"}>
-        <ProjectGroups
-          resourceTypes={resourceTypes}
-          searchQuery={searchQuery}
-        />
+        <ProjectGroups resourceTypes={[]} searchQuery={searchQuery} />
       </div>
     </div>
   );

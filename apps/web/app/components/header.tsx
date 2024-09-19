@@ -20,6 +20,7 @@ import { Project } from "@repo/shared";
 import { Combobox } from "~/components/combobox";
 import { useAppContext } from "~/AppContext";
 import { useUser } from "~/hooks/use-user.jsx";
+import { useSignOut } from "~/hooks/use-sign-out.js";
 
 function Logo() {
   return (
@@ -85,9 +86,7 @@ function UserProfile(props: UserProfileProps) {
     .toUpperCase();
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random`;
 
-  const logOut = React.useCallback(async () => {
-    location.assign("/auth/sign-out");
-  }, []);
+  const { signOut } = useSignOut();
 
   return (
     <DropdownMenu>
@@ -121,7 +120,7 @@ function UserProfile(props: UserProfileProps) {
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logOut}>
+        <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
@@ -166,7 +165,10 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <NotificationBell />
-          {user && <UserProfile name={user.name} email={user.email} />}
+          <UserProfile
+            name={user.user_metadata.name}
+            email={user.user_metadata.email}
+          />
         </div>
       </div>
     </header>
