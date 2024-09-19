@@ -17,14 +17,18 @@ import { Repository } from "@repo/shared";
 
 export const ImportGHRepo = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data } = useFetch<Repository[]>("/api/repositories");
+  const { data } = useFetch<Repository[]>(
+    `${import.meta.env.VITE_SERVER_URL}/api/repositories`,
+  );
 
   const filteredRepositories = useMemo(() => {
     if (!data || data.length === 0) {
-      return []
-    };
-    return data.filter((repo) => repo.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  }, [searchTerm, data])
+      return [];
+    }
+    return data.filter((repo) =>
+      repo.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [searchTerm, data]);
 
   return (
     <Dialog>
@@ -34,7 +38,7 @@ export const ImportGHRepo = () => {
           Import GitHub Repository
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[520px] overflow-hidden">
+      <DialogContent className="max-h-[520px] overflow-hidden sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Github className="mr-2" />
@@ -48,24 +52,29 @@ export const ImportGHRepo = () => {
             placeholder="Search repositories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-9 mb-4"
+            className="mb-4 h-9"
           />
           <div className="flex flex-col gap-4">
             <div className="h-[300px] overflow-auto">
               {filteredRepositories.map((repo) => (
                 <div
                   key={repo.name}
-                  className="grid grid-cols-[40px_1fr_auto] items-center gap-4 border-b border-muted pb-2 mb-2 pr-2"
+                  className="border-muted mb-2 grid grid-cols-[40px_1fr_auto] items-center gap-4 border-b pb-2 pr-2"
                 >
                   <Avatar>
-                    <AvatarImage src="/placeholder-user.jpg" alt={`@${repo.owner}`} />
+                    <AvatarImage
+                      src="/placeholder-user.jpg"
+                      alt={`@${repo.owner}`}
+                    />
                     <AvatarFallback>{repo.owner[0]}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">
                     <Link to="#" className="font-medium hover:underline">
                       {repo.name}
                     </Link>
-                    <p className="text-sm text-muted-foreground">{repo.description}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {repo.description}
+                    </p>
                   </div>
                   <Button variant="outline">Import</Button>
                 </div>
@@ -75,5 +84,5 @@ export const ImportGHRepo = () => {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 };
