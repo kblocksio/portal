@@ -4,7 +4,7 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
@@ -12,7 +12,6 @@ import { ProjectGroups } from "~/components/project-groups";
 import { getTypes } from "~/services/get-types";
 import { ImportGHRepo } from "~/components/import-gh-repo";
 import { json } from "@remix-run/node";
-import { useSupabase } from "~/hooks/use-supabase.jsx";
 
 export const loader = async () => {
   return json({
@@ -38,22 +37,8 @@ export default function _index() {
     console.log("Creating resource", resource);
   };
 
-  const supabase = useSupabase();
-
-  const signIn = useCallback(async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    });
-    console.log("supabase.auth.signInWithOAuth", { data, error });
-  }, [supabase.auth]);
-
   return (
     <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
-      <button onClick={signIn}>Sign In</button>
-
       <ProjectHeader selectedProject={selectedProject} />
       <div className="container mx-auto flex items-center space-x-4 rounded-lg">
         <div className="relative flex-grow">
