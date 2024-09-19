@@ -60,7 +60,7 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
   if (item.children) {
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between p-1 hover:bg-accent rounded-md">
+        <CollapsibleTrigger className="hover:bg-accent flex w-full items-center justify-between rounded-md p-1">
           <div className="flex items-center space-x-2">
             {item.icon && <item.icon className="h-4 w-4" />}
             <span>{item.label}</span>
@@ -72,7 +72,7 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
             <div
               className={cn(
                 "pl-4",
-                level === 0 ? "border-l border-border ml-2 mt-1" : "",
+                level === 0 ? "border-border ml-2 mt-1 border-l" : "",
               )}
             >
               {item.children.map((child, index) => (
@@ -93,16 +93,16 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
     <Link
       to={item.href ?? "/"}
       className={cn(
-        "flex items-center p-1 rounded-md",
+        "flex items-center rounded-md p-1",
         isActive ? "bg-primary" : "",
         isActive ? "hover:bg-primary-hover" : "hover:bg-accent",
       )}
     >
-      <div className="flex items-center w-full">
+      <div className="flex w-full items-center">
         {item.icon && (
           <item.icon
             className={cn(
-              "h-4 w-4 flex-shrink-0 mr-2",
+              "mr-2 h-4 w-4 flex-shrink-0",
               isActive ? "text-primary-foreground" : "text-foreground",
             )}
           />
@@ -116,7 +116,7 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
           {item.label}
         </span>
         {item.loading && (
-          <Loader className="h-4 w-4 animate-spin flex-shrink-0 ml-2" />
+          <Loader className="ml-2 h-4 w-4 flex-shrink-0 animate-spin" />
         )}
       </div>
     </Link>
@@ -124,9 +124,14 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
 };
 
 const SidebarSection = ({ api }: { api: ApiGroup }) => {
-  const { data, loading, error } = useFetch<{ items: any }>(`/api/resources`, {
-    params: { group: api.group, version: api.version, plural: api.plural },
-  });
+  const { data, isLoading, error } = useFetch<{ items: any }>(
+    `${process.env.VITE_SERVER_URL}/api/resources`,
+    {
+      group: api.group,
+      version: api.version,
+      plural: api.plural,
+    },
+  );
   const { pathname } = useLocation();
   const [map, setMap] = useState<Record<string, any>>();
 
@@ -148,7 +153,7 @@ const SidebarSection = ({ api }: { api: ApiGroup }) => {
       label: item.metadata.name,
       href: `${pathname}/${api.group}/${api.version}/${api.plural}/${item.metadata.namespace ?? "default"}/${item.metadata.name}`,
     }));
-  }, [map, Icon]);
+  }, [map, Icon, pathname, api.group, api.version, api.plural]);
 
   return (
     <MenuItem
@@ -156,7 +161,7 @@ const SidebarSection = ({ api }: { api: ApiGroup }) => {
         label: api.plural,
         icon: Icon,
         children,
-        isLoading: loading,
+        isLoading,
         error: error,
       }}
     />
