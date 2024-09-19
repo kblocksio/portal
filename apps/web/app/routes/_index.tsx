@@ -11,11 +11,12 @@ import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { getTypes } from "~/services/get-types";
 import { ImportGHRepo } from "~/components/import-gh-repo";
+import { json } from "@remix-run/node";
 
 export const loader = async () => {
-  return {
+  return json({
     resourceTypes: await getTypes(),
-  };
+  });
 };
 
 export default function _index() {
@@ -37,17 +38,17 @@ export default function _index() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-slate-50 pl-32 pr-32 pt-12 pb-12 overflow-auto">
+    <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
       <ProjectHeader selectedProject={selectedProject} />
       <div className="container mx-auto flex items-center space-x-4 rounded-lg">
         <div className="relative flex-grow">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
           <Input
             type="text"
             placeholder="Search resource..."
             value={searchQuery}
             onChange={handleSearch}
-            className="pl-8 pr-4 py-2 h-10 w-full bg-color-wite"
+            className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
           />
         </div>
         <CreateResourceWizard

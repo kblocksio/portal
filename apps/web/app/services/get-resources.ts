@@ -2,7 +2,6 @@ import { ResourceQuery, Resource } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
 
 export const getResources = async (request: Request) => {
-  console.log("getResources");
   const url = new URL(request.url);
   const params = Object.fromEntries(
     url.searchParams,
