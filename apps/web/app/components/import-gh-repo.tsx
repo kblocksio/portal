@@ -16,9 +16,7 @@ import { Input } from "./ui/input.js";
 
 export const ImportGHRepo = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data } = useFetch<Repository[]>(
-    `${import.meta.env.VITE_SERVER_URL}/api/repositories`,
-  );
+  const { data } = useFetch<Repository[]>("/api/repositories");
 
   const filteredRepositories = useMemo(() => {
     if (!data || data.length === 0) {
