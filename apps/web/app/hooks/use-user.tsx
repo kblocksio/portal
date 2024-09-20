@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { SignIn } from "~/components/sign-in.jsx";
-import { supabase } from "~/lib/supabase.js";
 
 const Context = createContext<User | undefined>(undefined);
 
@@ -26,13 +25,13 @@ export const UserProvider = (props: PropsWithChildren) => {
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(true);
-    supabase.auth
-      .getSession()
+    fetch("/api/user")
+      .then((response) => response.json())
       .then(({ data, error }) => {
         if (error) {
           setError(error);
         } else {
-          setUser(data.session?.user);
+          setUser(data.user);
         }
       })
       .catch((error) => {

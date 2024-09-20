@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
@@ -7,7 +8,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "eslint": "^8.57.1",
+    "jsonwebtoken": "^9.0.2",
+    "octokit": "^4.0.2",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "ts-node": "^10.9.2",

@@ -1,19 +1,18 @@
-import {
-  DialogHeader,
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { useMemo, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Link } from "@remix-run/react";
-import { Github } from "lucide-react";
+import { Github, Link } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
 import { Repository } from "@repo/shared";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog.js";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
+import { Input } from "./ui/input.js";
 
 export const ImportGHRepo = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +29,59 @@ export const ImportGHRepo = () => {
     );
   }, [searchTerm, data]);
 
+  // const { openPopupWindow } = usePopupWindow();
+
+  // const [authenticating, setAuthenticating] = useState(false);
+  // const authenticate = useCallback(
+  //   async () => {
+  //     // setAuthenticating(true);
+  //     const url = new URL("https://github.com/login/oauth/authorize");
+  //     url.searchParams.append(
+  //       "client_id",
+  //       import.meta.env.VITE_GITHUB_CLIENT_ID,
+  //     );
+
+  //     const session = await supabase.auth.getSession();
+  //     const access_token = session.data.session?.access_token;
+  //     if (!access_token) {
+  //       console.error("No access token found");
+  //       location.assign("/");
+  //       return;
+  //     }
+  //     url.searchParams.append("state", access_token);
+
+  //     const redirectUrl = new URL(location.origin);
+  //     redirectUrl.pathname = "/api/auth/installation/callback";
+  //     url.searchParams.append("redirect_uri", redirectUrl.toString());
+
+  //     // openPopupWindow({
+  //     //   url,
+  //     //   onClose() {
+  //     //     setAuthenticating(false);
+  //     //   },
+  //     // });
+
+  //     open(url, "_blank");
+  //   },
+  //   [
+  //     //openPopupWindow
+  //   ],
+  // );
+
   return (
+    // <Button className="ml-4" onClick={authenticate} disabled={authenticating}>
+    //   {authenticating ? (
+    //     <>
+    //       <Loader2 className="mr-2 animate-spin" />
+    //       Authenticating...
+    //     </>
+    //   ) : (
+    //     <>
+    //       <Github className="mr-2" />
+    //       Import GitHub Repository
+    //     </>
+    //   )}
+    // </Button>
     <Dialog>
       <DialogTrigger asChild>
         <Button className="ml-4">
