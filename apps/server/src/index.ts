@@ -159,6 +159,12 @@ app.get("/api/auth/sign-in", async (req, res) => {
   return res.redirect(data.url);
 });
 
+app.get("/api/auth/sign-out", async (req, res) => {
+  const supabase = createServerSupabase(req, res);
+  await supabase.auth.signOut();
+  return res.redirect("/");
+});
+
 app.get("/api/auth/callback/supabase", async (req, res) => {
   const code = req.query.code?.toString();
   if (!code) {
@@ -269,7 +275,7 @@ app.get("/api/github/repositories", async (req, res) => {
 app.get("/api/user", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const user = await supabase.auth.getUser();
-  return res.status(200).json(user);
+  return res.status(200).json({ user: user.data.user });
 });
 
 app.listen(port, () => {

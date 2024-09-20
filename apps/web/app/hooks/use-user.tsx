@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import {
   createContext,
@@ -27,12 +27,8 @@ export const UserProvider = (props: PropsWithChildren) => {
     setLoading(true);
     fetch("/api/user")
       .then((response) => response.json())
-      .then(({ data, error }) => {
-        if (error) {
-          setError(error);
-        } else {
-          setUser(data.user);
-        }
+      .then((data) => {
+        setUser(data.user);
       })
       .catch((error) => {
         setError(error);
