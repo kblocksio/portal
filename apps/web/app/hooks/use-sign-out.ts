@@ -1,26 +1,10 @@
 import { useCallback, useState } from "react";
-import { supabase } from "~/lib/supabase.js";
 
 export const useSignOut = () => {
-  const [error, setError] = useState<Error | undefined>();
-  const [isLoading, setLoading] = useState(false);
-  const signOut = useCallback(() => {
+  const [isLoading, setLoading] = useState(location.hash.length > 0);
+  const signOut = useCallback(async () => {
     setLoading(true);
-    supabase.auth
-      .signOut()
-      .then(({ error }) => {
-        if (error) {
-          setError(error);
-        } else {
-          location.assign("/");
-        }
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    location.assign("/api/auth/sign-out");
   }, []);
-  return { signOut, error, isSigningOut: isLoading };
+  return { signOut, isSigningOut: isLoading };
 };

@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import {
   createContext,
@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { SignIn } from "~/components/sign-in.jsx";
-import { supabase } from "~/lib/supabase.js";
 
 const Context = createContext<User | undefined>(undefined);
 
@@ -26,14 +25,10 @@ export const UserProvider = (props: PropsWithChildren) => {
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(true);
-    supabase.auth
-      .getSession()
-      .then(({ data, error }) => {
-        if (error) {
-          setError(error);
-        } else {
-          setUser(data.session?.user);
-        }
+    fetch("/api/user")
+      .then((response) => response.json())
+      .then((data) => {
+        setUser(data.user);
       })
       .catch((error) => {
         setError(error);
