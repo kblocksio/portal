@@ -16,7 +16,6 @@ import { Input } from "./ui/input.js";
 
 export const ImportGHRepo = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data } = useFetch<Repository[]>("/api/repositories");
   const { data: installations } = useFetch<Installation[]>(
     "/api/github/installations",
   );

@@ -3,7 +3,6 @@ import cors from "cors";
 import { ResourceType, ResourceQuery, Resource } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
 import projects from "./mock-data/projects.json";
-import repositories from "./mock-data/repositories.json";
 import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
@@ -61,10 +60,6 @@ app.get("/api/resources", async (req, res) => {
 
 app.get("/api/projects", async (_, res) => {
   return res.status(200).json(projects);
-});
-
-app.get("/api/repositories", async (_, res) => {
-  return res.status(200).json(repositories);
 });
 
 app.get("/api/types", async (_, res) => {
