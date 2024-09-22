@@ -6,43 +6,7 @@ config({ path: `.env.${process.env.NODE_ENV ?? "dev"}` });
 
 // Create and configure KubeConfig
 const kc = new k8s.KubeConfig();
-
-if (
-  process.env.KUBE_API_SERVER &&
-  process.env.KUBE_CA_DATA &&
-  process.env.KUBE_CERT_DATA &&
-  process.env.KUBE_KEY_DATA
-) {
-  kc.loadFromOptions({
-    clusters: [
-      {
-        name: process.env.KUBE_CLUSTER_NAME || "default-cluster",
-        server: process.env.KUBE_API_SERVER,
-        caData: process.env.KUBE_CA_DATA,
-      },
-    ],
-    users: [
-      {
-        name: process.env.KUBE_USER_NAME || "default-user",
-        certData: process.env.KUBE_CERT_DATA,
-        keyData: process.env.KUBE_KEY_DATA,
-      },
-    ],
-    contexts: [
-      {
-        name: process.env.KUBE_CONTEXT_NAME || "default-context",
-        user: process.env.KUBE_USER_NAME || "default-user",
-        cluster: process.env.KUBE_CLUSTER_NAME || "default-cluster",
-      },
-    ],
-    currentContext: process.env.KUBE_CONTEXT_NAME || "default-context",
-  });
-} else {
-  console.warn(
-    "k8s Kubernetes configuration not found in environment variables. Falling back to default config.",
-  );
-  kc.loadFromDefault();
-}
+kc.loadFromDefault();
 
 export async function kubernetesRequest(
   pathname: string,
