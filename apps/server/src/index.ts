@@ -32,7 +32,7 @@ app.use(
 );
 
 app.get("/", async (req, res) => {
-  return res.status(200).json({ message: "Hello, kblocks?!" });
+  return res.status(200).json({ message: "Hello, portal-backend!" });
 });
 
 app.get("/api/resources", async (req, res) => {

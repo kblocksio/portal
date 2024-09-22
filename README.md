@@ -46,11 +46,16 @@ Run this script to build the image, push it to Docker Hub and upgrade the Helm c
 
 ### Remote Development
 
-There's an initial [skaffold](https://skaffold.dev/) configuration:
+There's an initial [skaffold](https://skaffold.dev/) configuration.
+
+You can use it to run the app and tail the logs:
+
+```sh
+skaffold run --tail
+```
+
+Or even watch for changes with hot reloading:
 
 ```sh
 skaffold dev
 ```
-
-> [!WARNING]
-> Hot reloading doesn't work at the moment.
