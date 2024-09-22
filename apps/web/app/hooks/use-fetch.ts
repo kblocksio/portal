@@ -10,11 +10,14 @@ export function useFetch<T = unknown>(
   const [url, setUrl] = useState(initialUrl);
   const [params, setParams] = useState(initialParams);
   const [shouldFetch, setShouldFetch] = useState(immediate);
+  const [isLoading, setIsLoading] = useState(immediate);
 
   const { data, error, mutate } = useSWR<T>(
     shouldFetch ? [url, params] : null,
     async ([currentUrl, currentParams]) => {
+      setIsLoading(true);
       const response = await axios.get<T>(currentUrl, { params: currentParams });
+      setIsLoading(false);
       return response.data;
     }
   );
@@ -28,5 +31,5 @@ export function useFetch<T = unknown>(
     []
   );
 
-  return { data, error, refetch };
+  return { data, isLoading, error, refetch };
 }

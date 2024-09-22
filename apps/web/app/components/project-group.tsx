@@ -23,7 +23,7 @@ export const ProjectGroup = ({
   searchQuery,
 }: ProjectGroupProps) => {
   const { data, isLoading } = useFetch<{ items: Resource[] }>(
-    `${import.meta.env.VITE_SERVER_URL}/api/resources`,
+    `/api/resources`,
     {
       group: resourceType.group,
       version: resourceType.version,

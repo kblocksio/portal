@@ -4,15 +4,24 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import { useNavigation } from "@remix-run/react";
+import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportGHRepo } from "~/components/import-gh-repo";
+import axios from "axios";
+
+export const loader = async ({ request }: { request: Request }) => {
+  const url = new URL(request.url);
+  const apiUrl = `${url.protocol}//${url.host}/api/types`;
+  const resources = await axios.get(apiUrl);
+  return { resourceTypes: resources.data };
+};
 
 export default function _index() {
   const { selectedProject } = useAppContext();
+  const { resourceTypes } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,13 +55,13 @@ export default function _index() {
           isOpen={isOpen}
           handleOnOpenChange={setIsOpen}
           handleOnCreate={handleCreateResource}
-          resources={[]}
+          resources={resourceTypes && resourceTypes.length > 0 ? resourceTypes : []}
           isLoading={state === "loading"}
         />
         <ImportGHRepo />
       </div>
       <div className={"container mx-auto mt-12"}>
-        <ProjectGroups resourceTypes={[]} searchQuery={searchQuery} />
+        <ProjectGroups resourceTypes={resourceTypes} searchQuery={searchQuery} />
       </div>
     </div>
   );
