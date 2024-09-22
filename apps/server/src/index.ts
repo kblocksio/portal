@@ -237,6 +237,19 @@ app.get("/api/user", async (req, res) => {
   return res.status(200).json({ user: user.data.user });
 });
 
+app.get("/api/users", async (req, res) => {
+  const supabase = createServerSupabase(req, res);
+  const { data: users, error } = await supabase.auth.admin.listUsers();
+
+  if (error) {
+    console.error('Error fetching users:', error);
+    return res.status(500).json({ error: 'Failed to fetch users' });
+  }
+
+  return res.status(200).json(users.users);
+});
+
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

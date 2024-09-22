@@ -21,6 +21,7 @@ import { Combobox } from "~/components/combobox";
 import { useAppContext } from "~/AppContext";
 import { useUser } from "~/hooks/use-user.jsx";
 import { useSignOut } from "~/hooks/use-sign-out.js";
+import { getUserInitials } from "~/lib/user-initials";
 
 function Logo() {
   return (
@@ -79,11 +80,7 @@ interface UserProfileProps {
 }
 
 function UserProfile(props: UserProfileProps) {
-  const initials = props.name
-    .split(" ")
-    .map((name) => name[0])
-    .join("")
-    .toUpperCase();
+  const initials = getUserInitials(props.name);
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random`;
 
   const { signOut } = useSignOut();

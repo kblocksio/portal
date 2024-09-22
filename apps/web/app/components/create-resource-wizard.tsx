@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Loader } from "lucide-react";
@@ -71,86 +71,98 @@ export const CreateResourceWizard = ({
     return getResourceIconColors({ color: selectedResource?.color });
   }, [selectedResource]);
 
+  const StepTitle = useCallback(() => {
+    return step === 1 ? (
+      <>
+        Create a new resource
+        <p className="mt-2 text-sm text-gray-500">
+          Select a resource type to add to your project
+        </p>
+      </>) : (
+      <div className="flex items-center space-x-2">
+        <div className="rounded-full p-2">
+          <SelectedResourceIcon
+            className={`${selectedResourceIconColor} h-7 w-7`}
+          />
+        </div>
+        <div>
+          <CardTitle>New {selectedResource?.kind} resource</CardTitle>
+          <CardDescription className="mt-2">
+            {selectedResource?.description ||
+              "This is a mock description"}
+          </CardDescription>
+        </div>
+      </div>
+    )
+  }, [step, selectedResource, selectedResourceIconColor, SelectedResourceIcon]);
+
+  const StepContent = useCallback(() => {
+    {
+      return step === 1 ? (
+        <div className="grid max-h-[600px] grid-cols-4 gap-4 overflow-auto">
+          {resources.map((resource, index) => {
+            const Icon = getIconComponent({ icon: resource.icon });
+            const iconColor = getResourceIconColors({
+              color: resource?.color,
+            });
+            return (
+              <Card
+                key={index}
+                className="hover:bg-accent cursor-pointer"
+                onClick={() => handleResourceSelect(resource)}
+              >
+                <CardHeader className="flex flex-row space-x-2 p-4">
+                  <Icon className={`${iconColor} h-6 w-6`} />
+                  <CardTitle>{resource.kind}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    {resource.description ||
+                      "This is a mock description for now"}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-4 p-2">
+          <AutoForm
+            className={"max-h-[800px] overflow-auto"}
+            formSchema={
+              prepareOpenApiSchemaForAutoForm(
+                selectedResource?.openApiSchema,
+              ) as ZodObjectOrWrapped
+            }
+          />
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={handleBack}>
+              Back
+            </Button>
+            <Button onClick={handleCreate}>Create</Button>
+          </div>
+        </div>
+      )
+    }
+  }, [resources, step, handleBack, handleCreate, selectedResource]);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button disabled={isLoading}>
           New Resource...
-          {isLoading && <Loader className="h-5 w-5 ml-2" />}
+          {isLoading && <Loader className="ml-2 h-5 w-5" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>
-            {step === 1 ? (
-              <>
-                Create a new resource
-                < p className="text-sm text-gray-500 mt-2">Select a resource type to add to your project</p>
-              </>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <div className="p-2 rounded-full">
-                  <SelectedResourceIcon
-                    className={`${selectedResourceIconColor} w-7 h-7`}
-                  />
-                </div>
-                <div>
-                  <CardTitle>New {selectedResource?.kind} resource</CardTitle>
-                  <CardDescription className="mt-2">
-                    {selectedResource?.description || "This is a mock description"}
-                  </CardDescription>
-                </div>
-              </div>
-            )}
+            <StepTitle />
           </DialogTitle>
         </DialogHeader>
-        {step === 1 ? (
-          <div className="grid grid-cols-4 gap-4 max-h-[600px] overflow-auto">
-            {resources.map((resource, index) => {
-              const Icon = getIconComponent({ icon: resource.icon });
-              const iconColor = getResourceIconColors({
-                color: resource?.color,
-              });
-              return (
-                <Card
-                  key={index}
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => handleResourceSelect(resource)}
-                >
-                  <CardHeader className="flex flex-row space-x-2 p-4">
-                    <Icon className={`${iconColor} w-6 h-6`} />
-                    <CardTitle>{resource.kind}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      {resource.description ||
-                        "This is a mock description for now"}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="space-y-4 p-2">
-            <AutoForm
-              className={"overflow-auto max-h-[800px]"}
-              formSchema={
-                prepareOpenApiSchemaForAutoForm(
-                  selectedResource?.openApiSchema,
-                ) as ZodObjectOrWrapped
-              }
-            />
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={handleBack}>
-                Back
-              </Button>
-              <Button onClick={handleCreate}>Create</Button>
-            </div>
-          </div>
-        )}
+        <StepContent />
       </DialogContent>
-    </Dialog >
+    </Dialog>
   );
 };

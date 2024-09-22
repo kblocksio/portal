@@ -1,20 +1,12 @@
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { Project } from "@repo/shared";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Project, User } from "@repo/shared";
+import { useFetch } from "~/hooks/use-fetch";
+import { useEffect } from "react";
+import { getUserInitials } from "~/lib/user-initials";
 
 export interface ProjectHeaderProps {
   selectedProject: Project | null;
 }
-
-const avatars = [
-  { initials: "JD", name: "John Doe" },
-  { initials: "JS", name: "Jane Smith" },
-  { initials: "RJ", name: "Robert Johnson" },
-  { initials: "AS", name: "Alice Smith" },
-  { initials: "MT", name: "Mike Thompson" },
-  { initials: "EW", name: "Emma Wilson" },
-  { initials: "DL", name: "David Lee" },
-  { initials: "OG", name: "Olivia Green" },
-];
 
 const colors = [
   "bg-red-500",
@@ -28,6 +20,8 @@ const colors = [
 ];
 
 export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
+  const { data: users } = useFetch<User[]>("/api/users");
+
   return (
     <div className="container mx-auto pb-12">
       <div className="flex flex-col md:flex-row items-start justify-between">
@@ -41,13 +35,17 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
         </div>
         <div className="w-full md:w-auto">
           <div className="grid grid-cols-4 gap-0">
-            {avatars.map((avatar, index) => (
+            {(users ?? []).map((user, index) => (
               <div key={index} className="relative">
                 <Avatar className="w-12 h-12 border-2 border-background">
+                  <AvatarImage
+                    alt={`@${user.user_metadata.full_name}`}
+                    src={user.user_metadata.avatar_url}
+                  />
                   <AvatarFallback
                     className={`${colors[index % colors.length]} text-primary-foreground text-xs`}
                   >
-                    {avatar.initials}
+                    {getUserInitials(user.user_metadata.full_name)}
                   </AvatarFallback>
                 </Avatar>
               </div>

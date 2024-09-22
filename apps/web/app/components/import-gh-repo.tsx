@@ -58,7 +58,7 @@ export const ImportGHRepo = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Github className="mr-2" />
-            Import GitHub Repository
+            Import A GitHub Repository
           </DialogTitle>
           <DialogDescription>Select a repository to import.</DialogDescription>
         </DialogHeader>
@@ -75,7 +75,7 @@ export const ImportGHRepo = () => {
               {filteredRepositories.map((repo) => (
                 <div
                   key={repo.full_name}
-                  className="border-muted mb-2 grid grid-cols-[40px_1fr_auto] items-center gap-4 border-b pb-2 pr-2"
+                  className="mb-2 grid grid-cols-[40px_1fr_auto] items-start justify-between gap-4 border-b pb-2 pr-2 last:border-b-0"
                 >
                   <Avatar>
                     <AvatarImage
@@ -84,14 +84,13 @@ export const ImportGHRepo = () => {
                     />
                     <AvatarFallback>{repo.owner.login}</AvatarFallback>
                   </Avatar>
-                  <div className="grid gap-1">
+                  <div className="flex-1 pr-4">
                     <a
                       href={repo.html_url}
                       target="_blank"
                       className="flext-col flex gap-2 font-medium hover:underline"
                       rel="noreferrer"
                     >
-                      <Link to={repo.html_url} />
                       {repo.full_name}
                     </a>
                     <p className="text-muted-foreground text-sm">
