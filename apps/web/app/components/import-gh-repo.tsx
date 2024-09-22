@@ -1,8 +1,8 @@
 import { Button } from "./ui/button";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Github, Link } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
-import { Repository } from "@repo/shared";
+import { Installation, Repository } from "@repo/shared";
 import {
   Dialog,
   DialogContent,
@@ -17,69 +17,37 @@ import { Input } from "./ui/input.js";
 export const ImportGHRepo = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data } = useFetch<Repository[]>("/api/repositories");
+  const { data: installations } = useFetch<Installation[]>(
+    "/api/github/installations",
+  );
+  const { data: repositories, refetch: refetchRepositories } = useFetch<
+    Repository[]
+  >(
+    `/api/github/repositories?installation_id=${installations?.[0]?.id}`,
+    undefined,
+    false,
+  );
 
   const filteredRepositories = useMemo(() => {
-    if (!data || data.length === 0) {
+    if (!repositories || repositories.length === 0) {
       return [];
     }
-    return data.filter((repo) =>
-      repo.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    const repos = repositories.filter((repo) =>
+      repo.full_name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-  }, [searchTerm, data]);
+    return repos;
+  }, [searchTerm, repositories]);
 
-  // const { openPopupWindow } = usePopupWindow();
-
-  // const [authenticating, setAuthenticating] = useState(false);
-  // const authenticate = useCallback(
-  //   async () => {
-  //     // setAuthenticating(true);
-  //     const url = new URL("https://github.com/login/oauth/authorize");
-  //     url.searchParams.append(
-  //       "client_id",
-  //       import.meta.env.VITE_GITHUB_CLIENT_ID,
-  //     );
-
-  //     const session = await supabase.auth.getSession();
-  //     const access_token = session.data.session?.access_token;
-  //     if (!access_token) {
-  //       console.error("No access token found");
-  //       location.assign("/");
-  //       return;
-  //     }
-  //     url.searchParams.append("state", access_token);
-
-  //     const redirectUrl = new URL(location.origin);
-  //     redirectUrl.pathname = "/api/auth/installation/callback";
-  //     url.searchParams.append("redirect_uri", redirectUrl.toString());
-
-  //     // openPopupWindow({
-  //     //   url,
-  //     //   onClose() {
-  //     //     setAuthenticating(false);
-  //     //   },
-  //     // });
-
-  //     open(url, "_blank");
-  //   },
-  //   [
-  //     //openPopupWindow
-  //   ],
-  // );
+  useEffect(() => {
+    if (!installations || installations.length === 0) {
+      return;
+    }
+    refetchRepositories(
+      `/api/github/repositories?installation_id=${installations[0].id}`,
+    );
+  }, [installations, refetchRepositories]);
 
   return (
-    // <Button className="ml-4" onClick={authenticate} disabled={authenticating}>
-    //   {authenticating ? (
-    //     <>
-    //       <Loader2 className="mr-2 animate-spin" />
-    //       Authenticating...
-    //     </>
-    //   ) : (
-    //     <>
-    //       <Github className="mr-2" />
-    //       Import GitHub Repository
-    //     </>
-    //   )}
-    // </Button>
     <Dialog>
       <DialogTrigger asChild>
         <Button className="ml-4">
@@ -107,20 +75,26 @@ export const ImportGHRepo = () => {
             <div className="h-[300px] overflow-auto">
               {filteredRepositories.map((repo) => (
                 <div
-                  key={repo.name}
+                  key={repo.full_name}
                   className="border-muted mb-2 grid grid-cols-[40px_1fr_auto] items-center gap-4 border-b pb-2 pr-2"
                 >
                   <Avatar>
                     <AvatarImage
-                      src="/placeholder-user.jpg"
-                      alt={`@${repo.owner}`}
+                      alt={`@${repo.owner.login}`}
+                      src={repo.owner.avatar_url}
                     />
-                    <AvatarFallback>{repo.owner[0]}</AvatarFallback>
+                    <AvatarFallback>{repo.owner.login}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">
-                    <Link to="#" className="font-medium hover:underline">
-                      {repo.name}
-                    </Link>
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      className="flext-col flex gap-2 font-medium hover:underline"
+                      rel="noreferrer"
+                    >
+                      <Link to={repo.html_url} />
+                      {repo.full_name}
+                    </a>
                     <p className="text-muted-foreground text-sm">
                       {repo.description}
                     </p>
