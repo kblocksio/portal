@@ -4,7 +4,7 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
@@ -55,13 +55,18 @@ export default function _index() {
           isOpen={isOpen}
           handleOnOpenChange={setIsOpen}
           handleOnCreate={handleCreateResource}
-          resources={resourceTypes && resourceTypes.length > 0 ? resourceTypes : []}
+          resources={
+            resourceTypes && resourceTypes.length > 0 ? resourceTypes : []
+          }
           isLoading={state === "loading"}
         />
         <ImportGHRepo />
       </div>
       <div className={"container mx-auto mt-12"}>
-        <ProjectGroups resourceTypes={resourceTypes} searchQuery={searchQuery} />
+        <ProjectGroups
+          resourceTypes={resourceTypes}
+          searchQuery={searchQuery}
+        />
       </div>
     </div>
   );
