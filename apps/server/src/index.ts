@@ -7,18 +7,12 @@ import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 
-const kblocksConfigMap = process.env.KBLOCKS_CONFIG_MAP_ANNOTATION;
+const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
 const kblocksNamespace = process.env.KBLOCKS_NAMESPACE;
-const kblocksGroupName = process.env.KBLOCKS_GROUP_NAME;
 
-if (!kblocksConfigMap) {
-  throw new Error("KBLOCKS_CONFIG_MAP_ANNOTATION is not set");
-}
+// TODO: include the namespace of the configmap in the annotation
 if (!kblocksNamespace) {
   throw new Error("KBLOCKS_NAMESPACE is not set");
-}
-if (!kblocksGroupName) {
-  throw new Error("KBLOCKS_GROUP_NAME is not set");
 }
 
 // Create and configure KubeConfig
@@ -36,6 +30,10 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   }),
 );
+
+app.get("/", async (req, res) => {
+  return res.status(200).json({ message: "Hello, kblocks?!" });
+});
 
 app.get("/api/resources", async (req, res) => {
   const params = req.query as unknown as ResourceQuery;
@@ -65,8 +63,9 @@ app.get("/api/projects", async (_, res) => {
 app.get("/api/types", async (_, res) => {
   try {
     const crds = await crdClient.listCustomResourceDefinition();
+
     const filteredCrds = crds.body.items.filter(
-      (crd) => crd.spec.group === kblocksGroupName,
+      (crd) => crd?.metadata?.annotations?.[KBLOCKS_METADATA_ANNOTATION],
     );
 
     const crdsResult: ResourceType[] = [];
@@ -80,7 +79,7 @@ app.get("/api/types", async (_, res) => {
       };
 
       if (crd?.metadata?.annotations) {
-        const configmapName = crd.metadata.annotations[kblocksConfigMap];
+        const configmapName = crd.metadata.annotations[KBLOCKS_METADATA_ANNOTATION];
         const k8sConfigMapApi = kc.makeApiClient(k8s.CoreV1Api);
         const configMap = await k8sConfigMapApi.readNamespacedConfigMap(
           configmapName,

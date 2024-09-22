@@ -1,0 +1,5 @@
+apiVersion: v2
+name: portal-backend
+description: Deploys the Portal backend
+version: 0.1.0
+type: application
