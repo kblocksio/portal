@@ -1,33 +1,56 @@
-# `Turborepo` Vite starter
+# Kblocks Portal
 
-This is an official starter Turborepo.
+## Setup
 
-## Using this example
-
-Run the following command:
+Install dependencies:
 
 ```sh
-npx create-turbo@latest -e with-vite
+npm i
 ```
 
-## What's inside?
+### Access to our cluster
 
-This Turborepo includes the following packages and apps:
+Install the [quickube](https://github.com/winglang/quickube) CLI (see instructions in README)
+switch to the `portal-backend` cluster:
 
-### Apps and Packages
+```sh
+qkube use portal-backend.quickube.sh
+```
 
-- `docs`: a vanilla [vite](https://vitejs.dev) ts app
-- `web`: another vanilla [vite](https://vitejs.dev) ts app
-- `@repo/ui`: a stub component & utility library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: shared `eslint` configurations
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Local development
 
-Each package and app is 100% [TypeScript](https://www.typescriptlang.org/).
+You should be able to run `npm run dev` from the root and it will connect to the qkube cluster
+that's in your current context.
 
-### Utilities
 
-This Turborepo has some additional tools already setup for you:
+### Deploy to portal-backend
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+#### Login to Docker Hub
+
+We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1password]:
+
+```sh
+docker login -u wingcloudbot
+Password: <SEE 1PASSWORD>
+```
+
+[1password]: https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=lzd45n6b5mraghh53hnq74hccy&h=wingcloud.1password.com
+
+#### Install
+
+Run this script to build the image, push it to Docker Hub and upgrade the Helm chart.
+
+```sh
+./install.sh
+```
+
+### Remote Development
+
+There's an initial [skaffold](https://skaffold.dev/) configuration:
+
+```sh
+skaffold dev
+```
+
+> [!WARNING]
+> Hot reloading doesn't work at the moment.
