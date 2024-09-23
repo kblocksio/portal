@@ -1,0 +1,13 @@
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-backend
+image: {{ .Values.image }}
+route: /
+replicas: 2
+port: 3001
+tls: my-tls-secret
+allowCluster:
+- apiGroup: "*"
+  resource: "*"
+  verbs: ["*"]

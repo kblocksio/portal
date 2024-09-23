@@ -1,33 +1,73 @@
-# `Turborepo` Vite starter
+# Kblocks Portal
 
-This is an official starter Turborepo.
+## Prerequisites
 
-## Using this example
+* [docker](https://www.docker.com/)
+* [kubectl](https://kubernetes.io/docs/reference/kubectl/)
+* [helm](https://helm.sh/)
+* [skaffold](https://skaffold.dev/)
+* [quickube](https://github.com/winglang/quickube)
 
-Run the following command:
+## Setup
+
+#### Install dependencies
 
 ```sh
-npx create-turbo@latest -e with-vite
+npm i
 ```
 
-## What's inside?
+#### Access our cluster
 
-This Turborepo includes the following packages and apps:
+Install the [quickube](https://github.com/winglang/quickube) CLI (see instructions in README)
+switch to the `portal-backend` cluster:
 
-### Apps and Packages
+```sh
+qkube use portal-backend.quickube.sh
+```
 
-- `docs`: a vanilla [vite](https://vitejs.dev) ts app
-- `web`: another vanilla [vite](https://vitejs.dev) ts app
-- `@repo/ui`: a stub component & utility library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: shared `eslint` configurations
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+#### Sign in to Docker Hub
 
-Each package and app is 100% [TypeScript](https://www.typescriptlang.org/).
+We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1password]:
 
-### Utilities
+```sh
+docker login -u wingcloudbot
+Password: <SEE 1PASSWORD>
+```
 
-This Turborepo has some additional tools already setup for you:
+[1password]: https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=lzd45n6b5mraghh53hnq74hccy&h=wingcloud.1password.com
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Local development
+
+Run `npm run dev` from the root and it will connect to the qkube cluster that's in your current
+context.
+
+## Remote development
+
+Deploy to the cluster:
+
+```sh
+skaffold run
+```
+
+You can use it to run the app and tail the logs:
+
+```sh
+skaffold run --tail
+```
+
+Or even watch for changes with hot reloading:
+
+```sh
+skaffold dev
+```
+
+## Kblock Examples
+
+The [./deploy/examples](./deploy/examples/) directory includes manifests for kblocks that are
+installed on the cluster (they are not required by the portal backend).
+
+You can install them all like this:
+
+```sh
+helm upgrade --install kblock-examples --create-namespace -n examples ./deploy/examples
+```

@@ -1,0 +1,23 @@
+# NOTE: hot reloading is still not really working here
+
+apiVersion: skaffold/v4beta11
+kind: Config
+
+build:
+  artifacts:
+  - image: wingcloudbot/portal-backend
+    docker:
+      buildArgs: 
+        ENV: dev
+    sync:
+      infer:
+        - apps/server/src/**/*.ts
+        - packages/shared/src/**/*.ts
+
+deploy:
+  helm:
+    releases:
+      - name: portal-backend
+        chartPath: ./deploy/portal
+        setValueTemplates:
+          image: "{{.IMAGE_FULLY_QUALIFIED}}"
