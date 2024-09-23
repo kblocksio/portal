@@ -13,11 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import React, { ReactNode, useCallback, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Loader } from "lucide-react";
-import AutoForm from "./ui/auto-form";
+import AutoForm, { AutoFormSubmit } from "./ui/auto-form";
 import { prepareOpenApiSchemaForAutoForm } from "~/lib/utils";
 import { ZodObjectOrWrapped } from "~/components/ui/auto-form/utils";
 
@@ -25,7 +25,7 @@ export interface CreateResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (resource: any) => void;
+  handleOnCreate: (resouce: any, providedValues: any) => void;
   resources: ResourceType[];
 }
 
@@ -51,11 +51,9 @@ export const CreateResourceWizard = ({
     setSelectedResource(null);
   };
 
-  const handleCreate = () => {
-    handleOnCreate(selectedResource);
-    setStep(1);
-    setSelectedResource(null);
-  };
+  const handleCreate = useCallback((providedValues: any) => {
+    handleOnCreate(selectedResource, providedValues);
+  }, [selectedResource, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {
     handleOnOpenChange(open);
@@ -134,14 +132,15 @@ export const CreateResourceWizard = ({
                 selectedResource?.openApiSchema,
               ) as ZodObjectOrWrapped
             }
-          />
-
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={handleBack}>
-              Back
-            </Button>
-            <Button onClick={handleCreate}>Create</Button>
-          </div>
+            onSubmit={handleCreate}
+          >
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={handleBack}>
+                Back
+              </Button>
+              <Button type="submit">Create</Button>
+            </div>
+          </AutoForm>
         </div>
       )
     }

@@ -32,9 +32,12 @@ export default function _index() {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = (resource: any) => {
+  const handleCreateResource = (resource: any, providedValues: any) => {
+    const res = axios.post("/api/resources", {
+      resource: resource,
+      providedValues: providedValues,
+    });
     setIsOpen(false);
-    console.log("Creating resource", resource);
   };
 
   return (
