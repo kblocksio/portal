@@ -6,6 +6,7 @@ import projects from "./mock-data/projects.json";
 import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
+import { createCustomResourceInstance } from "./create-resource-utils.js";
 
 const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
 const kblocksNamespace = process.env.KBLOCKS_NAMESPACE;
@@ -97,6 +98,26 @@ app.get("/api/types", async (_, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500);
+  }
+});
+
+app.post("/api/resources", async (req, res) => {
+  const { resource, providedValues } = req.body as { resource: any, providedValues: any };
+  try {
+    const customResource = await createCustomResourceInstance(resource, providedValues, kblocksNamespace);
+    // Apply the custom resource to the cluster
+    const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
+    const response = await customObjectsApi.createNamespacedCustomObject(
+      resource.group,
+      resource.version,
+      customResource.metadata.namespace,
+      resource.plural,
+      customResource
+    );
+    return res.status(200).json(response.body);
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return res.status(500).json({ error: error });
   }
 });
 
