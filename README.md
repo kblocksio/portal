@@ -23,8 +23,7 @@ switch to the `portal-backend` cluster:
 
 ```sh
 qkube use portal-backend.quickube.sh
-
-Login to Docker Hub:
+```
 
 We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1password]:
 
