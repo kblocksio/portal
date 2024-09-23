@@ -10,13 +10,13 @@
 
 ## Setup
 
-### Install dependencies
+#### Install dependencies
 
 ```sh
 npm i
 ```
 
-### Access our cluster
+#### Access our cluster
 
 Install the [quickube](https://github.com/winglang/quickube) CLI (see instructions in README)
 switch to the `portal-backend` cluster:
@@ -25,7 +25,7 @@ switch to the `portal-backend` cluster:
 qkube use portal-backend.quickube.sh
 ```
 
-### Sign in to Docker Hub
+#### Sign in to Docker Hub
 
 We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1password]:
 
