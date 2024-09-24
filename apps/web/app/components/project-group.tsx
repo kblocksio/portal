@@ -94,12 +94,10 @@ function ResourceCard({
 
   if (isFirst) {
     borders.push("rounded-t-lg");
-    // borders.push('rounded-b-none');
   }
 
   if (isLast) {
     borders.push("rounded-b-lg");
-    // borders.push('rounded-t-none');
   }
 
   const readyCondition = item?.status?.conditions?.find(
@@ -127,7 +125,7 @@ function ResourceCard({
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <LastUpdated lastUpdated={readyCondition?.lastTransitionTime} />
+        <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
       </div>
     </Card>
   );
@@ -149,9 +147,8 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
 }
 
 function StatusBadge({ readyCondition }: { readyCondition?: Condition }) {
-  if (!readyCondition) return <></>;
 
-  const color = readyCondition.status === "True" ? "green" : "red";
+  const color = readyCondition ? (readyCondition.status === "True" ? "green" : "red") : "yellow";
 
   return (
     <TooltipProvider>
@@ -168,7 +165,7 @@ function StatusBadge({ readyCondition }: { readyCondition?: Condition }) {
           />
         </TooltipTrigger>
         <TooltipContent>
-          <p>{readyCondition.message}</p>
+          <p>{readyCondition?.message ?? "In Progress"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
