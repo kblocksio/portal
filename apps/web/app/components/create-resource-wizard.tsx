@@ -93,7 +93,7 @@ export const CreateResourceWizard = ({
           return (
             <Card
               key={index}
-              className="hover:bg-accent cursor-pointer max-h-[145px] flex flex-col items-center justify-center text-center"
+              className="hover:bg-accent cursor-pointer max-h-[145px] flex flex-col items-left justify-center text-left"
               onClick={() => handleResourceSelect(resource)}
             >
               <CardHeader className="flex flex-row space-x-2 p-4">

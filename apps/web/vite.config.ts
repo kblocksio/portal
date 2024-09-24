@@ -15,7 +15,9 @@ export default defineConfig(({ mode }) => ({
       presets: [vercelPreset()],
     }),
     tsconfigPaths(),
-    mode === "development" && FullReload(["mock-data/**/*.json"]),
+    mode === "development" && FullReload(
+      ["**/*.tsx", "**/*.ts"],
+    ),
   ],
   optimizeDeps: {
     include: ["lucide-react"],
@@ -26,12 +28,12 @@ export default defineConfig(({ mode }) => ({
   server:
     mode === "development"
       ? {
-          proxy: {
-            "/api": {
-              target: "http://localhost:3001",
-              changeOrigin: true,
-            },
+        proxy: {
+          "/api": {
+            target: "http://localhost:3001",
+            changeOrigin: true,
           },
-        }
+        },
+      }
       : undefined,
 }));

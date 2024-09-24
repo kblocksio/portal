@@ -19,6 +19,9 @@ export function useFetch<T = unknown>(
       const response = await axios.get<T>(currentUrl, { params: currentParams });
       setIsLoading(false);
       return response.data;
+    },
+    {
+      revalidateOnFocus: false
     }
   );
 
