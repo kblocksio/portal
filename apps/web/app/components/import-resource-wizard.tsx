@@ -6,15 +6,21 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import React, { useCallback, useMemo, useState } from "react";
+import {
+  CardDescription,
+  CardTitle,
+} from "~/components/ui/card";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { Loader } from "lucide-react";
+import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { Loader, Search } from "lucide-react";
+import { Input } from "./ui/input";
+import { ImportGHRepo } from "./import-gh-repo";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
-import { CreateNewResourceForm } from "./create-new-resource-form";
 
-export interface CreateResourceWizardProps {
+export interface ImportResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
@@ -22,13 +28,13 @@ export interface CreateResourceWizardProps {
   resourceTypes: ResourceType[];
 }
 
-export const CreateResourceWizard = ({
+export const ImportResourceWizard = ({
   isOpen,
   isLoading,
   handleOnOpenChange,
   handleOnCreate,
   resourceTypes,
-}: CreateResourceWizardProps) => {
+}: ImportResourceWizardProps) => {
   const [step, setStep] = useState(1);
   const [selectedResource, setSelectedResource] = useState<ResourceType | null>(
     null,
@@ -66,6 +72,9 @@ export const CreateResourceWizard = ({
     setSelectedResource(null);
   };
 
+
+
+
   const StepContent = useCallback(() => {
     return step === 1 ? (
       <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
@@ -73,11 +82,7 @@ export const CreateResourceWizard = ({
       </div>
     ) : (
       <div className="space-y-4 p-2">
-        {selectedResource && <CreateNewResourceForm
-          selectedResource={selectedResource}
-          handleCreate={handleCreate}
-          handleBack={handleBack}
-        />}
+        <ImportGHRepo handleBack={handleBack} />
       </div>
     )
   }, [filtereResources, step, handleBack, handleCreate, selectedResource]);
@@ -86,7 +91,7 @@ export const CreateResourceWizard = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button disabled={isLoading}>
-          New Resource...
+          Import...
           {isLoading && <Loader className="ml-2 h-5 w-5" />}
         </Button>
       </DialogTrigger>
@@ -96,38 +101,23 @@ export const CreateResourceWizard = ({
             {
               step === 1 ? (
                 <WizardSearchHeader
-                  title="Create a new resource"
-                  description="Select the type of resource you want to create"
+                  title="Import existing resources to your project"
+                  description="Connect to an external system and import existing resources to be managed in your project"
                   searchQuery={searchQuery}
                   handleSearch={handleSearch}
                 />
               ) : (
                 selectedResource &&
                 <WizardSimpleHeader
-                  title={`New ${selectedResource?.kind} resource`}
-                  description={selectedResource?.description ||
-                    "This is a mock description with a resonable length to see how it looks like"}
+                  title={`Import ${selectedResource?.kind} resources to your project`}
+                  description="Select the repositories you want to import into your project"
                   resourceType={selectedResource}
                 />
               )
             }
           </DialogTitle>
         </DialogHeader>
-        {
-          step === 1 ? (
-            <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-              <ResourceTypesCards filtereResources={filtereResources} handleResourceSelect={handleResourceSelect} />
-            </div>
-          ) : (
-            <div className="space-y-4 p-2">
-              {selectedResource && <CreateNewResourceForm
-                selectedResource={selectedResource}
-                handleCreate={handleCreate}
-                handleBack={handleBack}
-              />}
-            </div>
-          )
-        }
+        <StepContent />
       </DialogContent>
     </Dialog>
   );

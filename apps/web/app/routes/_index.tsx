@@ -11,6 +11,7 @@ import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportGHRepo } from "~/components/import-gh-repo";
 import axios from "axios";
+import { ImportResourceWizard } from "~/components/import-resource-wizard";
 
 export const loader = async ({ request }: { request: Request }) => {
   const url = new URL(request.url);
@@ -26,7 +27,8 @@ export default function _index() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
+  const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -37,7 +39,16 @@ export default function _index() {
       resource: resource,
       providedValues: providedValues,
     });
-    setIsOpen(false);
+    console.log(res);
+    setIsCreateWizardOpen(false);
+  };
+
+  const handleImportResource = (resource: any, providedValues: any) => {
+    // const res = axios.post("/api/resources", {
+    //   resource: resource,
+    //   providedValues: providedValues,
+    // });
+    setIsImportWizardOpen(false);
   };
 
   return (
@@ -55,15 +66,23 @@ export default function _index() {
           />
         </div>
         <CreateResourceWizard
-          isOpen={isOpen}
-          handleOnOpenChange={setIsOpen}
+          isOpen={isCreateWizardOpen}
+          handleOnOpenChange={setIsCreateWizardOpen}
           handleOnCreate={handleCreateResource}
-          resources={
-            resourceTypes && resourceTypes.length > 0 ? resourceTypes : []
+          resourceTypes={
+            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
           }
           isLoading={state === "loading"}
         />
-        <ImportGHRepo />
+        <ImportResourceWizard
+          isOpen={isImportWizardOpen}
+          handleOnOpenChange={setIsImportWizardOpen}
+          handleOnCreate={handleImportResource}
+          resourceTypes={
+            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => resource.kind.includes("Repo")) : []
+          }
+          isLoading={state === "loading"}
+        />
       </div>
       <div className={"container mx-auto mt-12"}>
         <ProjectGroups
