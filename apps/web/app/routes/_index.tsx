@@ -10,8 +10,8 @@ import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportGHRepo } from "~/components/import-gh-repo";
-import axios from "axios";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
+import { getTypes, createResource, CreateResourceRequest } from "~/lib/backend";
 
 export const loader = async () => getTypes();
 
@@ -33,7 +33,7 @@ export default function _index() {
 
   const handleCreateResource = async (resource: any, providedValues: any) => {
     setIsCreateResourceLoading(true);
-    const res = await axios.post("/api/resources", {
+    const res = await createResource({
       resource: resource,
       providedValues: providedValues,
     });
@@ -42,7 +42,7 @@ export default function _index() {
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResource = (resource: any, providedValues: any) => {
+  const handleImportResource = (req: CreateResourceRequest) => {
     // const res = axios.post("/api/resources", {
     //   resource: resource,
     //   providedValues: providedValues,
