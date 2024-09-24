@@ -84,7 +84,7 @@ export const CreateResourceWizard = ({
 
   const StepContent = useCallback(() => {
     return step === 1 ? (
-      <div className="grid h-[520px] grid-cols-4 gap-4 overflow-auto">
+      <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
         {filtereResources.map((resource, index) => {
           const Icon = getIconComponent({ icon: resource.icon });
           const iconColor = getResourceIconColors({
@@ -93,17 +93,19 @@ export const CreateResourceWizard = ({
           return (
             <Card
               key={index}
-              className="hover:bg-accent cursor-pointer max-h-[145px] flex flex-col items-left justify-center text-left"
+              className="hover:bg-accent cursor-pointer max-h-[160px] flex flex-col justify-center"
               onClick={() => handleResourceSelect(resource)}
             >
-              <CardHeader className="flex flex-row space-x-2 p-4">
-                <Icon className={`${iconColor} h-6 w-6`} />
-                <CardTitle>{resource.kind}</CardTitle>
+              <CardHeader className="flex flex-row h-[50px] text-center border-b border-b-gray-200 items-center align-middle">
+                <div className="w-full flex self-center items-center justify-center">
+                  <Icon className={`${iconColor} h-7 w-7`} />
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex p-2 flex-col h-[110px]">
+                <CardTitle className="mb-2">{resource.kind}</CardTitle>
                 <CardDescription>
                   {resource.description ||
-                    "This is a mock description for now"}
+                    "This is a mock description with a reasonable length to see how it looks like"}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -171,7 +173,7 @@ export const CreateResourceWizard = ({
                     <CardTitle>New {selectedResource?.kind} resource</CardTitle>
                     <CardDescription className="mt-2">
                       {selectedResource?.description ||
-                        "This is a mock description"}
+                        "This is a mock description with a resonable length to see how it looks like"}
                     </CardDescription>
                   </div>
                 </div>
