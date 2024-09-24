@@ -57,7 +57,11 @@ export const CreateResourceWizard = ({
   };
 
   const handleCreate = useCallback((providedValues: any) => {
-    handleOnCreate(selectedResource, providedValues);
+    if (!selectedResource) {
+      return;
+    }
+    
+    handleOnCreate({ resource: selectedResource, providedValues });
   }, [selectedResource, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {

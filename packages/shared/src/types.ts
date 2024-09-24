@@ -2,8 +2,8 @@ export interface ResourceQuery {
   group: string;
   version: string;
   plural: string;
-  namespace: string;
-  name: string;
+  namespace?: string;
+  name?: string;
 }
 
 export interface Condition {
@@ -68,9 +68,9 @@ export interface ResourceType {
   openApiSchema?: any;
 }
 
-export type User = {
-  user_metadata: {
-    full_name: string;
-    avatar_url: string;
-  };
-};
+// export type User = {
+//   user_metadata: {
+//     full_name: string;
+//     avatar_url: string;
+//   };
+// };

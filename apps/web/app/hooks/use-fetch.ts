@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
+import { get } from "~/lib/backend";
 
 export function useFetch<T = unknown>(
   initialUrl: string,
@@ -12,11 +12,11 @@ export function useFetch<T = unknown>(
   const [shouldFetch, setShouldFetch] = useState(immediate);
   const [isLoading, setIsLoading] = useState(immediate);
 
-  const { data, error, mutate } = useSWR<T>(
+  const { data, error } = useSWR<T>(
     shouldFetch ? [url, params] : null,
     async ([currentUrl, currentParams]) => {
       setIsLoading(true);
-      const response = await axios.get<T>(currentUrl, { params: currentParams });
+      const response = await get(currentUrl, currentParams as Record<string, string>);
       setIsLoading(false);
       return response.data;
     },

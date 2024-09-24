@@ -1,6 +1,6 @@
 import express, { Express } from "express";
 import cors from "cors";
-import { ResourceType, ResourceQuery, Resource } from "@repo/shared";
+import { ResourceType, ResourceQuery, GetResourceResponse, GetUserResponse, GetTypesResponse, CreateResourceRequest } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
 import projects from "./mock-data/projects.json";
 import * as k8s from "@kubernetes/client-node";
@@ -33,7 +33,7 @@ app.use(
   }),
 );
 
-app.get("/", async (req, res) => {
+app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, portal-backend!" });
 });
 
@@ -53,7 +53,7 @@ app.get("/api/resources", async (req, res) => {
   url.push(params.plural);
 
   const result = await kubernetesRequest(url.join("/"));
-  const data = (await result.json()) as { items: Resource[] };
+  const data = (await result.json()) as GetResourceResponse;
 
   return res.status(200).json(data);
 });
@@ -95,7 +95,7 @@ app.get("/api/types", async (_, res) => {
         crdsResult.push(result);
       }
     }
-    return res.status(200).json(crdsResult);
+    return res.status(200).json({ types: crdsResult } as GetTypesResponse);
   } catch (error) {
     console.error(error);
     return res.status(500);
@@ -103,7 +103,7 @@ app.get("/api/types", async (_, res) => {
 });
 
 app.post("/api/resources", async (req, res) => {
-  const { resource, providedValues } = req.body as { resource: any, providedValues: any };
+  const { resource, providedValues } = req.body as CreateResourceRequest;
   try {
     const customResource = await createCustomResourceInstance(resource, providedValues, kblocksNamespace);
     // Apply the custom resource to the cluster
@@ -265,7 +265,7 @@ app.get("/api/github/repositories", async (req, res) => {
 app.get("/api/user", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const user = await supabase.auth.getUser();
-  return res.status(200).json({ user: user.data.user });
+  return res.status(200).json({ user: user.data.user } as GetUserResponse);
 });
 
 app.get("/api/users", async (req, res) => {

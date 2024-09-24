@@ -13,16 +13,11 @@ import { ImportGHRepo } from "~/components/import-gh-repo";
 import axios from "axios";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 
-export const loader = async ({ request }: { request: Request }) => {
-  const url = new URL(request.url);
-  const apiUrl = `${url.protocol}//${url.host}/api/types`;
-  const resources = await axios.get(apiUrl);
-  return { resourceTypes: resources.data };
-};
+export const loader = async () => getTypes();
 
 export default function _index() {
   const { selectedProject } = useAppContext();
-  const { resourceTypes } = useLoaderData<typeof loader>();
+  const { types } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,7 +85,7 @@ export default function _index() {
       </div>
       <div className={"container mx-auto mt-12"}>
         <ProjectGroups
-          resourceTypes={resourceTypes}
+          resourceTypes={types}
           searchQuery={searchQuery}
         />
       </div>
