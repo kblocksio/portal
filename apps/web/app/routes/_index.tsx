@@ -9,21 +9,16 @@ import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
-import { ImportGHRepo } from "~/components/import-gh-repo";
 import axios from "axios";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-
-export const loader = async ({ request }: { request: Request }) => {
-  const url = new URL(request.url);
-  const apiUrl = `${url.protocol}//${url.host}/api/types`;
-  const resources = await axios.get(apiUrl);
-  return { resourceTypes: resources.data };
-};
+import { useFetch } from "~/hooks/use-fetch";
+import { ResourceType } from "@repo/shared";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
-  const { resourceTypes } = useLoaderData<typeof loader>();
   const { state } = useNavigation();
+  const { data: resourceTypes, isLoading } = useFetch<ResourceType[]>("/api/types");
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -56,44 +51,79 @@ export default function _index() {
   };
 
   return (
-    <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
-      <ProjectHeader selectedProject={selectedProject} />
-      <div className="container mx-auto flex items-center space-x-4 rounded-lg">
-        <div className="relative flex-grow">
-          <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
-          <Input
-            type="text"
-            placeholder="Search resource..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
+    <div className="flex h-screen bg-background">
+      <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
+        <ProjectHeader selectedProject={selectedProject} />
+        <div className="container mx-auto flex items-center space-x-4 rounded-lg">
+          <div className="relative flex-grow">
+            <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+            <Input
+              type="text"
+              placeholder="Search resource..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
+            />
+          </div>
+          <CreateResourceWizard
+            isOpen={isCreateWizardOpen}
+            handleOnOpenChange={setIsCreateWizardOpen}
+            handleOnCreate={handleCreateResource}
+            resourceTypes={
+              resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
+            }
+            isLoading={state === "loading" || isCreateResourceLoading}
+          />
+          <ImportResourceWizard
+            isOpen={isImportWizardOpen}
+            handleOnOpenChange={setIsImportWizardOpen}
+            handleOnCreate={handleImportResource}
+            resourceTypes={
+              resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => resource.kind.includes("Repo")) : []
+            }
+            isLoading={state === "loading"}
           />
         </div>
-        <CreateResourceWizard
-          isOpen={isCreateWizardOpen}
-          handleOnOpenChange={setIsCreateWizardOpen}
-          handleOnCreate={handleCreateResource}
-          resourceTypes={
-            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
-          }
-          isLoading={state === "loading" || isCreateResourceLoading}
-        />
-        <ImportResourceWizard
-          isOpen={isImportWizardOpen}
-          handleOnOpenChange={setIsImportWizardOpen}
-          handleOnCreate={handleImportResource}
-          resourceTypes={
-            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => resource.kind.includes("Repo")) : []
-          }
-          isLoading={state === "loading"}
-        />
-      </div>
-      <div className={"container mx-auto mt-12"}>
-        <ProjectGroups
-          resourceTypes={resourceTypes}
-          searchQuery={searchQuery}
-        />
+        <div className={"container mx-auto mt-12"}>
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : (
+            <ProjectGroups
+              resourceTypes={resourceTypes ?? []}
+              searchQuery={searchQuery}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
+const LoadingSkeleton = () => {
+  return (
+    [...Array(3)].map((_, index) => (
+      <div key={index} className="w-full space-y-4 p-4">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-6 w-6" />
+            <Skeleton className="h-6 w-16" />
+          </div>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+      </div>
+    ))
+  );
+};

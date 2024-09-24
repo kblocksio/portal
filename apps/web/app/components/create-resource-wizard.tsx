@@ -71,7 +71,7 @@ export const CreateResourceWizard = ({
       <DialogTrigger asChild>
         <Button disabled={isLoading}>
           New Resource...
-          {isLoading && <Loader className="ml-2 h-5 w-5" />}
+          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]"
