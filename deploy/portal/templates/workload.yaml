@@ -3,10 +3,15 @@ kind: Workload
 metadata:
   name: portal-backend
 image: {{ .Values.image }}
-route: /
-replicas: 2
 port: 3001
-tls: my-tls-secret
+replicas: 2
+ingress:
+  path: /
+  host: api.kblocks.io
+  tls:
+    hosts:
+    - api.kblocks.io
+    secret: kblocks-tls
 allowCluster:
 - apiGroup: "*"
   resource: "*"

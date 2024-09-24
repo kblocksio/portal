@@ -24,16 +24,5 @@ export default defineConfig(({ mode }) => ({
   },
   ssr: {
     noExternal: ["lucide-react"],
-  },
-  server:
-    mode === "development"
-      ? {
-        proxy: {
-          "/api": {
-            target: "http://localhost:3001",
-            changeOrigin: true,
-          },
-        },
-      }
-      : undefined,
+  }
 }));
