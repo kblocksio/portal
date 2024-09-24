@@ -5,6 +5,7 @@ import { Installation, Repository } from "@repo/shared";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
 import { Input } from "./ui/input.js";
 import { Skeleton } from "./ui/skeleton";
+import { Checkbox } from "./ui/checkbox";
 
 export interface ImportGHRepoProps {
   handleBack: () => void;
@@ -12,6 +13,8 @@ export interface ImportGHRepoProps {
 
 export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
+
   const { data: installations, isLoading: isLoadingInstallations } = useFetch<Installation[]>(
     "/api/github/installations",
   );
@@ -32,6 +35,33 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
     );
     return repos;
   }, [searchTerm, repositories]);
+
+  const isAllSelected = useMemo(() => {
+    return (
+      filteredRepositories.length > 0 &&
+      filteredRepositories.every((repo) => selectedRepos.has(repo.full_name))
+    );
+  }, [filteredRepositories, selectedRepos]);
+
+  const handleCheckboxChange = (repoFullName: string, checked: boolean) => {
+    setSelectedRepos((prevSelectedRepos) => {
+      const newSelectedRepos = new Set(prevSelectedRepos);
+      if (checked) {
+        newSelectedRepos.add(repoFullName);
+      } else {
+        newSelectedRepos.delete(repoFullName);
+      }
+      return newSelectedRepos;
+    });
+  };
+
+  const handleSelectAllChange = (checked: boolean) => {
+    if (checked) {
+      setSelectedRepos(new Set(filteredRepositories.map((repo) => repo.full_name)));
+    } else {
+      setSelectedRepos(new Set());
+    }
+  };
 
   useEffect(() => {
     if (!installations || installations.length === 0) {
@@ -60,34 +90,47 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
           {isLoading ? (
             <LoadingRepositories />
           ) : (
-            filteredRepositories.map((repo) => (
-              <div
-                key={repo.full_name}
-                className="mb-2 grid grid-cols-[40px_1fr_auto] items-start justify-between gap-4 border-b pb-2 pr-2 last:border-b-0"
-              >
-                <Avatar>
-                  <AvatarImage
-                    alt={`@${repo.owner.login}`}
-                    src={repo.owner.avatar_url}
-                  />
-                  <AvatarFallback>{repo.owner.login}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 pr-4">
-                  <a
-                    href={repo.html_url}
-                    target="_blank"
-                    className="flext-col flex gap-2 font-medium hover:underline"
-                    rel="noreferrer"
-                  >
-                    {repo.full_name}
-                  </a>
-                  <p className="text-muted-foreground text-sm">
-                    {repo.description}
-                  </p>
-                </div>
-                <Button variant="outline">Import</Button>
+            <>
+              <div className="mb-4 flex items-center">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
+                />
+                <span className="ml-2">Select All</span>
               </div>
-            ))
+              {filteredRepositories.map((repo) => (
+                <div
+                  key={repo.full_name}
+                  className="mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0"
+                >
+                  <Checkbox
+                    className="self-center"
+                    checked={selectedRepos.has(repo.full_name)}
+                    onCheckedChange={(checked) =>
+                      handleCheckboxChange(repo.full_name, checked as boolean)
+                    }
+                  />
+                  <Avatar>
+                    <AvatarImage alt={`@${repo.owner.login}`} src={repo.owner.avatar_url} />
+                    <AvatarFallback>{repo.owner.login}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 pr-4">
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      className="flex flex-col gap-2 font-medium hover:underline"
+                      rel="noreferrer"
+                    >
+                      {repo.full_name}
+                    </a>
+                    <p className="text-muted-foreground text-sm">{repo.description}</p>
+                  </div>
+                  <Button disabled={selectedRepos.size > 0} variant="outline">
+                    Import
+                  </Button>
+                </div>
+              ))}
+            </>
           )}
         </div>
       </div>
@@ -95,25 +138,37 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
         <Button variant="outline" onClick={handleBack}>
           Back
         </Button>
-        <Button disabled={isLoading} type="submit">Import Selected</Button>
+        <Button
+          disabled={isLoading || selectedRepos.size === 0}
+        >
+          Import Selected
+        </Button>
       </div>
     </div>
   );
 };
 
 
+
 const LoadingRepositories = () => {
   return (
     <>
+      <div className="mb-4 flex items-center">
+        <Skeleton className="h-5 w-5" />
+        <Skeleton className="ml-2 h-5 w-20" />
+      </div>
       {[...Array(3)].map((_, index) => (
-        <div key={index} className="mb-2 grid grid-cols-[40px_1fr_auto] items-start justify-between gap-4 border-b pb-2 pr-2 last:border-b-0">
+        <div
+          key={index}
+          className="mb-2 grid grid-cols-[auto_40px_1fr] items-start gap-4 border-b pb-2 pr-2 last:border-b-0"
+        >
+          <Skeleton className="h-5 w-5 self-center" />
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex-1 pr-4 self-center">
             <Skeleton className="h-5 w-[150px]" />
           </div>
-          <Skeleton className="h-8 w-20" />
         </div>
       ))}
     </>
-  )
-}
+  );
+};
