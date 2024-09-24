@@ -1,11 +1,12 @@
-import { useCallback, useState } from "react";
-import { signInUrl } from "~/lib/backend";
+
+import { useAuth0 } from "@auth0/auth0-react";
 
 export const useSignIn = () => {
-  const [isLoading, setLoading] = useState(location.hash.length > 0);
-  const signIn = useCallback(async () => {
-    setLoading(true);
-    location.assign(signInUrl);
-  }, []);
+  const { loginWithRedirect, isLoading } = useAuth0();
+
+  const signIn = () => {
+    loginWithRedirect();
+  };
+
   return { signIn, isSigningIn: isLoading };
 };

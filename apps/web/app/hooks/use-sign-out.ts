@@ -1,10 +1,11 @@
-import { useCallback, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export const useSignOut = () => {
-  const [isLoading, setLoading] = useState(location.hash.length > 0);
-  const signOut = useCallback(async () => {
-    setLoading(true);
-    location.assign("/api/auth/sign-out");
-  }, []);
+  const { logout, isLoading } = useAuth0();
+
+  const signOut = () => {
+    logout({ returnTo: window.location.origin });
+  };
+
   return { signOut, isSigningOut: isLoading };
 };

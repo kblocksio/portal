@@ -10,7 +10,7 @@ import { Header } from "~/components/header";
 import { cn } from "~/lib/utils";
 import { AppProvider } from "~/AppContext";
 import "./styles/global.css";
-import { UserProvider } from "./hooks/use-user.js";
+import { Auth0Provider } from "@auth0/auth0-react";
 
 export default function App() {
   return (
@@ -22,16 +22,23 @@ export default function App() {
         <Links />
       </head>
       <body className={cn("font-inter overflow-hidden")}>
-        <AppProvider>
-          <UserProvider>
+        <Auth0Provider
+          domain={process.env.AUTH0_DOMAIN!}
+          clientId={process.env.AUTH0_CLIENT_ID!}
+          authorizationParams={{
+            redirect_uri: window.location.origin,
+            audience: process.env.AUTH0_AUDIENCE,
+          }}
+        >
+          <AppProvider>
             <div className="flex h-screen flex-col">
               <Header />
               <div className="flex-grow overflow-hidden">
                 <Outlet />
               </div>
             </div>
-          </UserProvider>
-        </AppProvider>
+          </AppProvider>
+        </Auth0Provider>
         <ScrollRestoration />
         <Scripts />
       </body>

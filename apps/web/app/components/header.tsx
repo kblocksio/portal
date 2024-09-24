@@ -22,6 +22,7 @@ import { useAppContext } from "~/AppContext";
 import { useUser } from "~/hooks/use-user.jsx";
 import { useSignOut } from "~/hooks/use-sign-out.js";
 import { getUserInitials } from "~/lib/user-initials";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Logo() {
   return (
