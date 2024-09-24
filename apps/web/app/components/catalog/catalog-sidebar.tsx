@@ -125,7 +125,7 @@ const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
 
 const SidebarSection = ({ api }: { api: ApiGroup }) => {
   const { data, isLoading, error } = useFetch<{ items: any }>(
-    `${process.env.VITE_SERVER_URL}/api/resources`,
+    `/api/resources`,
     {
       group: api.group,
       version: api.version,

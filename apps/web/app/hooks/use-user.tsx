@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { SignIn } from "~/components/sign-in.jsx";
+import { getUser } from "~/lib/backend";
 
 const Context = createContext<User | undefined>(undefined);
 
@@ -25,19 +26,21 @@ export const UserProvider = (props: PropsWithChildren) => {
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(true);
-    fetch("/api/user")
-      .then((response) => response.json())
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
 
+    async function fetchUser() {
+      try {
+        const response = await getUser();
+        setUser(response.user);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
+  
   return (
     <>
       {isLoading && (

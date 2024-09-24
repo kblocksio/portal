@@ -6,11 +6,11 @@ import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
-import axios from "axios";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
+import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { ResourceType } from "@repo/shared";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -33,7 +33,7 @@ export default function _index() {
 
   const handleCreateResource = async (resource: any, providedValues: any) => {
     setIsCreateResourceLoading(true);
-    const res = await axios.post("/api/resources", {
+    const res = await createResource({
       resource: resource,
       providedValues: providedValues,
     });
@@ -42,7 +42,7 @@ export default function _index() {
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResource = (resource: any, providedValues: any) => {
+  const handleImportResource = () => {
     // const res = axios.post("/api/resources", {
     //   resource: resource,
     //   providedValues: providedValues,

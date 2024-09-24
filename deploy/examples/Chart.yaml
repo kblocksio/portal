@@ -1,5 +1,0 @@
-apiVersion: v2
-name: kblock-examples
-description: Examples of kblocks
-version: 0.1.0
-type: application

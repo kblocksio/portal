@@ -5,10 +5,10 @@ kind: Config
 
 build:
   artifacts:
-  - image: wingcloudbot/portal-backend
+  - image: wingcloudbot/kblocks-api
     docker:
       buildArgs: 
-        ENV: dev
+        ENV: prod
     sync:
       infer:
         - apps/server/src/**/*.ts
@@ -17,7 +17,7 @@ build:
 deploy:
   helm:
     releases:
-      - name: portal-backend
-        chartPath: ./deploy/portal
+      - name: kblocks-api
+        chartPath: ./deploy
         setValueTemplates:
           image: "{{.IMAGE_FULLY_QUALIFIED}}"

@@ -1,25 +1,9 @@
-export interface Params {
-  group: string;
-  version: string;
-  plural: string;
-}
+import { getResources } from "~/lib/backend";
+import { ResourceQuery } from "@repo/shared";
 
-export const k8sFetcher = async (params: Params) => {
-  const queryParams = new URLSearchParams({
-    group: params.group || "",
-    version: params.version || "",
-    plural: params.plural || "",
-  }).toString();
-  // Construct the full URL with query parameters
-  const url = `/api/resources?${queryParams}`;
-
+export const k8sFetcher = async (query: ResourceQuery) => {
   try {
-    const res = await fetch(url); // Send the request to the server
-    if (!res.ok) {
-      throw new Error(`Error fetching data from server: ${res.statusText}`);
-    }
-
-    const data = await res.json();
+    const data = await getResources(query);
 
     const map: Record<string, any> = {};
 

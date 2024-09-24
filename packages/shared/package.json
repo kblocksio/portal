@@ -8,5 +8,8 @@
   "scripts": {
     "lint": "eslint \"**/*.ts\""
   },
-  "author": "ainvoner"
+  "author": "ainvoner",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
 }
