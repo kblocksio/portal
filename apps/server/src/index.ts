@@ -16,6 +16,26 @@ if (!kblocksNamespace) {
   throw new Error("KBLOCKS_NAMESPACE is not set");
 }
 
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+if (!GITHUB_CLIENT_ID) {
+  throw new Error("GITHUB_CLIENT_ID is not set");
+}
+
+const WEBSITE_ORIGIN = process.env.WEBSITE_ORIGIN;
+if (!WEBSITE_ORIGIN) {
+  throw new Error("WEBSITE_ORIGIN is not set");
+}
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+if (!SUPABASE_URL) {
+  throw new Error("SUPABASE_URL is not set");
+}
+
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+if (!SUPABASE_ANON_KEY) {
+  throw new Error("SUPABASE_ANON_KEY is not set");
+}
+
 // Create and configure KubeConfig
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
@@ -128,7 +148,7 @@ app.get("/api/auth/sign-in", async (req, res) => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: `${process.env.WEBSITE_ORIGIN}/api/auth/callback/supabase`,
+      redirectTo: `${WEBSITE_ORIGIN}/api/auth/callback/supabase`,
     },
   });
 
