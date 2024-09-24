@@ -204,7 +204,7 @@ app.get("/api/github/installations", async (req, res) => {
     .eq("user_id", user.data.user?.id)
     .single();
   if (error) {
-    console.error(error);
+    console.error("error getting access token", error);
     return res.status(500).json({ message: "Server error" });
   }
 
@@ -214,12 +214,22 @@ app.get("/api/github/installations", async (req, res) => {
     auth: data.access_token,
   });
 
-  const { data: installations } =
-    await octokit.rest.apps.listInstallationsForAuthenticatedUser({
-      page: 0,
-      per_page: 100,
-    });
-  return res.status(200).json(installations.installations);
+  try {
+    const { data: installations } =
+      await octokit.rest.apps.listInstallationsForAuthenticatedUser({
+        page: 0,
+        per_page: 100,
+      });
+    return res.status(200).json(installations.installations);
+  } catch (error) {
+    console.error("error getting installations", error);
+    if ((error as any).status === 401) {
+      return res.redirect("/api/auth/sign-out");
+    }
+    return res.status(500).json({ message: "Server error" });
+  }
+
+
 });
 
 app.get("/api/github/repositories", async (req, res) => {
