@@ -60,8 +60,8 @@ export const CreateResourceWizard = ({
     if (!selectedResource) {
       return;
     }
-    
-    handleOnCreate({ resource: selectedResource, providedValues });
+
+    handleOnCreate(selectedResource, providedValues);
   }, [selectedResource, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {
