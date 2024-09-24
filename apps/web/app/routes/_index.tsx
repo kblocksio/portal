@@ -30,16 +30,20 @@ export default function _index() {
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
+  const [isCreateResourceLoading, setIsCreateResourceLoading] = useState(false);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = (resource: any, providedValues: any) => {
-    const res = axios.post("/api/resources", {
+  const handleCreateResource = async (resource: any, providedValues: any) => {
+    setIsCreateResourceLoading(true);
+    const res = await axios.post("/api/resources", {
       resource: resource,
       providedValues: providedValues,
     });
     console.log(res);
+    setIsCreateResourceLoading(false);
     setIsCreateWizardOpen(false);
   };
 
@@ -72,7 +76,7 @@ export default function _index() {
           resourceTypes={
             resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
           }
-          isLoading={state === "loading"}
+          isLoading={state === "loading" || isCreateResourceLoading}
         />
         <ImportResourceWizard
           isOpen={isImportWizardOpen}

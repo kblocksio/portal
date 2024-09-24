@@ -72,9 +72,6 @@ export const ImportResourceWizard = ({
     setSelectedResource(null);
   };
 
-
-
-
   const StepContent = useCallback(() => {
     return step === 1 ? (
       <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">

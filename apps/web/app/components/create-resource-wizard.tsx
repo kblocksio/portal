@@ -66,22 +66,6 @@ export const CreateResourceWizard = ({
     setSelectedResource(null);
   };
 
-  const StepContent = useCallback(() => {
-    return step === 1 ? (
-      <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-        <ResourceTypesCards filtereResources={filtereResources} handleResourceSelect={handleResourceSelect} />
-      </div>
-    ) : (
-      <div className="space-y-4 p-2">
-        {selectedResource && <CreateNewResourceForm
-          selectedResource={selectedResource}
-          handleCreate={handleCreate}
-          handleBack={handleBack}
-        />}
-      </div>
-    )
-  }, [filtereResources, step, handleBack, handleCreate, selectedResource]);
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -90,7 +74,17 @@ export const CreateResourceWizard = ({
           {isLoading && <Loader className="ml-2 h-5 w-5" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[800px]"
+        onPointerDownOutside={(event) => {
+          if (isLoading) {
+            event.preventDefault()
+          }
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isLoading) {
+            event.preventDefault()
+          }
+        }}>
         <DialogHeader>
           <DialogTitle>
             {
@@ -120,11 +114,13 @@ export const CreateResourceWizard = ({
             </div>
           ) : (
             <div className="space-y-4 p-2">
-              {selectedResource && <CreateNewResourceForm
-                selectedResource={selectedResource}
-                handleCreate={handleCreate}
-                handleBack={handleBack}
-              />}
+              {selectedResource &&
+                <CreateNewResourceForm
+                  selectedResource={selectedResource}
+                  handleCreate={handleCreate}
+                  handleBack={handleBack}
+                  isLoading={isLoading}
+                />}
             </div>
           )
         }

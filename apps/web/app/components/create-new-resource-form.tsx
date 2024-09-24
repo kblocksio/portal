@@ -3,15 +3,18 @@ import { prepareOpenApiSchemaForAutoForm } from "~/lib/utils";
 import { ZodObjectOrWrapped } from "~/components/ui/auto-form/utils";
 import { ResourceType } from "@repo/shared";
 import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
 
 export const CreateNewResourceForm = ({
   selectedResource,
   handleCreate,
   handleBack,
+  isLoading,
 }: {
   selectedResource: ResourceType;
   handleCreate: (data: any) => void;
   handleBack: () => void;
+  isLoading: boolean;
 }) => {
   return (
     <AutoForm
@@ -27,7 +30,16 @@ export const CreateNewResourceForm = ({
         <Button variant="outline" onClick={handleBack}>
           Back
         </Button>
-        <Button type="submit">Create</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            "Create"
+          )}
+        </Button>
       </div>
     </AutoForm>
   )

@@ -111,7 +111,7 @@ function ResourceCard({
       )}`}
     >
       <div className="flex items-center space-x-4">
-        <StatusBadge readyCondition={readyCondition} />
+        <StatusBadge readyCondition={readyCondition} message={readyCondition?.message} />
         <div>
           <div className="flex items-center">
             <h3>
@@ -146,9 +146,12 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   );
 }
 
-function StatusBadge({ readyCondition }: { readyCondition?: Condition }) {
+function StatusBadge({ readyCondition, message }: { readyCondition?: Condition, message?: string }) {
 
-  const color = readyCondition ? (readyCondition.status === "True" ? "green" : "red") : "yellow";
+  const color = readyCondition
+    ? (readyCondition.status === "True"
+      ? "green" : (message === "In Progress"
+        ? "yellow" : "red")) : "yellow";
 
   return (
     <TooltipProvider>
