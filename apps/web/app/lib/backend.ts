@@ -1,6 +1,9 @@
 import { GetResourceResponse, GetUserResponse, ResourceQuery, GetTypesResponse, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+if (!BASE_URL) {
+  throw new Error("VITE_BACKEND_URL is not set");
+}
 
 export const signInUrl = `${BASE_URL}/api/auth/sign-in`;
 

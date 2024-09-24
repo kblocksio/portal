@@ -9,9 +9,10 @@ import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useLoaderData, useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
-import { ImportGHRepo } from "~/components/import-gh-repo";
+// import { ImportGHRepo } from "~/components/import-gh-repo";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { getTypes, createResource, CreateResourceRequest } from "~/lib/backend";
+import { CreateResourceRequest } from "@repo/shared";
+import { getTypes, createResource } from "~/lib/backend";
 
 export const loader = async () => getTypes();
 
@@ -42,7 +43,7 @@ export default function _index() {
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResource = (req: CreateResourceRequest) => {
+  const handleImportResource = (_req: CreateResourceRequest) => {
     // const res = axios.post("/api/resources", {
     //   resource: resource,
     //   providedValues: providedValues,
@@ -69,7 +70,7 @@ export default function _index() {
           handleOnOpenChange={setIsCreateWizardOpen}
           handleOnCreate={handleCreateResource}
           resourceTypes={
-            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
+            types && types.length > 0 ? types.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
           }
           isLoading={state === "loading" || isCreateResourceLoading}
         />
@@ -78,7 +79,7 @@ export default function _index() {
           handleOnOpenChange={setIsImportWizardOpen}
           handleOnCreate={handleImportResource}
           resourceTypes={
-            resourceTypes && resourceTypes.length > 0 ? resourceTypes.filter((resource: any) => resource.kind.includes("Repo")) : []
+            types && types.length > 0 ? types.filter((resource: any) => resource.kind.includes("Repo")) : []
           }
           isLoading={state === "loading"}
         />
