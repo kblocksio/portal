@@ -12,6 +12,8 @@ ingress:
     hosts:
     - api.kblocks.io
     secret: kblocks-tls
+envFrom:
+- secretName: kblocks-api-secrets
 allowCluster:
 - apiGroup: "*"
   resource: "*"

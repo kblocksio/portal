@@ -8,7 +8,7 @@ build:
   - image: wingcloudbot/kblocks-api
     docker:
       buildArgs: 
-        ENV: dev
+        ENV: prod
     sync:
       infer:
         - apps/server/src/**/*.ts
