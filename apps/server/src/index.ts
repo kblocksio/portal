@@ -1,4 +1,4 @@
-import express, { Express, Request } from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import { ResourceType, ResourceQuery, GetResourceResponse, GetUserResponse, GetTypesResponse, CreateResourceRequest } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
@@ -145,12 +145,10 @@ app.post("/api/resources", async (req, res) => {
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
 
-  const baseUrl = getBaseUrl(req);  
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: `${baseUrl}/api/auth/callback/supabase`,
+      redirectTo: `${WEBSITE_ORIGIN}/api/auth/callback/supabase`,
     },
   });
 
@@ -325,14 +323,6 @@ app.get("/api/users", async (req, res) => {
 
   return res.status(200).json(users.users);
 });
-
-// Add this function near the top of your file, after the imports
-function getBaseUrl(req: Request): string {
-  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  const host = req.headers['x-forwarded-host'] || req.get('host');
-  return `${protocol}://${host}`;
-}
-
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
