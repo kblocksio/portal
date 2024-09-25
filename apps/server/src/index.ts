@@ -26,16 +26,6 @@ if (!WEBSITE_ORIGIN) {
   throw new Error("WEBSITE_ORIGIN is not set");
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-if (!SUPABASE_URL) {
-  throw new Error("SUPABASE_URL is not set");
-}
-
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-if (!SUPABASE_ANON_KEY) {
-  throw new Error("SUPABASE_ANON_KEY is not set");
-}
-
 // Create and configure KubeConfig
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
@@ -144,6 +134,8 @@ app.post("/api/resources", async (req, res) => {
 
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
+
+  console.log("WEBSITE_ORIGIN", WEBSITE_ORIGIN);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
