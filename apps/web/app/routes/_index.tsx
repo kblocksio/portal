@@ -10,16 +10,15 @@ import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { CreateResourceRequest } from "@repo/shared";
+import { CreateResourceRequest, ResourceType } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
-import { ResourceType } from "@repo/shared";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
   const { state } = useNavigation();
-  const { data: resourceTypes, isLoading } = useFetch<ResourceType[]>("/api/types");
+  const { data: types, isLoading } = useFetch<ResourceType[]>("/api/types");
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -43,7 +42,7 @@ export default function _index() {
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResource = (_req: CreateResourceRequest) => {
+  const handleImportResource = () => {
     // const res = axios.post("/api/resources", {
     //   resource: resource,
     //   providedValues: providedValues,
@@ -52,7 +51,7 @@ export default function _index() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="bg-background flex h-screen">
       <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
         <ProjectHeader selectedProject={selectedProject} />
         <div className="container mx-auto flex items-center space-x-4 rounded-lg">
@@ -71,7 +70,11 @@ export default function _index() {
             handleOnOpenChange={setIsCreateWizardOpen}
             handleOnCreate={handleCreateResource}
             resourceTypes={
-              types && types.length > 0 ? types.filter((resource: any) => !resource.kind.endsWith("Ref")) : []
+              types && types.length > 0
+                ? types.filter(
+                    (resource: any) => !resource.kind.endsWith("Ref"),
+                  )
+                : []
             }
             isLoading={state === "loading" || isCreateResourceLoading}
           />
@@ -80,7 +83,11 @@ export default function _index() {
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnCreate={handleImportResource}
             resourceTypes={
-              types && types.length > 0 ? types.filter((resource: any) => resource.kind.includes("Repo")) : []
+              types && types.length > 0
+                ? types.filter((resource: any) =>
+                    resource.kind.includes("Repo"),
+                  )
+                : []
             }
             isLoading={state === "loading"}
           />
@@ -90,7 +97,7 @@ export default function _index() {
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
-              resourceTypes={resourceTypes ?? []}
+              resourceTypes={types ?? []}
               searchQuery={searchQuery}
             />
           )}
@@ -101,30 +108,28 @@ export default function _index() {
 }
 
 const LoadingSkeleton = () => {
-  return (
-    [...Array(3)].map((_, index) => (
-      <div key={index} className="w-full space-y-4 p-4">
-        <div className="space-y-4">
+  return [...Array(3)].map((_, index) => (
+    <div key={index} className="w-full space-y-4 p-4">
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+        <div className="flex w-full items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Skeleton className="h-6 w-6" />
-            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-4 w-40" />
           </div>
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-4 w-4 rounded-full" />
-              <Skeleton className="h-4 w-40" />
-            </div>
-            <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-4 w-40" />
           </div>
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-4 w-4 rounded-full" />
-              <Skeleton className="h-4 w-40" />
-            </div>
-            <Skeleton className="h-4 w-32" />
-          </div>
+          <Skeleton className="h-4 w-32" />
         </div>
       </div>
-    ))
-  );
+    </div>
+  ));
 };
