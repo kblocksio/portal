@@ -1,8 +1,6 @@
 import ws from "ws";
 
-const socket = new ws("wss://api.kblocks.io/api/events/upstream", {
-  rejectUnauthorized: false
-});
+const socket = new ws("wss://api.kblocks.io/api/events/upstream");
 
 socket.on("open", () => {
   console.log("Connected to server");
