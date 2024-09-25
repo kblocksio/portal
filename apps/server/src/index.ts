@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express from "express";
 import cors from "cors";
 import { ResourceType, ResourceQuery, GetResourceResponse, GetUserResponse, GetTypesResponse, CreateResourceRequest } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
@@ -7,24 +7,13 @@ import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import { createCustomResourceInstance } from "./create-resource-utils.js";
+import expressWs from "express-ws";
+import { getEnv } from "./util";
+import * as pubsub from "./pubsub";
 
 const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
-const kblocksNamespace = process.env.KBLOCKS_NAMESPACE;
-
-// TODO: include the namespace of the configmap in the annotation
-if (!kblocksNamespace) {
-  throw new Error("KBLOCKS_NAMESPACE is not set");
-}
-
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-if (!GITHUB_CLIENT_ID) {
-  throw new Error("GITHUB_CLIENT_ID is not set");
-}
-
-const WEBSITE_ORIGIN = process.env.WEBSITE_ORIGIN;
-if (!WEBSITE_ORIGIN) {
-  throw new Error("WEBSITE_ORIGIN is not set");
-}
+const KBLOCKS_NAMESPACE = getEnv("KBLOCKS_NAMESPACE");
+const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
 // Create and configure KubeConfig
 const kc = new k8s.KubeConfig();
@@ -33,7 +22,9 @@ kc.loadFromDefault();
 const crdClient = kc.makeApiClient(k8s.ApiextensionsV1Api);
 
 const port = process.env.PORT || 3001;
-const app: Express = express();
+
+const { app } = expressWs(express());
+
 app.use(express.json());
 app.use(
   cors({
@@ -43,9 +34,37 @@ app.use(
   }),
 );
 
+console.log("express-ws, will you work?");
+
 app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, portal-backend!" });
 });
+
+app.ws("/api/events", (ws, req) => {
+  console.log("Client connected");
+
+  pubsub.subscribe((message) => {
+    ws.send(message);
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+});
+
+app.ws("/api/events/upstream", (ws, req) => {
+  console.log("Client connected");
+
+  ws.on("message", (message) => {
+    console.log("EVENT:", message.toString());
+    pubsub.publish(message.toString());
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+});
+
 
 app.get("/api/resources", async (req, res) => {
   const params = req.query as unknown as ResourceQuery;
@@ -95,7 +114,7 @@ app.get("/api/types", async (_, res) => {
         const k8sConfigMapApi = kc.makeApiClient(k8s.CoreV1Api);
         const configMap = await k8sConfigMapApi.readNamespacedConfigMap(
           configmapName,
-          kblocksNamespace,
+          KBLOCKS_NAMESPACE,
         );
         const crdConfigMap = configMap.body.data;
         result.color = crdConfigMap?.color;
@@ -115,7 +134,7 @@ app.get("/api/types", async (_, res) => {
 app.post("/api/resources", async (req, res) => {
   const { resource, providedValues } = req.body as CreateResourceRequest;
   try {
-    const customResource = await createCustomResourceInstance(resource, providedValues, kblocksNamespace);
+    const customResource = await createCustomResourceInstance(resource, providedValues, KBLOCKS_NAMESPACE);
     // Apply the custom resource to the cluster
     const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
     const response = await customObjectsApi.createNamespacedCustomObject(

@@ -15,6 +15,9 @@ export interface Condition {
 }
 
 export interface Resource {
+  apiVersion: string;
+  kind: string;
+
   metadata: {
     name: string;
     namespace?: string;
@@ -24,9 +27,15 @@ export interface Resource {
     uid?: string;
     resourceVersion?: string;
   };
+
+  // current state
   status: {
     conditions?: Condition[];
+    [key: string]: any;
   };
+
+  // desired state
+  [key: string]: any;
 }
 
 export type Project = {
@@ -58,9 +67,10 @@ export type Installation = {
 
 export interface ResourceType {
   group: string;
-  plural: string;
   version: string;
   kind: string;
+  
+  plural: string;
   description?: string;
   readme?: string;
   icon?: string;
