@@ -13,3 +13,4 @@ public/dist
 .vercel
 */.vercel
 apps/web/.vercel
+.history/
