@@ -6,9 +6,6 @@ import {
 
 import type { Request, Response } from "express";
 
-console.log("SUPABASE_URL", process.env.SUPABASE_URL);
-console.log("SUPABASE_SERVICE_KEY", process.env.SUPABASE_SERVICE_KEY);
-
 const SUPABASE_URL = process.env.SUPABASE_URL;
 if (!SUPABASE_URL) {
   throw new Error("SUPABASE_URL is not set");
