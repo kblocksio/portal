@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express from "express";
 import cors from "cors";
 import { ResourceType, ResourceQuery, GetResourceResponse, GetUserResponse, GetTypesResponse, CreateResourceRequest } from "@repo/shared";
 import { kubernetesRequest } from "./k8s";
@@ -7,6 +7,7 @@ import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import { createCustomResourceInstance } from "./create-resource-utils.js";
+import expressWs from "express-ws";
 
 const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
 const kblocksNamespace = process.env.KBLOCKS_NAMESPACE;
@@ -33,7 +34,9 @@ kc.loadFromDefault();
 const crdClient = kc.makeApiClient(k8s.ApiextensionsV1Api);
 
 const port = process.env.PORT || 3001;
-const app: Express = express();
+
+const { app } = expressWs(express());
+
 app.use(express.json());
 app.use(
   cors({
@@ -43,8 +46,22 @@ app.use(
   }),
 );
 
+console.log("express-ws, will you work?");
+
 app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, portal-backend!" });
+});
+
+app.ws("/api/events/upstream", (ws, req) => {
+  console.log("Client connected");
+
+  ws.on("message", (message) => {
+    console.log("EVENT:", message.toString());
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
 });
 
 app.get("/api/resources", async (req, res) => {
@@ -180,24 +197,6 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
   const next = (req.query.next ?? "/").toString();
   return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
 });
-
-// app.get("/api/auth/callback/supabase", async (req, res) => {
-//   const code = req.query.code?.toString();
-//   if (!code) {
-//     return res.status(400).json({ error: "Code is required" });
-//   }
-
-//   const supabase = createServerSupabase(req, res);
-//   await supabase.auth.exchangeCodeForSession(code);
-
-//   const url = new URL("https://github.com/login/oauth/authorize");
-//   url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
-//   url.searchParams.append(
-//     "redirect_uri",
-//     `${process.env.WEBSITE_ORIGIN}/api/auth/callback/github`,
-//   );
-//   return res.redirect(url.toString());
-// });
 
 app.get("/api/auth/callback/github", async (req, res) => {
   const code = req.query.code?.toString();
