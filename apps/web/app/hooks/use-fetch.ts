@@ -18,7 +18,7 @@ export function useFetch<T = unknown>(
       setIsLoading(true);
       const response = await get(currentUrl, currentParams as Record<string, string>);
       setIsLoading(false);
-      return response.data;
+      return response;
     },
     {
       revalidateOnFocus: false

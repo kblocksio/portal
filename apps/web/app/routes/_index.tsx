@@ -4,13 +4,13 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { CreateResourceRequest, ResourceType } from "@repo/shared";
+import { GetTypesResponse, ResourceType } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -18,7 +18,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 export default function _index() {
   const { selectedProject } = useAppContext();
   const { state } = useNavigation();
-  const { data: types, isLoading } = useFetch<ResourceType[]>("/api/types");
+  const { data, isLoading } = useFetch<GetTypesResponse>("/api/types");
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -70,10 +70,10 @@ export default function _index() {
             handleOnOpenChange={setIsCreateWizardOpen}
             handleOnCreate={handleCreateResource}
             resourceTypes={
-              types && types.length > 0
-                ? types.filter(
-                    (resource: any) => !resource.kind.endsWith("Ref"),
-                  )
+              data && data.types.length > 0
+                ? data.types.filter(
+                  (resource: any) => !resource.kind.endsWith("Ref"),
+                )
                 : []
             }
             isLoading={state === "loading" || isCreateResourceLoading}
@@ -83,10 +83,10 @@ export default function _index() {
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnCreate={handleImportResource}
             resourceTypes={
-              types && types.length > 0
-                ? types.filter((resource: any) =>
-                    resource.kind.includes("Repo"),
-                  )
+              data && data.types.length > 0
+                ? data.types.filter((resource: any) =>
+                  resource.kind.includes("Repo"),
+                )
                 : []
             }
             isLoading={state === "loading"}
@@ -97,7 +97,7 @@ export default function _index() {
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
-              resourceTypes={types ?? []}
+              resourceTypes={data?.types ?? []}
               searchQuery={searchQuery}
             />
           )}
