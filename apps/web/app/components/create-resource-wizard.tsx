@@ -60,8 +60,8 @@ export const CreateResourceWizard = ({
     if (!selectedResource) {
       return;
     }
-    
-    handleOnCreate({ resource: selectedResource, providedValues });
+
+    handleOnCreate(selectedResource, providedValues);
   }, [selectedResource, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {
@@ -75,7 +75,7 @@ export const CreateResourceWizard = ({
       <DialogTrigger asChild>
         <Button disabled={isLoading}>
           New Resource...
-          {isLoading && <Loader className="ml-2 h-5 w-5" />}
+          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]"

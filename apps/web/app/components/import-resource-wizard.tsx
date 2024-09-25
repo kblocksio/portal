@@ -89,7 +89,7 @@ export const ImportResourceWizard = ({
       <DialogTrigger asChild>
         <Button disabled={isLoading}>
           Import...
-          {isLoading && <Loader className="ml-2 h-5 w-5" />}
+          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
