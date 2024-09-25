@@ -10,7 +10,8 @@ export const signInUrl = `${BASE_URL}/api/auth/sign-in`;
 
 export const get = async (path: string, params?: Record<string, string>) => {
   const queryParams = new URLSearchParams(params).toString();
-  const res = await fetch(`${BASE_URL}${path}?${queryParams}`);
+  const url = queryParams ? `${BASE_URL}${path}?${queryParams}` : `${BASE_URL}${path}`;
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`${path}: ${res.statusText} ${res.status}\n${await res.text()}`);
   }

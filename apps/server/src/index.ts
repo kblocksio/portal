@@ -153,9 +153,6 @@ app.post("/api/resources", async (req, res) => {
 
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
-
-  console.log("WEBSITE_ORIGIN", WEBSITE_ORIGIN);
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
@@ -177,9 +174,6 @@ app.get("/api/auth/sign-out", async (req, res) => {
 });
 
 app.get("/api/auth/callback/supabase", async (req, res) => {
-  console.log("supabase callback");
-  console.log(req.query);
-
   const { error, error_description } = req.query;
   if (error) {
     console.error(`Supabase auth error: ${error}, Description: ${error_description}`);
@@ -188,16 +182,26 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
 
   const code = req.query.code?.toString();
 
-  if (code) {
-    const supabase = createServerSupabase(req, res);
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${error.message}`);
-    }
+  if (!code) {
+    return res.status(400).json({ error: "Code is required" });
   }
 
-  const next = (req.query.next ?? "/").toString();
-  return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
+  const supabase = createServerSupabase(req, res);
+  const { error: supabaseError } = await supabase.auth.exchangeCodeForSession(code);
+  if (supabaseError) {
+    return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${supabaseError}`);
+  }
+
+  console.log("client_id", process.env.GITHUB_CLIENT_ID);
+
+  const url = new URL("https://github.com/login/oauth/authorize");
+  url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
+  url.searchParams.append("scope", "repo, org:read");
+  url.searchParams.append(
+    "redirect_uri",
+    `${process.env.WEBSITE_ORIGIN}/api/auth/callback/github`,
+  );
+  return res.redirect(url.toString());
 });
 
 app.get("/api/auth/callback/github", async (req, res) => {
@@ -229,7 +233,8 @@ app.get("/api/auth/callback/github", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 
-  return res.redirect(WEBSITE_ORIGIN);
+  const next = (req.query.next ?? "/").toString();
+  return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
 });
 
 app.get("/api/github/installations", async (req, res) => {

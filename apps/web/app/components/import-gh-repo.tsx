@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
 import { Input } from "./ui/input.js";
 import { Skeleton } from "./ui/skeleton";
 import { Checkbox } from "./ui/checkbox";
+import { RefreshCw } from "lucide-react";
 
 export interface ImportGHRepoProps {
   handleBack: () => void;
@@ -14,9 +15,8 @@ export interface ImportGHRepoProps {
 export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
-
-  const { data: installations, isLoading: isLoadingInstallations } = useFetch<Installation[]>(
-    "/api/github/installations",
+  const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
+    "/api/github/installations"
   );
   const { data: repositories, refetch: refetchRepositories, isLoading: isLoadingRepositories } = useFetch<
     Repository[]
@@ -91,12 +91,23 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
             <LoadingRepositories />
           ) : (
             <>
-              <div className="mb-4 flex items-center">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
-                />
-                <span className="ml-2">Select All</span>
+              <div className="flex justify-between">
+                <div className="mb-4 flex items-center">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
+                  />
+                  <span className="ml-2">Select All</span>
+                </div>
+                <Button
+                  disabled={isLoading}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetchInstallations()}
+                  className="flex items-center mb-4 mr-2 p-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
               {filteredRepositories.map((repo) => (
                 <div
@@ -134,6 +145,19 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
           )}
         </div>
       </div>
+      <div className="mt-4 mb-4 text-sm text-muted-foreground">
+        <p>
+          Can't find the repository you're looking for? You may need to adjust your GitHub App installation.{' '}
+          <a
+            href="https://github.com/apps/kblocks-io/installations/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Manage GitHub App installation
+          </a>
+        </p>
+      </div>
       <div className="flex justify-between">
         <Button variant="outline" onClick={handleBack}>
           Back
@@ -153,9 +177,12 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
 const LoadingRepositories = () => {
   return (
     <>
-      <div className="mb-4 flex items-center">
-        <Skeleton className="h-5 w-5" />
-        <Skeleton className="ml-2 h-5 w-20" />
+      <div className="flex justify-between">
+        <div className="mb-4 flex items-center">
+          <Skeleton className="h-5 w-5" />
+          <Skeleton className="ml-2 h-5 w-20" />
+        </div>
+        <Skeleton className="h-8 w-8" />
       </div>
       {[...Array(3)].map((_, index) => (
         <div

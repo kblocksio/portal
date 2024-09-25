@@ -11,10 +11,12 @@ export function useFetch<T = unknown>(
   const [params, setParams] = useState(initialParams);
   const [shouldFetch, setShouldFetch] = useState(immediate);
   const [isLoading, setIsLoading] = useState(immediate);
+  // refetchCount is used to force a re-fetch when the refetchCount changes
+  const [refetchCount, setRefetchCount] = useState(0);
 
   const { data, error } = useSWR<T>(
-    shouldFetch ? [url, params] : null,
-    async ([currentUrl, currentParams]) => {
+    shouldFetch ? [url, params, refetchCount] : null,
+    async ([currentUrl, currentParams, currentRefetchCount]) => {
       setIsLoading(true);
       const response = await get(currentUrl, currentParams as Record<string, string>);
       setIsLoading(false);
@@ -29,9 +31,9 @@ export function useFetch<T = unknown>(
     (newUrl?: string, newParams?: Record<string, string>) => {
       if (newUrl) setUrl(newUrl);
       if (newParams) setParams(newParams);
-      setShouldFetch(true); // Enable fetching
-    },
-    []
+      setShouldFetch(true);
+      setRefetchCount((prevCount) => prevCount + 1);
+    }, []
   );
 
   return { data, isLoading, error, refetch };

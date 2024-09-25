@@ -37,7 +37,6 @@ export default function _index() {
       resource: resource,
       providedValues: providedValues,
     });
-    console.log(res);
     setIsCreateResourceLoading(false);
     setIsCreateWizardOpen(false);
   };
@@ -85,7 +84,7 @@ export default function _index() {
             resourceTypes={
               data && data.types.length > 0
                 ? data.types.filter((resource: any) =>
-                  resource.kind.includes("Repo"),
+                  resource.kind.endsWith("Ref"),
                 )
                 : []
             }
