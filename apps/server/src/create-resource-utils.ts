@@ -136,7 +136,7 @@ export const createCustomResourceInstance = async (resource: any, providedValues
         name: generateNewResourceName(namespace, resource.kind),
         namespace: namespace,
       },
-      spec: adjustedValues,
+      ...adjustedValues,
     };
     return customResource;
   } else {
