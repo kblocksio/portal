@@ -6,7 +6,6 @@ import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
@@ -17,7 +16,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
-  const { state } = useNavigation();
   const { data, isLoading } = useFetch<GetTypesResponse>("/api/types");
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,12 +40,14 @@ export default function _index() {
   };
 
   const handleImportResources = async (newResources: { resourceType: any, providedValues: any[] }) => {
+    setIsCreateResourceLoading(true);
     for (const providedValues of newResources.providedValues) {
       const res = await createResource({
         resourceType: newResources.resourceType,
         providedValues: providedValues,
       });
     }
+    setIsCreateResourceLoading(false);
     setIsImportWizardOpen(false);
   };
 
@@ -77,7 +77,7 @@ export default function _index() {
                 )
                 : []
             }
-            isLoading={state === "loading" || isCreateResourceLoading}
+            isLoading={isCreateResourceLoading || isLoading}
           />
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
@@ -90,7 +90,7 @@ export default function _index() {
                 )
                 : []
             }
-            isLoading={state === "loading"}
+            isLoading={isCreateResourceLoading || isLoading}
           />
         </div>
         <div className={"container mx-auto mt-12"}>

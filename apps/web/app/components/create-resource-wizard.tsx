@@ -73,9 +73,8 @@ export const CreateResourceWizard = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button disabled={isLoading}>
+        <Button>
           New Resource...
-          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]"
@@ -114,7 +113,10 @@ export const CreateResourceWizard = ({
         {
           step === 1 ? (
             <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-              <ResourceTypesCards filtereResources={filtereResources} handleResourceSelect={handleResourceSelect} />
+              <ResourceTypesCards
+                isLoading={isLoading}
+                filtereResources={filtereResources}
+                handleResourceSelect={handleResourceSelect} />
             </div>
           ) : (
             <div className="space-y-4 p-2">

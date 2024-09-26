@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
 import { Input } from "./ui/input.js";
 import { Skeleton } from "./ui/skeleton";
 import { Checkbox } from "./ui/checkbox";
-import { RefreshCw } from "lucide-react";
+import { Loader, RefreshCw } from "lucide-react";
 
 export interface ImportGHRepoProps {
   handleBack: () => void;
@@ -156,12 +156,13 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
                     </a>
                     <p className="text-muted-foreground text-sm">{repo.description}</p>
                   </div>
-                  <Button disabled={selectedRepos.size > 0}
+                  <Button disabled={selectedRepos.size > 0 || isLoading}
                     variant="outline"
                     onClick={() => {
                       handleImportRepo(repo);
                     }}>
                     Import
+                    {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
                   </Button>
                 </div>
               ))}
@@ -191,6 +192,7 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
           onClick={() => handleImportRepo()}
         >
           Import Selected
+          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
         </Button>
       </div>
     </div>
