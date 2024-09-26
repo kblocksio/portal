@@ -1,9 +1,8 @@
-import { useFetch } from "~/hooks/use-fetch";
 import { Condition, Resource, ResourceType } from "@repo/shared";
 import { Card } from "~/components/ui/card";
 import { CalendarIcon } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { cn } from "~/lib/utils";
 import {
@@ -13,6 +12,8 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { formatDistanceToNow } from "date-fns";
+import { useResources } from "~/hooks/use-resources";
+import { useSyncResourcesContext } from "~/hooks/sync-resouces-context";
 
 export interface ProjectGroupProps {
   resourceType: ResourceType;
@@ -22,22 +23,31 @@ export const ProjectGroup = ({
   resourceType,
   searchQuery,
 }: ProjectGroupProps) => {
-  const { data, isLoading } = useFetch<{ items: Resource[] }>(
-    `/api/resources`,
-    {
-      group: resourceType.group,
-      version: resourceType.version,
-      plural: resourceType.plural,
-    },
-  );
+  const typeId = `${resourceType.group}/${resourceType.version}/${resourceType.kind.toLowerCase()}`;
+  const { isLoading } = useSyncResourcesContext({
+    group: resourceType.group,
+    version: resourceType.version,
+    plural: resourceType.plural,
+  });
+
+  const { resources } = useResources();
+
+  const [resourcesForType, setResourcesForType] = useState<Resource[]>([]);
+
+  useEffect(() => {
+    if (!resources || !resources.get(typeId)) {
+      return
+    };
+    setResourcesForType(Array.from(resources.get(typeId)?.values() || []));
+  }, [resources]);
 
   const filteredData = useMemo(() => {
-    if (!data) return null;
-    if (!searchQuery) return data.items;
-    return data.items.filter((item: any) =>
-      item.metadata.name.includes(searchQuery),
+    if (!resourcesForType) return null;
+    if (!searchQuery) return resourcesForType;
+    return resourcesForType.filter((resource: any) =>
+      resource.metadata.name.includes(searchQuery),
     );
-  }, [data, searchQuery]);
+  }, [resourcesForType, searchQuery]);
 
   const Icon = getIconComponent({ icon: resourceType.icon });
   const iconColor = getResourceIconColors({
