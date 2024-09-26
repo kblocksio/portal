@@ -42,6 +42,10 @@ export async function subscribeToEvents(callback: (event: string) => void) {
   events.on("event", callback);
 }
 
+export async function unsubscribeFromEvents(callback: (event: string) => void) {
+  events.removeListener("event", callback);
+}
+
 export async function subscribeToControlRequests(systemId: string, resourceType: string, callback: (event: string) => void) {
   subscribeClient.subscribe(`control.${systemId}.${resourceType}`, callback);
 }

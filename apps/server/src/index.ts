@@ -44,12 +44,15 @@ app.get("/", async (_, res) => {
 app.ws("/api/events", (ws) => {
   console.log("Client connected");
 
-  pubsub.subscribeToEvents((message) => {
+  const callback = (message: string) => { 
     ws.send(message);
-  });
+  };
+
+  pubsub.subscribeToEvents(callback);
 
   ws.on("close", () => {
     console.log("/api/events client disconnected");
+    pubsub.unsubscribeFromEvents(callback);
   });
 });
 
@@ -66,6 +69,11 @@ app.ws("/api/control", (ws, req) => {
 
   pubsub.subscribeToControlRequests(system_id, resourceType, (message) => {
     ws.send(message);
+  });
+
+  ws.on("close", () => {
+    console.log(`control connection closed: ${resourceType} for ${system_id}`);
+    //TODO: unsubscribe from control requests
   });
 });
 
