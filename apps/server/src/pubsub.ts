@@ -3,30 +3,33 @@ import { getEnv } from "./util";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
+const EVENTS_CHANNEL = "events";
 
-const redisClient = createClient({
+const config = {
   password: REDIS_PASSWORD,
   socket: {
     host: REDIS_HOST,
     port: 18284
   }
-});
+};
 
-const CHANNEL = "events";
+const publishClient = createClient(config);
+const subscribeClient = createClient(config);
 
-redisClient.connect().catch(console.error);
+publishClient.connect().catch(console.error);
+subscribeClient.connect().catch(console.error);
 
-export async function publish(message: string) {
+export async function publishEvent(message: string) {
   try {
-    await redisClient.publish(CHANNEL, message);
+    await publishClient.publish(EVENTS_CHANNEL, message);
   } catch (error) {
     console.warn("Error publishing message", error);
   }
 }
 
-export async function subscribe(callback: (message: string) => void) {
+export async function subscribeToEvents(callback: (message: string) => void) {
   try {
-    await redisClient.subscribe(CHANNEL, (message) => callback(message));
+    await subscribeClient.subscribe(EVENTS_CHANNEL, (message) => callback(message));
   } catch (error) {
     console.warn("Error subscribing to channel", error);
   }

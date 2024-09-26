@@ -43,7 +43,7 @@ app.get("/", async (_, res) => {
 app.ws("/api/events", (ws, req) => {
   console.log("Client connected");
 
-  pubsub.subscribe((message) => {
+  pubsub.subscribeToEvents((message) => {
     ws.send(message);
   });
 
@@ -57,7 +57,7 @@ app.ws("/api/events/upstream", (ws, req) => {
 
   ws.on("message", (message) => {
     console.log("EVENT:", message.toString());
-    pubsub.publish(message.toString());
+    pubsub.publishEvent(message.toString());
   });
 
   ws.on("close", () => {
