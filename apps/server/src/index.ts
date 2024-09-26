@@ -48,21 +48,15 @@ app.ws("/api/events", (ws, req) => {
   });
 
   ws.on("close", () => {
-    console.log("Client disconnected");
+    console.log("/api/events client disconnected");
   });
 });
 
-app.ws("/api/events/upstream", (ws, req) => {
-  console.log("Client connected");
-
-  ws.on("message", (message) => {
-    console.log("EVENT:", message.toString());
-    pubsub.publishEvent(message.toString());
-  });
-
-  ws.on("close", () => {
-    console.log("Client disconnected");
-  });
+// publish an event to the events stream (called by workers)
+app.post("/api/events", (req, res) => {
+  console.log("EVENT:", req.body);
+  pubsub.publishEvent(req.body);
+  return res.status(200).json({ message: "Event published" });
 });
 
 app.get("/api/resources", async (req, res) => {
