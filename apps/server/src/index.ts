@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { ResourceType, ResourceQuery, GetResourceResponse, GetUserResponse, GetTypesResponse, CreateResourceRequest } from "@repo/shared";
-import { kubernetesRequest } from "./k8s";
+import { ResourceType, GetUserResponse, GetTypesResponse, CreateResourceRequest, GetResourceResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
@@ -10,7 +9,9 @@ import { createCustomResourceInstance } from "./create-resource-utils.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import * as kblocks from "@kblocks/cli/types";
+import { all } from "./resources.js";
+import { ObjectEvent } from "@kblocks/cli/types";
+
 const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
 const KBLOCKS_NAMESPACE = getEnv("KBLOCKS_NAMESPACE");
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
@@ -40,7 +41,7 @@ app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, portal-backend!" });
 });
 
-app.ws("/api/events", (ws, req) => {
+app.ws("/api/events", (ws) => {
   console.log("Client connected");
 
   pubsub.subscribeToEvents((message) => {
@@ -52,46 +53,39 @@ app.ws("/api/events", (ws, req) => {
   });
 });
 
-// publish an event to the events stream (called by workers)
-app.post("/api/events", (req, res) => {
-  console.log("EVENT:", req.body);
-  pubsub.publishEvent(req.body);
-  return res.status(200).json({ message: "Event published" });
+app.ws("/api/control", (ws, req) => {
+  const { api_version, kind, system_id } = req.query as unknown as { api_version: string, kind: string, system_id: string };
+  if (!api_version || !kind || !system_id) {
+    console.error("Invalid control connection request. Missing one of api_version, kind, system_id query params.");
+    console.log("Query params:", req.query);
+    return ws.close();
+  }
+
+  const resourceType = `${api_version}/${kind}`;
+  console.log(`control connection: ${resourceType} for ${system_id}`);
+
+  pubsub.subscribeToControlRequests(system_id, resourceType, (message) => {
+    ws.send(message);
+  });
 });
 
-app.get("/api/resources", async (req, res) => {
-  const params = req.query as unknown as ResourceQuery;
+// publish an event to the events stream (called by workers)
+app.post("/api/events", (req, res) => {
+  const body = JSON.stringify(req.body);
+  console.log("EVENT:", body);
+  pubsub.publishEvent(body);
+  return res.status(200);
+});
 
-  const url = [];
+app.get("/api/resources", async (_, res) => {
+  const objects: ObjectEvent[] = [];
 
-  if (params.group === "core") {
-    url.push("api");
-  } else {
-    url.push("apis");
-    url.push(params.group);
-  }
-
-  if (!params.version || !params.plural) {
-    return res.status(400).json({ error: "Query params 'version' and 'plural' are required" });
-  }
-
-  url.push(params.version);
-  url.push(params.plural);
-
-  const result = await kubernetesRequest(url.join("/"));
-  const objects: kblocks.ObjectEvent[] = [];
-  const k8sResult = await result.json();
-
-  // convert to events
-  for (const item of k8sResult?.items ?? []) {
-    // for now, we will just render this
-    const objType = `${item.apiVersion}/${item.kind.toLocaleLowerCase()}`;
-    const objUri = `kblocks://${objType}/sys-001/${item.metadata.namespace}/${item.metadata.name}`;
+  for (const [objUri, object] of Object.entries(all)) {
     objects.push({
       type: "OBJECT",
-      object: item,
-      objType,
+      object,
       objUri,
+      objType: `${object.apiVersion}/${object.kind.toLocaleLowerCase()}`,
       reason: "SYNC",
     });
   }
@@ -148,16 +142,20 @@ app.post("/api/resources", async (req, res) => {
   const { resourceType, providedValues } = req.body as CreateResourceRequest;
   try {
     const customResource = await createCustomResourceInstance(resourceType, providedValues, KBLOCKS_NAMESPACE);
-    // Apply the custom resource to the cluster
-    const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
-    const response = await customObjectsApi.createNamespacedCustomObject(
-      resourceType.group,
-      resourceType.version,
-      customResource.metadata.namespace,
-      resourceType.plural,
-      customResource
-    );
-    return res.status(200).json(response.body);
+
+    const resourceTypeString = `${resourceType.group}/${resourceType.version}/${resourceType.kind}`;
+    pubsub.publishControlRequest("demo", resourceTypeString, JSON.stringify(customResource));
+
+    // // Apply the custom resource to the cluster
+    // const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
+    // const response = await customObjectsApi.createNamespacedCustomObject(
+    //   resourceType.group,
+    //   resourceType.version,
+    //   customResource.metadata.namespace,
+    //   resourceType.plural,
+    //   customResource
+    // );
+    return res.status(200);
   } catch (error) {
     console.error('Unexpected error:', error);
     return res.status(500).json({ error: error });

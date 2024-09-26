@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
 import { getEnv } from "./util";
+import { EventEmitter } from 'stream';
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
@@ -14,10 +15,20 @@ const config = {
 };
 
 const publishClient = createClient(config);
+publishClient.connect().catch(console.error);
+
+const events = new EventEmitter();
+
 const subscribeClient = createClient(config);
 
-publishClient.connect().catch(console.error);
-subscribeClient.connect().catch(console.error);
+subscribeClient.connect()
+  .then(() => {
+    subscribeClient.subscribe(EVENTS_CHANNEL, (message) => {
+      console.log("Received message:", message);
+      events.emit("event", message);
+    });
+  })
+  .catch(console.error);
 
 export async function publishEvent(message: string) {
   try {
@@ -27,10 +38,14 @@ export async function publishEvent(message: string) {
   }
 }
 
-export async function subscribeToEvents(callback: (message: string) => void) {
-  try {
-    await subscribeClient.subscribe(EVENTS_CHANNEL, (message) => callback(message));
-  } catch (error) {
-    console.warn("Error subscribing to channel", error);
-  }
+export async function subscribeToEvents(callback: (event: string) => void) {
+  events.on("event", callback);
+}
+
+export async function subscribeToControlRequests(systemId: string, resourceType: string, callback: (event: string) => void) {
+  subscribeClient.subscribe(`control.${systemId}.${resourceType}`, callback);
+}
+
+export async function publishControlRequest(systemId: string, resourceType: string, message: string) {
+  await publishClient.publish(`control.${systemId}.${resourceType}`, message);
 }
