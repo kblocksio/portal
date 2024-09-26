@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFetch } from "~/hooks/use-fetch";
 import { Installation, Repository } from "@repo/shared";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
@@ -10,9 +10,10 @@ import { RefreshCw } from "lucide-react";
 
 export interface ImportGHRepoProps {
   handleBack: () => void;
+  handleOnImport: (providedValues: any[]) => void;
 }
 
-export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
+export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
   const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
@@ -76,6 +77,25 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
 
+  const handleImportRepo = useCallback((repo?: Repository) => {
+    if (!repo) {
+      const providedValues =
+        repositories?.filter((repo) => selectedRepos
+          .has(repo.full_name))
+          .map((repo) => ({
+            name: repo.full_name,
+            owner: repo.owner.login,
+          })) || [];
+      handleOnImport(providedValues);
+    } else {
+      handleOnImport([{
+        name: repo.full_name,
+        owner: repo.owner.login,
+      }]);
+    }
+  }, [handleOnImport, selectedRepos, repositories])
+
+
   return (
     <div className="flex flex-col gap-4 py-4">
       <Input
@@ -136,7 +156,11 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
                     </a>
                     <p className="text-muted-foreground text-sm">{repo.description}</p>
                   </div>
-                  <Button disabled={selectedRepos.size > 0} variant="outline">
+                  <Button disabled={selectedRepos.size > 0}
+                    variant="outline"
+                    onClick={() => {
+                      handleImportRepo(repo);
+                    }}>
                     Import
                   </Button>
                 </div>
@@ -164,6 +188,7 @@ export const ImportGHRepo = ({ handleBack }: ImportGHRepoProps) => {
         </Button>
         <Button
           disabled={isLoading || selectedRepos.size === 0}
+          onClick={() => handleImportRepo()}
         >
           Import Selected
         </Button>

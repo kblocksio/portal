@@ -4,7 +4,7 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { useNavigation } from "@remix-run/react";
 import { ProjectHeader } from "~/components/project-header";
@@ -31,21 +31,23 @@ export default function _index() {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = async (resource: any, providedValues: any) => {
+  const handleCreateResource = async (resourceType: any, providedValues: any) => {
     setIsCreateResourceLoading(true);
     const res = await createResource({
-      resource: resource,
+      resourceType: resourceType,
       providedValues: providedValues,
     });
     setIsCreateResourceLoading(false);
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResource = () => {
-    // const res = axios.post("/api/resources", {
-    //   resource: resource,
-    //   providedValues: providedValues,
-    // });
+  const handleImportResources = async (newResources: { resourceType: any, providedValues: any[] }) => {
+    for (const providedValues of newResources.providedValues) {
+      const res = await createResource({
+        resourceType: newResources.resourceType,
+        providedValues: providedValues,
+      });
+    }
     setIsImportWizardOpen(false);
   };
 
@@ -80,7 +82,7 @@ export default function _index() {
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}
-            handleOnCreate={handleImportResource}
+            handleOnImport={handleImportResources}
             resourceTypes={
               data && data.types.length > 0
                 ? data.types.filter((resource: any) =>

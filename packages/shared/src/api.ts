@@ -15,10 +15,10 @@ export type GetTypesResponse = {
 };
 
 export type CreateResourceRequest = {
-  resource: ResourceType;
+  resourceType: ResourceType;
   providedValues: any;
 };
 
 export type CreateResourceResponse = {
-  
+
 };

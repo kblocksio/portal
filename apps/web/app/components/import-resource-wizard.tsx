@@ -6,15 +6,9 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import {
-  CardDescription,
-  CardTitle,
-} from "~/components/ui/card";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
-import { Loader, Search } from "lucide-react";
-import { Input } from "./ui/input";
+import { Loader } from "lucide-react";
 import { ImportGHRepo } from "./import-gh-repo";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
@@ -24,7 +18,7 @@ export interface ImportResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (resouce: any, providedValues: any) => void;
+  handleOnImport: (newResources: { resourceType: any, providedValues: any[] }) => void;
   resourceTypes: ResourceType[];
 }
 
@@ -32,7 +26,7 @@ export const ImportResourceWizard = ({
   isOpen,
   isLoading,
   handleOnOpenChange,
-  handleOnCreate,
+  handleOnImport,
   resourceTypes,
 }: ImportResourceWizardProps) => {
   const [step, setStep] = useState(1);
@@ -62,27 +56,15 @@ export const ImportResourceWizard = ({
     setSelectedResource(null);
   };
 
-  const handleCreate = useCallback((providedValues: any) => {
-    handleOnCreate(selectedResource, providedValues);
-  }, [selectedResource, handleOnCreate]);
+  const handleImportResources = useCallback((selectedTypeProvidedValues: any[]) => {
+    handleOnImport({ resourceType: selectedResource, providedValues: selectedTypeProvidedValues });
+  }, [handleOnImport, selectedResource]);
 
   const handleOpenChange = (open: boolean) => {
     handleOnOpenChange(open);
     setStep(1);
     setSelectedResource(null);
   };
-
-  const StepContent = useCallback(() => {
-    return step === 1 ? (
-      <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-        <ResourceTypesCards filtereResources={filtereResources} handleResourceSelect={handleResourceSelect} />
-      </div>
-    ) : (
-      <div className="space-y-4 p-2">
-        <ImportGHRepo handleBack={handleBack} />
-      </div>
-    )
-  }, [filtereResources, step, handleBack, handleCreate, selectedResource]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -114,7 +96,19 @@ export const ImportResourceWizard = ({
             }
           </DialogTitle>
         </DialogHeader>
-        <StepContent />
+        {
+          step === 1 ? (
+            <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
+              <ResourceTypesCards filtereResources={filtereResources} handleResourceSelect={handleResourceSelect} />
+            </div>
+          ) : (
+            selectedResource?.kind === 'RepositoryRef' ? (
+              <div className="space-y-4 p-2">
+                <ImportGHRepo handleBack={handleBack} handleOnImport={handleImportResources} />
+              </div>
+            ) : null
+          )
+        }
       </DialogContent>
     </Dialog>
   );

@@ -151,16 +151,16 @@ app.get("/api/types", async (_, res) => {
 });
 
 app.post("/api/resources", async (req, res) => {
-  const { resource, providedValues } = req.body as CreateResourceRequest;
+  const { resourceType, providedValues } = req.body as CreateResourceRequest;
   try {
-    const customResource = await createCustomResourceInstance(resource, providedValues, KBLOCKS_NAMESPACE);
+    const customResource = await createCustomResourceInstance(resourceType, providedValues, KBLOCKS_NAMESPACE);
     // Apply the custom resource to the cluster
     const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
     const response = await customObjectsApi.createNamespacedCustomObject(
-      resource.group,
-      resource.version,
+      resourceType.group,
+      resourceType.version,
       customResource.metadata.namespace,
-      resource.plural,
+      resourceType.plural,
       customResource
     );
     return res.status(200).json(response.body);
