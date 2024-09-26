@@ -1,8 +1,9 @@
-import { Resource, ResourceType, ResourceQuery } from "./types";
+import { ResourceType } from "./types";
 import { User } from "@supabase/supabase-js";
+import * as kblocks from "@kblocks/cli/types";
 
 export type GetResourceResponse = {
-  items: Resource[];
+  objects: kblocks.ObjectEvent[];
 };
 
 export type GetUserResponse = {

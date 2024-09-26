@@ -10,7 +10,7 @@ import { createCustomResourceInstance } from "./create-resource-utils.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-
+import * as kblocks from "@kblocks/cli/types";
 const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
 const KBLOCKS_NAMESPACE = getEnv("KBLOCKS_NAMESPACE");
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
@@ -65,7 +65,6 @@ app.ws("/api/events/upstream", (ws, req) => {
   });
 });
 
-
 app.get("/api/resources", async (req, res) => {
   const params = req.query as unknown as ResourceQuery;
 
@@ -78,13 +77,33 @@ app.get("/api/resources", async (req, res) => {
     url.push(params.group);
   }
 
+  if (!params.version || !params.plural) {
+    return res.status(400).json({ error: "Query params 'version' and 'plural' are required" });
+  }
+
   url.push(params.version);
   url.push(params.plural);
 
   const result = await kubernetesRequest(url.join("/"));
-  const data = (await result.json()) as GetResourceResponse;
+  const objects: kblocks.ObjectEvent[] = [];
+  const k8sResult = await result.json();
 
-  return res.status(200).json(data);
+  // convert to events
+  for (const item of k8sResult?.items ?? []) {
+    // for now, we will just render this
+    const objType = `${item.apiVersion}/${item.kind.toLocaleLowerCase()}`;
+    const objUri = `kblocks://${objType}/sys-001/${item.metadata.namespace}/${item.metadata.name}`;
+    objects.push({
+      type: "OBJECT",
+      object: item,
+      objType,
+      objUri,
+      reason: "SYNC",
+    });
+  }
+
+  const response: GetResourceResponse = { objects };
+  return res.status(200).json(response);
 });
 
 app.get("/api/projects", async (_, res) => {
@@ -270,8 +289,6 @@ app.get("/api/github/installations", async (req, res) => {
     }
     return res.status(500).json({ message: "Server error" });
   }
-
-
 });
 
 app.get("/api/github/repositories", async (req, res) => {
