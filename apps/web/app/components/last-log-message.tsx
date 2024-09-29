@@ -1,4 +1,5 @@
 import { LogMessage } from "@repo/shared";
+import { format } from "date-fns";
 import { ChevronRightIcon } from "lucide-react";
 import { useResources } from "~/hooks/use-resources";
 
@@ -13,7 +14,7 @@ export const LastLogMessage = ({ objType, objUri }: { objType: string; objUri: s
           <ChevronRightIcon className="w-4 h-4 text-muted-foreground" />
         </span>
         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-          {log?.timestamp}
+          {format(new Date(log?.timestamp), 'yyyy-MM-dd HH:mm:ss')}
         </span>
         <span className="text-sm truncate text-muted-foreground" title={log?.message}>
           {log?.message}

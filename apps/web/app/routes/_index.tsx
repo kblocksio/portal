@@ -13,6 +13,8 @@ import { GetTypesResponse, ResourceType } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
+import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
+import RightSideDrawer from "~/components/ui/right-side-drawer";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
@@ -92,6 +94,7 @@ export default function _index() {
             }
             isLoading={isCreateResourceLoading || isLoading}
           />
+          <ResourceDetailsDrawer />
         </div>
         <div className={"container mx-auto mt-12"}>
           {isLoading ? (
