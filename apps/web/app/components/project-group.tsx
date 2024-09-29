@@ -16,7 +16,7 @@ export const ProjectGroup = ({
   searchQuery,
   isLoading,
 }: ProjectGroupProps) => {
-  const typeId = `${resourceType.group}/${resourceType.version}/${resourceType.kind.toLowerCase()}`;
+  const typeId = `${resourceType.group}/${resourceType.version}/${resourceType.plural}`;
 
   const { resources } = useResources();
 

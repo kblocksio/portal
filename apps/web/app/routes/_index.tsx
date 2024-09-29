@@ -9,7 +9,7 @@ import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { GetTypesResponse, ResourceType } from "@repo/shared";
+import { GetTypesResponse } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
