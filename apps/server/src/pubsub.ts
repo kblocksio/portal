@@ -46,10 +46,24 @@ export async function unsubscribeFromEvents(callback: (event: string) => void) {
   events.removeListener("event", callback);
 }
 
-export async function subscribeToControlRequests(systemId: string, resourceType: string, callback: (event: string) => void) {
-  subscribeClient.subscribe(`control.${systemId}.${resourceType}`, callback);
+export function subscribeToControlRequests({ systemId, group, version, plural }: { systemId: string, group: string, version: string, plural: string }, callback: (event: string) => void) {
+  const channel = createChannelFor(systemId, group, version, plural);
+  subscribeClient.subscribe(channel, callback);
+
+  return {
+    unsubscribe: () => {
+      console.log(`unsubscribing from ${channel}`);
+      subscribeClient.unsubscribe(channel);
+    }
+  }
 }
 
-export async function publishControlRequest(systemId: string, resourceType: string, message: string) {
-  await publishClient.publish(`control.${systemId}.${resourceType}`, message);
+export function publishControlRequest({ systemId, group, version, plural }: { systemId: string, group: string, version: string, plural: string }, message: string) {
+  const channel = createChannelFor(systemId, group, version, plural);
+  console.log(`publishing control message to ${channel}:`, message);
+  publishClient.publish(channel, message);
+}
+
+function createChannelFor(systemId: string, group: string, version: string, plural: string) {
+  return `create:${systemId}/${group}/${version}/${plural}`;
 }

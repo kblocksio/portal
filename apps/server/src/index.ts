@@ -1,11 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { ResourceType, GetUserResponse, GetTypesResponse, CreateResourceRequest, GetResourceResponse } from "@repo/shared";
+import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
-import { createCustomResourceInstance } from "./create-resource-utils.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
@@ -56,24 +55,30 @@ app.ws("/api/events", (ws) => {
   });
 });
 
-app.ws("/api/control", (ws, req) => {
-  const { api_version, kind, system_id } = req.query as unknown as { api_version: string, kind: string, system_id: string };
-  if (!api_version || !kind || !system_id) {
-    console.error("Invalid control connection request. Missing one of api_version, kind, system_id query params.");
+app.ws("/api/control/:group/:version/:plural", (ws, req) => {
+  const { group, version, plural } = req.params;
+  const { system_id } = req.query as unknown as { system_id: string };
+  if (!group || !version || !plural || !system_id) {
+    console.error("Invalid control connection request. Missing one of group, version, plural, system_id query params.");
     console.log("Query params:", req.query);
     return ws.close();
   }
 
-  const resourceType = `${api_version}/${kind}`;
+  const resourceType = `${group}/${version}/${plural}`;
   console.log(`control connection: ${resourceType} for ${system_id}`);
 
-  pubsub.subscribeToControlRequests(system_id, resourceType, (message) => {
+  const { unsubscribe } = pubsub.subscribeToControlRequests({ systemId: system_id, group, version, plural }, (message) => {
+    console.log(`sending control message to ${resourceType}:`, message);
     ws.send(message);
+  });
+
+  ws.on("message", (message) => {
+    console.log(`received control message from ${resourceType}:`, message);
   });
 
   ws.on("close", () => {
     console.log(`control connection closed: ${resourceType} for ${system_id}`);
-    //TODO: unsubscribe from control requests
+    unsubscribe();
   });
 });
 
@@ -146,28 +151,30 @@ app.get("/api/types", async (_, res) => {
   }
 });
 
-app.post("/api/resources", async (req, res) => {
-  const { resourceType, providedValues } = req.body as CreateResourceRequest;
-  try {
-    const customResource = await createCustomResourceInstance(resourceType, providedValues, KBLOCKS_NAMESPACE);
+app.post("/api/resources/:group/:version/:plural", async (req, res) => {
+  const { group, version, plural } = req.params;
+  const obj = req.body;
 
-    const resourceTypeString = `${resourceType.group}/${resourceType.version}/${resourceType.kind}`;
-    pubsub.publishControlRequest("demo", resourceTypeString, JSON.stringify(customResource));
-
-    // // Apply the custom resource to the cluster
-    // const customObjectsApi = kc.makeApiClient(k8s.CustomObjectsApi);
-    // const response = await customObjectsApi.createNamespacedCustomObject(
-    //   resourceType.group,
-    //   resourceType.version,
-    //   customResource.metadata.namespace,
-    //   resourceType.plural,
-    //   customResource
-    // );
-    return res.status(200);
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return res.status(500).json({ error: error });
+  const systemId = req.query.system_id as string;
+  if (!systemId) {
+    return res.status(400).json({ error: "system_id is required as a query param" });
   }
+
+  const apiVersion = `${group}/${version}`;
+
+  // verify that the request has the correct `apiVersion` and `kind`
+  if (obj.apiVersion !== apiVersion) {
+    return res.status(400).json({ error: `Invalid "apiVersion" in object. Expected ${apiVersion}, but got ${obj.apiVersion}` });
+  }
+
+  // verify that the request as a metadata.name
+  if (!obj.metadata?.name) {
+    return res.status(400).json({ error: `Object is missing "metadata.name" field` });
+  }
+
+  pubsub.publishControlRequest({ systemId, group, version, plural }, JSON.stringify(obj));
+
+  return res.sendStatus(200);
 });
 
 app.get("/api/auth/sign-in", async (req, res) => {
