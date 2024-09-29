@@ -15,6 +15,8 @@ export interface Condition {
 }
 
 export interface Resource {
+  // additional field for app usage
+  objUri: string;
   apiVersion: string;
   kind: string;
 
@@ -69,7 +71,7 @@ export interface ResourceType {
   group: string;
   version: string;
   kind: string;
-  
+
   plural: string;
   description?: string;
   readme?: string;
@@ -78,9 +80,34 @@ export interface ResourceType {
   openApiSchema?: any;
 }
 
-// export type User = {
-//   user_metadata: {
-//     full_name: string;
-//     avatar_url: string;
-//   };
-// };
+export type EventType = 'LOG' | 'PATCH' | 'OBJECT';
+
+export interface Event {
+  type: EventType;
+  objUri: string;
+  objType: string;
+};
+
+export enum LogLevel {
+  DEBUG,
+  INFO,
+  WARNING,
+  ERROR
+}
+
+export interface LogMessage extends Event {
+  level: LogLevel;
+  timestamp: number;
+  message: string;
+};
+
+export interface ObjectMessage extends Event {
+  type: 'OBJECT';
+  object: any;
+  reason: 'CREATE' | 'DELETE' | 'SYNC' | 'UPDATE';
+};
+
+export interface PatchMessage extends Event {
+  type: 'PATCH';
+  patch: any;
+};

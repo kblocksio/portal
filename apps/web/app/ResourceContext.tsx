@@ -1,21 +1,6 @@
-import { Resource } from '@repo/shared';
+import { LogMessage, ObjectMessage, PatchMessage, Resource } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
-
-type ObjectMessage = {
-  type: 'OBJECT';
-  object: any;
-  reason: 'CREATE' | 'DELETE' | 'SYNC' | 'UPDATE';
-  objUri: string;
-  objType: string;
-};
-
-type PatchMessage = {
-  type: 'PATCH';
-  patch: any;
-  objUri: string;
-  objType: string;
-};
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -24,17 +9,20 @@ if (!WS_URL) {
 
 export interface ResourceContextValue {
   resources: Map<string, Map<string, Resource>>;
+  resourcesLogs: Map<string, Map<string, LogMessage[]>>;
   handleObjectMessages: (messages: ObjectMessage[]) => void;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resources: new Map<string, Map<string, Resource>>(),
+  resourcesLogs: new Map<string, Map<string, LogMessage[]>>(),
   handleObjectMessages: () => { },
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
-  const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectMessage | PatchMessage>(WS_URL, {
+  const [resourcesLogs, setResourcesLogs] = useState<Map<string, Map<string, LogMessage[]>>>(new Map());
+  const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectMessage | PatchMessage | LogMessage>(WS_URL, {
     shouldReconnect: (closeEvent) => {
       console.log('WebSocket shouldReconnect...', closeEvent);
       return true;
@@ -60,7 +48,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         setResources((prevResourcesForTypes) => {
           const resoucesForTypeMap = prevResourcesForTypes.get(objType) || new Map<string, Resource>();
           const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-          newResourcesForTypeMap.set(objUri, object);
+          newResourcesForTypeMap.set(objUri, { ...object, objUri });
           const newResources = new Map(prevResourcesForTypes);
           newResources.set(objType, newResourcesForTypeMap);
           return newResources;
@@ -70,7 +58,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         setResources((prevResourcesForTypes) => {
           const resoucesForTypeMap = prevResourcesForTypes.get(objType);
           if (!resoucesForTypeMap) {
-            console.error('WebSocket Object Message unknown object type:', objType, object);
+            console.error('WebSocket Object Message unknown object type:', objType, object, prevResourcesForTypes);
             return prevResourcesForTypes;
           }
           const newResourcesForTypeMap = new Map(resoucesForTypeMap);
@@ -81,7 +69,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         });
         break;
       default:
-        console.error('WebSocket Object Message unknown reason:', reason);
+        console.error('WebSocket Object Message unknown reason:', reason, object);
     }
   };
 
@@ -114,15 +102,39 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     });
   };
 
+  const handleLogMessage = (message: LogMessage) => {
+    console.log('handleLogMessage', message);
+    const { objType, objUri } = message;
+    setResourcesLogs((prevResourcesLogs) => {
+      const resoucesLogsForTypeMap = prevResourcesLogs.get(objType) || new Map<string, LogMessage[]>();
+      const newResourcesLogsForTypeMap = new Map(resoucesLogsForTypeMap);
+      // add the message to the existing messages for this resource
+      const existingMessages = newResourcesLogsForTypeMap.get(objUri) || [];
+      existingMessages.push(message);
+      newResourcesLogsForTypeMap.set(objUri, existingMessages);
+      const newResourcesLogs = new Map(prevResourcesLogs);
+      newResourcesLogs.set(objType, newResourcesLogsForTypeMap);
+      return newResourcesLogs;
+    });
+  };
+
+
   useEffect(() => {
     if (!lastJsonMessage) {
       return;
     }
-
-    if (lastJsonMessage.type === 'OBJECT') {
-      handleObjectMessage(lastJsonMessage as ObjectMessage);
-    } else if (lastJsonMessage.type === 'PATCH') {
-      handlePatchMessage(lastJsonMessage as PatchMessage);
+    switch (lastJsonMessage.type) {
+      case 'OBJECT':
+        handleObjectMessage(lastJsonMessage as ObjectMessage);
+        break;
+      case 'PATCH':
+        handlePatchMessage(lastJsonMessage as PatchMessage);
+        break;
+      case 'LOG':
+        handleLogMessage(lastJsonMessage as LogMessage);
+        break;
+      default:
+        console.error('WebSocket unknown message type:', lastJsonMessage);
     }
   }, [lastJsonMessage]);
 
@@ -139,6 +151,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
   const value: ResourceContextValue = {
     resources,
+    resourcesLogs,
     handleObjectMessages,
   };
 
