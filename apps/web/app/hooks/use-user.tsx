@@ -10,13 +10,30 @@ import {
 import { SignIn } from "~/components/sign-in.jsx";
 import { getUser } from "~/lib/backend";
 
+const MockUser = {
+  id: '1',
+  user_metadata: {
+    email: 'test@test.com',
+    name: 'Test User',
+  },
+  app_metadata: {},
+  aud: 'test',
+  created_at: new Date().toISOString(),
+};
+
 const Context = createContext<User | undefined>(undefined);
 
 export const useUser = () => {
   const user = useContext(Context);
+
+  if (import.meta.env.VITE_SKIP_AUTH) {
+    return MockUser;
+  }
+
   if (user === undefined) {
     throw new Error("useUser must be used within a UserProvider");
   }
+
   return user;
 };
 
@@ -25,6 +42,13 @@ export const UserProvider = (props: PropsWithChildren) => {
   const [error, setError] = useState<Error | undefined>();
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
+
+    if (import.meta.env.VITE_SKIP_AUTH) {
+      setUser(MockUser);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     async function fetchUser() {
@@ -40,7 +64,7 @@ export const UserProvider = (props: PropsWithChildren) => {
 
     fetchUser();
   }, []);
-  
+
   return (
     <>
       {isLoading && (
