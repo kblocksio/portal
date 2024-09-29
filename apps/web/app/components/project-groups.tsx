@@ -2,7 +2,7 @@ import { ResourceType } from "@repo/shared";
 import { ProjectGroup } from "~/components/project-group";
 import { useSyncResourcesContext } from "~/hooks/sync-resouces-context";
 export interface ProjectEntitiesProps {
-  resourceTypes: ResourceType[];
+  resourceTypes: Record<string, ResourceType>;
   searchQuery?: string;
 }
 export const ProjectGroups = ({
@@ -12,7 +12,7 @@ export const ProjectGroups = ({
 
   const { isLoading } = useSyncResourcesContext();
 
-  return resourceTypes.map((resourceType, index) => (
-    <ProjectGroup key={index} resourceType={resourceType} searchQuery={searchQuery} isLoading={isLoading} />
+  return Object.entries(resourceTypes).map(([objType, resourceType], index) => (
+    <ProjectGroup key={index} objType={objType} resourceType={resourceType} searchQuery={searchQuery} isLoading={isLoading} />
   ));
 };

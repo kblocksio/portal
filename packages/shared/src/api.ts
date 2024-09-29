@@ -11,7 +11,11 @@ export type GetUserResponse = {
 };
 
 export type GetTypesResponse = {
-  types: ResourceType[];
+  /**
+   * A map of resource type names to their definitions..
+   * TYpe is: `group/version/plural`
+   */
+  types: Record<string, ResourceType>;
 };
 
 export type CreateResourceRequest = {

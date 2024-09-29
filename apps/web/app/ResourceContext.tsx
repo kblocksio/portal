@@ -41,12 +41,13 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const handleObjectMessage = (message: ObjectMessage) => {
     console.log('handleObjectMessage', message);
     const { object, reason, objUri, objType } = message;
+    console.log({resources});
     switch (reason) {
       case 'CREATE':
       case 'SYNC':
       case 'UPDATE':
         setResources((prevResourcesForTypes) => {
-          const resoucesForTypeMap = prevResourcesForTypes.get(objType) || new Map<string, Resource>();
+          const resoucesForTypeMap = prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
           const newResourcesForTypeMap = new Map(resoucesForTypeMap);
           newResourcesForTypeMap.set(objUri, { ...object, objUri });
           const newResources = new Map(prevResourcesForTypes);
@@ -134,7 +135,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         handleLogMessage(lastJsonMessage as LogMessage);
         break;
       default:
-        console.error('WebSocket unknown message type:', lastJsonMessage);
+        console.warn('WebSocket unknown message type:', lastJsonMessage);
     }
   }, [lastJsonMessage]);
 

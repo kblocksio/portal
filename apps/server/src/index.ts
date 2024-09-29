@@ -89,7 +89,7 @@ app.get("/api/resources", async (_, res) => {
       type: "OBJECT",
       object,
       objUri,
-      objType: objUri.split("kblocks://")[1].split("/").slice(0,3).join("/"),
+      objType: typeFromUri(objUri),
       reason: "SYNC",
     });
   }
@@ -98,12 +98,16 @@ app.get("/api/resources", async (_, res) => {
   return res.status(200).json(response);
 });
 
+function typeFromUri(objUri: string): string {
+  return objUri.split("kblocks://")[1].split("/").slice(0,3).join("/");
+}
+
 app.get("/api/projects", async (_, res) => {
   return res.status(200).json(projects);
 });
 
 app.get("/api/types", async (_, res) => {
-  const result = new Array<ResourceType>();
+  const result: Record<string, ResourceType> = {};
 
   // find all the kblocks.io/v1/blocks objects
   for (const [objUri, object] of Object.entries(all)) {
@@ -111,8 +115,8 @@ app.get("/api/types", async (_, res) => {
       continue;
     }
 
-    const spec = object.spec as ResourceType;
-    result.push(spec);
+    const type = `${object.spec.group}/${object.spec.version}/${object.spec.plural}`;
+    result[type] = object.spec as ResourceType;
   }
 
   return res.status(200).json({ types: result } as GetTypesResponse);

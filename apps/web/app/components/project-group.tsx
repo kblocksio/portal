@@ -7,26 +7,26 @@ import { useResources } from "~/hooks/use-resources";
 import { ResourceRow } from "./resouce-row";
 
 export interface ProjectGroupProps {
+  objType: string;
   resourceType: ResourceType;
   isLoading: boolean;
   searchQuery?: string;
 }
 export const ProjectGroup = ({
+  objType,
   resourceType,
   searchQuery,
   isLoading,
 }: ProjectGroupProps) => {
-  const typeId = `${resourceType.group}/${resourceType.version}/${resourceType.plural}`;
-
   const { resources } = useResources();
 
   const [resourcesForType, setResourcesForType] = useState<Resource[]>([]);
 
   useEffect(() => {
-    if (!resources || !resources.get(typeId)) {
+    if (!resources || !resources.get(objType)) {
       return
     };
-    setResourcesForType(Array.from(resources.get(typeId)?.values() || []));
+    setResourcesForType(Array.from(resources.get(objType)?.values() || []));
   }, [resources]);
 
   const filteredData = useMemo(() => {
@@ -69,7 +69,7 @@ export const ProjectGroup = ({
               item={item}
               isFirst={index === 0}
               isLast={index === filteredData.length - 1}
-              objType={typeId}
+              objType={objType}
             />
           ))}
       </div>

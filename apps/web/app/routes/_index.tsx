@@ -51,6 +51,13 @@ export default function _index() {
     setIsImportWizardOpen(false);
   };
 
+  const types = data?.types ?? {};
+  const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
+  const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
+
+  if (Object.keys(types).length > 0) {
+    console.log({types});
+  }
   return (
     <div className="bg-background flex h-screen">
       <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
@@ -70,26 +77,14 @@ export default function _index() {
             isOpen={isCreateWizardOpen}
             handleOnOpenChange={setIsCreateWizardOpen}
             handleOnCreate={handleCreateResource}
-            resourceTypes={
-              data && data.types.length > 0
-                ? data.types.filter(
-                  (resource: any) => !resource.kind.endsWith("Ref"),
-                )
-                : []
-            }
+            resourceTypes={createResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnImport={handleImportResources}
-            resourceTypes={
-              data && data.types.length > 0
-                ? data.types.filter((resource: any) =>
-                  resource.kind.endsWith("Ref"),
-                )
-                : []
-            }
+            resourceTypes={importResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
         </div>
@@ -98,7 +93,7 @@ export default function _index() {
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
-              resourceTypes={data?.types ?? []}
+              resourceTypes={types}
               searchQuery={searchQuery}
             />
           )}
