@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
-import * as k8s from "@kubernetes/client-node";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
@@ -11,17 +10,9 @@ import * as pubsub from "./pubsub";
 import { all } from "./resources.js";
 import { ObjectEvent } from "@kblocks/cli/types";
 
-const KBLOCKS_METADATA_ANNOTATION = "kblocks.io/metadata";
-const KBLOCKS_NAMESPACE = getEnv("KBLOCKS_NAMESPACE");
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
-// Create and configure KubeConfig
-const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
-
-const crdClient = kc.makeApiClient(k8s.ApiextensionsV1Api);
-
-const port = process.env.PORT || 3001;
+const port = process.env.PORT ?? 3001;
 
 const { app } = expressWs(express());
 
@@ -98,7 +89,7 @@ app.get("/api/resources", async (_, res) => {
       type: "OBJECT",
       object,
       objUri,
-      objType: `${object.apiVersion}/${object.kind.toLocaleLowerCase()}`,
+      objType: objUri.split("kblocks://")[1].split("/").slice(0,3).join("/"),
       reason: "SYNC",
     });
   }
@@ -112,43 +103,19 @@ app.get("/api/projects", async (_, res) => {
 });
 
 app.get("/api/types", async (_, res) => {
-  try {
-    const crds = await crdClient.listCustomResourceDefinition();
+  const result = new Array<ResourceType>();
 
-    const filteredCrds = crds.body.items.filter(
-      (crd) => crd?.metadata?.annotations?.[KBLOCKS_METADATA_ANNOTATION],
-    );
-
-    const crdsResult: ResourceType[] = [];
-
-    for (const crd of filteredCrds) {
-      const result: ResourceType = {
-        kind: crd.spec.names.kind,
-        group: crd.spec.group,
-        plural: crd.spec.names.plural,
-        version: crd.spec.versions[0].name,
-      };
-
-      if (crd?.metadata?.annotations) {
-        const configmapName = crd.metadata.annotations[KBLOCKS_METADATA_ANNOTATION];
-        const k8sConfigMapApi = kc.makeApiClient(k8s.CoreV1Api);
-        const configMap = await k8sConfigMapApi.readNamespacedConfigMap(
-          configmapName,
-          KBLOCKS_NAMESPACE,
-        );
-        const crdConfigMap = configMap.body.data;
-        result.color = crdConfigMap?.color;
-        result.icon = crdConfigMap?.icon?.replace("heroicon://", "");
-        result.readme = crdConfigMap?.readme;
-        result.openApiSchema = crd.spec.versions[0]?.schema?.openAPIV3Schema;
-        crdsResult.push(result);
-      }
+  // find all the kblocks.io/v1/blocks objects
+  for (const [objUri, object] of Object.entries(all)) {
+    if (!objUri.startsWith("kblocks://kblocks.io/v1/blocks")) {
+      continue;
     }
-    return res.status(200).json({ types: crdsResult } as GetTypesResponse);
-  } catch (error) {
-    console.error(error);
-    return res.status(500);
+
+    const spec = object.spec as ResourceType;
+    result.push(spec);
   }
+
+  return res.status(200).json({ types: result } as GetTypesResponse);
 });
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
