@@ -59,7 +59,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   });
 
   const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
-  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectMessage[] }>("/api/resources");
+  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
 
 
   useEffect(() => {

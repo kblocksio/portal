@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext } from "react";
-import { ResourceContext } from "~/ResourceContext";
+import { Resource, ResourceContext } from "~/ResourceContext";
 import { ApiObject } from "@kblocks/cli/types";
 
 export const ResourceRow = ({
@@ -40,7 +40,7 @@ export const ResourceRow = ({
       className={`flex items-center justify-between p-2 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
         " ",
       )}`}
-      onClick={() => setSelectedResource(item)}
+      onClick={() => setSelectedResource(item as Resource)}
     >
       {/* Left Section: Status Badge, Namespace, Name */}
       <div className="flex items-center space-x-4 flex-shrink-0">

@@ -1,6 +1,5 @@
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area"
-import { useContext, useEffect, useMemo } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
@@ -9,13 +8,17 @@ import { type LogEvent } from "@kblocks/cli/types";
 
 export function ResourceDrawerComponent() {
   const { selectedResource, setSelectedResource, resourceTypes, logs } = useContext(ResourceContext);
-  const selectedResourceType = useMemo(() => selectedResource ? resourceTypes[selectedResource.objType] : undefined, [resourceTypes, selectedResource]);
+  const selectedResourceType = useMemo(
+    () => (selectedResource ? resourceTypes[selectedResource.objType] : undefined),
+    [resourceTypes, selectedResource]
+  );
   const Icon = useMemo(() => getIconComponent({ icon: selectedResourceType?.icon }), [selectedResourceType]);
+  const logContainerRef = useRef<HTMLDivElement>(null);
 
   const logsUrl = (resource?: Resource) => {
     const uri = resource?.objUri.split("kblocks://")[1];
     return `/api/resources/${uri}/logs`;
-  }
+  };
 
   const { data: oldLogs, refetch } = useFetch(logsUrl(selectedResource), {}, false);
   useEffect(() => {
@@ -32,7 +35,7 @@ export function ResourceDrawerComponent() {
     }
 
     const result = [];
-    for (const entry of Object.keys(map).sort().map(k => map[k])) {
+    for (const entry of Object.keys(map).sort().map((k) => map[k])) {
       for (const line of entry.message.split("\n")) {
         result.push({ ...entry, message: line });
       }
@@ -40,11 +43,28 @@ export function ResourceDrawerComponent() {
     return result;
   }, [oldLogs, logs, selectedResource]);
 
+  const scrollToBottom = () => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [finalLogs]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
+
   const iconColor = getResourceIconColors({
     color: selectedResource?.color,
   });
 
-  const readyCondition = useMemo(() => selectedResource?.status?.conditions?.find((condition: any) => condition.type === "Ready"), [selectedResource?.status?.conditions]);
+  const readyCondition = useMemo(
+    () => selectedResource?.status?.conditions?.find((condition: any) => condition.type === "Ready"),
+    [selectedResource?.status?.conditions]
+  );
   const properties: Record<string, string> = {};
   const outputs: Record<string, string> = {};
 
@@ -64,22 +84,22 @@ export function ResourceDrawerComponent() {
   });
 
   return (
-    <Sheet open={!!selectedResource} onOpenChange={x => !x ? setSelectedResource(undefined) : null}>
-      <SheetContent className="min-w-[1000px] sm:w-[540px] sm:max-w-[50vw] flex flex-col">
+    <Sheet open={!!selectedResource} onOpenChange={(x) => (!x ? setSelectedResource(undefined) : null)}>
+      <SheetContent className="min-w-[1000px] sm:w-[540px] sm:max-w-[50vw] flex flex-col h-full">
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold flex items-center gap-2">
             <Icon className={`${iconColor} h-7 w-7`} />
-            <span className="text-muted-foreground whitespace-nowrap">
-              {selectedResource?.metadata.namespace}
-            </span>
+            <span className="text-muted-foreground whitespace-nowrap">{selectedResource?.metadata.namespace}</span>
             <span className="text-muted-foreground mx-1">·</span>
             {selectedResource?.metadata.name}
           </SheetTitle>
         </SheetHeader>
-        <div className="mt-4 space-y-4 flex-grow flex flex-col overflow-hidden">
+        <div className="mt-4 space-y-4 flex flex-col overflow-hidden">
           <div>
             <h1 className="text-sm font-medium text-gray-500">Type</h1>
-            <p className="mt-1 text-sm">{selectedResourceType?.group}/{selectedResourceType?.version}.{selectedResourceType?.kind}</p>
+            <p className="mt-1 text-sm">
+              {selectedResourceType?.group}/{selectedResourceType?.version}.{selectedResourceType?.kind}
+            </p>
           </div>
           <div>
             <h2 className="text-sm font-medium text-gray-500">Status</h2>
@@ -114,28 +134,27 @@ export function ResourceDrawerComponent() {
               </dl>
             </div>
           )}
-          <div className="flex-grow overflow-hidden">
-            <h2 className="text-sm font-medium text-gray-500">Logs</h2>
-            <div className="mt-1 border rounded-md h-full">
-              <ScrollArea className="h-full w-full bg-gray-900 text-gray-200" type="hover">
+          <h2 className="text-sm font-medium text-gray-500">Logs</h2>
+          {/* scrollable logs container */}
+          <div className="border rounded-md flex-grow h-full overflow-hidden">
+            <div className="h-full overflow-auto bg-gray-900">
+              <div ref={logContainerRef} className="h-full w-full bg-gray-900 text-gray-200 overflow-auto">
                 <pre className="text-xs font-extralight font-mono whitespace-pre p-4 pb-10">
                   {finalLogs?.map((p, idx) => (
                     <div key={idx} className="flex gap-2">
-                      <span key={p.timestamp} className="text-gray-500">{p.timestamp}</span>
+                      <span className="text-gray-500">{p.timestamp}</span>
                       <span className={renderLevel(p.level)?.color}>{renderLevel(p.level)?.text}</span>
                       <span className="text-white">{p.message}</span>
                     </div>
                   ))}
                 </pre>
-                <ScrollBar orientation="horizontal" />
-                <ScrollBar orientation="vertical" />
-              </ScrollArea>
+              </div>
             </div>
           </div>
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
 function renderLevel(level: any) {
@@ -150,7 +169,6 @@ function renderLevel(level: any) {
       return { text: "WARN ", color: "text-yellow-500" };
   }
 }
-
 
 function addProperty(target: Record<string, string>, value: any, keyPrefix: string[] = []) {
   if (value === undefined) {

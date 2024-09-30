@@ -1,10 +1,10 @@
-import { Resource, ResourceType } from "@repo/shared";
+import { ResourceType } from "@repo/shared";
 import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { ResourceRow } from "./resource-row";
-import { ResourceContext } from "~/ResourceContext";
+import { Resource, ResourceContext } from "~/ResourceContext";
 
 export interface ProjectGroupProps {
   objType: string;
@@ -71,7 +71,6 @@ export const ProjectGroup = ({
               item={item}
               isFirst={index === 0}
               isLast={index === filteredData.length - 1}
-              objType={objType}
             />
           ))}
       </div>
