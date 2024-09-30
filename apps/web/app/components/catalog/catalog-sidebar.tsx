@@ -92,7 +92,7 @@ export const DesktopSidebar = ({
           className,
         )}
         animate={{
-          width: animate ? (open ? "250px" : "60px") : "250px",
+          width: animate ? (open ? "270px" : "60px") : "270px",
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -194,6 +194,7 @@ export const SidebarLabel = ({
   icon,
   className,
   onClick,
+  isActive,
   ...props
 }: {
   label: string;
@@ -201,14 +202,16 @@ export const SidebarLabel = ({
   className?: string;
   onClick?: () => void;
   props?: any;
+  isActive?: boolean;
 }) => {
   const { open, animate } = useSidebar();
   return (
     <a
       onClick={onClick}
       className={cn(
-        "flex items-center justify-start gap-2  group/sidebar py-2 hover:cursor-pointer",
+        "flex items-center justify-start gap-2 group/sidebar p-2 hover:cursor-pointer",
         className,
+        isActive ? "text-primary bg-gray-200 rounded-lg" : ""
       )}
       {...props}
     >
@@ -219,7 +222,8 @@ export const SidebarLabel = ({
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-base leading-relaxed text-neutral-700 dark:text-neutral-200 group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className={cn("text-base leading-relaxed text-grey-700 dark:text-neutral-200 group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0",
+          isActive ? "font-bold" : "")}
       >
         {label}
       </motion.span>

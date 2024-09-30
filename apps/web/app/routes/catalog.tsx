@@ -63,6 +63,7 @@ export default function catalog() {
                           className={`${iconColor} h-5 w-5 flex-shrink-0`}
                         />}
                       onClick={() => setCurrentResourceType(resourceType)}
+                      isActive={currentResourceType?.kind === resourceType.kind}
                     />
                   );
                 })}
