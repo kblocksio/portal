@@ -46,6 +46,8 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   });
 
   const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
+  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectMessage[] }>("/api/resources");
+
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
@@ -54,10 +56,17 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   }, [resourceTypesData]);
 
   useEffect(() => {
-    if (!isResourceTypesLoading) {
+    if (!initialResources || !initialResources.objects) {
+      return;
+    }
+    handleObjectMessages(initialResources.objects);
+  }, [initialResources]);
+
+  useEffect(() => {
+    if (!isResourceTypesLoading && !isSyncInitialResourcesLoading) {
       setIsLoading(false);
     }
-  }, [isResourceTypesLoading]);
+  }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
 
   const handleObjectMessage = (message: ObjectMessage) => {
     console.log('handleObjectMessage', message);

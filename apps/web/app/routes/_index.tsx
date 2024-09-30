@@ -86,12 +86,13 @@ export default function _index() {
           />
         </div>
         <div className={"container mx-auto mt-12"}>
-          {isLoading ? (
+          {isLoading || !types || Object.keys(types).length === 0 ? (
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
               resourceTypes={types}
               searchQuery={searchQuery}
+              isLoading={isLoading}
             />
           )}
         </div>

@@ -51,7 +51,7 @@ export const ProjectGroup = ({
         <h2 className="text-xl font-semibold">{resourceType.plural}</h2>
       </div>
       <div>
-        {isLoading && !filteredData && (
+        {isLoading && (!filteredData || filteredData?.length === 0) && (
           <Card className="flex items-center justify-between p-4">
             <Skeleton className="h-6 w-32" />
             <div className="flex items-center space-x-4">
