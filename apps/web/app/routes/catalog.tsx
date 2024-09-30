@@ -37,14 +37,14 @@ export default function catalog() {
   ) : (
     <div
       className={cn(
-        "flex flex-col md:flex-row bg-slate-50 dark:bg-neutral-800 w-full flex-1 mx-auto overflow-hidden",
+        "flex flex-col md:flex-row dark:bg-neutral-800 w-full flex-1 mx-auto overflow-hidden",
         "h-full",
       )}
     >
       <CatalogSidebar animate={false}>
         <SidebarBody className="justify-between gap-10 bg-muted border-r">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <h1 className="text-3xl font-bold mb-4 mt-8">Catalog</h1>
+            <h1 className="text-3xl font-bold mb-4 border-b border-gray-200 pb-4">Catalog</h1>
             <div className="flex flex-col">
               {resourceTypes &&
                 Object.values(resourceTypes).map((resourceType, idx) => {
@@ -71,7 +71,7 @@ export default function catalog() {
         </SidebarBody>
       </CatalogSidebar>
       <div className="flex flex-1 overflow-hidden bg-background">
-        <div className="flex flex-1 overflow-hidden bg-white">
+        <div className="flex flex-1 overflow-hidden bg-slate-50">
           {/* Parent container wrapping both markdown and metadata */}
           <div className="flex flex-row flex-1 h-full overflow-auto">
             <div className="p-2 md:p-8 text-left rounded-tl-2xl dark:border-neutral-700 flex flex-col gap-2 flex-1 w-full h-full">
