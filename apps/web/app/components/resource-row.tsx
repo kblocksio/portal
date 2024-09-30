@@ -1,22 +1,23 @@
-import { Condition, Resource } from "@repo/shared";
 import { Card } from "./ui/card";
 import { CalendarIcon } from "lucide-react";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
+import { useContext } from "react";
+import { ResourceContext } from "~/ResourceContext";
+import { ApiObject } from "@kblocks/cli/types";
 
 export const ResourceRow = ({
   item,
   isFirst,
   isLast,
-  objType,
 }: {
-  item: Resource;
+  item: ApiObject;
   isFirst: boolean;
   isLast: boolean;
-  objType: string;
 }) => {
+  const { setSelectedResource } = useContext(ResourceContext);
   const borders = [];
 
   borders.push("rounded-none");
@@ -36,9 +37,10 @@ export const ResourceRow = ({
 
   return (
     <Card
-      className={`flex items-center justify-between p-2 transition-colors duration-200 hover:bg-gray-50 ${borders.join(
+      className={`flex items-center justify-between p-2 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
         " ",
       )}`}
+      onClick={() => setSelectedResource(item)}
     >
       {/* Left Section: Status Badge, Namespace, Name */}
       <div className="flex items-center space-x-4 flex-shrink-0">
@@ -58,7 +60,7 @@ export const ResourceRow = ({
 
       {/* Middle Section: Log Message & Timestamp */}
       <div className="flex px-6 items-center space-x-4 flex-grow min-w-0">
-        <LastLogMessage objType={objType} objUri={item.objUri} />
+        <LastLogMessage objUri={item.objUri} />
       </div>
 
       {/* Right Section: Last Updated */}
@@ -84,31 +86,33 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   );
 }
 
-function StatusBadge({ readyCondition, message }: { readyCondition?: Condition, message?: string }) {
+export function StatusBadge({ readyCondition, message }: { readyCondition?: any, message?: string }) {
 
   const color = readyCondition
     ? (readyCondition.status === "True"
       ? "green" : (message === "In Progress"
         ? "yellow" : "red")) : "yellow";
 
-  return (
+  const div = <div
+    className={cn(
+      "ml-1",
+      "inline-block rounded-full",
+      "h-3 w-3",
+      `bg-${color}-500`,
+      "transition-transform duration-200 hover:scale-125",
+    )}
+  />;
+
+  return message ? (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <div
-            className={cn(
-              "ml-1",
-              "inline-block rounded-full",
-              "h-3 w-3",
-              `bg-${color}-500`,
-              "transition-transform duration-200 hover:scale-125",
-            )}
-          />
+          {div}
         </TooltipTrigger>
         <TooltipContent>
           <p>{readyCondition?.message ?? "In Progress"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
+  ) : div;
 }

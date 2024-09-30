@@ -6,39 +6,6 @@ export interface ResourceQuery {
   name?: string;
 }
 
-export interface Condition {
-  type?: string;
-  status?: string;
-  lastTransitionTime?: string;
-  reason?: string;
-  message?: string;
-}
-
-export interface Resource {
-  // additional field for app usage
-  objUri: string;
-  apiVersion: string;
-  kind: string;
-
-  metadata: {
-    name: string;
-    namespace?: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-    creationTimestamp?: string;
-    uid?: string;
-    resourceVersion?: string;
-  };
-
-  // current state
-  status: {
-    conditions?: Condition[];
-    [key: string]: any;
-  };
-
-  // desired state
-  [key: string]: any;
-}
 
 export type Project = {
   label: string;
@@ -79,35 +46,3 @@ export interface ResourceType {
   color?: string;
   openApiSchema?: any;
 }
-
-export type EventType = 'LOG' | 'PATCH' | 'OBJECT';
-
-export interface Event {
-  type: EventType;
-  objUri: string;
-  objType: string;
-};
-
-export enum LogLevel {
-  DEBUG,
-  INFO,
-  WARNING,
-  ERROR
-}
-
-export interface LogMessage extends Event {
-  level: LogLevel;
-  timestamp: number;
-  message: string;
-};
-
-export interface ObjectMessage extends Event {
-  type: 'OBJECT';
-  object: any;
-  reason: 'CREATE' | 'DELETE' | 'SYNC' | 'UPDATE';
-};
-
-export interface PatchMessage extends Event {
-  type: 'PATCH';
-  patch: any;
-};

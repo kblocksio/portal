@@ -1,6 +1,6 @@
 import { ResourceType } from "@repo/shared";
 import { useContext, useEffect, useState } from "react";
-import { CatalogSidebar, SidebarBody, SidebarLabel, SidebarLink } from "~/components/catalog/catalog-sidebar";
+import { CatalogSidebar, SidebarBody, SidebarLabel } from "~/components/catalog/catalog-sidebar";
 import { loadingStates } from "~/components/catalog/loading-states";
 import { MultiStepLoader } from "~/components/ui/multi-step-loader";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
@@ -14,8 +14,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { ResourceContext } from "~/ResourceContext";
 
-export default function catalog() {
-
+export default function Catalog() {
   const { isLoading, resourceTypes } = useContext(ResourceContext);
   const [currentResourceType, setCurrentResourceType] = useState<ResourceType | null>(null);
 

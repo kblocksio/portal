@@ -11,6 +11,7 @@ import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
+import { ResourceDrawerComponent } from "~/components/resource-drawer";
 import { ResourceContext } from "~/ResourceContext";
 
 export default function _index() {
@@ -51,7 +52,7 @@ export default function _index() {
   };
 
   const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
+  const createResourceTypes = Object.values(types).filter(r => !r.kind?.endsWith("Ref"));
   const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
@@ -83,6 +84,7 @@ export default function _index() {
             resourceTypes={importResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
+          <ResourceDrawerComponent />
         </div>
         <div className={"container mx-auto mt-12"}>
           {isLoading || !types || Object.keys(types).length === 0 ? (

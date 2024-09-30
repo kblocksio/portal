@@ -18,6 +18,11 @@ export type GetTypesResponse = {
   types: Record<string, ResourceType>;
 };
 
+export type GetLogsResponse = {
+  objUri: string;
+  logs: kblocks.LogEvent[];
+};
+
 export type CreateResourceRequest = {
   resourceType: ResourceType;
   providedValues: any;

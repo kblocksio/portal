@@ -1,35 +1,48 @@
-import { GetTypesResponse, LogMessage, ObjectMessage, PatchMessage, Resource, ResourceType } from '@repo/shared';
+import { GetTypesResponse, ResourceType } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
+import { LogEvent, ObjectEvent, PatchEvent } from "@kblocks/cli/types/events";
+import { ApiObject } from '@kblocks/cli/types';
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
   console.error('WebSocket URL is not set');
 }
 
+export type Resource = ApiObject & {
+  objUri: string;
+  objType: string;
+};
+
 export interface ResourceContextValue {
   resourceTypes: Record<string, ResourceType>;
   resources: Map<string, Map<string, Resource>>;
-  resourcesLogs: Map<string, Map<string, LogMessage[]>>;
-  handleObjectMessages: (messages: ObjectMessage[]) => void;
+  logs: Map<string, Record<string, LogEvent>>;
+  handleObjectMessages: (messages: ObjectEvent[]) => void;
   isLoading: boolean;
+  selectedResource: Resource | undefined;
+  setSelectedResource: (resource: Resource | undefined) => void;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
   resources: new Map<string, Map<string, Resource>>(),
-  resourcesLogs: new Map<string, Map<string, LogMessage[]>>(),
+  logs: new Map<string, Record<string, LogEvent>>(),
   handleObjectMessages: () => { },
   isLoading: true,
+  selectedResource: undefined,
+  setSelectedResource: () => { },
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTypes, setResourceTypes] = useState<Record<string, ResourceType>>({});
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
-  const [resourcesLogs, setResourcesLogs] = useState<Map<string, Map<string, LogMessage[]>>>(new Map());
-  const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectMessage | PatchMessage | LogMessage>(WS_URL, {
+  const [logs, setLogs] = useState<Map<string, Record<string, LogEvent>>>(new Map());
+  const [selectedResource, setSelectedResource] = useState<Resource | undefined>(undefined);
+
+  const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectEvent | PatchEvent | LogEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
       console.log('WebSocket shouldReconnect...', closeEvent);
       return true;
@@ -68,8 +81,8 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
 
-  const handleObjectMessage = (message: ObjectMessage) => {
-    console.log('handleObjectMessage', message);
+  const handleObjectMessage = (message: ObjectEvent) => {
+    // console.log('handleObjectMessage', message);
     const { object, reason, objUri, objType } = message;
     switch (reason) {
       case 'CREATE':
@@ -78,7 +91,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         setResources((prevResourcesForTypes) => {
           const resoucesForTypeMap = prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
           const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-          newResourcesForTypeMap.set(objUri, { ...object, objUri });
+          newResourcesForTypeMap.set(objUri, { ...object, objUri, objType } as Resource);
           const newResources = new Map(prevResourcesForTypes);
           newResources.set(objType, newResourcesForTypeMap);
           return newResources;
@@ -103,13 +116,13 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const handleObjectMessages = (messages: ObjectMessage[]) => {
+  const handleObjectMessages = (messages: ObjectEvent[]) => {
     messages.forEach((message) => {
       handleObjectMessage(message);
     });
   };
 
-  const handlePatchMessage = (message: PatchMessage) => {
+  const handlePatchMessage = (message: PatchEvent) => {
     console.log('handlePatchMessage', message);
     const { objUri, objType, patch } = message;
     setResources((prevResourcesForTypes) => {
@@ -132,22 +145,22 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     });
   };
 
-  const handleLogMessage = (message: LogMessage) => {
-    console.log('handleLogMessage', message);
-    const { objType, objUri } = message;
-    setResourcesLogs((prevResourcesLogs) => {
-      const resoucesLogsForTypeMap = prevResourcesLogs.get(objType) || new Map<string, LogMessage[]>();
-      const newResourcesLogsForTypeMap = new Map(resoucesLogsForTypeMap);
-      // add the message to the existing messages for this resource
-      const existingMessages = newResourcesLogsForTypeMap.get(objUri) || [];
-      existingMessages.push(message);
-      newResourcesLogsForTypeMap.set(objUri, existingMessages);
-      const newResourcesLogs = new Map(prevResourcesLogs);
-      newResourcesLogs.set(objType, newResourcesLogsForTypeMap);
-      return newResourcesLogs;
+  const handleLogMessage = (message: LogEvent) => {
+    const { objUri } = message;
+    setLogs((prevLogs) => {
+      const copy = new Map(prevLogs);
+      const existingMessages = copy.get(objUri) ?? {};
+      existingMessages[message.timestamp] = message;
+
+      console.log(`new log message for ${objUri} at ${message.timestamp}:`, message);
+
+      copy.set(objUri, existingMessages);
+
+      console.log('updated logs:', copy);
+
+      return copy;
     });
   };
-
 
   useEffect(() => {
     if (!lastJsonMessage) {
@@ -155,13 +168,13 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     }
     switch (lastJsonMessage.type) {
       case 'OBJECT':
-        handleObjectMessage(lastJsonMessage as ObjectMessage);
+        handleObjectMessage(lastJsonMessage as ObjectEvent);
         break;
       case 'PATCH':
-        handlePatchMessage(lastJsonMessage as PatchMessage);
+        handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
       case 'LOG':
-        handleLogMessage(lastJsonMessage as LogMessage);
+        handleLogMessage(lastJsonMessage as LogEvent);
         break;
       default:
         console.warn('WebSocket unknown message type:', lastJsonMessage);
@@ -182,9 +195,11 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const value: ResourceContextValue = {
     resourceTypes,
     resources,
-    resourcesLogs,
+    logs,
     handleObjectMessages,
     isLoading,
+    selectedResource,
+    setSelectedResource,
   };
 
   return <ResourceContext.Provider value={value}>{children}</ResourceContext.Provider>;

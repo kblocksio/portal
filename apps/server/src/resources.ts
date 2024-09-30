@@ -3,6 +3,8 @@ import * as kblocks from "@kblocks/cli/types";
 
 export const all: Record<string, kblocks.ApiObject> = {};
 
+export const logs: Record<string, kblocks.LogEvent[]> = {};
+
 subscribeToEvents(message => {
   try {
     const event = JSON.parse(message) as kblocks.WorkerEvent;
@@ -21,6 +23,15 @@ subscribeToEvents(message => {
       all[event.objUri] = { ...all[event.objUri], ...event.patch };
       return;
     }
+
+    if (event.type === "LOG") {
+      const { objUri } = event;
+      const existingLogs = logs[objUri] ?? [];
+      existingLogs.push(event);
+      logs[objUri] = existingLogs;
+      return;
+    }
+
   } catch (error) {
     console.error("Error parsing event", error);
   }
