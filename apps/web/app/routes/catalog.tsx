@@ -14,7 +14,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { ResourceContext } from "~/ResourceContext";
 
-export default function catalog() {
+export default function Catalog() {
   const { isLoading, resourceTypes } = useContext(ResourceContext);
   const [currentResourceType, setCurrentResourceType] = useState<ResourceType | null>(null);
 
