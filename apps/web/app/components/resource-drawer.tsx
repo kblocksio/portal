@@ -123,7 +123,7 @@ export function ResourceDrawerComponent() {
                     <div key={idx} className="flex gap-2">
                       <span key={p.timestamp} className="text-gray-500">{p.timestamp}</span>
                       <span className={renderLevel(p.level)?.color}>{renderLevel(p.level)?.text}</span>
-                      <span className="text-white">{p.message.trim()}</span>
+                      <span className="text-white">{p.message}</span>
                     </div>
                   ))}
                 </pre>
