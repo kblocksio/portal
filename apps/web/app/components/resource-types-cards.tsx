@@ -1,9 +1,10 @@
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
+import { ResourceType } from "@repo/shared";
 
 export interface ResourceTypesCardsProps {
-  filtereResources: any[];
+  filtereResources: ResourceType[];
   handleResourceSelect: (resource: any) => void;
   isLoading: boolean;
 }
