@@ -9,9 +9,7 @@ import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { GetTypesResponse } from "@repo/shared";
 import { createResource } from "~/lib/backend";
-import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useResources } from "~/hooks/use-resources";
 
@@ -33,7 +31,7 @@ export default function _index() {
 
   const handleCreateResource = async (resourceType: any, providedValues: any) => {
     setIsCreateResourceLoading(true);
-    const res = await createResource({
+    await createResource({
       resourceType: resourceType,
       providedValues: providedValues,
     });
@@ -44,7 +42,7 @@ export default function _index() {
   const handleImportResources = async (newResources: { resourceType: any, providedValues: any[] }) => {
     setIsCreateResourceLoading(true);
     for (const providedValues of newResources.providedValues) {
-      const res = await createResource({
+      await createResource({
         resourceType: newResources.resourceType,
         providedValues: providedValues,
       });

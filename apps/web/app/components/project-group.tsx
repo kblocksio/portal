@@ -38,8 +38,10 @@ export const ProjectGroup = ({
   }, [resourcesForType, searchQuery]);
 
   const Icon = getIconComponent({ icon: resourceType.icon });
+  // use default color for now
   const iconColor = getResourceIconColors({
-    color: resourceType?.color,
+    // color: resourceType?.color,
+    color: undefined
   });
 
   return !isLoading && (!filteredData || filteredData?.length === 0) ? null : (
