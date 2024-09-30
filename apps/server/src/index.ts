@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse } from "@repo/shared";
+import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse, CreateResourceRequest } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
@@ -9,6 +9,7 @@ import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
 import { all } from "./resources.js";
 import { ObjectEvent } from "@kblocks/cli/types";
+import { createCustomResourceInstance } from "./create-resource-utils";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -124,14 +125,17 @@ app.get("/api/types", async (_, res) => {
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
-  const obj = req.body;
+  const apiVersion = `${group}/${version}`;
 
   const systemId = req.query.system_id as string;
   if (!systemId) {
     return res.status(400).json({ error: "system_id is required as a query param" });
   }
 
-  const apiVersion = `${group}/${version}`;
+  const { resourceType, providedValues } = req.body as CreateResourceRequest;
+  const obj = await createCustomResourceInstance(resourceType, providedValues, "default");
+
+  console.log("creating object:", JSON.stringify(obj));
 
   // verify that the request has the correct `apiVersion` and `kind`
   if (obj.apiVersion !== apiVersion) {
@@ -145,7 +149,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
 
   pubsub.publishControlRequest({ systemId, group, version, plural }, JSON.stringify(obj));
 
-  return res.sendStatus(200);
+  return res.status(200).json({ message: "Create request accepted", objType: `${group}/${version}/${plural}`, obj });
 });
 
 app.get("/api/auth/sign-in", async (req, res) => {

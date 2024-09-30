@@ -8,7 +8,6 @@ import {
 import { Button } from "~/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { Loader } from "lucide-react";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
@@ -18,7 +17,7 @@ export interface CreateResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (resouce: any, providedValues: any) => void;
+  handleOnCreate: (resouce: ResourceType, providedValues: any) => void;
   resourceTypes: ResourceType[];
 }
 

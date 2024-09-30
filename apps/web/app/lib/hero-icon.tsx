@@ -18,6 +18,9 @@ export const getIconComponent = ({
   solid?: boolean;
   icon?: string;
 }) => {
+  if (icon.startsWith("heroicon://")) {
+    icon = icon.split("heroicon://")[1];
+  }
   const iconSet = solid ? SolidHeroIcons : OutlineHeroIcons;
   const iconComponent = iconSet[getHeroIconName(icon) as keyof typeof iconSet];
   if (iconComponent) {
