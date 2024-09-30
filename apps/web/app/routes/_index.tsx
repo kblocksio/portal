@@ -55,9 +55,6 @@ export default function _index() {
   const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
   const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
 
-  if (Object.keys(types).length > 0) {
-    console.log({types});
-  }
   return (
     <div className="bg-background flex h-screen">
       <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">

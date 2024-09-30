@@ -41,7 +41,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const handleObjectMessage = (message: ObjectMessage) => {
     console.log('handleObjectMessage', message);
     const { object, reason, objUri, objType } = message;
-    console.log({resources});
     switch (reason) {
       case 'CREATE':
       case 'SYNC':
