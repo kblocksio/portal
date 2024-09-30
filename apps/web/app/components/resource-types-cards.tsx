@@ -21,19 +21,18 @@ export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isL
         return (
           <Card
             key={index}
-            className="hover:bg-accent cursor-pointer max-h-[160px] flex flex-col justify-center"
+            className="hover:bg-accent cursor-pointer max-h-[240px] flex flex-col justify-center"
             onClick={() => handleResourceSelect(resource)}
           >
-            <CardHeader className="flex flex-row h-[50px] text-center border-b border-b-gray-200 items-center align-middle">
-              <div className="w-full flex self-center items-center justify-center">
-                <Icon className={`${iconColor} h-7 w-7`} />
+            <CardHeader className="flex flex-row h-[75px] text-center border-b border-b-gray-200 items-center align-middle">
+              <div className="w-full flex self-center items-center">
+                <Icon className={`${iconColor} h-8 w-8`} />
               </div>
             </CardHeader>
-            <CardContent className="flex p-2 flex-col h-[110px]">
+            <CardContent className="flex p-4 flex-start flex-col min-h-[165px]">
               <CardTitle className="mb-2">{resource.kind}</CardTitle>
               <CardDescription>
-                {resource.description ||
-                  "This is a mock description with a reasonable length to see how it looks like"}
+                {resource.description}
               </CardDescription>
             </CardContent>
           </Card>

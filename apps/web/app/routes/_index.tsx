@@ -23,7 +23,6 @@ export default function _index() {
 
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
-
   const [isCreateResourceLoading, setIsCreateResourceLoading] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,8 +52,8 @@ export default function _index() {
   };
 
   const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
-  const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
+  const createResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
+  const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
     <div className="bg-background flex h-screen">
@@ -88,12 +87,13 @@ export default function _index() {
           <ResourceDrawerComponent />
         </div>
         <div className={"container mx-auto mt-12"}>
-          {isLoading ? (
+          {isLoading || !types || Object.keys(types).length === 0 ? (
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
               resourceTypes={types}
               searchQuery={searchQuery}
+              isLoading={isLoading}
             />
           )}
         </div>
