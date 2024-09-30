@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format } from "date-fns/format";
 import { ChevronRightIcon } from "lucide-react";
 import { useContext } from "react";
 import { ResourceContext } from "~/ResourceContext";

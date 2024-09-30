@@ -1,8 +1,8 @@
-import { LogLevel, LogMessage } from "@repo/shared";
-import { format } from "date-fns";
+import { LogEvent, LogLevel } from "@kblocks/cli/types";
+import { format } from "date-fns/format";
 import { cn } from "~/lib/utils";
 
-type LogMessageWithId = LogMessage & { id: string, parentId?: string, children?: LogMessageWithId[] };
+type LogMessageWithId = LogEvent & { id: string, parentId?: string, children?: LogMessageWithId[] };
 
 const parseLogs = (logs: LogMessageWithId[]) => {
 
