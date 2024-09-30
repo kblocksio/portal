@@ -1,9 +1,8 @@
 import { ResourceType } from "@repo/shared";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CatalogSidebar, SidebarBody, SidebarLabel, SidebarLink } from "~/components/catalog/catalog-sidebar";
 import { loadingStates } from "~/components/catalog/loading-states";
 import { MultiStepLoader } from "~/components/ui/multi-step-loader";
-import { useResources } from "~/hooks/use-resources";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { cn } from "~/lib/utils";
 import Markdown from "react-markdown";
@@ -13,10 +12,11 @@ import rehypeRaw from "rehype-raw";
 import { DocumentCheckIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { ResourceContext } from "~/ResourceContext";
 
 export default function catalog() {
 
-  const { isLoading, resourceTypes } = useResources();
+  const { isLoading, resourceTypes } = useContext(ResourceContext);
   const [currentResourceType, setCurrentResourceType] = useState<ResourceType | null>(null);
 
   useEffect(() => {

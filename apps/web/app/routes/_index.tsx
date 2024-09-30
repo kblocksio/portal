@@ -4,25 +4,24 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useResources } from "~/hooks/use-resources";
+import { ResourceContext } from "~/ResourceContext";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
 
-  const { isLoading, resourceTypes } = useResources();
+  const { isLoading, resourceTypes } = useContext(ResourceContext);
 
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
-
   const [isCreateResourceLoading, setIsCreateResourceLoading] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,8 +51,8 @@ export default function _index() {
   };
 
   const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
-  const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
+  const createResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
+  const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
     <div className="bg-background flex h-screen">

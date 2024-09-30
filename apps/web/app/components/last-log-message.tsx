@@ -1,9 +1,10 @@
 import { LogMessage } from "@repo/shared";
 import { ChevronRightIcon } from "lucide-react";
-import { useResources } from "~/hooks/use-resources";
+import { useContext } from "react";
+import { ResourceContext } from "~/ResourceContext";
 
 export const LastLogMessage = ({ objType, objUri }: { objType: string; objUri: string }) => {
-  const { resourcesLogs } = useResources();
+  const { resourcesLogs } = useContext(ResourceContext);
 
   const log: LogMessage | undefined = resourcesLogs.get(objType)?.get(objUri)?.at(-1);
   return (
