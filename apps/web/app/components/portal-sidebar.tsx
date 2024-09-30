@@ -4,7 +4,7 @@ import { Box, LayoutDashboard, Settings } from "lucide-react"
 
 export function PortalSidebar() {
   return (
-    <aside className="w-16 bg-muted border-r flex flex-col items-center py-4 space-y-4">
+    <aside className="w-16 min-w-16 bg-muted border-r flex-none flex flex-col items-center py-4 space-y-4">
       <Button variant="ghost" size="icon" asChild>
         <Link to="/">
           <LayoutDashboard className="h-6 w-6" />

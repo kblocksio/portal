@@ -29,7 +29,7 @@ export default function App() {
             <ResourceProvider>
               <div className="flex h-screen flex-col">
                 <Header />
-                <div className="flex h-screen bg-background">
+                <div className="flex h-[calc(100vh-theme(height.14))] bg-background">
                   <PortalSidebar />
                   <div className="flex-grow overflow-hidden">
                     <Outlet />
