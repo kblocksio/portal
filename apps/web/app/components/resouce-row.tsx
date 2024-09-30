@@ -1,7 +1,7 @@
 import { Condition, Resource } from "@repo/shared";
 import { Card } from "./ui/card";
 import { CalendarIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
