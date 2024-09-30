@@ -9,7 +9,7 @@ import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { GetTypesResponse, ResourceType } from "@repo/shared";
+import { GetTypesResponse } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -53,6 +53,10 @@ export default function _index() {
     setIsImportWizardOpen(false);
   };
 
+  const types = data?.types ?? {};
+  const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
+  const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
+
   return (
     <div className="bg-background flex h-screen">
       <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
@@ -72,26 +76,14 @@ export default function _index() {
             isOpen={isCreateWizardOpen}
             handleOnOpenChange={setIsCreateWizardOpen}
             handleOnCreate={handleCreateResource}
-            resourceTypes={
-              data && data.types.length > 0
-                ? data.types.filter(
-                  (resource: any) => !resource.kind.endsWith("Ref"),
-                )
-                : []
-            }
+            resourceTypes={createResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnImport={handleImportResources}
-            resourceTypes={
-              data && data.types.length > 0
-                ? data.types.filter((resource: any) =>
-                  resource.kind.endsWith("Ref"),
-                )
-                : []
-            }
+            resourceTypes={importResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
           <ResourceDetailsDrawer />
@@ -101,7 +93,7 @@ export default function _index() {
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
-              resourceTypes={data?.types ?? []}
+              resourceTypes={types}
               searchQuery={searchQuery}
             />
           )}

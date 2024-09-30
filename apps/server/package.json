@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@kblocks/cli": "^0.1.30",
-    "@kubernetes/client-node": "^0.21.0",
     "@octokit/core": "^6.1.2",
     "@supabase/ssr": "^0.5.1",
     "@types/express-ws": "^3.0.5",

@@ -1,16 +1,16 @@
 import { GetResourceResponse, GetUserResponse, ResourceQuery, GetTypesResponse, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
 
 // if VITE_BACKEND_URL is not set, use the current origin
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-if (!BASE_URL) {
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+if (!VITE_BACKEND_URL) {
   throw new Error("VITE_BACKEND_URL is not set");
 }
 
-export const signInUrl = `${BASE_URL}/api/auth/sign-in`;
+export const signInUrl = `${VITE_BACKEND_URL}/api/auth/sign-in`;
 
 export const get = async (path: string, params?: Record<string, string>) => {
   const queryParams = new URLSearchParams(params).toString();
-  const url = queryParams ? `${BASE_URL}${path}?${queryParams}` : `${BASE_URL}${path}`;
+  const url = queryParams ? `${VITE_BACKEND_URL}${path}?${queryParams}` : `${VITE_BACKEND_URL}${path}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`${path}: ${res.statusText} ${res.status}\n${await res.text()}`);
@@ -19,7 +19,7 @@ export const get = async (path: string, params?: Record<string, string>) => {
 };
 
 export const post = async (path: string, body: any) => {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${VITE_BACKEND_URL}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
