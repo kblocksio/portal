@@ -1,5 +1,6 @@
 import Ajv, { SchemaObject } from 'ajv';
 import crypto from 'crypto';
+import { ResourceType } from '../../../packages/shared/src/types';
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 
@@ -124,12 +125,13 @@ const generateNewResourceName = (namespace: string, kind: string) => {
   return `${namespace}-${kind.toLowerCase()}-${randomString}`;
 }
 
-export const createCustomResourceInstance = async (resource: any, providedValues: any, namespace: string) => {
+export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any, namespace: string) => {
   const adjustedValues = adjustProvidedValues(resource.openApiSchema, providedValues);
+  
   // Validate the adjusted values
   if (validateSpecObject(resource.openApiSchema, adjustedValues)) {
     // Proceed to create the custom resource instance
-    const customResource = {
+    return {
       apiVersion: `${resource.group}/${resource.version}`,
       kind: resource.kind,
       metadata: {
@@ -138,8 +140,7 @@ export const createCustomResourceInstance = async (resource: any, providedValues
       },
       ...adjustedValues,
     };
-    return customResource;
   } else {
-    throw new Error('Provided values failed resoruce open api schema validation.');
+    throw new Error('Schema validation failed.');
   }
 }

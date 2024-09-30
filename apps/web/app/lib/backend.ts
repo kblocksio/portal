@@ -47,5 +47,6 @@ export const getUser = async (): Promise<GetUserResponse> => {
 };
 
 export const createResource = async (req: CreateResourceRequest): Promise<CreateResourceResponse> => {
-  return post(`/api/resources`, req);
+  const objType = `${req.resourceType.group}/${req.resourceType.version}/${req.resourceType.plural}`;
+  return post(`/api/resources/${objType}?system_id=demo`, req);
 };
