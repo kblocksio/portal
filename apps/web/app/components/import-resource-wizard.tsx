@@ -30,7 +30,7 @@ export const ImportResourceWizard = ({
   resourceTypes,
 }: ImportResourceWizardProps) => {
   const [step, setStep] = useState(1);
-  const [selectedResource, setSelectedResource] = useState<ResourceType | null>(
+  const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | null>(
     null,
   );
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,23 +47,23 @@ export const ImportResourceWizard = ({
   }, [resourceTypes, searchQuery]);
 
   const handleResourceSelect = (resource: any) => {
-    setSelectedResource(resource);
+    setSelectedResourceType(resource);
     setStep(2);
   };
 
   const handleBack = () => {
     setStep(1);
-    setSelectedResource(null);
+    setSelectedResourceType(null);
   };
 
   const handleImportResources = useCallback((selectedTypeProvidedValues: any[]) => {
-    handleOnImport({ resourceType: selectedResource, providedValues: selectedTypeProvidedValues });
-  }, [handleOnImport, selectedResource]);
+    handleOnImport({ resourceType: selectedResourceType, providedValues: selectedTypeProvidedValues });
+  }, [handleOnImport, selectedResourceType]);
 
   const handleOpenChange = (open: boolean) => {
     handleOnOpenChange(open);
     setStep(1);
-    setSelectedResource(null);
+    setSelectedResourceType(null);
   };
 
   return (
@@ -85,11 +85,11 @@ export const ImportResourceWizard = ({
                   handleSearch={handleSearch}
                 />
               ) : (
-                selectedResource &&
+                selectedResourceType &&
                 <WizardSimpleHeader
-                  title={`Import ${selectedResource?.kind} resources to your project`}
+                  title={`Import ${selectedResourceType?.kind} resources to your project`}
                   description="Select the repositories you want to import into your project"
-                  resourceType={selectedResource}
+                  resourceType={selectedResourceType}
                 />
               )
             }
@@ -105,7 +105,7 @@ export const ImportResourceWizard = ({
               />
             </div>
           ) : (
-            selectedResource?.kind === 'RepositoryRef' ? (
+            selectedResourceType?.kind === 'RepositoryRef' ? (
               <div className="space-y-4 p-2">
                 <ImportGHRepo handleBack={handleBack} handleOnImport={handleImportResources} />
               </div>

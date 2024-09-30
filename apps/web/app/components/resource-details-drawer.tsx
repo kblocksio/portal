@@ -1,26 +1,41 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
 import { type LogEvent } from "@kblocks/cli/types";
 
-export function ResourceDrawerComponent() {
-  const { selectedResource, setSelectedResource, resourceTypes, logs } = useContext(ResourceContext);
-  const selectedResourceType = useMemo(
-    () => (selectedResource ? resourceTypes[selectedResource.objType] : undefined),
-    [resourceTypes, selectedResource]
-  );
-  const Icon = useMemo(() => getIconComponent({ icon: selectedResourceType?.icon }), [selectedResourceType]);
+export const ResourceDetailsDrawer = () => {
+
   const logContainerRef = useRef<HTMLDivElement>(null);
 
+  const { selectedResourceId, setSelectedResourceId, resourceTypes, logs, resources } = useContext(ResourceContext);
+
+  const selectedResource = useMemo(() => {
+    if (!selectedResourceId) return undefined;
+    return resources.get(selectedResourceId.objType)?.get(selectedResourceId.objUri);
+  }, [selectedResourceId, resources]);
+
+  const selectedResourceType = useMemo(() => (
+    selectedResource ? resourceTypes[selectedResource.objType] : undefined
+  ), [resourceTypes, selectedResource]
+  );
+
+  const Icon = useMemo(() => (
+    getIconComponent({ icon: selectedResourceType?.icon })
+  ), [selectedResourceType]);
+
   const logsUrl = (resource?: Resource) => {
-    const uri = resource?.objUri.split("kblocks://")[1];
+    if (!resource) {
+      return "";
+    }
+    const uri = resource.objUri.split("kblocks://")[1];
     return `/api/resources/${uri}/logs`;
   };
 
   const { data: oldLogs, refetch } = useFetch(logsUrl(selectedResource), {}, false);
+
   useEffect(() => {
     if (selectedResource) {
       refetch(logsUrl(selectedResource));
@@ -28,7 +43,8 @@ export function ResourceDrawerComponent() {
   }, [selectedResource, refetch]);
 
   const finalLogs = useMemo(() => {
-    const resourceLogs = selectedResource ? logs.get(selectedResource?.objUri) : {};
+    console.log("super heavy api call");
+    const resourceLogs = selectedResource ? logs.get(selectedResource.objUri) : {};
     const map: Record<string, LogEvent> = { ...resourceLogs };
     for (const entry of (oldLogs as any)?.logs ?? []) {
       map[entry.timestamp] = entry;
@@ -43,28 +59,30 @@ export function ResourceDrawerComponent() {
     return result;
   }, [oldLogs, logs, selectedResource]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  };
+  }, [logContainerRef]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [finalLogs]);
+  }, [finalLogs, scrollToBottom]);
 
   useEffect(() => {
     scrollToBottom();
-  }, []);
+  }, [scrollToBottom]);
 
-  const iconColor = getResourceIconColors({
-    color: selectedResource?.color,
-  });
+  const iconColor = useMemo(() => (
+    getResourceIconColors({
+      color: selectedResource?.color,
+    })
+  ), [selectedResource]);
 
-  const readyCondition = useMemo(
-    () => selectedResource?.status?.conditions?.find((condition: any) => condition.type === "Ready"),
-    [selectedResource?.status?.conditions]
-  );
+  const readyCondition = useMemo(() => (
+    selectedResource?.status?.conditions?.find((condition: any) => condition.type === "Ready")
+  ), [selectedResource?.status?.conditions]);
+
   const properties: Record<string, string> = {};
   const outputs: Record<string, string> = {};
 
@@ -84,7 +102,7 @@ export function ResourceDrawerComponent() {
   });
 
   return (
-    <Sheet open={!!selectedResource} onOpenChange={(x) => (!x ? setSelectedResource(undefined) : null)}>
+    <Sheet open={!!selectedResource} onOpenChange={(x) => (!x ? setSelectedResourceId(undefined) : null)}>
       <SheetContent className="min-w-[1000px] sm:w-[540px] sm:max-w-[50vw] flex flex-col h-full">
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold flex items-center gap-2">
@@ -136,7 +154,7 @@ export function ResourceDrawerComponent() {
           )}
           <h2 className="text-sm font-medium text-gray-500">Logs</h2>
           {/* scrollable logs container */}
-          <div className="border rounded-md flex-grow h-full overflow-hidden">
+          <div className="border rounded-md flex-grow h-lvh overflow-hidden">
             <div className="h-full overflow-auto bg-gray-900">
               <div ref={logContainerRef} className="h-full w-full bg-gray-900 text-gray-200 overflow-auto">
                 <pre className="text-xs font-extralight font-mono whitespace-pre p-4 pb-10">

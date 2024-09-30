@@ -29,7 +29,7 @@ export const CreateResourceWizard = ({
   resourceTypes,
 }: CreateResourceWizardProps) => {
   const [step, setStep] = useState(1);
-  const [selectedResource, setSelectedResource] = useState<ResourceType | null>(
+  const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | null>(
     null,
   );
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,32 +41,32 @@ export const CreateResourceWizard = ({
     if (!resourceTypes) return [];
     if (!searchQuery) return resourceTypes;
     return resourceTypes.filter((item: any) =>
-      item.kind.toLowerCase().includes(searchQuery.toLowerCase()),
+      item.kind.toLowerCase().includes(searchQuery?.toLowerCase()),
     );
   }, [resourceTypes, searchQuery]);
 
   const handleResourceSelect = (resource: any) => {
-    setSelectedResource(resource);
+    setSelectedResourceType(resource);
     setStep(2);
   };
 
   const handleBack = () => {
     setStep(1);
-    setSelectedResource(null);
+    setSelectedResourceType(null);
   };
 
   const handleCreate = useCallback((providedValues: any) => {
-    if (!selectedResource) {
+    if (!selectedResourceType) {
       return;
     }
 
-    handleOnCreate(selectedResource, providedValues);
-  }, [selectedResource, handleOnCreate]);
+    handleOnCreate(selectedResourceType, providedValues);
+  }, [selectedResourceType, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {
     handleOnOpenChange(open);
     setStep(1);
-    setSelectedResource(null);
+    setSelectedResourceType(null);
   };
 
   return (
@@ -98,12 +98,12 @@ export const CreateResourceWizard = ({
                   handleSearch={handleSearch}
                 />
               ) : (
-                selectedResource &&
+                selectedResourceType &&
                 <WizardSimpleHeader
-                  title={`New ${selectedResource?.kind} resource`}
-                  description={selectedResource?.description ||
+                  title={`New ${selectedResourceType?.kind} resource`}
+                  description={selectedResourceType?.description ||
                     "This is a mock description with a resonable length to see how it looks like"}
-                  resourceType={selectedResource}
+                  resourceType={selectedResourceType}
                 />
               )
             }
@@ -119,9 +119,9 @@ export const CreateResourceWizard = ({
             </div>
           ) : (
             <div className="space-y-4 p-2">
-              {selectedResource &&
+              {selectedResourceType &&
                 <CreateNewResourceForm
-                  selectedResource={selectedResource}
+                  selectedResourceType={selectedResourceType}
                   handleCreate={handleCreate}
                   handleBack={handleBack}
                   isLoading={isLoading}

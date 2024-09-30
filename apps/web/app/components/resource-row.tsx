@@ -17,7 +17,7 @@ export const ResourceRow = ({
   isFirst: boolean;
   isLast: boolean;
 }) => {
-  const { setSelectedResource } = useContext(ResourceContext);
+  const { setSelectedResourceId } = useContext(ResourceContext);
   const borders = [];
 
   borders.push("rounded-none");
@@ -40,7 +40,7 @@ export const ResourceRow = ({
       className={`flex items-center justify-between p-2 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
         " ",
       )}`}
-      onClick={() => setSelectedResource(item as Resource)}
+      onClick={() => setSelectedResourceId({ objType: item.objType, objUri: item.objUri })}
     >
       {/* Left Section: Status Badge, Namespace, Name */}
       <div className="flex items-center space-x-4 flex-shrink-0">

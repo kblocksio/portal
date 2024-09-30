@@ -6,12 +6,12 @@ import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 
 export const CreateNewResourceForm = ({
-  selectedResource,
+  selectedResourceType,
   handleCreate,
   handleBack,
   isLoading,
 }: {
-  selectedResource: ResourceType;
+  selectedResourceType: ResourceType;
   handleCreate: (data: any) => void;
   handleBack: () => void;
   isLoading: boolean;
@@ -21,7 +21,7 @@ export const CreateNewResourceForm = ({
       className={"max-h-[800px] overflow-auto"}
       formSchema={
         prepareOpenApiSchemaForAutoForm(
-          selectedResource?.openApiSchema,
+          selectedResourceType?.openApiSchema,
         ) as ZodObjectOrWrapped
       }
       onSubmit={handleCreate}

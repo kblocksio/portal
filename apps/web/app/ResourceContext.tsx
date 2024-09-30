@@ -15,14 +15,22 @@ export type Resource = ApiObject & {
   objType: string;
 };
 
+export type SelectedResourceId = {
+  objUri: string;
+  objType: string;
+};
+
 export interface ResourceContextValue {
+  // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
+  // objType -> objUri -> Resource
   resources: Map<string, Map<string, Resource>>;
+  // objUri -> Record<timestamp, LogEvent>
   logs: Map<string, Record<string, LogEvent>>;
   handleObjectMessages: (messages: ObjectEvent[]) => void;
   isLoading: boolean;
-  selectedResource: Resource | undefined;
-  setSelectedResource: (resource: Resource | undefined) => void;
+  selectedResourceId: SelectedResourceId | undefined;
+  setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -31,8 +39,8 @@ export const ResourceContext = createContext<ResourceContextValue>({
   logs: new Map<string, Record<string, LogEvent>>(),
   handleObjectMessages: () => { },
   isLoading: true,
-  selectedResource: undefined,
-  setSelectedResource: () => { },
+  selectedResourceId: undefined,
+  setSelectedResourceId: () => { },
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
@@ -40,7 +48,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const [resourceTypes, setResourceTypes] = useState<Record<string, ResourceType>>({});
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
   const [logs, setLogs] = useState<Map<string, Record<string, LogEvent>>>(new Map());
-  const [selectedResource, setSelectedResource] = useState<Resource | undefined>(undefined);
+  const [selectedResourceId, setSelectedResourceId] = useState<SelectedResourceId | undefined>(undefined);
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectEvent | PatchEvent | LogEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
@@ -198,8 +206,8 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     logs,
     handleObjectMessages,
     isLoading,
-    selectedResource,
-    setSelectedResource,
+    selectedResourceId,
+    setSelectedResourceId,
   };
 
   return <ResourceContext.Provider value={value}>{children}</ResourceContext.Provider>;

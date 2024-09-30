@@ -11,7 +11,7 @@ import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ResourceDrawerComponent } from "~/components/resource-drawer";
+import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
 import { ResourceContext } from "~/ResourceContext";
 
 export default function _index() {
@@ -84,7 +84,7 @@ export default function _index() {
             resourceTypes={importResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
-          <ResourceDrawerComponent />
+          <ResourceDetailsDrawer />
         </div>
         <div className={"container mx-auto mt-12"}>
           {isLoading || !types || Object.keys(types).length === 0 ? (
