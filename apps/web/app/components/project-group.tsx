@@ -1,10 +1,10 @@
 import { Resource, ResourceType } from "@repo/shared";
 import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
-import { useResources } from "~/hooks/use-resources";
-import { ResourceRow } from "./resouce-row";
+import { ResourceRow } from "./resource-row";
+import { ResourceContext } from "~/ResourceContext";
 
 export interface ProjectGroupProps {
   objType: string;
@@ -18,7 +18,7 @@ export const ProjectGroup = ({
   searchQuery,
   isLoading,
 }: ProjectGroupProps) => {
-  const { resources } = useResources();
+  const { resources } = useContext(ResourceContext);
 
   const [resourcesForType, setResourcesForType] = useState<Resource[]>([]);
 

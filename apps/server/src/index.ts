@@ -1,13 +1,13 @@
 import express from "express";
 import cors from "cors";
-import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse, CreateResourceRequest } from "@repo/shared";
+import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse, CreateResourceRequest, GetLogsResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import { all } from "./resources.js";
+import * as resources from "./resources.js";
 import { ObjectEvent } from "@kblocks/cli/types";
 import { createCustomResourceInstance } from "./create-resource-utils";
 
@@ -85,7 +85,7 @@ app.post("/api/events", (req, res) => {
 app.get("/api/resources", async (_, res) => {
   const objects: ObjectEvent[] = [];
 
-  for (const [objUri, object] of Object.entries(all)) {
+  for (const [objUri, object] of Object.entries(resources.all)) {
     objects.push({
       type: "OBJECT",
       object,
@@ -111,7 +111,7 @@ app.get("/api/types", async (_, res) => {
   const result: Record<string, ResourceType> = {};
 
   // find all the kblocks.io/v1/blocks objects
-  for (const [objUri, object] of Object.entries(all)) {
+  for (const [objUri, object] of Object.entries(resources.all)) {
     if (!objUri.startsWith("kblocks://kblocks.io/v1/blocks")) {
       continue;
     }
@@ -121,6 +121,13 @@ app.get("/api/types", async (_, res) => {
   }
 
   return res.status(200).json({ types: result } as GetTypesResponse);
+});
+
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = `kblocks://${group}/${version}/${plural}/${system}/${namespace}/${name}`;
+  const logs = resources.logs[objUri] ?? [];
+  return res.status(200).json({ objUri, logs } as GetLogsResponse);
 });
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {

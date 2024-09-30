@@ -1,12 +1,14 @@
-import { LogMessage } from "@repo/shared";
 import { format } from "date-fns";
 import { ChevronRightIcon } from "lucide-react";
-import { useResources } from "~/hooks/use-resources";
+import { useContext } from "react";
+import { ResourceContext } from "~/ResourceContext";
 
-export const LastLogMessage = ({ objType, objUri }: { objType: string; objUri: string }) => {
-  const { resourcesLogs } = useResources();
+export const LastLogMessage = ({ objUri }: { objUri: string }) => {
+  const { logs } = useContext(ResourceContext);
 
-  const log: LogMessage | undefined = resourcesLogs.get(objType)?.get(objUri)?.at(-1);
+  const events = logs.get(objUri) ?? {};
+  const last = Object.keys(events).pop();
+  const log = last ? events[last] : undefined;
   return (
     log ?
       < div className="flex items-center justify-center space-x-1 overflow-hidden min-w-0" >
@@ -16,7 +18,7 @@ export const LastLogMessage = ({ objType, objUri }: { objType: string; objUri: s
         <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
           {format(new Date(log?.timestamp), 'yyyy-MM-dd HH:mm:ss')}
         </span>
-        <span className="text-sm truncate text-muted-foreground" title={log?.message}>
+        <span className="text-sm truncate text-muted-foreground font-mono" title={log?.message}>
           {log?.message}
         </span>
       </div >

@@ -4,22 +4,20 @@
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectGroups } from "~/components/project-groups";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
-import { GetTypesResponse } from "@repo/shared";
 import { createResource } from "~/lib/backend";
-import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
-import RightSideDrawer from "~/components/ui/right-side-drawer";
+import { ResourceDrawerComponent } from "~/components/resource-drawer";
+import { ResourceContext } from "~/ResourceContext";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
 
-  const { isLoading, resourceTypes } = useResources();
+  const { isLoading, resourceTypes } = useContext(ResourceContext);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,7 +32,7 @@ export default function _index() {
 
   const handleCreateResource = async (resourceType: any, providedValues: any) => {
     setIsCreateResourceLoading(true);
-    const res = await createResource({
+    await createResource({
       resourceType: resourceType,
       providedValues: providedValues,
     });
@@ -45,7 +43,7 @@ export default function _index() {
   const handleImportResources = async (newResources: { resourceType: any, providedValues: any[] }) => {
     setIsCreateResourceLoading(true);
     for (const providedValues of newResources.providedValues) {
-      const res = await createResource({
+      await createResource({
         resourceType: newResources.resourceType,
         providedValues: providedValues,
       });
@@ -87,7 +85,7 @@ export default function _index() {
             resourceTypes={importResourceTypes}
             isLoading={isCreateResourceLoading || isLoading}
           />
-          <ResourceDetailsDrawer />
+          <ResourceDrawerComponent />
         </div>
         <div className={"container mx-auto mt-12"}>
           {isLoading ? (
