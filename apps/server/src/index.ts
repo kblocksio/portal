@@ -231,8 +231,7 @@ app.get("/api/auth/callback/github", async (req, res) => {
   }
 
   const next = (req.query.next ?? "/").toString();
-  // return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
-  return res.redirect(303, `http://localhost:3000/${next.slice(1)}`)
+  return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
 });
 
 app.get("/api/github/installations", async (req, res) => {
