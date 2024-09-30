@@ -52,7 +52,7 @@ export default function _index() {
   };
 
   const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
+  const createResourceTypes = Object.values(types).filter(r => !r.kind?.endsWith("Ref"));
   const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
