@@ -13,10 +13,12 @@ import { GetTypesResponse } from "@repo/shared";
 import { createResource } from "~/lib/backend";
 import { useFetch } from "~/hooks/use-fetch";
 import { Skeleton } from "~/components/ui/skeleton";
+import { useResources } from "~/hooks/use-resources";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
-  const { data, isLoading } = useFetch<GetTypesResponse>("/api/types");
+
+  const { isLoading, resourceTypes } = useResources();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -51,7 +53,7 @@ export default function _index() {
     setIsImportWizardOpen(false);
   };
 
-  const types = data?.types ?? {};
+  const types = resourceTypes ?? {};
   const createResourceTypes = Object.values(types).filter(r => !r.kind.endsWith("Ref"));
   const importResourceTypes = Object.values(types).filter(r => r.kind.endsWith("Ref"));
 
