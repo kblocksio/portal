@@ -1,6 +1,7 @@
-import { LogMessage, ObjectMessage, PatchMessage, Resource } from '@repo/shared';
+import { GetTypesResponse, LogMessage, ObjectMessage, PatchMessage, Resource, ResourceType } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
+import { useFetch } from './hooks/use-fetch';
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -8,18 +9,24 @@ if (!WS_URL) {
 }
 
 export interface ResourceContextValue {
+  resourceTypes: Record<string, ResourceType>;
   resources: Map<string, Map<string, Resource>>;
   resourcesLogs: Map<string, Map<string, LogMessage[]>>;
   handleObjectMessages: (messages: ObjectMessage[]) => void;
+  isLoading: boolean;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
+  resourceTypes: {},
   resources: new Map<string, Map<string, Resource>>(),
   resourcesLogs: new Map<string, Map<string, LogMessage[]>>(),
   handleObjectMessages: () => { },
+  isLoading: true,
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [resourceTypes, setResourceTypes] = useState<Record<string, ResourceType>>({});
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
   const [resourcesLogs, setResourcesLogs] = useState<Map<string, Map<string, LogMessage[]>>>(new Map());
   const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectMessage | PatchMessage | LogMessage>(WS_URL, {
@@ -37,6 +44,20 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       console.error('WebSocket error:', error);
     },
   });
+
+  const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
+
+  useEffect(() => {
+    if (resourceTypesData && resourceTypesData.types) {
+      setResourceTypes(resourceTypesData.types);
+    }
+  }, [resourceTypesData]);
+
+  useEffect(() => {
+    if (!isResourceTypesLoading) {
+      setIsLoading(false);
+    }
+  }, [isResourceTypesLoading]);
 
   const handleObjectMessage = (message: ObjectMessage) => {
     console.log('handleObjectMessage', message);
@@ -150,9 +171,11 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   const value: ResourceContextValue = {
+    resourceTypes,
     resources,
     resourcesLogs,
     handleObjectMessages,
+    isLoading,
   };
 
   return <ResourceContext.Provider value={value}>{children}</ResourceContext.Provider>;

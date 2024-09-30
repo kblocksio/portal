@@ -1,182 +1,232 @@
-import * as React from "react";
-import { AlertTriangle, ChevronDown, ChevronRight, Loader } from "lucide-react";
 import { cn } from "~/lib/utils";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
-import { ApiGroup } from "@repo/shared";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { useIcon } from "~/hooks/use-icon";
-import { Link, useLocation } from "@remix-run/react";
-import { useEffect, useMemo, useState } from "react";
-import { useFetch } from "~/hooks/use-fetch";
+import React, { useState, createContext, useContext } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-type MenuItem = {
-  icon?: React.ElementType;
+interface Links {
   label: string;
-  loading?: boolean;
-  href?: string;
-  isLoading?: boolean;
-  children?: MenuItem[];
-  error?: Error;
+  navigate: string;
+  icon: React.JSX.Element | React.ReactNode;
+}
+
+interface SidebarContextProps {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  animate: boolean;
+}
+
+const SidebarContext = createContext<SidebarContextProps | undefined>(
+  undefined,
+);
+
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider");
+  }
+  return context;
 };
 
-const Indicator = ({ isOpen, item }: { isOpen: boolean; item: MenuItem }) => {
-  if (item.error) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </TooltipTrigger>
-          <TooltipContent>{item.error.message}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
+export const SidebarProvider = ({
+  children,
+  open: openProp,
+  setOpen: setOpenProp,
+  animate = true,
+}: {
+  children: React.ReactNode;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  animate?: boolean;
+}) => {
+  const [openState, setOpenState] = useState(false);
 
-  if (!isOpen) {
-    return <ChevronRight className="h-4 w-4" />;
-  }
+  const open = openProp !== undefined ? openProp : openState;
+  const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
-  if (item.isLoading) {
-    return <Loader className="h-4 w-4 animate-spin" />;
-  }
-
-  return <ChevronDown className="h-4 w-4" />;
+  return (
+    <SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
+      {children}
+    </SidebarContext.Provider>
+  );
 };
 
-const MenuItem = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { pathname } = useLocation();
+export const CatalogSidebar = ({
+  children,
+  open,
+  setOpen,
+  animate,
+}: {
+  children: React.ReactNode;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  animate?: boolean;
+}) => {
+  return (
+    <SidebarProvider open={open} setOpen={setOpen} animate={animate}>
+      {children}
+    </SidebarProvider>
+  );
+};
 
-  if (item.children) {
-    return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="hover:bg-accent flex w-full items-center justify-between rounded-md p-1">
-          <div className="flex items-center space-x-2">
-            {item.icon && <item.icon className="h-4 w-4" />}
-            <span>{item.label}</span>
-          </div>
-          <Indicator isOpen={isOpen} item={item} />
-        </CollapsibleTrigger>
-        {item.children.length ? (
-          <CollapsibleContent>
-            <div
+export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+  return (
+    <>
+      <DesktopSidebar {...props} />
+      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
+    </>
+  );
+};
+
+export const DesktopSidebar = ({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof motion.div>) => {
+  const { open, setOpen, animate } = useSidebar();
+  return (
+    <>
+      <motion.div
+        className={cn(
+          "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-neutral-800 w-[300px] flex-shrink-0",
+          className,
+        )}
+        animate={{
+          width: animate ? (open ? "270px" : "60px") : "270px",
+        }}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    </>
+  );
+};
+
+export const MobileSidebar = ({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) => {
+  const { open, setOpen } = useSidebar();
+  return (
+    <>
+      <div
+        className={cn(
+          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full",
+        )}
+        {...props}
+      >
+        <div className="flex justify-end z-20 w-full">
+          <Menu
+            className="text-neutral-800 dark:text-neutral-200"
+            onClick={() => setOpen(!open)}
+          />
+        </div>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ x: "-100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+              }}
               className={cn(
-                "pl-4",
-                level === 0 ? "border-border ml-2 mt-1 border-l" : "",
+                "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+                className,
               )}
             >
-              {item.children.map((child, index) => (
-                <MenuItem key={index} item={child} level={level + 1} />
-              ))}
-            </div>
-          </CollapsibleContent>
-        ) : (
-          <></>
-        )}
-      </Collapsible>
-    );
-  }
-
-  const isActive = pathname === item.href;
-
-  return (
-    <Link
-      to={item.href ?? "/"}
-      className={cn(
-        "flex items-center rounded-md p-1",
-        isActive ? "bg-primary" : "",
-        isActive ? "hover:bg-primary-hover" : "hover:bg-accent",
-      )}
-    >
-      <div className="flex w-full items-center">
-        {item.icon && (
-          <item.icon
-            className={cn(
-              "mr-2 h-4 w-4 flex-shrink-0",
-              isActive ? "text-primary-foreground" : "text-foreground",
-            )}
-          />
-        )}
-        <span
-          className={cn(
-            "flex-grow truncate",
-            isActive ? "text-primary-foreground" : "text-foreground",
+              <div
+                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
+                onClick={() => setOpen(!open)}
+              >
+                <X />
+              </div>
+              {children}
+            </motion.div>
           )}
-        >
-          {item.label}
-        </span>
-        {item.loading && (
-          <Loader className="ml-2 h-4 w-4 flex-shrink-0 animate-spin" />
-        )}
+        </AnimatePresence>
       </div>
-    </Link>
+    </>
   );
 };
 
-const SidebarSection = ({ api }: { api: ApiGroup }) => {
-  const { data, isLoading, error } = useFetch<{ items: any }>(
-    `/api/resources`,
-    {
-      group: api.group,
-      version: api.version,
-      plural: api.plural,
-    },
-  );
-  const { pathname } = useLocation();
-  const [map, setMap] = useState<Record<string, any>>();
-
-  useEffect(() => {
-    if (!data) return; // Only run when data is available
-    const myMap: Record<string, any> = {};
-
-    data.items.forEach((item: any) => {
-      myMap[`${item.metadata.namespace}/${item.metadata.name}`] = item;
-    });
-
-    setMap(myMap);
-  }, [data]);
-
-  const Icon = useIcon(api.icon);
-  const children: MenuItem[] = useMemo(() => {
-    return Object.values(map ?? {}).map((item: any) => ({
-      icon: Icon,
-      label: item.metadata.name,
-      href: `${pathname}/${api.group}/${api.version}/${api.plural}/${item.metadata.namespace ?? "default"}/${item.metadata.name}`,
-    }));
-  }, [map, Icon, pathname, api.group, api.version, api.plural]);
-
+export const SidebarLink = ({
+  link,
+  className,
+  ...props
+}: {
+  link: Links;
+  className?: string;
+  props?: any;
+}) => {
+  const { open, animate } = useSidebar();
+  const navigate = useNavigate();
   return (
-    <MenuItem
-      item={{
-        label: api.plural,
-        icon: Icon,
-        children,
-        isLoading,
-        error: error,
-      }}
-    />
+    <a
+      onClick={() => navigate(link.navigate)}
+      className={cn(
+        "flex items-center justify-start gap-2  group/sidebar py-2 hover:cursor-pointer",
+        className,
+      )}
+      {...props}
+    >
+      {link.icon}
+
+      <motion.span
+        animate={{
+          display: animate ? (open ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (open ? 1 : 0) : 1,
+        }}
+        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+      >
+        {link.label}
+      </motion.span>
+    </a>
   );
 };
 
-export interface CatalogSidebarProps {
-  apiGroups: ApiGroup[];
-}
-export const CatalogSidebar = ({ apiGroups }: CatalogSidebarProps) => {
+export const SidebarLabel = ({
+  label,
+  icon,
+  className,
+  onClick,
+  isActive,
+  ...props
+}: {
+  label: string;
+  icon: React.JSX.Element | React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  props?: any;
+  isActive?: boolean;
+}) => {
+  const { open, animate } = useSidebar();
   return (
-    <nav>
-      {apiGroups.map((api, index) => (
-        <SidebarSection key={index} api={api} />
-      ))}
-    </nav>
+    <a
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-start gap-2 group/sidebar p-2 hover:cursor-pointer",
+        className,
+        isActive ? "text-primary bg-gray-200 rounded-lg" : ""
+      )}
+      {...props}
+    >
+      {icon}
+
+      <motion.span
+        animate={{
+          display: animate ? (open ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (open ? 1 : 0) : 1,
+        }}
+        className={cn("text-base leading-relaxed text-grey-700 dark:text-neutral-200 group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0",
+          isActive ? "font-bold" : "")}
+      >
+        {label}
+      </motion.span>
+    </a>
   );
 };
