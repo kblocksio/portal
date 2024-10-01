@@ -43,7 +43,6 @@ export const ResourceDetailsDrawer = () => {
   }, [selectedResource, refetch]);
 
   const finalLogs = useMemo(() => {
-    console.log("super heavy api call");
     const resourceLogs = selectedResource ? logs.get(selectedResource.objUri) : {};
     const map: Record<string, LogEvent> = { ...resourceLogs };
     for (const entry of (oldLogs as any)?.logs ?? []) {
