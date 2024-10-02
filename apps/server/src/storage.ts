@@ -83,15 +83,12 @@ async function deleteObject(blockUri: string) {
 
 export async function getAllObjects() {
   const keys = await listAllObjects();
-  console.log("all keys:", keys);
   if (keys.length === 0) {
     return {};
   }
 
   const redis = await connection();
   const values = await redis.mGet(keys.map(key => keyForObject(key)));
-
-  console.log("values:", values);
 
   const result: Record<string, kblocks.ApiObject> = {};
   for (let i = 0; i < keys.length; i++) {
