@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kblocks-api
+name: kblocks-backend
 description: Kblocks backend
 version: 0.1.0
 type: application

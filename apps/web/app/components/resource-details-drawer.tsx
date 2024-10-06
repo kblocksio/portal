@@ -4,7 +4,7 @@ import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
-import { type LogEvent } from "@kblocks/cli/types";
+import { type LogEvent } from "@kblocks/api";
 
 export const ResourceDetailsDrawer = () => {
 

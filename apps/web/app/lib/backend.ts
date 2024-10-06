@@ -1,4 +1,4 @@
-import { GetResourceResponse, GetUserResponse, ResourceQuery, GetTypesResponse, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
+import { GetResourceResponse, GetUserResponse, ResourceQuery, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
 
 // if VITE_BACKEND_URL is not set, use the current origin
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -44,5 +44,9 @@ export const getUser = async (): Promise<GetUserResponse> => {
 
 export const createResource = async (req: CreateResourceRequest): Promise<CreateResourceResponse> => {
   const objType = `${req.resourceType.group}/${req.resourceType.version}/${req.resourceType.plural}`;
-  return post(`/api/resources/${objType}?system_id=demo`, req);
+  return post(`/api/resources/${objType}?system=demo`, req);
+};
+
+export const deleteResource = async (objUri: string) => {
+  return post(`/api/resources/${objUri}`, { force: true });
 };

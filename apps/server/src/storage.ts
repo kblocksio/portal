@@ -1,4 +1,4 @@
-import * as kblocks from "@kblocks/cli/types";
+import * as kblocks from "@kblocks/api";
 import { createClient } from "redis";
 import { getEnv } from "./util";
 

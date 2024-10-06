@@ -1,6 +1,7 @@
 import Ajv, { SchemaObject } from 'ajv';
 import crypto from 'crypto';
 import { ResourceType } from '../../../packages/shared/src/types';
+import { ApiObject } from '@kblocks/cli/src/api';
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 
@@ -125,7 +126,7 @@ const generateNewResourceName = (namespace: string, kind: string) => {
   return `${namespace}-${kind.toLowerCase()}-${randomString}`;
 }
 
-export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any, namespace: string) => {
+export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any, namespace: string): Promise<ApiObject> => {
   const adjustedValues = adjustProvidedValues(resource.openApiSchema, providedValues);
   
   // Validate the adjusted values
