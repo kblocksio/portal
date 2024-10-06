@@ -4,6 +4,8 @@ import { ZodObjectOrWrapped } from "~/components/ui/auto-form/utils";
 import { ResourceType } from "@repo/shared";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
+import FormGenerator from "./resource-form";
+import { useMemo } from "react";
 
 export const CreateNewResourceForm = ({
   selectedResourceType,
@@ -16,31 +18,14 @@ export const CreateNewResourceForm = ({
   handleBack: () => void;
   isLoading: boolean;
 }) => {
+
+  const cleanedSchema = useMemo(() => {
+    const schema = { ...selectedResourceType.openApiSchema };
+    delete schema.properties?.status;
+    return schema;
+  }, [selectedResourceType.openApiSchema]);
+
   return (
-    <AutoForm
-      className={"max-h-[800px] overflow-auto"}
-      formSchema={
-        prepareOpenApiSchemaForAutoForm(
-          selectedResourceType?.openApiSchema,
-        ) as ZodObjectOrWrapped
-      }
-      onSubmit={handleCreate}
-    >
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={handleBack}>
-          Back
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            "Create"
-          )}
-        </Button>
-      </div>
-    </AutoForm>
+    <FormGenerator schema={cleanedSchema} />
   )
 }
