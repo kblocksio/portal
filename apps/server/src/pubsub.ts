@@ -1,6 +1,7 @@
 import { createClient } from 'redis';
 import { getEnv } from "./util";
 import { EventEmitter } from 'stream';
+import { ControlCommand } from "@kblocks/api";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
@@ -46,8 +47,8 @@ export async function unsubscribeFromEvents(callback: (event: string) => void) {
   events.removeListener("event", callback);
 }
 
-export function subscribeToControlRequests({ systemId, group, version, plural }: { systemId: string, group: string, version: string, plural: string }, callback: (event: string) => void) {
-  const channel = createChannelFor(systemId, group, version, plural);
+export function subscribeToControlRequests({ system, group, version, plural }: { system: string, group: string, version: string, plural: string }, callback: (event: string) => void) {
+  const channel = createChannelFor(system, group, version, plural);
   subscribeClient.subscribe(channel, callback);
 
   return {
@@ -58,12 +59,12 @@ export function subscribeToControlRequests({ systemId, group, version, plural }:
   }
 }
 
-export function publishControlRequest({ systemId, group, version, plural }: { systemId: string, group: string, version: string, plural: string }, message: string) {
-  const channel = createChannelFor(systemId, group, version, plural);
-  console.log(`publishing control message to ${channel}:`, message);
-  publishClient.publish(channel, message);
+export function publishControlRequest({ system, group, version, plural }: { system: string, group: string, version: string, plural: string }, command: ControlCommand) {
+  const channel = createChannelFor(system, group, version, plural);
+  console.log(`publishing control message to ${channel}:`, command);
+  publishClient.publish(channel, JSON.stringify(command));
 }
 
-function createChannelFor(systemId: string, group: string, version: string, plural: string) {
-  return `create:${systemId}/${group}/${version}/${plural}`;
+function createChannelFor(system: string, group: string, version: string, plural: string) {
+  return `create:${system}/${group}/${version}/${plural}`;
 }

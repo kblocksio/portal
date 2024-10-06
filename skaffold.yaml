@@ -5,7 +5,7 @@ kind: Config
 
 build:
   artifacts:
-  - image: wingcloudbot/kblocks-api
+  - image: wingcloudbot/kblocks-backend
     docker:
       buildArgs: 
         ENV: prod
@@ -17,7 +17,7 @@ build:
 deploy:
   helm:
     releases:
-      - name: kblocks-api
+      - name: kblocks-backend
         chartPath: ./deploy
         setValueTemplates:
           image: "{{.IMAGE_FULLY_QUALIFIED}}"

@@ -5,8 +5,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext } from "react";
-import { Resource, ResourceContext } from "~/ResourceContext";
-import { ApiObject } from "@kblocks/cli/types";
+import { ResourceContext } from "~/ResourceContext";
+import { ApiObject } from "@kblocks/api";
 
 export const ResourceRow = ({
   item,

@@ -7,7 +7,7 @@ import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/cli/types";
+import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
 import { createCustomResourceInstance } from "./create-resource-utils";
 import { getAllObjects, handleEvent, loadLogs } from "./storage";
 
@@ -49,28 +49,26 @@ app.ws("/api/events", (ws) => {
 
 app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const { group, version, plural } = req.params;
-  const { system_id } = req.query as unknown as { system_id: string };
+  const { system: sys, system_id } = req.query as unknown as { system?: string, system_id?: string };
+
+  const system = sys ?? system_id;
   
-  if (!group || !version || !plural || !system_id) {
-    console.error("Invalid control connection request. Missing one of group, version, plural, system_id query params.");
+  if (!group || !version || !plural || !system) {
+    console.error("Invalid control connection request. Missing one of group, version, plural, system query params.");
     console.log("Query params:", req.query);
     return ws.close();
   }
 
   const resourceType = `${group}/${version}/${plural}`;
-  console.log(`control connection: ${resourceType} for ${system_id}`);
+  console.log(`control connection: ${resourceType} for ${system}`);
 
-  const { unsubscribe } = pubsub.subscribeToControlRequests({ systemId: system_id, group, version, plural }, (message) => {
+  const { unsubscribe } = pubsub.subscribeToControlRequests({ system, group, version, plural }, (message) => {
     console.log(`sending control message to ${resourceType}:`, message);
     ws.send(message);
   });
 
-  ws.on("message", (message) => {
-    console.log(`received control message from ${resourceType}:`, message);
-  });
-
   ws.on("close", () => {
-    console.log(`control connection closed: ${resourceType} for ${system_id}`);
+    console.log(`control connection closed: ${resourceType} for system ${system}`);
     unsubscribe();
   });
 });
@@ -143,9 +141,9 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
   const apiVersion = `${group}/${version}`;
 
-  const systemId = req.query.system_id as string;
-  if (!systemId) {
-    return res.status(400).json({ error: "system_id is required as a query param" });
+  const system = req.query.system as string;
+  if (!system) {
+    return res.status(400).json({ error: "'system' is required as a query param" });
   }
 
   const { resourceType, providedValues } = req.body as CreateResourceRequest;
@@ -163,10 +161,34 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
     return res.status(400).json({ error: `Object is missing "metadata.name" field` });
   }
 
-  pubsub.publishControlRequest({ systemId, group, version, plural }, JSON.stringify(obj));
+  pubsub.publishControlRequest({ system, group, version, plural }, {
+    type: "APPLY",
+    object: obj,
+  });
 
   return res.status(200).json({ message: "Create request accepted", objType: `${group}/${version}/${plural}`, obj });
 });
+
+app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+
+  pubsub.publishControlRequest({ system, group, version, plural }, {
+    type: "DELETE",
+    objUri,
+  });
+
+  return res.status(200).json({ message: "Delete request accepted" });
+});
+
 
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);

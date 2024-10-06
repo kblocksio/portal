@@ -1,4 +1,4 @@
-import { LogEvent, LogLevel } from "@kblocks/cli/types";
+import { LogEvent, LogLevel } from "@kblocks/api";
 import { format } from "date-fns/format";
 import { cn } from "~/lib/utils";
 
