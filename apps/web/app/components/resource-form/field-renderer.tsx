@@ -3,20 +3,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
-
-interface ModalProps {
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0 bg-black opacity-50" onClick={onClose}></div>
-      <div className="bg-white p-4 rounded shadow-lg z-50">{children}</div>
-    </div>
-  );
-};
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 
 interface ObjectFormProps {
   properties: any;
@@ -282,16 +269,23 @@ export const FieldRenderer = ({
             }
           </div>
         )}
-        {showObjectModal && (
-          <Modal onClose={() => setShowObjectModal(false)}>
-            <ObjectFieldForm
-              properties={objectProperties}
-              initialData={objectData}
-              onSave={handleSaveObject}
-              onCancel={() => setShowObjectModal(false)}
-            />
-          </Modal>
-        )}
+        {
+          <Dialog open={showObjectModal} onOpenChange={(open: boolean) => setShowObjectModal(open)}>
+            <DialogContent className="sm:max-w-[800px]">
+              <DialogHeader className="border-b border-gray-200 pb-4 mb-4">
+                <DialogTitle className="text-lg">
+                  {fieldName}
+                </DialogTitle>
+              </DialogHeader>
+              <ObjectFieldForm
+                properties={objectProperties}
+                initialData={objectData}
+                onSave={handleSaveObject}
+                onCancel={() => setShowObjectModal(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        }
       </div >
     );
 
@@ -372,8 +366,13 @@ export const FieldRenderer = ({
             ))}
           </div>
         )}
-        {showArrayModal && (
-          <Modal onClose={() => setShowArrayModal(false)}>
+        <Dialog open={showArrayModal} onOpenChange={(open: boolean) => setShowArrayModal(open)}>
+          <DialogContent className="sm:max-w-[800px]">
+            <DialogHeader className="border-b border-gray-200 pb-4 mb-4">
+              <DialogTitle className="text-lg">
+                {fieldName} item
+              </DialogTitle>
+            </DialogHeader>
             <ArrayItemForm
               fieldName={fieldName ?? ''}
               schema={schema.items}
@@ -381,10 +380,10 @@ export const FieldRenderer = ({
               onSave={handleSaveItem}
               onCancel={() => setShowArrayModal(false)}
             />
-          </Modal>
-        )}
+          </DialogContent>
+        </Dialog>
       </div>
-    );
+    )
   } else {
     // Primitive type
     const value = getDataByPath(formData, path) ?? '';
@@ -405,6 +404,3 @@ export const FieldRenderer = ({
     );
   }
 };
-
-
-
