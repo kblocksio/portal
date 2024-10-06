@@ -38,10 +38,6 @@ export const getResources = async (query: ResourceQuery): Promise<GetResourceRes
   });
 };
 
-export const getTypes = async (): Promise<GetTypesResponse> => {
-  return get(`/api/types`);
-};
-
 export const getUser = async (): Promise<GetUserResponse> => {
   return get(`/api/user`);
 };
