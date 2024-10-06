@@ -78,7 +78,7 @@ export const UserProvider = (props: PropsWithChildren) => {
           </p>
         </div>
       )}
-      {error && <div>error: {error.message}</div>}
+      {error && <ErrorPage />}
       {!isLoading && !error && !user && <SignIn />}
       {user && (
         <Context.Provider value={user}>{props.children}</Context.Provider>
@@ -86,3 +86,22 @@ export const UserProvider = (props: PropsWithChildren) => {
     </>
   );
 };
+
+const ErrorPage = () => {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <img
+          src="/wing.svg"
+          alt="Wing Logo"
+          width={251}
+          height={153}
+        />
+        <h1 className="mt-8 text-4xl font-bold text-gray-900">Coming Soon...</h1>
+        <p className="mt-4 text-xl text-gray-600">
+          We're working on something exciting. Please check back later.
+        </p>
+      </div>
+    </div>
+  )
+}

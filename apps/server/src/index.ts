@@ -10,6 +10,7 @@ import * as pubsub from "./pubsub";
 import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
 import { createCustomResourceInstance } from "./create-resource-utils";
 import { getAllObjects, handleEvent, loadLogs } from "./storage";
+import { whitelist } from "./whitelist";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -35,7 +36,7 @@ app.get("/", async (_, res) => {
 app.ws("/api/events", (ws) => {
   console.log("Client connected");
 
-  const callback = (message: string) => { 
+  const callback = (message: string) => {
     ws.send(message);
   };
 
@@ -52,7 +53,7 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const { system: sys, system_id } = req.query as unknown as { system?: string, system_id?: string };
 
   const system = sys ?? system_id;
-  
+
   if (!group || !version || !plural || !system) {
     console.error("Invalid control connection request. Missing one of group, version, plural, system query params.");
     console.log("Query params:", req.query);
@@ -252,6 +253,11 @@ app.get("/api/auth/callback/github", async (req, res) => {
   const supabase = createServerSupabase(req, res);
 
   const user = await supabase.auth.getUser();
+
+  // check if the user is whitelisted
+  if (!whitelist.includes(user.data.user?.email ?? "")) {
+    return res.status(403).json({ error: "User is not whitelisted" });
+  }
 
   const tokens = await exchangeCodeForTokens(code.toString());
 
