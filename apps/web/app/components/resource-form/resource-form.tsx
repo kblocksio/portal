@@ -18,17 +18,19 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: F
   };
 
   return (
-    <form className="space-y-4 overflow-y-auto max-h-[80vh]" onSubmit={(e) => {
+    <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
       e.preventDefault();
       handleSubmit(formData);
     }}>
-      <FieldRenderer
-        schema={schema}
-        path=""
-        formData={formData}
-        updateFormData={updateFormData}
-        hideField={true}
-      />
+      <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
+        <FieldRenderer
+          schema={schema}
+          path=""
+          formData={formData}
+          updateFormData={updateFormData}
+          hideField={true}
+        />
+      </div>
       <div className="flex justify-between">
         <Button variant="outline" onClick={handleBack}>
           Back
@@ -45,9 +47,9 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: F
         </Button>
       </div>
 
-      <pre className="mt-4 bg-gray-100 p-2 rounded">
+      {/* <pre className="mt-4 bg-gray-100 p-2 rounded">
         {JSON.stringify(formData, null, 2)}
-      </pre>
+      </pre> */}
     </form>
   );
 };

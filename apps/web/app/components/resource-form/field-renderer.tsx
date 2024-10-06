@@ -4,8 +4,10 @@ import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Pencil, Plus, X } from "lucide-react";
-
+import { Pencil, Plus, X, Check } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
+import { Switch } from "~/components/ui/switch";
 
 interface ObjectFormProps {
   properties: any;
@@ -16,65 +18,6 @@ interface ObjectFormProps {
   requiredFields?: string[];
 }
 
-export const ObjectFieldForm = ({
-  requiredFields,
-  properties,
-  onSave,
-  onCancel,
-  initialData = {},
-  hideField = false,
-}: ObjectFormProps) => {
-  const [objectData, setObjectData] = useState<any>(initialData);
-
-  const updateObjectData = (newData: any) => {
-    setObjectData(newData);
-  };
-
-  return (
-    <div className="w-full max-h-full overflow-y-auto p-1">
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onSave(objectData);
-      }}>
-        {properties
-          ? Object.keys(properties).map((key) => (
-            <FieldRenderer
-              key={key}
-              schema={properties[key]}
-              path={key}
-              formData={objectData}
-              updateFormData={updateObjectData}
-              fieldName={key}
-              hideField={hideField}
-              required={requiredFields?.includes(key)}
-            />
-          ))
-          : null
-        }
-        <div className="flex space-x-2 mt-4">
-          <Button
-            type="submit"
-            variant="secondary"
-            className="px-2 py-1"
-          >
-            Save
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onCancel}
-            className="px-2 py-1"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-
 interface ArrayItemFormProps {
   fieldName: string;
   schema: any;
@@ -82,67 +25,6 @@ interface ArrayItemFormProps {
   onCancel: () => void;
   initialData?: any;
 }
-
-export const ArrayItemForm = ({
-  fieldName,
-  schema,
-  onSave,
-  onCancel,
-  initialData,
-}: ArrayItemFormProps) => {
-  const { type } = schema;
-
-  const [itemData, setItemData] = useState<any>(initialData ?? (type === 'object' ? {} : ''));
-
-  const updateItemData = (newData: any) => {
-    setItemData(newData);
-  };
-
-  const handleSave = () => {
-    onSave(itemData);
-  };
-
-  return (
-    <div className="w-full max-h-full overflow-y-auto p-1">
-      {type === 'object' || type === 'array' ? (
-        <FieldRenderer
-          schema={schema}
-          path=""
-          formData={itemData}
-          updateFormData={updateItemData}
-          hideField={true}
-          required={schema.required?.includes(fieldName)}
-        />
-      ) : (
-        <PrimitiveFieldRenderer
-          type={type}
-          handleChange={setItemData}
-          value={itemData}
-          fieldName={fieldName}
-          required={schema.required?.includes(fieldName)}
-        />
-      )}
-      <div className="flex space-x-2 mt-4">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={handleSave}
-          className="px-2 py-1"
-        >
-          Save
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-          className="px-2 py-1"
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 interface PrimitiveFieldRendererProps {
   type: string;
@@ -153,42 +35,15 @@ interface PrimitiveFieldRendererProps {
   required?: boolean;
 }
 
-const PrimitiveFieldRenderer = ({
-  type,
-  handleChange,
-  value,
-  fieldName,
-  hideField = false,
-  required = false,
-}: PrimitiveFieldRendererProps) => {
-  return (
-    <div className="m-1">
-      {!hideField && fieldName && (
-        <Label className="mb-2">{fieldName}</Label>
-      )}
-      {type === 'boolean' ? (
-        <Select value={value} onValueChange={handleChange} required={required}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a value" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">True</SelectItem>
-            <SelectItem value="false">False</SelectItem>
-          </SelectContent>
-        </Select>
-      ) : (
-        <Input
-          required={required}
-          type={type === 'number' ? 'number' : 'text'}
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
-          className="border p-1 rounded w-full"
-        />
-      )}
-    </div>
-  );
+interface FieldRendererProps {
+  schema: any;
+  path: string;
+  formData: any;
+  updateFormData: (data: any) => void;
+  fieldName?: string;
+  hideField?: boolean;
+  required?: boolean;
 }
-
 
 const updateDataByPath = (data: any, path: string, value: any): any => {
   const keys = path.split('.');
@@ -214,14 +69,171 @@ const getDataByPath = (data: any, path: string) => {
   return path.split('.').reduce((acc, key) => (acc ? acc[key] : undefined), data);
 };
 
-interface FieldRendererProps {
-  schema: any;
-  path: string;
-  formData: any;
-  updateFormData: (data: any) => void;
-  fieldName?: string;
-  hideField?: boolean;
-  required?: boolean;
+const isObjectPopulated = (obj: any) => {
+  return obj && Object.keys(obj).length > 0;
+};
+
+export const ObjectFieldForm = ({
+  requiredFields,
+  properties,
+  onSave,
+  onCancel,
+  initialData = {},
+  hideField = false,
+}: ObjectFormProps) => {
+  const [objectData, setObjectData] = useState<any>(initialData);
+
+  const updateObjectData = (newData: any) => {
+    setObjectData(newData);
+  };
+
+  return (
+    <Card className="w-full">
+      <CardContent className="p-6">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSave(objectData);
+        }}>
+          <div className="space-y-4 ml-2 mr-2">
+            {properties
+              ? Object.keys(properties).map((key) => (
+                <FieldRenderer
+                  key={key}
+                  schema={properties[key]}
+                  path={key}
+                  formData={objectData}
+                  updateFormData={updateObjectData}
+                  fieldName={key}
+                  hideField={hideField}
+                  required={requiredFields?.includes(key)}
+                />
+              ))
+              : null
+            }
+          </div>
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+            >
+              Save
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export const ArrayItemForm = ({
+  fieldName,
+  schema,
+  onSave,
+  onCancel,
+  initialData,
+}: ArrayItemFormProps) => {
+  const { type } = schema;
+
+  const [itemData, setItemData] = useState<any>(initialData ?? (type === 'object' ? {} : ''));
+
+  const updateItemData = (newData: any) => {
+    setItemData(newData);
+  };
+
+  const handleSave = () => {
+    onSave(itemData);
+  };
+
+  return (
+    <Card className="w-full">
+      <CardContent className="p-6">
+        <div className="space-y-4 ml-2 mr-2">
+          {type === 'object' || type === 'array' ? (
+            <FieldRenderer
+              schema={schema}
+              path=""
+              formData={itemData}
+              updateFormData={updateItemData}
+              hideField={true}
+              required={schema.required?.includes(fieldName)}
+            />
+          ) : (
+            <PrimitiveFieldRenderer
+              type={type}
+              handleChange={setItemData}
+              value={itemData}
+              fieldName={fieldName}
+              required={schema.required?.includes(fieldName)}
+            />
+          )}
+        </div>
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="default"
+            onClick={handleSave}
+          >
+            Save
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const PrimitiveFieldRenderer = ({
+  type,
+  handleChange,
+  value,
+  fieldName,
+  hideField = false,
+  required = false,
+}: PrimitiveFieldRendererProps) => {
+  return (
+    <div className="space-y-4">
+      {!hideField && fieldName && (
+        <Label htmlFor={fieldName} className="text-sm font-medium">
+          {fieldName}
+        </Label>
+      )}
+      {type === 'boolean' ? (
+        <div className="flex items-center space-x-2">
+          <Switch
+            id={fieldName}
+            checked={value === 'true'}
+            onCheckedChange={(checked) => handleChange(checked ? 'true' : 'false')}
+          />
+          <Label htmlFor={fieldName} className="text-sm">
+            {value ? 'Enabled' : 'Disabled'}
+          </Label>
+        </div>
+      ) : (
+        <Input
+          id={fieldName}
+          required={required}
+          type={type === 'number' ? 'number' : 'text'}
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          className="w-full"
+        />
+      )}
+    </div>
+  );
 }
 
 export const FieldRenderer = ({
@@ -236,7 +248,6 @@ export const FieldRenderer = ({
   const { type, properties, additionalProperties } = schema;
 
   if (type === 'object' && (properties || additionalProperties)) {
-
     const [showObjectModal, setShowObjectModal] = useState(false);
 
     const handleEditObject = () => {
@@ -254,21 +265,30 @@ export const FieldRenderer = ({
     const objectProperties = properties || additionalProperties.properties;
 
     return (
-      <div className="m-1">
+      <div className="space-y-4">
         {!hideField && fieldName ? (
-          <div className="flex items-center mb-2">
-            <Label className="mb-2">{fieldName}</Label>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Label className="text-sm font-medium">{fieldName}</Label>
+              {isObjectPopulated(objectData) && (
+                <Badge variant="secondary" className="text-xs">
+                  <Check className="w-3 h-3 mr-1" />
+                  Set
+                </Badge>
+              )}
+            </div>
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={handleEditObject}
-              className="px-2 py-1 ml-auto"
+              className="h-8 px-3 text-xs mr-2"
             >
-              <Pencil className="w-4 h-4" />
+              <Pencil className="w-3 h-3 mr-1" />
+              Edit
             </Button>
           </div>
         ) : (
-          <div className="space-y-4 ml-4">
+          <div className="space-y-4 ml-2 mr-2">
             {objectProperties
               ? Object.keys(objectProperties).map((key) => (
                 <FieldRenderer
@@ -285,25 +305,23 @@ export const FieldRenderer = ({
             }
           </div>
         )}
-        {
-          <Dialog open={showObjectModal} onOpenChange={(open: boolean) => setShowObjectModal(open)}>
-            <DialogContent className="sm:max-w-[800px]">
-              <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
-                <DialogTitle className="text-lg">
-                  {fieldName}
-                </DialogTitle>
-              </DialogHeader>
-              <ObjectFieldForm
-                requiredFields={schema.required}
-                properties={objectProperties}
-                initialData={objectData}
-                onSave={handleSaveObject}
-                onCancel={() => setShowObjectModal(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        }
-      </div >
+        <Dialog open={showObjectModal} onOpenChange={(open: boolean) => setShowObjectModal(open)}>
+          <DialogContent className="sm:max-w-[800px]">
+            <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
+              <DialogTitle className="text-lg">
+                {fieldName}
+              </DialogTitle>
+            </DialogHeader>
+            <ObjectFieldForm
+              requiredFields={schema.required}
+              properties={objectProperties}
+              initialData={objectData}
+              onSave={handleSaveObject}
+              onCancel={() => setShowObjectModal(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
     );
 
   } else if (type === 'array') {
@@ -342,47 +360,56 @@ export const FieldRenderer = ({
     };
 
     return (
-      <div className="m-1">
-        {!hideField && fieldName && (
-          <div className="flex items-center mb-2">
-            <Label className="mb-2">{fieldName}</Label>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleAddItem}
-              className="px-2 py-1 ml-auto"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-        {items.length > 0 && (
-          <div className="space-y-2 ml-4">
-            {items.map((item: any, index: number) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="flex-1">
-                  {typeof item === 'object' ? `Item ${index + 1}` : item}
+      <Card className="mt-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            {fieldName}
+          </CardTitle>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddItem}
+            className="h-8 px-3 text-xs"
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Add
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {items.length > 0 ? (
+            <div className="space-y-2">
+              {items.map((item: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-md">
+                  <div className="flex-1 truncate text-sm">
+                    {typeof item === 'object' ? `Item ${index + 1}` : item}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => handleEditItem(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      <span className="sr-only">Edit item</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => handleRemoveItem(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="w-3 h-3" />
+                      <span className="sr-only">Remove item</span>
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => handleEditItem(index)}
-                  className="px-2 py-1"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => handleRemoveItem(index)}
-                  className="px-2 py-1"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No items added yet.</p>
+          )}
+        </CardContent>
         <Dialog open={showArrayModal} onOpenChange={(open: boolean) => setShowArrayModal(open)}>
           <DialogContent className="sm:max-w-[800px]">
             <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
@@ -399,7 +426,7 @@ export const FieldRenderer = ({
             />
           </DialogContent>
         </Dialog>
-      </div>
+      </Card>
     )
   } else {
     // Primitive type
