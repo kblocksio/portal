@@ -4,6 +4,8 @@ import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { Pencil, Plus, X } from "lucide-react";
+
 
 interface ObjectFormProps {
   properties: any;
@@ -11,9 +13,11 @@ interface ObjectFormProps {
   onCancel: () => void;
   initialData?: any;
   hideField?: boolean;
+  requiredFields?: string[];
 }
 
 export const ObjectFieldForm = ({
+  requiredFields,
   properties,
   onSave,
   onCancel,
@@ -27,8 +31,12 @@ export const ObjectFieldForm = ({
   };
 
   return (
-    <div className="w-full max-h-full overflow-y-auto p-4">
-      <div className="space-y-4 ml-4">
+    <div className="w-full max-h-full overflow-y-auto p-1">
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSave(objectData);
+      }}>
         {properties
           ? Object.keys(properties).map((key) => (
             <FieldRenderer
@@ -39,29 +47,29 @@ export const ObjectFieldForm = ({
               updateFormData={updateObjectData}
               fieldName={key}
               hideField={hideField}
+              required={requiredFields?.includes(key)}
             />
           ))
           : null
         }
-      </div>
-      <div className="flex space-x-2 mt-4">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => onSave(objectData)}
-          className="px-2 py-1"
-        >
-          Save
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-          className="px-2 py-1"
-        >
-          Cancel
-        </Button>
-      </div>
+        <div className="flex space-x-2 mt-4">
+          <Button
+            type="submit"
+            variant="secondary"
+            className="px-2 py-1"
+          >
+            Save
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            className="px-2 py-1"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
@@ -95,7 +103,7 @@ export const ArrayItemForm = ({
   };
 
   return (
-    <div className="w-full max-h-full overflow-y-auto p-4">
+    <div className="w-full max-h-full overflow-y-auto p-1">
       {type === 'object' || type === 'array' ? (
         <FieldRenderer
           schema={schema}
@@ -103,6 +111,7 @@ export const ArrayItemForm = ({
           formData={itemData}
           updateFormData={updateItemData}
           hideField={true}
+          required={schema.required?.includes(fieldName)}
         />
       ) : (
         <PrimitiveFieldRenderer
@@ -110,6 +119,7 @@ export const ArrayItemForm = ({
           handleChange={setItemData}
           value={itemData}
           fieldName={fieldName}
+          required={schema.required?.includes(fieldName)}
         />
       )}
       <div className="flex space-x-2 mt-4">
@@ -140,6 +150,7 @@ interface PrimitiveFieldRendererProps {
   value: any;
   fieldName?: string;
   hideField?: boolean;
+  required?: boolean;
 }
 
 const PrimitiveFieldRenderer = ({
@@ -148,14 +159,15 @@ const PrimitiveFieldRenderer = ({
   value,
   fieldName,
   hideField = false,
+  required = false,
 }: PrimitiveFieldRendererProps) => {
   return (
-    <div className="mb-4">
+    <div className="m-1">
       {!hideField && fieldName && (
-        <Label className="text-base mb-2">{fieldName}</Label>
+        <Label className="mb-2">{fieldName}</Label>
       )}
       {type === 'boolean' ? (
-        <Select value={value} onValueChange={handleChange}>
+        <Select value={value} onValueChange={handleChange} required={required}>
           <SelectTrigger>
             <SelectValue placeholder="Select a value" />
           </SelectTrigger>
@@ -166,6 +178,7 @@ const PrimitiveFieldRenderer = ({
         </Select>
       ) : (
         <Input
+          required={required}
           type={type === 'number' ? 'number' : 'text'}
           value={value}
           onChange={(e) => handleChange(e.target.value)}
@@ -208,6 +221,7 @@ interface FieldRendererProps {
   updateFormData: (data: any) => void;
   fieldName?: string;
   hideField?: boolean;
+  required?: boolean;
 }
 
 export const FieldRenderer = ({
@@ -217,6 +231,7 @@ export const FieldRenderer = ({
   updateFormData,
   fieldName,
   hideField = false,
+  required = false,
 }: FieldRendererProps) => {
   const { type, properties, additionalProperties } = schema;
 
@@ -239,17 +254,17 @@ export const FieldRenderer = ({
     const objectProperties = properties || additionalProperties.properties;
 
     return (
-      <div className="mb-4">
+      <div className="m-1">
         {!hideField && fieldName ? (
           <div className="flex items-center mb-2">
-            <Label className="text-base mb-2">{fieldName}</Label>
+            <Label className="mb-2">{fieldName}</Label>
             <Button
               type="button"
               variant="secondary"
               onClick={handleEditObject}
               className="px-2 py-1 ml-auto"
             >
-              Edit
+              <Pencil className="w-4 h-4" />
             </Button>
           </div>
         ) : (
@@ -263,6 +278,7 @@ export const FieldRenderer = ({
                   formData={formData}
                   updateFormData={updateFormData}
                   fieldName={key}
+                  required={schema.required?.includes(key)}
                 />
               ))
               : null
@@ -272,12 +288,13 @@ export const FieldRenderer = ({
         {
           <Dialog open={showObjectModal} onOpenChange={(open: boolean) => setShowObjectModal(open)}>
             <DialogContent className="sm:max-w-[800px]">
-              <DialogHeader className="border-b border-gray-200 pb-4 mb-4">
+              <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
                 <DialogTitle className="text-lg">
                   {fieldName}
                 </DialogTitle>
               </DialogHeader>
               <ObjectFieldForm
+                requiredFields={schema.required}
                 properties={objectProperties}
                 initialData={objectData}
                 onSave={handleSaveObject}
@@ -325,17 +342,17 @@ export const FieldRenderer = ({
     };
 
     return (
-      <div className="mb-4">
+      <div className="m-1">
         {!hideField && fieldName && (
           <div className="flex items-center mb-2">
-            <Label className="text-base mb-2">{fieldName}</Label>
+            <Label className="mb-2">{fieldName}</Label>
             <Button
               type="button"
               variant="secondary"
               onClick={handleAddItem}
               className="px-2 py-1 ml-auto"
             >
-              Add
+              <Plus className="w-4 h-4" />
             </Button>
           </div>
         )}
@@ -352,7 +369,7 @@ export const FieldRenderer = ({
                   onClick={() => handleEditItem(index)}
                   className="px-2 py-1"
                 >
-                  Edit
+                  <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
                   type="button"
@@ -360,7 +377,7 @@ export const FieldRenderer = ({
                   onClick={() => handleRemoveItem(index)}
                   className="px-2 py-1"
                 >
-                  Remove
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             ))}
@@ -368,7 +385,7 @@ export const FieldRenderer = ({
         )}
         <Dialog open={showArrayModal} onOpenChange={(open: boolean) => setShowArrayModal(open)}>
           <DialogContent className="sm:max-w-[800px]">
-            <DialogHeader className="border-b border-gray-200 pb-4 mb-4">
+            <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
               <DialogTitle className="text-lg">
                 {fieldName} item
               </DialogTitle>
@@ -395,6 +412,7 @@ export const FieldRenderer = ({
 
     return (
       <PrimitiveFieldRenderer
+        required={required}
         type={type}
         handleChange={handleChange}
         value={value}

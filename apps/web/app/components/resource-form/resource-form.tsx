@@ -7,7 +7,7 @@ export interface FormGeneratorProps {
   schema: any,
   isLoading: boolean,
   handleBack: () => void,
-  handleSubmit: () => void,
+  handleSubmit: (formData: any) => void,
 };
 
 export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: FormGeneratorProps) => {
@@ -18,7 +18,10 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: F
   };
 
   return (
-    <form className="space-y-4 overflow-y-auto max-h-[80vh]">
+    <form className="space-y-4 overflow-y-auto max-h-[80vh]" onSubmit={(e) => {
+      e.preventDefault();
+      handleSubmit(formData);
+    }}>
       <FieldRenderer
         schema={schema}
         path=""
@@ -30,7 +33,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: F
         <Button variant="outline" onClick={handleBack}>
           Back
         </Button>
-        <Button type='button' onClick={() => console.log(formData)} disabled={isLoading}>
+        <Button type='submit' disabled={isLoading}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
