@@ -81,6 +81,7 @@ export const ObjectFieldForm = ({
 
 
 interface ArrayItemFormProps {
+  fieldName: string;
   schema: any;
   onSave: (data: any) => void;
   onCancel: () => void;
@@ -88,6 +89,7 @@ interface ArrayItemFormProps {
 }
 
 export const ArrayItemForm = ({
+  fieldName,
   schema,
   onSave,
   onCancel,
@@ -116,32 +118,12 @@ export const ArrayItemForm = ({
           hideField={true}
         />
       ) : (
-        <div className="mb-4">
-          <Label className="text-base mb-2">Value</Label>
-          {type === 'boolean' ? (
-            <Select
-              value={itemData}
-              onValueChange={(value) => setItemData(value === 'true')}
-            >          <SelectTrigger id="boolean-select">
-                <SelectValue placeholder="Select a value" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">True</SelectItem>
-                <SelectItem value="false">False</SelectItem>
-              </SelectContent>
-            </Select>
-
-          ) : (
-            <Input
-              type={type === 'number' ? 'number' : 'text'}
-              value={itemData}
-              onChange={(e) =>
-                setItemData(type === 'number' ? Number(e.target.value) : e.target.value)
-              }
-              className="border p-1 rounded w-full"
-            />
-          )}
-        </div>
+        <PrimitiveFieldRenderer
+          type={type}
+          handleChange={setItemData}
+          value={itemData}
+          fieldName={fieldName}
+        />
       )}
       <div className="flex space-x-2 mt-4">
         <Button
@@ -165,6 +147,47 @@ export const ArrayItemForm = ({
   );
 };
 
+interface PrimitiveFieldRendererProps {
+  type: string;
+  handleChange: (value: string) => void;
+  value: any;
+  fieldName?: string;
+  hideField?: boolean;
+}
+
+const PrimitiveFieldRenderer = ({
+  type,
+  handleChange,
+  value,
+  fieldName,
+  hideField = false,
+}: PrimitiveFieldRendererProps) => {
+  return (
+    <div className="mb-4">
+      {!hideField && fieldName && (
+        <Label className="text-base mb-2">{fieldName}</Label>
+      )}
+      {type === 'boolean' ? (
+        <Select value={value} onValueChange={handleChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">True</SelectItem>
+            <SelectItem value="false">False</SelectItem>
+          </SelectContent>
+        </Select>
+      ) : (
+        <Input
+          type={type === 'number' ? 'number' : 'text'}
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          className="border p-1 rounded w-full"
+        />
+      )}
+    </div>
+  );
+}
 
 
 const updateDataByPath = (data: any, path: string, value: any): any => {
@@ -271,6 +294,7 @@ export const FieldRenderer = ({
         )}
       </div >
     );
+
   } else if (type === 'array') {
     const [showArrayModal, setShowArrayModal] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -351,6 +375,7 @@ export const FieldRenderer = ({
         {showArrayModal && (
           <Modal onClose={() => setShowArrayModal(false)}>
             <ArrayItemForm
+              fieldName={fieldName ?? ''}
               schema={schema.items}
               initialData={editIndex !== null ? items[editIndex] : undefined}
               onSave={handleSaveItem}
@@ -370,29 +395,13 @@ export const FieldRenderer = ({
     };
 
     return (
-      <div className="mb-4">
-        {!hideField && fieldName && (
-          <Label className="text-base mb-2">{fieldName}</Label>
-        )}
-        {type === 'boolean' ? (
-          <Select value={value} onValueChange={handleChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">True</SelectItem>
-              <SelectItem value="false">False</SelectItem>
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            type={type === 'number' ? 'number' : 'text'}
-            value={value}
-            onChange={(e) => handleChange(e.target.value)}
-            className="border p-1 rounded w-full"
-          />
-        )}
-      </div>
+      <PrimitiveFieldRenderer
+        type={type}
+        handleChange={handleChange}
+        value={value}
+        fieldName={fieldName}
+        hideField={hideField}
+      />
     );
   }
 };
