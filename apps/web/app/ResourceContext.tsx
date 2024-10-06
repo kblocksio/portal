@@ -72,7 +72,17 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
-      setResourceTypes(resourceTypesData.types);
+      console.log("resourceTypesData", resourceTypesData);
+      const result: Record<string, ResourceType> = {};
+      for (const [k, v] of Object.entries(resourceTypesData.types).sort(([l], [r]) => l.localeCompare(r))) {
+        if (!k.startsWith("acme.com/v1")) {
+          continue;
+        }
+
+        result[k] = v;
+      }
+
+      setResourceTypes(result);
     }
   }, [resourceTypesData]);
 

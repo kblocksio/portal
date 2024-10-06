@@ -7,9 +7,9 @@ import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import * as resources from "./resources.js";
-import { ObjectEvent } from "@kblocks/cli/types";
+import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/cli/types";
 import { createCustomResourceInstance } from "./create-resource-utils";
+import { getAllObjects, handleEvent, loadLogs } from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -50,6 +50,7 @@ app.ws("/api/events", (ws) => {
 app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const { group, version, plural } = req.params;
   const { system_id } = req.query as unknown as { system_id: string };
+  
   if (!group || !version || !plural || !system_id) {
     console.error("Invalid control connection request. Missing one of group, version, plural, system_id query params.");
     console.log("Query params:", req.query);
@@ -79,18 +80,21 @@ app.post("/api/events", (req, res) => {
   const body = JSON.stringify(req.body);
   console.log("EVENT:", body);
   pubsub.publishEvent(body);
+  handleEvent(req.body as WorkerEvent); // <-- runs in the background
   return res.status(200);
 });
 
 app.get("/api/resources", async (_, res) => {
   const objects: ObjectEvent[] = [];
 
-  for (const [objUri, object] of Object.entries(resources.all)) {
+  const all = await getAllObjects();
+
+  for (const [objUri, object] of Object.entries(all)) {
     objects.push({
       type: "OBJECT",
       object,
       objUri,
-      objType: typeFromUri(objUri),
+      objType: blockTypeFromUri(objUri),
       reason: "SYNC",
     });
   }
@@ -99,10 +103,6 @@ app.get("/api/resources", async (_, res) => {
   return res.status(200).json(response);
 });
 
-function typeFromUri(objUri: string): string {
-  return objUri.split("kblocks://")[1].split("/").slice(0,3).join("/");
-}
-
 app.get("/api/projects", async (_, res) => {
   return res.status(200).json(projects);
 });
@@ -110,8 +110,10 @@ app.get("/api/projects", async (_, res) => {
 app.get("/api/types", async (_, res) => {
   const result: Record<string, ResourceType> = {};
 
+  const all = await getAllObjects();
+
   // find all the kblocks.io/v1/blocks objects
-  for (const [objUri, object] of Object.entries(resources.all)) {
+  for (const [objUri, object] of Object.entries(all)) {
     if (!objUri.startsWith("kblocks://kblocks.io/v1/blocks")) {
       continue;
     }
@@ -125,8 +127,15 @@ app.get("/api/types", async (_, res) => {
 
 app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
   const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = `kblocks://${group}/${version}/${plural}/${system}/${namespace}/${name}`;
-  const logs = resources.logs[objUri] ?? [];
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const logs = await loadLogs(objUri);
   return res.status(200).json({ objUri, logs } as GetLogsResponse);
 });
 

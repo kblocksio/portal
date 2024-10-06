@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
 import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";

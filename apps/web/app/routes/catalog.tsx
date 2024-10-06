@@ -43,7 +43,6 @@ export default function Catalog() {
       <CatalogSidebar animate={false}>
         <SidebarBody className="justify-between gap-10 bg-muted border-r">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <h1 className="text-3xl font-bold mb-4 border-b border-gray-200 pb-4">Catalog</h1>
             <div className="flex flex-col">
               {resourceTypes &&
                 Object.values(resourceTypes).map((resourceType, idx) => {
