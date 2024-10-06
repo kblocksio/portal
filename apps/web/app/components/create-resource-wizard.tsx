@@ -56,10 +56,6 @@ export const CreateResourceWizard = ({
   };
 
   const handleCreate = useCallback((providedValues: any) => {
-    console.log(providedValues);
-    return;
-
-
     if (!selectedResourceType) {
       return;
     }
