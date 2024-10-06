@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Input } from './ui/input';
 // Utility functions to update and get data by path
 const updateDataByPath = (data: any, path: string, value: any): any => {
   const keys = path.split('.');
@@ -101,7 +103,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div className="mb-4">
           {!hideLabel && fieldName && (
             <div className="flex items-center mb-2">
-              <label className="block font-medium">{fieldName}</label>
+              <Label className="text-base mb-2">{fieldName}</Label>
               <Button
                 type="button"
                 variant="secondary"
@@ -155,7 +157,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <div className="mb-4">
           {!hideLabel && fieldName && (
-            <label className="block font-medium mb-2">{fieldName}</label>
+            <Label className="text-base mb-2">{fieldName}</Label>
           )}
           <div className="space-y-4 ml-4">
             {properties
@@ -213,7 +215,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
       <div className="mb-4">
         {!hideLabel && fieldName && (
           <div className="flex items-center mb-2">
-            <label className="block font-medium">{fieldName}</label>
+            <Label className="text-base mb-2">{fieldName}</Label>
             <Button
               type="button"
               variant="secondary"
@@ -267,39 +269,31 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
     // Primitive type
     const value = getDataByPath(formData, path) ?? '';
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      let inputValue: any;
-      if (type === 'number') {
-        inputValue = Number(e.target.value);
-      } else if (type === 'boolean') {
-        inputValue = e.target.value === 'true';
-      } else {
-        inputValue = e.target.value;
-      }
-      const newFormData = updateDataByPath(formData, path, inputValue);
+    const handleChange = (value: string) => {
+      const newFormData = updateDataByPath(formData, path, value);
       updateFormData(newFormData);
     };
 
     return (
       <div className="mb-4">
         {!hideLabel && fieldName && (
-          <label className="block font-medium mb-1">{fieldName}</label>
+          <Label className="text-base mb-2">{fieldName}</Label>
         )}
         {type === 'boolean' ? (
-          <select
-            value={value}
-            onChange={handleChange}
-            className="border p-1 rounded w-full"
-          >
-            <option value="">Select</option>
-            <option value="true">True</option>
-            <option value="false">False</option>
-          </select>
+          <Select value={value} onValueChange={handleChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">True</SelectItem>
+              <SelectItem value="false">False</SelectItem>
+            </SelectContent>
+          </Select>
         ) : (
-          <input
+          <Input
             type={type === 'number' ? 'number' : 'text'}
             value={value}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e.target.value)}
             className="border p-1 rounded w-full"
           />
         )}
@@ -346,19 +340,22 @@ const ArrayItemForm: React.FC<ArrayItemFormProps> = ({
         />
       ) : (
         <div className="mb-4">
-          <label className="block font-medium mb-1">Value</label>
+          <Label className="text-base mb-2">Value</Label>
           {type === 'boolean' ? (
-            <select
+            <Select
               value={itemData}
-              onChange={(e) => setItemData(e.target.value === 'true')}
-              className="border p-1 rounded w-full"
-            >
-              <option value="">Select</option>
-              <option value="true">True</option>
-              <option value="false">False</option>
-            </select>
+              onValueChange={(value) => setItemData(value === 'true')}
+            >          <SelectTrigger id="boolean-select">
+                <SelectValue placeholder="Select a value" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">True</SelectItem>
+                <SelectItem value="false">False</SelectItem>
+              </SelectContent>
+            </Select>
+
           ) : (
-            <input
+            <Input
               type={type === 'number' ? 'number' : 'text'}
               value={itemData}
               onChange={(e) =>
