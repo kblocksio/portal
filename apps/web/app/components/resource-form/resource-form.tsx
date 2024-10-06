@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Input } from './ui/input';
-// Utility functions to update and get data by path
+import { Button } from '../ui/button';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Input } from '../ui/input';
+import { Loader2 } from 'lucide-react';
+
 const updateDataByPath = (data: any, path: string, value: any): any => {
   const keys = path.split('.');
   const newData = { ...data };
@@ -64,132 +65,77 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
   const { type, properties, additionalProperties } = schema;
 
   if (type === 'object' && (properties || additionalProperties)) {
-    if (additionalProperties) {
-      // Handle additionalProperties like an array
-      const [showModal, setShowModal] = useState(false);
-      const [editIndex, setEditIndex] = useState<number | null>(null);
-      const items = getDataByPath(formData, path) || [];
+    const [showObjectModal, setShowObjectModal] = useState(false);
+    const handleEditObject = () => {
+      setShowObjectModal(true);
+    };
 
-      const handleAddItem = () => {
-        setEditIndex(null);
-        setShowModal(true);
-      };
+    const objectData = getDataByPath(formData, path) || {};
 
-      const handleEditItem = (index: number) => {
-        setEditIndex(index);
-        setShowModal(true);
-      };
+    const handleSaveObject = (objectData: any) => {
+      const newFormData = updateDataByPath(formData, path, objectData);
+      updateFormData(newFormData);
+      setShowObjectModal(false);
+    };
 
-      const handleRemoveItem = (index: number) => {
-        const currentData = [...items];
-        currentData.splice(index, 1);
-        const newFormData = updateDataByPath(formData, path, currentData);
-        updateFormData(newFormData);
-      };
-
-      const handleSaveItem = (itemData: any) => {
-        const currentData = [...items];
-        if (editIndex !== null) {
-          currentData[editIndex] = itemData;
-        } else {
-          currentData.push(itemData);
-        }
-        const newFormData = updateDataByPath(formData, path, currentData);
-        updateFormData(newFormData);
-        setShowModal(false);
-      };
-
-      return (
-        <div className="mb-4">
-          {!hideLabel && fieldName && (
-            <div className="flex items-center mb-2">
-              <Label className="text-base mb-2">{fieldName}</Label>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleAddItem}
-                className="px-2 py-1 ml-auto"
-              >
-                Add
-              </Button>
-            </div>
-          )}
-          {items.length > 0 && (
-            <div className="space-y-2 ml-4">
-              {items.map((item: any, index: number) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="flex-1">{`Item ${index + 1}`}</div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => handleEditItem(index)}
-                    className="px-2 py-1"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => handleRemoveItem(index)}
-                    className="px-2 py-1"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-          {showModal && (
-            <Modal onClose={() => setShowModal(false)}>
-              <ObjectForm
-                schema={additionalProperties}
-                initialData={editIndex !== null ? items[editIndex] : {}}
-                onSave={handleSaveItem}
-                onCancel={() => setShowModal(false)}
-                hideLabel={true}
-              />
-            </Modal>
-          )}
-        </div>
-      );
-    } else {
-      // Handle normal properties
-      return (
-        <div className="mb-4">
-          {!hideLabel && fieldName && (
+    const objectProperties = properties || additionalProperties.properties;
+    return (
+      <div className="mb-4">
+        {!hideLabel && fieldName ? (
+          <div className="flex items-center mb-2">
             <Label className="text-base mb-2">{fieldName}</Label>
-          )}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleEditObject}
+              className="px-2 py-1 ml-auto"
+            >
+              Edit
+            </Button>
+          </div>
+        ) : (
           <div className="space-y-4 ml-4">
-            {properties
-              ? Object.keys(properties).map((key) => (
+            {objectProperties
+              ? Object.keys(objectProperties).map((key) => (
                 <FieldRenderer
                   key={key}
-                  schema={properties[key]}
+                  schema={objectProperties[key]}
                   path={path ? `${path}.${key}` : key}
                   formData={formData}
                   updateFormData={updateFormData}
                   fieldName={key}
                 />
               ))
-              : null}
+              : null
+            }
           </div>
-        </div>
-      );
-    }
+        )}
+        {showObjectModal && (
+          <Modal onClose={() => setShowObjectModal(false)}>
+            <ObjectForm
+              properties={objectProperties}
+              initialData={objectData}
+              onSave={handleSaveObject}
+              onCancel={() => setShowObjectModal(false)}
+            />
+          </Modal>
+        )}
+      </div >
+    );
   } else if (type === 'array') {
-    const [showModal, setShowModal] = useState(false);
+    const [showArrayModal, setShowArrayModal] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
 
     const items = getDataByPath(formData, path) || [];
 
     const handleAddItem = () => {
       setEditIndex(null);
-      setShowModal(true);
+      setShowArrayModal(true);
     };
 
     const handleEditItem = (index: number) => {
       setEditIndex(index);
-      setShowModal(true);
+      setShowArrayModal(true);
     };
 
     const handleRemoveItem = (index: number) => {
@@ -208,7 +154,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
       }
       const newFormData = updateDataByPath(formData, path, currentData);
       updateFormData(newFormData);
-      setShowModal(false);
+      setShowArrayModal(false);
     };
 
     return (
@@ -253,13 +199,13 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
             ))}
           </div>
         )}
-        {showModal && (
-          <Modal onClose={() => setShowModal(false)}>
+        {showArrayModal && (
+          <Modal onClose={() => setShowArrayModal(false)}>
             <ArrayItemForm
               schema={schema.items}
               initialData={editIndex !== null ? items[editIndex] : undefined}
               onSave={handleSaveItem}
-              onCancel={() => setShowModal(false)}
+              onCancel={() => setShowArrayModal(false)}
             />
           </Modal>
         )}
@@ -388,22 +334,21 @@ const ArrayItemForm: React.FC<ArrayItemFormProps> = ({
   );
 };
 
-// ObjectForm component
 interface ObjectFormProps {
-  schema: any;
+  properties: any;
   onSave: (data: any) => void;
   onCancel: () => void;
   initialData?: any;
   hideLabel?: boolean;
 }
 
-const ObjectForm: React.FC<ObjectFormProps> = ({
-  schema,
+const ObjectForm = ({
+  properties,
   onSave,
   onCancel,
   initialData = {},
   hideLabel = false,
-}) => {
+}: ObjectFormProps) => {
   const [objectData, setObjectData] = useState<any>(initialData);
 
   const updateObjectData = (newData: any) => {
@@ -412,13 +357,22 @@ const ObjectForm: React.FC<ObjectFormProps> = ({
 
   return (
     <div className="w-full max-h-full overflow-y-auto p-4">
-      <FieldRenderer
-        schema={schema}
-        path=""
-        formData={objectData}
-        updateFormData={updateObjectData}
-        hideLabel={hideLabel}
-      />
+      <div className="space-y-4 ml-4">
+        {properties
+          ? Object.keys(properties).map((key) => (
+            <FieldRenderer
+              key={key}
+              schema={properties[key]}
+              path={key}
+              formData={objectData}
+              updateFormData={updateObjectData}
+              fieldName={key}
+              hideLabel={hideLabel}
+            />
+          ))
+          : null
+        }
+      </div>
       <div className="flex space-x-2 mt-4">
         <Button
           type="button"
@@ -441,12 +395,14 @@ const ObjectForm: React.FC<ObjectFormProps> = ({
   );
 };
 
-// Main FormGenerator component
-interface FormGeneratorProps {
-  schema: any;
-}
+export interface FormGeneratorProps {
+  schema: any,
+  isLoading: boolean,
+  handleBack: () => void,
+  handleSubmit: () => void,
+};
 
-const FormGenerator: React.FC<FormGeneratorProps> = ({ schema }) => {
+export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: FormGeneratorProps) => {
   const [formData, setFormData] = useState<any>({});
 
   const updateFormData = (newData: any) => {
@@ -462,11 +418,25 @@ const FormGenerator: React.FC<FormGeneratorProps> = ({ schema }) => {
         updateFormData={updateFormData}
         hideLabel={true}
       />
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          Back
+        </Button>
+        <Button type='button' onClick={() => console.log(formData)} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            "Create"
+          )}
+        </Button>
+      </div>
+
       <pre className="mt-4 bg-gray-100 p-2 rounded">
         {JSON.stringify(formData, null, 2)}
       </pre>
     </form>
   );
 };
-
-export default FormGenerator;

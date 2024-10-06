@@ -4,7 +4,7 @@ import { ZodObjectOrWrapped } from "~/components/ui/auto-form/utils";
 import { ResourceType } from "@repo/shared";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
-import FormGenerator from "./resource-form";
+import { FormGenerator } from "./resource-form/resource-form";
 import { useMemo } from "react";
 
 export const CreateNewResourceForm = ({
@@ -26,6 +26,6 @@ export const CreateNewResourceForm = ({
   }, [selectedResourceType.openApiSchema]);
 
   return (
-    <FormGenerator schema={cleanedSchema} />
+    <FormGenerator schema={cleanedSchema} isLoading={isLoading} handleBack={handleBack} handleSubmit={handleCreate} />
   )
 }
