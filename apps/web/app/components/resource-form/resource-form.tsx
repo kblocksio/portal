@@ -12,17 +12,11 @@ export interface FormGeneratorProps {
 };
 
 export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, initialValues }: FormGeneratorProps) => {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>(initialValues || {});
 
   const updateFormData = (newData: any) => {
     setFormData(newData);
   };
-
-  useEffect(() => {
-    if (initialValues) {
-      setFormData(initialValues);
-    }
-  }, [initialValues]);
 
   return (
     <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
