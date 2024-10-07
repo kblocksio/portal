@@ -32,6 +32,7 @@ export const createCustomResourceInstance = async (resource: ResourceType, provi
         name: generateNewResourceName(namespace, resource.kind),
         namespace: namespace,
       },
+      // incase of edit, providedValues will contain the existing resource propreties and override the above updates
       ...providedValues,
     };
   } else {

@@ -1,14 +1,33 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "~/components/ui/sheet"
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
 import { type LogEvent } from "@kblocks/api";
+import { CreateResourceWizard } from "./create-resource-wizard";
+import { filterDataBySchema } from "~/lib/utils";
+import { createResource } from "~/lib/backend";
 
 export const ResourceDetailsDrawer = () => {
 
   const logContainerRef = useRef<HTMLDivElement>(null);
+  const [isEditWizardOpen, setIsEditWizardOpen] = useState(false);
+  const [isEditResourceLoading, setIsEditResourceLoading] = useState(false);
+
+  const handleEditResource = async (resourceType: any, providedValues: any) => {
+    setIsEditResourceLoading(true);
+    const updatedResource = {
+      ...selectedResource,
+      ...providedValues,
+    };
+    await createResource({
+      resourceType: resourceType,
+      providedValues: updatedResource,
+    });
+    setIsEditResourceLoading(false);
+    setIsEditWizardOpen(false);
+  };
 
   const { selectedResourceId, setSelectedResourceId, resourceTypes, logs, resources } = useContext(ResourceContext);
 
@@ -169,6 +188,20 @@ export const ResourceDetailsDrawer = () => {
             </div>
           </div>
         </div>
+        <SheetFooter>
+          {selectedResourceType &&
+            <CreateResourceWizard
+              isOpen={isEditWizardOpen}
+              handleOnOpenChange={setIsEditWizardOpen}
+              handleOnCreate={handleEditResource}
+              resourceTypes={Object.values(resourceTypes)}
+              editModeData={{
+                resourceType: selectedResourceType,
+                initialValues: filterDataBySchema(selectedResourceType.openApiSchema, selectedResource),
+              }}
+              isLoading={isEditResourceLoading}
+            />}
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

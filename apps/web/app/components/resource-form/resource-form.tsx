@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
@@ -8,14 +8,21 @@ export interface FormGeneratorProps {
   isLoading: boolean,
   handleBack: () => void,
   handleSubmit: (formData: any) => void,
+  initialValues?: any;
 };
 
-export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: FormGeneratorProps) => {
+export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, initialValues }: FormGeneratorProps) => {
   const [formData, setFormData] = useState<any>({});
 
   const updateFormData = (newData: any) => {
     setFormData(newData);
   };
+
+  useEffect(() => {
+    if (initialValues) {
+      setFormData(initialValues);
+    }
+  }, [initialValues]);
 
   return (
     <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
@@ -39,10 +46,10 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit }: F
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {initialValues ? "Editing..." : "Creating..."}
             </>
           ) : (
-            "Create"
+            initialValues ? "Edit" : "Create"
           )}
         </Button>
       </div>

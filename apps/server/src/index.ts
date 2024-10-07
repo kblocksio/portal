@@ -256,8 +256,11 @@ app.get("/api/auth/callback/github", async (req, res) => {
 
   // check if the user is whitelisted
   if (!whitelist.includes(user.data.user?.email ?? "")) {
+    console.log("user is not whitelisted", user.data.user?.email);
     return res.status(403).json({ error: "User is not whitelisted" });
   }
+
+  console.log("user is whitelisted", user.data.user?.email);
 
   const tokens = await exchangeCodeForTokens(code.toString());
 
