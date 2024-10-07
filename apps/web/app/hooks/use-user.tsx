@@ -8,7 +8,8 @@ import {
   useState,
 } from "react";
 import { SignIn } from "~/components/sign-in.jsx";
-import { getUser } from "~/lib/backend";
+import { getUser, rejectUser } from "~/lib/backend";
+import { isUserWhitelisted } from "./whitelist";
 
 const MockUser = {
   id: '1',
@@ -54,6 +55,13 @@ export const UserProvider = (props: PropsWithChildren) => {
     async function fetchUser() {
       try {
         const response = await getUser();
+        const email = response.user.email;
+        const isWhitelisted = await isUserWhitelisted(email);
+        if (!isWhitelisted) {
+          await rejectUser();
+          setError(new Error("User is not whitelisted and was signed out"));
+          return;
+        }
         setUser(response.user);
       } catch (error) {
         setError(error as Error);

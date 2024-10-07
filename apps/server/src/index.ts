@@ -10,7 +10,6 @@ import * as pubsub from "./pubsub";
 import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
 import { createCustomResourceInstance } from "./create-resource-utils";
 import { getAllObjects, handleEvent, loadLogs } from "./storage";
-import { whitelist } from "./whitelist";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -213,6 +212,12 @@ app.get("/api/auth/sign-out", async (req, res) => {
   return res.redirect("/");
 });
 
+app.get("/api/auth/reject", async (req, res) => {
+  const supabase = createServerSupabase(req, res);
+  await supabase.auth.signOut();
+  return res.status(200).json({ error: "User is not whitelisted and was signed out" });
+});
+
 app.get("/api/auth/callback/supabase", async (req, res) => {
   const { error, error_description } = req.query;
   if (error) {
@@ -253,14 +258,6 @@ app.get("/api/auth/callback/github", async (req, res) => {
   const supabase = createServerSupabase(req, res);
 
   const user = await supabase.auth.getUser();
-
-  // check if the user is whitelisted
-  if (!whitelist.includes(user.data.user?.email ?? "")) {
-    console.log("user is not whitelisted", user.data.user?.email);
-    return res.status(403).json({ error: "User is not whitelisted" });
-  }
-
-  console.log("user is whitelisted", user.data.user?.email);
 
   const tokens = await exchangeCodeForTokens(code.toString());
 

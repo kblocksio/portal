@@ -28,7 +28,7 @@ export const request = async (method: string, path: string, body: any) => {
       },
       body: JSON.stringify(body),
     });
-    return res.json(); 
+    return res.json();
   } catch (error: any) {
     console.log(error);
     throw new Error(JSON.stringify(error));
@@ -46,6 +46,10 @@ export const getResources = async (query: ResourceQuery): Promise<GetResourceRes
 
 export const getUser = async (): Promise<GetUserResponse> => {
   return get(`/api/user`);
+};
+
+export const rejectUser = async (): Promise<void> => {
+  return get(`/api/auth/reject`);
 };
 
 export const createResource = async (req: CreateResourceRequest): Promise<CreateResourceResponse> => {

@@ -6,3 +6,7 @@ export const whitelist = [
   "cristianp@wing.cloud",
   "wing.cloud.apps@wing.cloud"
 ];
+
+export const isUserWhitelisted = (email?: string) => {
+  return whitelist.includes(email ?? "");
+};
