@@ -176,7 +176,6 @@ export const ResourceDetailsDrawer = () => {
           {selectedResourceType && selectedResource &&
             <Button onClick={() => openEditWizard({
               resourceType: selectedResourceType,
-              obj: selectedResource,
               resource: selectedResource,
             })}>Edit</Button>
           }

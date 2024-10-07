@@ -37,8 +37,8 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
     return Object.values(resourceTypes).filter(r => !r.kind?.endsWith("Ref"));
   }, [resourceTypes]);
 
-  const openWizard = useCallback((editMode?: EditModeData) => {
-    setEditModeData(editMode);
+  const openWizard = useCallback((editModeData?: EditModeData) => {
+    setEditModeData(editModeData);
     setIsOpen(true);
   }, []);
 
