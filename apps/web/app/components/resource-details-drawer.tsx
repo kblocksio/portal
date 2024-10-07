@@ -7,11 +7,14 @@ import { useFetch } from "~/hooks/use-fetch";
 import { type LogEvent } from "@kblocks/api";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { Button } from "~/components/ui/button";
+import { DeleteResourceDialog } from "./delete-resource";
 export const ResourceDetailsDrawer = () => {
 
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   const { openWizard: openEditWizard } = useCreateResourceWizard();
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const { selectedResourceId, setSelectedResourceId, resourceTypes, logs, resources } = useContext(ResourceContext);
 
@@ -174,10 +177,18 @@ export const ResourceDetailsDrawer = () => {
         </div>
         <SheetFooter>
           {selectedResourceType && selectedResource &&
-            <Button onClick={() => openEditWizard({
-              resourceType: selectedResourceType,
-              resource: selectedResource,
-            })}>Edit</Button>
+            <div className="flex gap-2">
+              <Button onClick={() => openEditWizard({
+                resourceType: selectedResourceType,
+                resource: selectedResource,
+              })}>Edit</Button>
+              <Button className="bg-destructive text-destructive-foreground" onClick={() => setIsDeleteOpen(true)}>Delete</Button>
+              <DeleteResourceDialog
+                resource={selectedResource}
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+              />
+            </div>
           }
         </SheetFooter>
       </SheetContent>

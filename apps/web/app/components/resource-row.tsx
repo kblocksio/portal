@@ -15,7 +15,7 @@ import {
 } from "./ui/dropdown-menu";
 import { DeleteResourceDialog } from "./delete-resource"; // Add this import
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
-import { ResourceType } from "../../../../packages/shared/src/types";
+import { ResourceType } from "@repo/shared";
 
 export const ResourceRow = ({
   item,
@@ -140,6 +140,7 @@ export function StatusBadge({ readyCondition, message }: { readyCondition?: any,
 function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
   const [isOpen, setIsOpen] = useState(false);
   const { openWizard: openEditWizard } = useCreateResourceWizard();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
 
@@ -155,7 +156,20 @@ function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceT
         }}>
           Edit
         </DropdownMenuItem>
-        <DeleteResourceDialog resource={resource} closeMenu={closeMenu} />
+        <DropdownMenuItem className="text-destructive" onSelect={(e) => {
+          e.preventDefault();
+          setIsDeleteOpen(true);
+        }}>
+          Delete...
+        </DropdownMenuItem>
+        <DeleteResourceDialog
+          resource={resource}
+          isOpen={isDeleteOpen}
+          onClose={() => {
+            setIsDeleteOpen(false);
+            closeMenu();
+          }}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

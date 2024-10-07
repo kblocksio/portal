@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ApiObject } from "@kblocks/api";
+import { useEffect, useState } from "react";
 import { deleteResource } from "~/lib/backend";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -11,20 +10,30 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import { DropdownMenuItem } from "./ui/dropdown-menu";
+import { Resource } from "~/ResourceContext";
 
-export function DeleteResourceDialog({ resource, closeMenu }: { resource: ApiObject; closeMenu: () => void }) {
+interface DeleteResourceDialogProps {
+  resource: Resource;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function DeleteResourceDialog({ resource, isOpen, onClose }: DeleteResourceDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(isOpen);
+  }, [isOpen]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
     setDeleteError(null);
     try {
       await deleteResource(resource.objUri);
-      closeMenu();
+      onClose();
     } catch (error: any) {
       setDeleteError(error.message ?? "An error occurred while deleting the resource");
     } finally {
@@ -36,17 +45,16 @@ export function DeleteResourceDialog({ resource, closeMenu }: { resource: ApiObj
     setDeleteError(null);
     // Only close the menu if there's no error
     if (!deleteError) {
-      closeMenu();
+      onClose();
     }
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-          Delete...
-        </DropdownMenuItem>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+      }
+    }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -74,7 +82,7 @@ export function DeleteResourceDialog({ resource, closeMenu }: { resource: ApiObj
               e.preventDefault();
               handleDelete();
             }}
-            className="bg-destructive text-destructive-foreground" 
+            className="bg-destructive text-destructive-foreground"
             disabled={isDeleting}
           >
             {isDeleting ? (
