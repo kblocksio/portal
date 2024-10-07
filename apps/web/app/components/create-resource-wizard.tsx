@@ -13,6 +13,7 @@ import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ResourceType } from "@repo/shared";
 import { ApiObject } from "@kblocks/api";
+import { ObjectMetadata } from "./resource-form/resource-form";
 
 export interface EditModeData {
   resourceType: ResourceType;
@@ -23,7 +24,7 @@ export interface CreateResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (resourceType: ResourceType, obj: ApiObject) => void;
+  handleOnCreate: (system: string, resourceType: ResourceType, obj: ApiObject) => void;
   resourceTypes: ResourceType[];
   editModeData?: EditModeData;
 }
@@ -67,22 +68,22 @@ export const CreateResourceWizard = ({
     }
   };
 
-  const handleCreate = useCallback((values: any) => {
+  const handleCreate = useCallback((meta: ObjectMetadata, values: any) => {
     if (!selectedResourceType) {
       return;
     }
 
-    // TODO: get name and namespace from wizard
-    const name = `${selectedResourceType.kind}-${Date.now()}`.toLocaleLowerCase();
+    console.log("values", values);
 
-    handleOnCreate(selectedResourceType, {
+    delete values.metadata?.system;
+
+    handleOnCreate(meta.system, selectedResourceType, {
       apiVersion: `${selectedResourceType.group}/${selectedResourceType.version}`,
       kind: selectedResourceType.kind,
       metadata: {
-        name,
-        namespace: "default",
+        name: meta.name,
+        namespace: meta.namespace,
       },
-
       ...values,
     });
   }, [selectedResourceType, handleOnCreate]);

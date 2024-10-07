@@ -15,13 +15,13 @@ export const ResourceDetailsDrawer = () => {
   const [isEditWizardOpen, setIsEditWizardOpen] = useState(false);
   const [isEditResourceLoading, setIsEditResourceLoading] = useState(false);
 
-  const handleEditResource = async (resourceType: ResourceType, providedValues: ApiObject) => {
+  const handleEditResource = async (system: string, resourceType: ResourceType, providedValues: ApiObject) => {
     setIsEditResourceLoading(true);
     const updatedResource = {
       ...selectedResource,
       ...providedValues,
     };
-    await createResource(resourceType, updatedResource);
+    await createResource(system, resourceType, updatedResource);
     setIsEditResourceLoading(false);
     setIsEditWizardOpen(false);
   };

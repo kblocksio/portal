@@ -52,8 +52,7 @@ export const rejectUser = async (): Promise<void> => {
   return get(`/api/auth/reject`);
 };
 
-export const createResource = async (type: ResourceType, obj: ApiObject): Promise<CreateResourceResponse> => {
-  const system = "demo";
+export const createResource = async (system: string, type: ResourceType, obj: ApiObject): Promise<CreateResourceResponse> => {
   const objType = `${type.group}/${type.version}/${type.plural}`;
 
   console.log("Creating resource", objType, obj);

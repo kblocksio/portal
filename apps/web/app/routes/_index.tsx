@@ -28,9 +28,9 @@ export default function _index() {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = async (resourceType: ResourceType, obj: ApiObject) => {
+  const handleCreateResource = async (system: string, resourceType: ResourceType, obj: ApiObject) => {
     setIsCreateResourceLoading(true);
-    await createResource(resourceType, obj);
+    await createResource(system, resourceType, obj);
     setIsCreateResourceLoading(false);
     setIsCreateWizardOpen(false);
   };
@@ -38,7 +38,7 @@ export default function _index() {
   const handleImportResources = async (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => {
     setIsCreateResourceLoading(true);
     for (const obj of newResources.objects) {
-      await createResource(newResources.resourceType, obj);
+      await createResource("demo", newResources.resourceType, obj);
     }
     setIsCreateResourceLoading(false);
     setIsImportWizardOpen(false);

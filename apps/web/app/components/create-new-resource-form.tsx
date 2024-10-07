@@ -1,5 +1,5 @@
 import { ResourceType } from "@repo/shared";
-import { FormGenerator } from "./resource-form/resource-form";
+import { FormGenerator, ObjectMetadata } from "./resource-form/resource-form";
 import { useMemo } from "react";
 
 export const CreateNewResourceForm = ({
@@ -11,7 +11,7 @@ export const CreateNewResourceForm = ({
 }: {
   resourceType: ResourceType;
   initialValues?: any;
-  handleCreate: (data: any) => void;
+  handleCreate: (meta: ObjectMetadata, fields: any) => void;
   handleBack: () => void;
   isLoading: boolean;
 }) => {
