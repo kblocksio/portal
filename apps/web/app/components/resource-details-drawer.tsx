@@ -197,7 +197,13 @@ export const ResourceDetailsDrawer = () => {
               resourceTypes={Object.values(resourceTypes)}
               editModeData={{
                 resourceType: selectedResourceType,
-                initialValues: filterDataBySchema(selectedResourceType.openApiSchema, selectedResource),
+                initialValues: {
+                  ...filterDataBySchema(selectedResourceType.openApiSchema, selectedResource),
+                  metadata: {
+                    name: selectedResource?.metadata.name,
+                    namespace: selectedResource?.metadata.namespace
+                  },
+                },
               }}
               isLoading={isEditResourceLoading}
             />}

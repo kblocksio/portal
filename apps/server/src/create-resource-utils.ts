@@ -21,15 +21,16 @@ const generateNewResourceName = (namespace: string, kind: string) => {
   return `${namespace}-${kind.toLowerCase()}-${randomString}`;
 }
 
-export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any, namespace: string): Promise<ApiObject> => {
-  // Validate the adjusted values
+export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any): Promise<ApiObject> => {
+
   if (validateSpecObject(resource.openApiSchema, providedValues)) {
-    // Proceed to create the custom resource instance
+    const namespace = providedValues.metadata?.namespace || "default";
+    const name = providedValues.metadata?.name || generateNewResourceName(namespace, resource.kind);
     return {
       apiVersion: `${resource.group}/${resource.version}`,
       kind: resource.kind,
       metadata: {
-        name: generateNewResourceName(namespace, resource.kind),
+        name: name,
         namespace: namespace,
       },
       // incase of edit, providedValues will contain the existing resource propreties and override the above updates

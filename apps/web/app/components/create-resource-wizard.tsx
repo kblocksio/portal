@@ -44,12 +44,6 @@ export const CreateResourceWizard = ({
     setSearchQuery(e.target.value);
   }, []);
 
-  useEffect(() => {
-    console.log("step", step);
-    console.log("editModeData", editModeData);
-
-  }, [step, editModeData]);
-
   const filtereResources = useMemo(() => {
     if (!resourceTypes) return [];
     if (!searchQuery) return resourceTypes;
