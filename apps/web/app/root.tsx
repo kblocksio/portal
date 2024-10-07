@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Links,
   Meta,
@@ -13,8 +14,23 @@ import "./styles/global.css";
 import { UserProvider } from "./hooks/use-user.js";
 import { PortalSidebar } from "./components/portal-sidebar";
 import { ResourceProvider } from "./ResourceContext";
+import toast, { ToastBar, Toaster } from 'react-hot-toast';
 
 export default function App() {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        toast.dismiss();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <html lang="en">
       <head>
@@ -36,6 +52,21 @@ export default function App() {
                     <Outlet />
                   </div>
                 </div>
+
+                <Toaster position="bottom-right" toastOptions={{ duration: Infinity }}>
+                  {(t) => (
+                    <ToastBar toast={t} style={{ overflowX: 'auto', maxWidth: '700px' }}>
+                      {({ icon, message }) => (
+                        <div className="flex items-center justify-between">
+                          <button onClick={() => toast.dismiss(t.id)}>
+                            {icon}
+                          </button>
+                          {message}
+                        </div>
+                      )}
+                    </ToastBar>
+                  )}
+                </Toaster>
               </div>
             </ResourceProvider>
           </UserProvider>
