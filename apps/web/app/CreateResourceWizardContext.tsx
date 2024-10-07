@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { ResourceType } from "@repo/shared";
 import { CreateResourceWizard, EditModeData } from './components/create-resource-wizard';
 import { ResourceContext } from './ResourceContext';
@@ -33,6 +33,10 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
   const [editModeData, setEditModeData] = useState<EditModeData | undefined>(undefined);
   const { resourceTypes } = useContext(ResourceContext);
 
+  const filteredResourceTypes = useMemo(() => {
+    return Object.values(resourceTypes).filter(r => !r.kind?.endsWith("Ref"));
+  }, [resourceTypes]);
+
   const openWizard = useCallback((editMode?: EditModeData) => {
     setEditModeData(editMode);
     setIsOpen(true);
@@ -43,35 +47,29 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
     setEditModeData(undefined);
   }, []);
 
-  const handleCreateResource = async (resourceType: any, providedValues: any) => {
+  const handleCreateResource = async (system: string, resourceType: ResourceType, providedValues: any) => {
     setIsLoading(true);
-    await createResource({
-      resourceType: resourceType,
-      providedValues: providedValues,
-    });
+    await createResource(system, resourceType, providedValues);
     setIsLoading(false);
     setIsOpen(false);
   };
 
-  const handleEditResource = useCallback(async (resourceType: ResourceType, providedValues: any) => {
+  const handleEditResource = useCallback(async (system: string, resourceType: ResourceType, providedValues: any) => {
     setIsLoading(true);
     const updatedResource = {
       ...editModeData?.resource,
       ...providedValues,
     };
-    await createResource({
-      resourceType: resourceType,
-      providedValues: updatedResource,
-    });
+    await createResource(system, resourceType, updatedResource);
     setIsLoading(false);
     setIsOpen(false);
   }, [editModeData]);
 
-  const handleCreateOrEdit = useCallback(async (resourceType: ResourceType, providedValues: any) => {
+  const handleCreateOrEdit = useCallback(async (system: string, resourceType: ResourceType, providedValues: any) => {
     if (editModeData) {
-      await handleEditResource(resourceType, providedValues);
+      await handleEditResource(system, resourceType, providedValues);
     } else {
-      await handleCreateResource(resourceType, providedValues);
+      await handleCreateResource(system, resourceType, providedValues);
     }
   }, [editModeData, handleCreateResource, handleEditResource]);
 
@@ -96,7 +94,7 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
           }
         }}
         handleOnCreate={handleCreateOrEdit}
-        resourceTypes={Object.values(resourceTypes)}
+        resourceTypes={filteredResourceTypes}
         editModeData={editModeData}
       />
     </CreateResourceWizardContext.Provider>

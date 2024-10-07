@@ -18,31 +18,23 @@ export default function _index() {
   const { selectedProject } = useAppContext();
 
   const { isLoading, resourceTypes } = useContext(ResourceContext);
-  const { openWizard, closeWizard } = useCreateResourceWizard();
+  const { openWizard: openCreateWizard } = useCreateResourceWizard();
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
-  const [isCreateResourceLoading, setIsCreateResourceLoading] = useState(false);
+  const [isImportResourceLoading, setIsImportResourceLoading] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = async (system: string, resourceType: ResourceType, obj: ApiObject) => {
-    setIsCreateResourceLoading(true);
-    await createResource(system, resourceType, obj);
-    setIsCreateResourceLoading(false);
-    setIsCreateWizardOpen(false);
-  };
-
   const handleImportResources = async (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => {
-    setIsCreateResourceLoading(true);
+    setIsImportResourceLoading(true);
     for (const obj of newResources.objects) {
       await createResource("demo", newResources.resourceType, obj);
     }
-    setIsCreateResourceLoading(false);
+    setIsImportResourceLoading(false);
     setIsImportWizardOpen(false);
   };
 
@@ -65,13 +57,13 @@ export default function _index() {
               className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
             />
           </div>
-          <Button onClick={() => openWizard()}>New Resource...</Button>
+          <Button onClick={() => openCreateWizard()}>New Resource...</Button>
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnImport={handleImportResources}
             resourceTypes={importResourceTypes}
-            isLoading={isCreateResourceLoading || isLoading}
+            isLoading={isImportResourceLoading || isLoading}
           />
           <ResourceDetailsDrawer />
         </div>

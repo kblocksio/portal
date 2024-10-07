@@ -5,7 +5,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
