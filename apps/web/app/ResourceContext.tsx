@@ -2,8 +2,8 @@ import { GetTypesResponse, ResourceType } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent } from "@kblocks/cli/types/events";
-import { ApiObject } from '@kblocks/cli/types';
+import { LogEvent, ObjectEvent, PatchEvent, ApiObject } from "@kblocks/api";
+import { toast } from 'react-hot-toast'; // Add this import
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -194,8 +194,12 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       case 'LOG':
         handleLogMessage(lastJsonMessage as LogEvent);
         break;
+      case 'ERROR':
+        toast.error((lastJsonMessage as any).message || 'Unknown error');
+        break;
       default:
         console.warn('WebSocket unknown message type:', lastJsonMessage);
+        // toast.warn(lastJsonMessage.type);
     }
   }, [lastJsonMessage]);
 

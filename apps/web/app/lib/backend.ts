@@ -1,4 +1,5 @@
 import { GetResourceResponse, GetUserResponse, ResourceQuery, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
+import { parseBlockUri } from "@kblocks/api";
 
 // if VITE_BACKEND_URL is not set, use the current origin
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -18,16 +19,21 @@ export const get = async (path: string, params?: Record<string, string>) => {
   return res.json();
 };
 
-export const post = async (path: string, body: any) => {
-  const res = await fetch(`${VITE_BACKEND_URL}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-  return res.json();
-};
+export const request = async (method: string, path: string, body: any) => {
+  try {
+    const res = await fetch(`${VITE_BACKEND_URL}${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    return res.json(); 
+  } catch (error: any) {
+    console.log(error);
+    throw new Error(JSON.stringify(error));
+  }
+}
 
 
 export const getResources = async (query: ResourceQuery): Promise<GetResourceResponse> => {
@@ -44,9 +50,10 @@ export const getUser = async (): Promise<GetUserResponse> => {
 
 export const createResource = async (req: CreateResourceRequest): Promise<CreateResourceResponse> => {
   const objType = `${req.resourceType.group}/${req.resourceType.version}/${req.resourceType.plural}`;
-  return post(`/api/resources/${objType}?system=demo`, req);
+  return request('POST', `/api/resources/${objType}?system=demo`, req);
 };
 
 export const deleteResource = async (objUri: string) => {
-  return post(`/api/resources/${objUri}`, { force: true });
+  const { group, version, plural, name, system, namespace } = parseBlockUri(objUri);
+  return request('DELETE', `/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}`, { force: true });
 };

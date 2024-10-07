@@ -1,12 +1,19 @@
 import { Card } from "./ui/card";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, MoreVertical } from "lucide-react";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
-import { useContext } from "react";
+import { useContext , useState } from "react";
 import { ResourceContext } from "~/ResourceContext";
 import { ApiObject } from "@kblocks/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { DeleteResourceDialog } from "./delete-resource"; // Add this import
 
 export const ResourceRow = ({
   item,
@@ -37,7 +44,7 @@ export const ResourceRow = ({
 
   return (
     <Card
-      className={`flex items-center justify-between p-2 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
+      className={`flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
         " ",
       )}`}
       onClick={() => setSelectedResourceId({ objType: item.objType, objUri: item.objUri })}
@@ -63,9 +70,10 @@ export const ResourceRow = ({
         <LastLogMessage objUri={item.objUri} />
       </div>
 
-      {/* Right Section: Last Updated */}
+      {/* Right Section: Last Updated and Ellipsis Menu */}
       <div className="flex items-center space-x-4 flex-shrink-0">
         <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
+        <ActionsMenu resource={item} />
       </div>
     </Card>
   );
@@ -115,4 +123,27 @@ export function StatusBadge({ readyCondition, message }: { readyCondition?: any,
       </Tooltip>
     </TooltipProvider>
   ) : div;
+}
+
+function ActionsMenu({ resource }: { resource: ApiObject }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeMenu = () => setIsOpen(false);
+
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger className="focus:outline-none" onClick={(e) => e.stopPropagation()}>
+        <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuItem onSelect={() => {
+          // Add your edit logic here
+          console.log("Edit operation");
+          closeMenu();
+        }}>
+          Edit
+        </DropdownMenuItem>
+        <DeleteResourceDialog resource={resource} closeMenu={closeMenu} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
