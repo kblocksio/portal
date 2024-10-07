@@ -1,26 +1,26 @@
 import { ResourceType } from "@repo/shared";
-import { FormGenerator } from "./resource-form/resource-form";
+import { FormGenerator, ObjectMetadata } from "./resource-form/resource-form";
 import { useMemo } from "react";
 
 export const CreateNewResourceForm = ({
-  selectedResourceType,
+  resourceType,
   initialValues,
   handleCreate,
   handleBack,
   isLoading,
 }: {
-  selectedResourceType: ResourceType;
+  resourceType: ResourceType;
   initialValues?: any;
-  handleCreate: (data: any) => void;
+  handleCreate: (meta: ObjectMetadata, fields: any) => void;
   handleBack: () => void;
   isLoading: boolean;
 }) => {
 
   const cleanedSchema = useMemo(() => {
-    const schema = { ...selectedResourceType.openApiSchema };
+    const schema = { ...resourceType.schema };
     delete schema.properties?.status;
     return schema;
-  }, [selectedResourceType.openApiSchema]);
+  }, [resourceType.schema]);
 
   return (
     <FormGenerator

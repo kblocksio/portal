@@ -1,6 +1,6 @@
-import { ResourceType } from "./types";
 import { User } from "@supabase/supabase-js";
 import * as kblocks from "@kblocks/api";
+import { ResourceType } from "./types";
 
 export type GetResourceResponse = {
   objects: kblocks.ObjectEvent[];
@@ -23,11 +23,4 @@ export type GetLogsResponse = {
   logs: kblocks.LogEvent[];
 };
 
-export type CreateResourceRequest = {
-  resourceType: ResourceType;
-  providedValues: any;
-};
-
-export type CreateResourceResponse = {
-
-};
+export type CreateResourceResponse = { };

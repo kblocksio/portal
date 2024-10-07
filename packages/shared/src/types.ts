@@ -1,3 +1,5 @@
+import { Manifest } from "@kblocks/api";
+
 export interface ResourceQuery {
   group: string;
   version: string;
@@ -34,15 +36,4 @@ export type Installation = {
   repositories_url: string;
 };
 
-export interface ResourceType {
-  group: string;
-  version: string;
-  kind: string;
-
-  plural: string;
-  description?: string;
-  readme?: string;
-  icon?: string;
-  color?: string;
-  openApiSchema?: any;
-}
+export type ResourceType = Manifest["definition"];

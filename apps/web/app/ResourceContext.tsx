@@ -2,7 +2,7 @@ import { GetTypesResponse, ResourceType } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent, ApiObject } from "@kblocks/api";
+import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent } from "@kblocks/api";
 import { toast } from 'react-hot-toast'; // Add this import
 
 const WS_URL = import.meta.env.VITE_WS_URL;
@@ -50,7 +50,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const [logs, setLogs] = useState<Map<string, Record<string, LogEvent>>>(new Map());
   const [selectedResourceId, setSelectedResourceId] = useState<SelectedResourceId | undefined>(undefined);
 
-  const { lastJsonMessage, getWebSocket } = useWebSocket<ObjectEvent | PatchEvent | LogEvent>(WS_URL, {
+  const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
       console.log('WebSocket shouldReconnect...', closeEvent);
       return true;
@@ -100,37 +100,31 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
 
   const handleObjectMessage = (message: ObjectEvent) => {
-    // console.log('handleObjectMessage', message);
-    const { object, reason, objUri, objType } = message;
-    switch (reason) {
-      case 'CREATE':
-      case 'SYNC':
-      case 'UPDATE':
-        setResources((prevResourcesForTypes) => {
-          const resoucesForTypeMap = prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
-          const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-          newResourcesForTypeMap.set(objUri, { ...object, objUri, objType } as Resource);
-          const newResources = new Map(prevResourcesForTypes);
-          newResources.set(objType, newResourcesForTypeMap);
-          return newResources;
-        });
-        break;
-      case 'DELETE':
-        setResources((prevResourcesForTypes) => {
-          const resoucesForTypeMap = prevResourcesForTypes.get(objType);
-          if (!resoucesForTypeMap) {
-            console.error('WebSocket Object Message unknown object type:', objType, object, prevResourcesForTypes);
-            return prevResourcesForTypes;
-          }
-          const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-          newResourcesForTypeMap.delete(objUri);
-          const newResources = new Map(prevResourcesForTypes);
-          newResources.set(objType, newResourcesForTypeMap);
-          return newResources;
-        });
-        break;
-      default:
-        console.error('WebSocket Object Message unknown reason:', reason, object);
+    const { object, objUri, objType } = message;
+
+    if (Object.keys(object).length > 0) {
+      setResources((prevResourcesForTypes) => {
+        const resoucesForTypeMap = prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
+        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
+        newResourcesForTypeMap.set(objUri, { ...object, objUri, objType } as Resource);
+        const newResources = new Map(prevResourcesForTypes);
+        newResources.set(objType, newResourcesForTypeMap);
+        return newResources;
+      });
+    } else {
+      setResources((prevResourcesForTypes) => {
+        const resoucesForTypeMap = prevResourcesForTypes.get(objType);
+        if (!resoucesForTypeMap) {
+          console.error('WebSocket Object Message unknown object type:', objType, object, prevResourcesForTypes);
+          return prevResourcesForTypes;
+        }
+        
+        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
+        newResourcesForTypeMap.delete(objUri);
+        const newResources = new Map(prevResourcesForTypes);
+        newResources.set(objType, newResourcesForTypeMap);
+        return newResources;
+      });
     }
   };
 
@@ -199,7 +193,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         break;
       default:
         console.warn('WebSocket unknown message type:', lastJsonMessage);
-        // toast.warn(lastJsonMessage.type);
+      // toast.warn(lastJsonMessage.type);
     }
   }, [lastJsonMessage]);
 
@@ -212,7 +206,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         websocket.close();
       }
     };
-  }, []);
+  }, [getWebSocket]);
 
   const value: ResourceContextValue = {
     resourceTypes,

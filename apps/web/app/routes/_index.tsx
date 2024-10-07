@@ -1,18 +1,16 @@
-/**
- * All projects view
- */
-import { Search } from "lucide-react";
-import { Input } from "~/components/ui/input";
 import { useAppContext } from "~/AppContext";
 import { useContext, useState } from "react";
-import { CreateResourceWizard } from "~/components/create-resource-wizard";
-import { ProjectHeader } from "~/components/project-header";
-import { ProjectGroups } from "~/components/project-groups";
-import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
 import { ResourceContext } from "~/ResourceContext";
+import { ResourceType } from "@repo/shared";
+import { ApiObject } from "@kblocks/api";
+import { Search } from "lucide-react";
+import { ProjectHeader } from "~/components/project-header";
+import { Input } from "~/components/ui/input";
+import { ImportResourceWizard } from "~/components/import-resource-wizard";
+import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
+import { ProjectGroups } from "~/components/project-groups";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { Button } from "~/components/ui/button";
 
@@ -32,23 +30,17 @@ export default function _index() {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = async (resourceType: any, providedValues: any) => {
+  const handleCreateResource = async (system: string, resourceType: ResourceType, obj: ApiObject) => {
     setIsCreateResourceLoading(true);
-    await createResource({
-      resourceType: resourceType,
-      providedValues: providedValues,
-    });
+    await createResource(system, resourceType, obj);
     setIsCreateResourceLoading(false);
     setIsCreateWizardOpen(false);
   };
 
-  const handleImportResources = async (newResources: { resourceType: any, providedValues: any[] }) => {
+  const handleImportResources = async (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => {
     setIsCreateResourceLoading(true);
-    for (const providedValues of newResources.providedValues) {
-      await createResource({
-        resourceType: newResources.resourceType,
-        providedValues: providedValues,
-      });
+    for (const obj of newResources.objects) {
+      await createResource("demo", newResources.resourceType, obj);
     }
     setIsCreateResourceLoading(false);
     setIsImportWizardOpen(false);

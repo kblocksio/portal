@@ -1,46 +1,49 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 
+export interface ObjectMetadata {
+  name: string;
+  namespace: string;
+  system: string;
+}
+
 export interface FormGeneratorProps {
   schema: any,
   isLoading: boolean,
   handleBack: () => void,
-  handleSubmit: (formData: any) => void,
+  handleSubmit: (meta: ObjectMetadata, fields: any) => void,
   initialValues?: any;
 };
 
 export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, initialValues }: FormGeneratorProps) => {
   const [formData, setFormData] = useState<any>(initialValues || {});
   const [system] = useState<string>("demo");
-  const [namespace, setNamespace] = useState<string>(initialValues?.metadata?.namespace || "");
-  const [name, setName] = useState<string>(initialValues?.metadata?.name || "");
-
-  const updateFormData = useCallback((newData: any) => {
-    newData.metadata = {
-      name,
-      namespace,
-      system,
-    };
-    setFormData(newData);
-  }, [name, namespace, system]);
+  const [namespace, setNamespace] = useState<string>(initialValues?.metadata?.namespace ?? "default");
+  const [name, setName] = useState<string>(initialValues?.metadata?.name ?? "");
 
   return (
     <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
       e.preventDefault();
-      handleSubmit(formData);
+      const meta: ObjectMetadata = {
+        name,
+        namespace,
+        system,
+      };
+
+      handleSubmit(meta, formData);
     }}>
       <div className="space-y-4 border-b pb-4 ml-2 mr-2">
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className={`${!!initialValues ? "opacity-50" : ""}`}>Name</Label>
+            <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
             <Input id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="namespace" className={`${!!initialValues ? "opacity-50" : ""}`}>Namespace</Label>
+            <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
             <Input id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
           </div>
           <div className="space-y-2">
@@ -54,7 +57,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           schema={schema}
           path=""
           formData={formData}
-          updateFormData={updateFormData}
+          updateFormData={setFormData}
           hideField={true}
         />
       </div>
@@ -66,17 +69,13 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {initialValues ? "Editing..." : "Creating..."}
+              {initialValues ? "Updating..." : "Creating..."}
             </>
           ) : (
-            initialValues ? "Edit" : "Create"
+            initialValues ? "Update" : "Create"
           )}
         </Button>
       </div>
-
-      {/* <pre className="mt-4 bg-gray-100 p-2 rounded">
-        {JSON.stringify(formData, null, 2)}
-      </pre> */}
-    </form >
+    </form>
   );
 };

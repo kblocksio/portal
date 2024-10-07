@@ -1,14 +1,13 @@
 import express from "express";
 import cors from "cors";
-import { ResourceType, GetUserResponse, GetTypesResponse, GetResourceResponse, CreateResourceRequest, GetLogsResponse } from "@repo/shared";
+import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, ResourceType } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import { blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
-import { createCustomResourceInstance } from "./create-resource-utils";
+import { ApiObject, blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
 import { getAllObjects, handleEvent, loadLogs } from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
@@ -146,10 +145,11 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
     return res.status(400).json({ error: "'system' is required as a query param" });
   }
 
-  const { resourceType, providedValues } = req.body as CreateResourceRequest;
-  const obj = await createCustomResourceInstance(resourceType, providedValues, "default");
+  const obj = req.body as ApiObject;
 
   console.log("creating object:", JSON.stringify(obj));
+
+  sanitizeObject(obj);
 
   // verify that the request has the correct `apiVersion` and `kind`
   if (obj.apiVersion !== apiVersion) {
@@ -368,5 +368,26 @@ app.get("/api/users", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+/**
+ * Clean up the object to remove fields that shouldn't be sent to apply requests.
+ */
+function sanitizeObject(obj: ApiObject) {
+  const metadata: any = obj.metadata;
+  if (metadata) {
+    delete metadata.managedFields;
+    delete metadata.generation;
+    delete metadata.resourceVersion;
+    delete metadata.uid;
+    delete metadata.creationTimestamp;
+    delete metadata.deletionTimestamp;
+    delete metadata.deletionGracePeriodSeconds;
+    delete metadata.ownerReferences;
+    delete metadata.finalizers;
+    delete metadata.generation;
+  }
+
+  delete obj.status;
+}
 
 export default app;
