@@ -71,12 +71,6 @@ export const UserProvider = (props: PropsWithChildren) => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    console.log("error", error);
-    console.log("user", user);
-    console.log("isLoading", isLoading);
-  }, [error, user, isLoading]);
-
   return (
     <>
       {isLoading && (
