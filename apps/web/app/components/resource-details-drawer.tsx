@@ -4,27 +4,17 @@ import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
-import { ApiObject, type LogEvent } from "@kblocks/api";
-import { CreateResourceWizard } from "./create-resource-wizard";
-import { createResource } from "~/lib/backend";
-import { ResourceType } from "@repo/shared";
-
+import { type LogEvent } from "@kblocks/api";
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
+import { Button } from "~/components/ui/button";
+import { DeleteResourceDialog } from "./delete-resource";
 export const ResourceDetailsDrawer = () => {
 
   const logContainerRef = useRef<HTMLDivElement>(null);
-  const [isEditWizardOpen, setIsEditWizardOpen] = useState(false);
-  const [isEditResourceLoading, setIsEditResourceLoading] = useState(false);
 
-  const handleEditResource = async (system: string, resourceType: ResourceType, providedValues: ApiObject) => {
-    setIsEditResourceLoading(true);
-    const updatedResource = {
-      ...selectedResource,
-      ...providedValues,
-    };
-    await createResource(system, resourceType, updatedResource);
-    setIsEditResourceLoading(false);
-    setIsEditWizardOpen(false);
-  };
+  const { openWizard: openEditWizard } = useCreateResourceWizard();
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const { selectedResourceId, setSelectedResourceId, resourceTypes, logs, resources } = useContext(ResourceContext);
 
@@ -187,17 +177,19 @@ export const ResourceDetailsDrawer = () => {
         </div>
         <SheetFooter>
           {selectedResourceType && selectedResource &&
-            <CreateResourceWizard
-              isOpen={isEditWizardOpen}
-              handleOnOpenChange={setIsEditWizardOpen}
-              handleOnCreate={handleEditResource}
-              resourceTypes={Object.values(resourceTypes)}
-              editModeData={{
+            <div className="flex gap-2">
+              <Button onClick={() => openEditWizard({
                 resourceType: selectedResourceType,
-                obj: selectedResource,
-              }}
-              isLoading={isEditResourceLoading}
-            />}
+                resource: selectedResource,
+              })}>Edit</Button>
+              <Button className="bg-destructive text-destructive-foreground" onClick={() => setIsDeleteOpen(true)}>Delete</Button>
+              <DeleteResourceDialog
+                resource={selectedResource}
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+              />
+            </div>
+          }
         </SheetFooter>
       </SheetContent>
     </Sheet>

@@ -3,10 +3,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
@@ -14,10 +12,11 @@ import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ResourceType } from "@repo/shared";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "./resource-form/resource-form";
+import { Resource } from "~/ResourceContext";
 
 export interface EditModeData {
   resourceType: ResourceType;
-  obj: ApiObject;
+  resource: Resource;
 }
 
 export interface CreateResourceWizardProps {
@@ -46,6 +45,11 @@ export const CreateResourceWizard = ({
     setSearchQuery(e.target.value);
   }, []);
 
+  useEffect(() => {
+    setStep(editModeData ? 2 : 1);
+    setSelectedResourceType(editModeData?.resourceType || null);
+  }, [editModeData]);
+
   const filtereResources = useMemo(() => {
     if (!resourceTypes) return [];
     if (!searchQuery) return resourceTypes;
@@ -59,21 +63,19 @@ export const CreateResourceWizard = ({
     setStep(2);
   };
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (editModeData) {
       handleOnOpenChange(false);
     } else {
       setStep(1);
       setSelectedResourceType(null);
     }
-  };
+  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
 
   const handleCreate = useCallback((meta: ObjectMetadata, values: any) => {
     if (!selectedResourceType) {
       return;
     }
-
-    console.log("values", values);
 
     delete values.metadata?.system;
 
@@ -88,20 +90,16 @@ export const CreateResourceWizard = ({
     });
   }, [selectedResourceType, handleOnCreate]);
 
-  const handleOpenChange = (open: boolean) => {
+  const handleOpenChange = useCallback((open: boolean) => {
     handleOnOpenChange(open);
     setStep(editModeData ? 2 : 1);
     setSelectedResourceType(editModeData?.resourceType || null);
-  };
+  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button>
-          {editModeData ? "Edit" : "New Resource..."}
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]"
+        aria-description="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
             event.preventDefault()
@@ -146,7 +144,7 @@ export const CreateResourceWizard = ({
               {selectedResourceType &&
                 <CreateNewResourceForm
                   resourceType={selectedResourceType}
-                  initialValues={editModeData?.obj}
+                  initialValues={editModeData?.resource}
                   handleCreate={handleCreate}
                   handleBack={handleBack}
                   isLoading={isLoading}

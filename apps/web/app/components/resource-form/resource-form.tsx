@@ -40,15 +40,15 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
-            <Input id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
+            <Input required id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
-            <Input id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
+            <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="system" className={"opacity-50"}>System</Label>
-            <Input id="system" placeholder="System" disabled={true} value="demo" />
+            <Input required id="system" placeholder="System" disabled={true} value="demo" />
           </div>
         </div>
       </div>

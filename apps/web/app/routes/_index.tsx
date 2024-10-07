@@ -8,39 +8,33 @@ import { ApiObject } from "@kblocks/api";
 import { Search } from "lucide-react";
 import { ProjectHeader } from "~/components/project-header";
 import { Input } from "~/components/ui/input";
-import { CreateResourceWizard } from "~/components/create-resource-wizard";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
 import { ProjectGroups } from "~/components/project-groups";
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
+import { Button } from "~/components/ui/button";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
 
   const { isLoading, resourceTypes } = useContext(ResourceContext);
+  const { openWizard: openCreateWizard } = useCreateResourceWizard();
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
-  const [isCreateResourceLoading, setIsCreateResourceLoading] = useState(false);
+  const [isImportResourceLoading, setIsImportResourceLoading] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleCreateResource = async (system: string, resourceType: ResourceType, obj: ApiObject) => {
-    setIsCreateResourceLoading(true);
-    await createResource(system, resourceType, obj);
-    setIsCreateResourceLoading(false);
-    setIsCreateWizardOpen(false);
-  };
-
   const handleImportResources = async (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => {
-    setIsCreateResourceLoading(true);
+    setIsImportResourceLoading(true);
     for (const obj of newResources.objects) {
       await createResource("demo", newResources.resourceType, obj);
     }
-    setIsCreateResourceLoading(false);
+    setIsImportResourceLoading(false);
     setIsImportWizardOpen(false);
   };
 
@@ -63,19 +57,13 @@ export default function _index() {
               className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
             />
           </div>
-          <CreateResourceWizard
-            isOpen={isCreateWizardOpen}
-            handleOnOpenChange={setIsCreateWizardOpen}
-            handleOnCreate={handleCreateResource}
-            resourceTypes={createResourceTypes}
-            isLoading={isCreateResourceLoading || isLoading}
-          />
+          <Button onClick={() => openCreateWizard()}>New Resource...</Button>
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}
             handleOnImport={handleImportResources}
             resourceTypes={importResourceTypes}
-            isLoading={isCreateResourceLoading || isLoading}
+            isLoading={isImportResourceLoading || isLoading}
           />
           <ResourceDetailsDrawer />
         </div>

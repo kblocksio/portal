@@ -4,8 +4,8 @@ import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
-import { useContext , useState } from "react";
-import { ResourceContext } from "~/ResourceContext";
+import { useContext, useMemo, useState } from "react";
+import { Resource, ResourceContext } from "~/ResourceContext";
 import { ApiObject } from "@kblocks/api";
 import {
   DropdownMenu,
@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { DeleteResourceDialog } from "./delete-resource"; // Add this import
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
+import { ResourceType } from "@repo/shared";
 
 export const ResourceRow = ({
   item,
@@ -24,7 +26,16 @@ export const ResourceRow = ({
   isFirst: boolean;
   isLast: boolean;
 }) => {
-  const { setSelectedResourceId } = useContext(ResourceContext);
+  const { setSelectedResourceId, resources, resourceTypes } = useContext(ResourceContext);
+
+  const selectedResource = useMemo(() => {
+    return resources.get(item.objType)?.get(item.objUri);
+  }, [resources, item.objType, item.objUri]);
+
+  const selectedResourceType = useMemo(() => (
+    resourceTypes[item.objType]
+  ), [resourceTypes, item.objType]);
+
   const borders = [];
 
   borders.push("rounded-none");
@@ -73,7 +84,8 @@ export const ResourceRow = ({
       {/* Right Section: Last Updated and Ellipsis Menu */}
       <div className="flex items-center space-x-4 flex-shrink-0">
         <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
-        <ActionsMenu resource={item} />
+        {selectedResource && selectedResourceType
+          && <ActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
       </div>
     </Card>
   );
@@ -125,8 +137,11 @@ export function StatusBadge({ readyCondition, message }: { readyCondition?: any,
   ) : div;
 }
 
-function ActionsMenu({ resource }: { resource: ApiObject }) {
+function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { openWizard: openEditWizard } = useCreateResourceWizard();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const closeMenu = () => setIsOpen(false);
 
   return (
@@ -136,13 +151,25 @@ function ActionsMenu({ resource }: { resource: ApiObject }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onSelect={() => {
-          // Add your edit logic here
-          console.log("Edit operation");
+          openEditWizard({ resource, resourceType });
           closeMenu();
         }}>
           Edit
         </DropdownMenuItem>
-        <DeleteResourceDialog resource={resource} closeMenu={closeMenu} />
+        <DropdownMenuItem className="text-destructive" onSelect={(e) => {
+          e.preventDefault();
+          setIsDeleteOpen(true);
+        }}>
+          Delete...
+        </DropdownMenuItem>
+        <DeleteResourceDialog
+          resource={resource}
+          isOpen={isDeleteOpen}
+          onClose={() => {
+            setIsDeleteOpen(false);
+            closeMenu();
+          }}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
