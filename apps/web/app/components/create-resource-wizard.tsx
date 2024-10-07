@@ -92,7 +92,6 @@ export const CreateResourceWizard = ({
 
   const handleOpenChange = useCallback((open: boolean) => {
     handleOnOpenChange(open);
-    console.log("handleOpenChange", editModeData);
     setStep(editModeData ? 2 : 1);
     setSelectedResourceType(editModeData?.resourceType || null);
   }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
