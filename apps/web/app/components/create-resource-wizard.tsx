@@ -12,10 +12,12 @@ import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
+import { Resource } from "~/ResourceContext";
 
 export interface EditModeData {
   resourceType: ResourceType;
   initialValues: any;
+  resource: Resource;
 }
 
 export interface CreateResourceWizardProps {
@@ -81,11 +83,11 @@ export const CreateResourceWizard = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button>
           {!!editModeData ? "Edit" : "New Resource..."}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[800px]"
         onPointerDownOutside={(event) => {
           if (isLoading) {

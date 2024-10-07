@@ -13,11 +13,14 @@ import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
 import { ResourceContext } from "~/ResourceContext";
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
+import { Button } from "~/components/ui/button";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
 
   const { isLoading, resourceTypes } = useContext(ResourceContext);
+  const { openWizard, closeWizard } = useCreateResourceWizard();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -70,13 +73,7 @@ export default function _index() {
               className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
             />
           </div>
-          <CreateResourceWizard
-            isOpen={isCreateWizardOpen}
-            handleOnOpenChange={setIsCreateWizardOpen}
-            handleOnCreate={handleCreateResource}
-            resourceTypes={createResourceTypes}
-            isLoading={isCreateResourceLoading || isLoading}
-          />
+          <Button onClick={() => openWizard()}>New Resource...</Button>
           <ImportResourceWizard
             isOpen={isImportWizardOpen}
             handleOnOpenChange={setIsImportWizardOpen}

@@ -15,6 +15,7 @@ import { UserProvider } from "./hooks/use-user.js";
 import { PortalSidebar } from "./components/portal-sidebar";
 import { ResourceProvider } from "./ResourceContext";
 import toast, { ToastBar, Toaster } from 'react-hot-toast';
+import { CreateResourceWizardProvider } from './CreateResourceWizardContext';
 
 export default function App() {
   useEffect(() => {
@@ -44,30 +45,31 @@ export default function App() {
         <AppProvider>
           <UserProvider>
             <ResourceProvider>
-              <div className="flex h-screen flex-col">
-                <Header />
-                <div className="flex h-[calc(100vh-theme(height.14))] bg-background">
-                  <PortalSidebar />
-                  <div className="flex-grow overflow-hidden">
-                    <Outlet />
+              <CreateResourceWizardProvider>
+                <div className="flex h-screen flex-col">
+                  <Header />
+                  <div className="flex h-[calc(100vh-theme(height.14))] bg-background">
+                    <PortalSidebar />
+                    <div className="flex-grow overflow-hidden">
+                      <Outlet />
+                    </div>
                   </div>
+                  <Toaster position="bottom-right" toastOptions={{ duration: Infinity }}>
+                    {(t) => (
+                      <ToastBar toast={t} style={{ overflowX: 'auto', maxWidth: '700px' }}>
+                        {({ icon, message }) => (
+                          <div className="flex items-center justify-between">
+                            <button onClick={() => toast.dismiss(t.id)}>
+                              {icon}
+                            </button>
+                            {message}
+                          </div>
+                        )}
+                      </ToastBar>
+                    )}
+                  </Toaster>
                 </div>
-
-                <Toaster position="bottom-right" toastOptions={{ duration: Infinity }}>
-                  {(t) => (
-                    <ToastBar toast={t} style={{ overflowX: 'auto', maxWidth: '700px' }}>
-                      {({ icon, message }) => (
-                        <div className="flex items-center justify-between">
-                          <button onClick={() => toast.dismiss(t.id)}>
-                            {icon}
-                          </button>
-                          {message}
-                        </div>
-                      )}
-                    </ToastBar>
-                  )}
-                </Toaster>
-              </div>
+              </CreateResourceWizardProvider>
             </ResourceProvider>
           </UserProvider>
         </AppProvider>
