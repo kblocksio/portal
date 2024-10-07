@@ -26,6 +26,8 @@ export const createCustomResourceInstance = async (resource: ResourceType, provi
   if (validateSpecObject(resource.openApiSchema, providedValues)) {
     const namespace = providedValues.metadata?.namespace || "default";
     const name = providedValues.metadata?.name || generateNewResourceName(namespace, resource.kind);
+    delete providedValues.metadata.namespace;
+    delete providedValues.metadata.name;
     return {
       apiVersion: `${resource.group}/${resource.version}`,
       kind: resource.kind,
