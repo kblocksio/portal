@@ -60,14 +60,3 @@ Or even watch for changes with hot reloading:
 ```sh
 skaffold dev
 ```
-
-## Kblock Examples
-
-The [./deploy/examples](./deploy/examples/) directory includes manifests for kblocks that are
-installed on the cluster (they are not required by the portal backend).
-
-You can install them all like this:
-
-```sh
-helm upgrade --install kblock-examples --create-namespace -n examples ./deploy/examples
-```
