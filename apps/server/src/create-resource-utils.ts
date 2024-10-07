@@ -21,20 +21,21 @@ const generateNewResourceName = (namespace: string, kind: string) => {
   return `${namespace}-${kind.toLowerCase()}-${randomString}`;
 }
 
-export const createCustomResourceInstance = async (resource: ResourceType, providedValues: any): Promise<ApiObject> => {
+export const createCustomResourceInstance = async (resourceType: ResourceType, providedValues: any): Promise<ApiObject> => {
 
-  if (validateSpecObject(resource.openApiSchema, providedValues)) {
+  if (validateSpecObject(resourceType.openApiSchema, providedValues)) {
     const namespace = providedValues.metadata?.namespace || "default";
-    const name = providedValues.metadata?.name || generateNewResourceName(namespace, resource.kind);
-    delete providedValues.metadata.namespace;
-    delete providedValues.metadata.name;
+    const name = providedValues.metadata?.name || generateNewResourceName(namespace, resourceType.kind);
+    const metadata = {
+      ...providedValues.metadata,
+      name: name,
+      namespace: namespace,
+    };
+    delete providedValues.metadata;
     return {
-      apiVersion: `${resource.group}/${resource.version}`,
-      kind: resource.kind,
-      metadata: {
-        name: name,
-        namespace: namespace,
-      },
+      apiVersion: `${resourceType.group}/${resourceType.version}`,
+      kind: resourceType.kind,
+      metadata,
       // incase of edit, providedValues will contain the existing resource propreties and override the above updates
       ...providedValues,
     };
