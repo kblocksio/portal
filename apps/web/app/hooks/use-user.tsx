@@ -55,13 +55,11 @@ export const UserProvider = (props: PropsWithChildren) => {
     async function fetchUser() {
       try {
         const response = await getUser();
-        // const email = response.user.email;
-        // const isWhitelisted = isUserWhitelisted(email);
-        // if (!isWhitelisted && email) {
-        //   await rejectUser();
-        //   setError(new Error("User is not whitelisted and was signed out"));
-        //   return;
-        // }
+        const isWhitelisted = isUserWhitelisted(response.user.email);
+        if (!isWhitelisted) {
+          await rejectUser();
+          throw new Error("User is not whitelisted and was signed out");
+        }
         setUser(response.user);
       } catch (error) {
         setError(error as Error);

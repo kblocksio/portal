@@ -8,5 +8,8 @@ export const whitelist = [
 ];
 
 export const isUserWhitelisted = (email?: string) => {
-  return whitelist.includes(email ?? "");
+  if (!email) {
+    return true;
+  }
+  return whitelist.includes(email);
 };
