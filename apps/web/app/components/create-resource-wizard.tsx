@@ -6,23 +6,24 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ResourceType } from "@repo/shared";
+import React, { useCallback, useMemo, useState } from "react";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
+import { ResourceType } from "@repo/shared";
+import { ApiObject } from "@kblocks/api";
 
 export interface EditModeData {
   resourceType: ResourceType;
-  initialValues: any;
+  obj: ApiObject;
 }
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (resouce: ResourceType, providedValues: any) => void;
+  handleOnCreate: (resourceType: ResourceType, obj: ApiObject) => void;
   resourceTypes: ResourceType[];
   editModeData?: EditModeData;
 }
@@ -35,7 +36,7 @@ export const CreateResourceWizard = ({
   resourceTypes,
   editModeData,
 }: CreateResourceWizardProps) => {
-  const [step, setStep] = useState(!!editModeData ? 2 : 1);
+  const [step, setStep] = useState(editModeData ? 2 : 1);
   const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | null>(
     editModeData ? editModeData.resourceType : null,
   );
@@ -66,11 +67,24 @@ export const CreateResourceWizard = ({
     }
   };
 
-  const handleCreate = useCallback((providedValues: any) => {
+  const handleCreate = useCallback((values: any) => {
     if (!selectedResourceType) {
       return;
     }
-    handleOnCreate(selectedResourceType, providedValues);
+
+    // TODO: get name and namespace from wizard
+    const name = `${selectedResourceType.kind}-${Date.now()}`.toLocaleLowerCase();
+
+    handleOnCreate(selectedResourceType, {
+      apiVersion: `${selectedResourceType.group}/${selectedResourceType.version}`,
+      kind: selectedResourceType.kind,
+      metadata: {
+        name,
+        namespace: "default",
+      },
+
+      ...values,
+    });
   }, [selectedResourceType, handleOnCreate]);
 
   const handleOpenChange = (open: boolean) => {
@@ -83,7 +97,7 @@ export const CreateResourceWizard = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
-          {!!editModeData ? "Edit" : "New Resource..."}
+          {editModeData ? "Edit" : "New Resource..."}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]"
@@ -110,7 +124,7 @@ export const CreateResourceWizard = ({
               ) : (
                 selectedResourceType &&
                 <WizardSimpleHeader
-                  title={`${!!editModeData ? "Edit" : "New"} ${selectedResourceType?.kind} resource`}
+                  title={`${editModeData ? "Edit" : "New"} ${selectedResourceType?.kind} resource`}
                   description={selectedResourceType?.description || ""}
                   resourceType={selectedResourceType}
                 />
@@ -130,8 +144,8 @@ export const CreateResourceWizard = ({
             <div className="space-y-4 p-2">
               {selectedResourceType &&
                 <CreateNewResourceForm
-                  selectedResourceType={selectedResourceType}
-                  initialValues={editModeData?.initialValues}
+                  resourceType={selectedResourceType}
+                  initialValues={editModeData?.obj}
                   handleCreate={handleCreate}
                   handleBack={handleBack}
                   isLoading={isLoading}

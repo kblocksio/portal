@@ -4,10 +4,10 @@ import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
 import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
-import { type LogEvent } from "@kblocks/api";
+import { ApiObject, type LogEvent } from "@kblocks/api";
 import { CreateResourceWizard } from "./create-resource-wizard";
-import { filterDataBySchema } from "~/lib/utils";
 import { createResource } from "~/lib/backend";
+import { ResourceType } from "@repo/shared";
 
 export const ResourceDetailsDrawer = () => {
 
@@ -15,16 +15,13 @@ export const ResourceDetailsDrawer = () => {
   const [isEditWizardOpen, setIsEditWizardOpen] = useState(false);
   const [isEditResourceLoading, setIsEditResourceLoading] = useState(false);
 
-  const handleEditResource = async (resourceType: any, providedValues: any) => {
+  const handleEditResource = async (resourceType: ResourceType, providedValues: ApiObject) => {
     setIsEditResourceLoading(true);
     const updatedResource = {
       ...selectedResource,
       ...providedValues,
     };
-    await createResource({
-      resourceType: resourceType,
-      providedValues: updatedResource,
-    });
+    await createResource(resourceType, updatedResource);
     setIsEditResourceLoading(false);
     setIsEditWizardOpen(false);
   };
@@ -189,7 +186,7 @@ export const ResourceDetailsDrawer = () => {
           </div>
         </div>
         <SheetFooter>
-          {selectedResourceType &&
+          {selectedResourceType && selectedResource &&
             <CreateResourceWizard
               isOpen={isEditWizardOpen}
               handleOnOpenChange={setIsEditWizardOpen}
@@ -197,13 +194,7 @@ export const ResourceDetailsDrawer = () => {
               resourceTypes={Object.values(resourceTypes)}
               editModeData={{
                 resourceType: selectedResourceType,
-                initialValues: {
-                  ...filterDataBySchema(selectedResourceType.openApiSchema, selectedResource),
-                  metadata: {
-                    name: selectedResource?.metadata.name,
-                    namespace: selectedResource?.metadata.namespace
-                  },
-                },
+                obj: selectedResource,
               }}
               isLoading={isEditResourceLoading}
             />}

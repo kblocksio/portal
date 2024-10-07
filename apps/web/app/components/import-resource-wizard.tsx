@@ -8,17 +8,17 @@ import {
 import { Button } from "~/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { Loader } from "lucide-react";
 import { ImportGHRepo } from "./import-gh-repo";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
+import { ApiObject } from "@kblocks/api";
 
 export interface ImportResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnImport: (newResources: { resourceType: any, providedValues: any[] }) => void;
+  handleOnImport: (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => void;
   resourceTypes: ResourceType[];
 }
 
@@ -56,8 +56,10 @@ export const ImportResourceWizard = ({
     setSelectedResourceType(null);
   };
 
-  const handleImportResources = useCallback((selectedTypeProvidedValues: any[]) => {
-    handleOnImport({ resourceType: selectedResourceType, providedValues: selectedTypeProvidedValues });
+  const handleImportResources = useCallback((objects: ApiObject[]) => {
+    if (selectedResourceType) {
+      handleOnImport({ resourceType: selectedResourceType, objects });
+    }
   }, [handleOnImport, selectedResourceType]);
 
   const handleOpenChange = (open: boolean) => {

@@ -28,6 +28,8 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
     setFormData(newData);
   }, [name, namespace, system]);
 
+  console.log("initialValues", initialValues);
+
   return (
     <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
       e.preventDefault();
@@ -36,11 +38,11 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
       <div className="space-y-4 border-b pb-4 ml-2 mr-2">
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className={`${!!initialValues ? "opacity-50" : ""}`}>Name</Label>
+            <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
             <Input id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="namespace" className={`${!!initialValues ? "opacity-50" : ""}`}>Namespace</Label>
+            <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
             <Input id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
           </div>
           <div className="space-y-2">
@@ -66,17 +68,13 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {initialValues ? "Editing..." : "Creating..."}
+              {initialValues ? "Updating..." : "Creating..."}
             </>
           ) : (
-            initialValues ? "Edit" : "Create"
+            initialValues ? "Update" : "Create"
           )}
         </Button>
       </div>
-
-      {/* <pre className="mt-4 bg-gray-100 p-2 rounded">
-        {JSON.stringify(formData, null, 2)}
-      </pre> */}
-    </form >
+    </form>
   );
 };

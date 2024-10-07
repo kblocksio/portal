@@ -1,5 +1,5 @@
-import { GetResourceResponse, GetUserResponse, ResourceQuery, CreateResourceRequest, CreateResourceResponse } from "@repo/shared";
-import { parseBlockUri } from "@kblocks/api";
+import { GetResourceResponse, GetUserResponse, ResourceQuery, CreateResourceResponse, ResourceType } from "@repo/shared";
+import { ApiObject, parseBlockUri } from "@kblocks/api";
 
 // if VITE_BACKEND_URL is not set, use the current origin
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -52,9 +52,13 @@ export const rejectUser = async (): Promise<void> => {
   return get(`/api/auth/reject`);
 };
 
-export const createResource = async (req: CreateResourceRequest): Promise<CreateResourceResponse> => {
-  const objType = `${req.resourceType.group}/${req.resourceType.version}/${req.resourceType.plural}`;
-  return request('POST', `/api/resources/${objType}?system=demo`, req);
+export const createResource = async (type: ResourceType, obj: ApiObject): Promise<CreateResourceResponse> => {
+  const system = "demo";
+  const objType = `${type.group}/${type.version}/${type.plural}`;
+
+  console.log("Creating resource", objType, obj);
+
+  return request('POST', `/api/resources/${objType}?system=${system}`, obj);
 };
 
 export const deleteResource = async (objUri: string) => {
