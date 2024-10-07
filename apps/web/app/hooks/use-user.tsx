@@ -57,7 +57,7 @@ export const UserProvider = (props: PropsWithChildren) => {
         const response = await getUser();
         const email = response.user.email;
         const isWhitelisted = isUserWhitelisted(email);
-        if (!isWhitelisted && response.user) {
+        if (!isWhitelisted && email) {
           await rejectUser();
           setError(new Error("User is not whitelisted and was signed out"));
           return;
