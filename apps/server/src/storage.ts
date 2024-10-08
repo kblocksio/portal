@@ -76,6 +76,11 @@ async function listAllObjects() {
     });
 }
 
+export async function resetStorage() {
+  const redis = await connection();
+  await redis.flushDb();
+}
+
 async function deleteObject(blockUri: string) {
   const redis = await connection();
   await redis.del(keyForObject(blockUri));
@@ -133,6 +138,7 @@ async function patchObject(objUri: string, patch: kblocks.ApiObject) {
   const newObj = { ...obj, ...patch };
   return saveObject(objUri, newObj);
 }
+
 
 async function storeEvent(event: kblocks.WorkerEvent) {
   if (event.type === "OBJECT") {
