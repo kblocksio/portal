@@ -28,7 +28,7 @@ interface ArrayItemFormProps {
 
 interface PrimitiveFieldRendererProps {
   type: string;
-  handleChange: (value: string | number) => void;
+  handleChange: (value: string | number | boolean) => void;
   value: any;
   fieldName?: string;
   hideField?: boolean;
@@ -217,8 +217,8 @@ const PrimitiveFieldRenderer = ({
         <div className="flex items-center space-x-2">
           <Switch
             id={fieldName}
-            checked={value === 'true'}
-            onCheckedChange={(checked) => handleChange(checked ? 'true' : 'false')}
+            checked={value}
+            onCheckedChange={handleChange}
           />
           <Label htmlFor={fieldName} className="text-sm">
             {value ? 'Enabled' : 'Disabled'}
@@ -441,7 +441,7 @@ export const FieldRenderer = ({
     // Primitive type
     const value = getDataByPath(formData, path) ?? '';
 
-    const handleChange = (value: string | number) => {
+    const handleChange = (value: string | number | boolean) => {
       const newFormData = updateDataByPath(formData, path, value);
       updateFormData(newFormData);
     };
