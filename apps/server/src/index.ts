@@ -169,6 +169,36 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   return res.status(200).json({ message: "Create request accepted", objType: `${group}/${version}/${plural}`, obj });
 });
 
+app.patch("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+
+  if (!system) {
+    return res.status(400).json({ error: "'system' is required as a query param" });
+  }
+
+  const obj = req.body as ApiObject;
+
+  console.log("patching object:", JSON.stringify(obj));
+
+  sanitizeObject(obj);
+
+  pubsub.publishControlRequest({ system, group, version, plural }, {
+    type: "PATCH",
+    objUri,
+    object: obj,
+  });
+
+  return res.status(200).json({ message: "Patch request accepted", objType: `${group}/${version}/${plural}`, obj });
+});
+
 app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
   const { group, version, plural, system, namespace, name } = req.params;
 
