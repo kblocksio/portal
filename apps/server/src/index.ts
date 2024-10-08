@@ -8,7 +8,7 @@ import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
 import { ApiObject, blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
-import { getAllObjects, handleEvent, loadLogs } from "./storage";
+import { getAllObjects, handleEvent, loadLogs, resetStorage } from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -189,7 +189,6 @@ app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", as
   return res.status(200).json({ message: "Delete request accepted" });
 });
 
-
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -363,6 +362,15 @@ app.get("/api/users", async (req, res) => {
   }
 
   return res.status(200).json(users.users);
+});
+
+app.post("/api/reset", async (req, res) => {
+  if (req.query["password"] !== "kblocks4422") {
+    return res.status(401).json({ error: "Invalid password" });
+  }
+
+  await resetStorage();
+  return res.status(200).json({ message: "Storage reset" });
 });
 
 app.listen(port, () => {
