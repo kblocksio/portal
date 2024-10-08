@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
@@ -206,6 +206,45 @@ const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
+
+  const getPrimitiveWidget = useMemo(() => {
+    switch (type) {
+      case 'boolean':
+        return (
+          <div className="flex items-center space-x-2">
+            <Switch
+              id={fieldName}
+              checked={value}
+              onCheckedChange={handleChange}
+            />
+            <Label htmlFor={fieldName} className="text-sm">
+              {value ? 'Enabled' : 'Disabled'}
+            </Label>
+          </div>
+        )
+      default:
+        return (
+          <Input
+            id={fieldName}
+            required={required}
+            type={type === 'number' ? 'number' : 'text'}
+            value={value}
+            onChange={(e) => {
+              const value =
+                type === 'number' && isNumeric(e.target.value)
+                  ? Number(e.target.value)
+                  : e.target.value;
+
+              handleChange(value);
+            }}
+            className="w-full"
+          />
+        )
+    }
+  }, [type, fieldName, value, required, handleChange]);
+
+
+
   return (
     <div className="space-y-4">
       {!hideField && fieldName && (
@@ -213,34 +252,7 @@ const PrimitiveFieldRenderer = ({
           {fieldName}
         </Label>
       )}
-      {type === 'boolean' ? (
-        <div className="flex items-center space-x-2">
-          <Switch
-            id={fieldName}
-            checked={value}
-            onCheckedChange={handleChange}
-          />
-          <Label htmlFor={fieldName} className="text-sm">
-            {value ? 'Enabled' : 'Disabled'}
-          </Label>
-        </div>
-      ) : (
-        <Input
-          id={fieldName}
-          required={required}
-          type={type === 'number' ? 'number' : 'text'}
-          value={value}
-          onChange={(e) => {
-            const value =
-              type === 'number' && isNumeric(e.target.value)
-                ? Number(e.target.value)
-                : e.target.value;
-
-            handleChange(value);
-          }}
-          className="w-full"
-        />
-      )}
+      {getPrimitiveWidget}
     </div>
   );
 }
