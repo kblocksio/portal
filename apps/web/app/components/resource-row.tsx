@@ -6,7 +6,7 @@ import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
-import { ApiObject } from "@kblocks/api";
+import { ApiObject, parseBlockUri } from "@kblocks/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,7 @@ import {
 import { DeleteResourceDialog } from "./delete-resource"; // Add this import
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { ResourceType } from "@repo/shared";
+import { Badge } from "./ui/badge"; // Add this import
 
 export const ResourceRow = ({
   item,
@@ -55,52 +56,78 @@ export const ResourceRow = ({
 
   return (
     <Card
-      className={`flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50 ${borders.join(
-        " ",
-      )}`}
+      className={cn("flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50", borders.join(" "))}
       onClick={() => setSelectedResourceId({ objType: item.objType, objUri: item.objUri })}
     >
-      {/* Left Section: Status Badge, Namespace, Name */}
-      <div className="flex items-center space-x-4 flex-shrink-0">
-        <StatusBadge readyCondition={readyCondition} message={readyCondition?.message} />
-        <div className="flex-shrink-0">
-          <div className="flex items-center">
-            <h3 className="flex-shrink-0">
-              <span className="text-muted-foreground whitespace-nowrap">
-                {item.metadata.namespace}
-              </span>
-              <span className="text-muted-foreground mx-1">·</span>
-              <span className="font-semibold whitespace-nowrap">{item.metadata.name}</span>
-            </h3>
+
+      <div className="flex w-full justify-between items-center">
+        {/* Left Section: Status Badge, Namespace, Name, and LastUpdated */}
+
+        <div className="flex items-center space-x-4 flex-shrink-0">
+          <StatusBadge readyCondition={readyCondition} message={readyCondition?.message} />
+
+          <div className="flex-shrink-0">
+            <div className="flex items-center space-x-2">
+              <h3>
+                <span className="text-muted-foreground whitespace-nowrap">
+                  {item.metadata.namespace}
+                </span>
+                <span className="text-muted-foreground mx-1">·</span>
+                <span className="font-semibold whitespace-nowrap">{item.metadata.name}</span>
+              </h3>
+              <SystemBadge blockUri={item.objUri} />
+            </div>
           </div>
+
+        </div>
+
+
+        {/* Middle Section: Log Message & Timestamp */}
+        <div className="flex-grow min-w-0 px-6">
+          <LastLogMessage objUri={item.objUri} />
+        </div>
+
+        {/* Right Section: System ID Badge and Ellipsis Menu */}
+        <div className="flex items-center space-x-4 flex-shrink-0">
+          &nbsp;
+          <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
+          {selectedResource && selectedResourceType
+            && <ActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
         </div>
       </div>
 
-      {/* Middle Section: Log Message & Timestamp */}
-      <div className="flex px-6 items-center space-x-4 flex-grow min-w-0">
-        <LastLogMessage objUri={item.objUri} />
-      </div>
-
-      {/* Right Section: Last Updated and Ellipsis Menu */}
-      <div className="flex items-center space-x-4 flex-shrink-0">
-        <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
-        {selectedResource && selectedResourceType
-          && <ActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
-      </div>
     </Card>
+  );
+}
+
+export function SystemBadge({ blockUri }: { blockUri: string }) {
+  const block = parseBlockUri(blockUri);
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)}`}>
+            {block.system}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>System</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
 function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   if (!lastUpdated) return <></>;
 
-  const relativeTime = formatDistanceToNow(lastUpdated);
+  const relativeTime = formatDistanceToNow(lastUpdated, { addSuffix: true });
 
   return (
-    <div className="text-muted-foreground text-sm">
+    <div className="text-muted-foreground text-xs">
       <p className="flex items-center">
-        <CalendarIcon className="mr-1 h-4 w-4" />
-        {relativeTime}
+        <CalendarIcon className="mr-1 h-3 w-3" />
+        Updated {relativeTime}
       </p>
     </div>
   );
@@ -173,4 +200,19 @@ function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceT
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function getSystemIdColor(systemId: string): string {
+  const colors = [
+    "bg-red-100 text-red-800",
+    "bg-blue-100 text-blue-800",
+    "bg-green-100 text-green-800",
+    "bg-yellow-100 text-yellow-800",
+    "bg-purple-100 text-purple-800",
+    "bg-pink-100 text-pink-800",
+    "bg-indigo-100 text-indigo-800",
+  ];
+
+  const index = systemId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  return colors[index];
 }
