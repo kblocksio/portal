@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Input } from "~/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Pencil, Plus, X, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Switch } from "~/components/ui/switch";
+import { SwitchField } from "./switch-field";
+import { InputField } from "./input-field";
 
 interface ObjectFormProps {
   properties: any;
@@ -44,8 +43,6 @@ interface FieldRendererProps {
   hideField?: boolean;
   required?: boolean;
 }
-
-const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
 const updateDataByPath = (data: any, path: string, value: any): any => {
   const keys = path.split('.');
@@ -211,39 +208,22 @@ const PrimitiveFieldRenderer = ({
     switch (type) {
       case 'boolean':
         return (
-          <div className="flex items-center space-x-2">
-            <Switch
-              id={fieldName}
-              checked={value}
-              onCheckedChange={handleChange}
-            />
-            <Label htmlFor={fieldName} className="text-sm">
-              {value ? 'Enabled' : 'Disabled'}
-            </Label>
-          </div>
+          <SwitchField
+            value={value}
+            onChange={handleChange}
+          />
         )
       default:
         return (
-          <Input
-            id={fieldName}
-            required={required}
-            type={type === 'number' ? 'number' : 'text'}
+          <InputField
             value={value}
-            onChange={(e) => {
-              const value =
-                type === 'number' && isNumeric(e.target.value)
-                  ? Number(e.target.value)
-                  : e.target.value;
-
-              handleChange(value);
-            }}
-            className="w-full"
+            onChange={handleChange}
+            required={required}
+            type={type}
           />
         )
     }
   }, [type, fieldName, value, required, handleChange]);
-
-
 
   return (
     <div className="space-y-4">
