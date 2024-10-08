@@ -98,7 +98,7 @@ export const CreateResourceWizard = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[800px]"
+      <DialogContent className="sm:max-w-[90%]"
         aria-description="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
