@@ -28,7 +28,7 @@ interface ArrayItemFormProps {
 
 interface PrimitiveFieldRendererProps {
   type: string;
-  handleChange: (value: string) => void;
+  handleChange: (value: string | number) => void;
   value: any;
   fieldName?: string;
   hideField?: boolean;
@@ -44,6 +44,8 @@ interface FieldRendererProps {
   hideField?: boolean;
   required?: boolean;
 }
+
+const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
 const updateDataByPath = (data: any, path: string, value: any): any => {
   const keys = path.split('.');
@@ -228,7 +230,14 @@ const PrimitiveFieldRenderer = ({
           required={required}
           type={type === 'number' ? 'number' : 'text'}
           value={value}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e) => {
+            const value =
+              type === 'number' && isNumeric(e.target.value)
+                ? Number(e.target.value)
+                : e.target.value;
+
+            handleChange(value);
+          }}
           className="w-full"
         />
       )}
@@ -432,7 +441,7 @@ export const FieldRenderer = ({
     // Primitive type
     const value = getDataByPath(formData, path) ?? '';
 
-    const handleChange = (value: string) => {
+    const handleChange = (value: string | number) => {
       const newFormData = updateDataByPath(formData, path, value);
       updateFormData(newFormData);
     };
