@@ -2,7 +2,7 @@ import { GetTypesResponse, ResourceType } from '@repo/shared';
 import React, { createContext, useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent } from "@kblocks/api";
+import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri } from "@kblocks/api";
 import { toast } from 'react-hot-toast'; // Add this import
 
 const WS_URL = import.meta.env.VITE_WS_URL;
@@ -163,13 +163,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       const copy = new Map(prevLogs);
       const existingMessages = copy.get(objUri) ?? {};
       existingMessages[message.timestamp] = message;
-
-      console.log(`new log message for ${objUri} at ${message.timestamp}:`, message);
-
       copy.set(objUri, existingMessages);
-
-      console.log('updated logs:', copy);
-
       return copy;
     });
   };
@@ -191,9 +185,10 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       case 'ERROR':
         toast.error((lastJsonMessage as any).message || 'Unknown error');
         break;
-      default:
-        console.warn('WebSocket unknown message type:', lastJsonMessage);
-      // toast.warn(lastJsonMessage.type);
+      default: {
+        const blockUri = parseBlockUri(lastJsonMessage.objUri);
+        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, { duration: 2000, icon: "🔔" });
+      }
     }
   }, [lastJsonMessage]);
 

@@ -1,12 +1,12 @@
 import { Card } from "./ui/card";
-import { CalendarIcon, MoreVertical } from "lucide-react";
+import { CalendarIcon, MoreVertical, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
-import { ApiObject, parseBlockUri } from "@kblocks/api";
+import { ApiObject, Condition, parseBlockUri, StatusReason } from "@kblocks/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -133,35 +133,44 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   );
 }
 
-export function StatusBadge({ readyCondition, message }: { readyCondition?: any, message?: string }) {
+export function StatusBadge({ readyCondition, message }: { readyCondition?: Condition, message?: string }) {
+  const reason = readyCondition?.reason as StatusReason;
+  
+  const getStatusContent = (reason: StatusReason) => {
+    switch (reason) {
+      case StatusReason.Completed:
+        return <div className="bg-green-500 h-3 w-3 rounded-full" />;
+      case StatusReason.ResolvingReferences:
+      case StatusReason.InProgress:
+        return <Loader2 className="h-3 w-3 text-yellow-500 animate-spin" />;
+      case StatusReason.Error:
+        return <div className="bg-red-500 h-3 w-3 rounded-full" />;
+      default:
+        console.log("unknown reason", readyCondition);
+        return <div className="bg-gray-500 h-3 w-3 rounded-full" />;
+    }
+  }
 
-  const color = readyCondition
-    ? (readyCondition.status === "True"
-      ? "green" : (message === "In Progress"
-        ? "yellow" : "red")) : "yellow";
+  const statusContent = getStatusContent(reason);
 
-  const div = <div
-    className={cn(
-      "ml-1",
-      "inline-block rounded-full",
-      "h-3 w-3",
-      `bg-${color}-500`,
-      "transition-transform duration-200 hover:scale-125",
-    )}
-  />;
+  const wrapper = (
+    <div className="ml-1 inline-block transition-transform duration-200 hover:scale-125">
+      {statusContent}
+    </div>
+  );
 
   return message ? (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          {div}
+          {wrapper}
         </TooltipTrigger>
         <TooltipContent>
           <p>{readyCondition?.message ?? "In Progress"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  ) : div;
+  ) : wrapper;
 }
 
 function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
