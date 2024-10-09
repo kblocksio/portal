@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { ExampleUsage } from './instance-type-field';
 
 export interface ObjectMetadata {
   name: string;
@@ -52,6 +53,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           </div>
         </div>
       </div>
+      <ExampleUsage />
       <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
         <FieldRenderer
           schema={schema}
