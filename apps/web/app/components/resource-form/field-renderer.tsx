@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Pencil, Plus, X, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
@@ -30,6 +30,7 @@ interface PrimitiveFieldRendererProps {
   handleChange: (value: string | number | boolean) => void;
   value: any;
   fieldName?: string;
+  description?: string;
   hideField?: boolean;
   required?: boolean;
 }
@@ -170,6 +171,7 @@ export const ArrayItemForm = ({
               handleChange={setItemData}
               value={itemData}
               fieldName={fieldName}
+              description={schema?.description}
               required={schema.required?.includes(fieldName)}
             />
           )}
@@ -200,6 +202,7 @@ const PrimitiveFieldRenderer = ({
   handleChange,
   value,
   fieldName,
+  description,
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
@@ -228,9 +231,16 @@ const PrimitiveFieldRenderer = ({
   return (
     <div className="space-y-4">
       {!hideField && fieldName && (
-        <Label htmlFor={fieldName} className="text-sm font-medium">
-          {fieldName}
-        </Label>
+        <div className="flex flex-col">
+          <Label htmlFor={fieldName} className="text-sm font-medium">
+            {fieldName}
+          </Label>
+          {description && (
+            <div className="text-xs pt-1 text-muted-foreground">
+              {description}
+            </div>
+          )}
+        </div>
       )}
       {getPrimitiveWidget}
     </div>
@@ -246,7 +256,7 @@ export const FieldRenderer = ({
   hideField = false,
   required = false,
 }: FieldRendererProps) => {
-  const { type, properties, additionalProperties } = schema;
+  const { type, properties, additionalProperties, description } = schema;
 
   if (type === 'object' && (properties || additionalProperties)) {
     const [showObjectModal, setShowObjectModal] = useState(false);
@@ -264,18 +274,25 @@ export const FieldRenderer = ({
     };
 
     const objectProperties = properties || additionalProperties.properties;
-
+    const objectDescription = description || additionalProperties?.description;
     return (
       <div className="space-y-4">
         {!hideField && fieldName ? (
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Label className="text-sm font-medium">{fieldName}</Label>
-              {isObjectPopulated(objectData) && (
-                <Badge variant="secondary" className="text-xs">
-                  <Check className="w-3 h-3 mr-1" />
-                  Set
-                </Badge>
+            <div className="flex flex-col">
+              <div className="flex items-center space-x-2">
+                <Label className="text-sm font-medium">{fieldName}</Label>
+                {isObjectPopulated(objectData) && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Check className="w-3 h-3 mr-1" />
+                    Set
+                  </Badge>
+                )}
+              </div>
+              {objectDescription && (
+                <div className="text-xs pt-1 text-muted-foreground">
+                  {objectDescription}
+                </div>
               )}
             </div>
             <Button
@@ -312,6 +329,11 @@ export const FieldRenderer = ({
               <DialogTitle className="text-lg">
                 {fieldName}
               </DialogTitle>
+              {objectDescription && (
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {objectDescription}
+                </DialogDescription>
+              )}
             </DialogHeader>
             <ObjectFieldForm
               requiredFields={schema.required}
@@ -365,6 +387,11 @@ export const FieldRenderer = ({
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {fieldName}
+            {description && (
+              <CardDescription className="text-xs text-muted-foreground">
+                {description}
+              </CardDescription>
+            )}
           </CardTitle>
           <Button
             type="button"
@@ -417,6 +444,11 @@ export const FieldRenderer = ({
               <DialogTitle className="text-lg">
                 {fieldName} item
               </DialogTitle>
+              {description && (
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {description}
+                </DialogDescription>
+              )}
             </DialogHeader>
             <ArrayItemForm
               fieldName={fieldName ?? ''}
@@ -445,6 +477,7 @@ export const FieldRenderer = ({
         handleChange={handleChange}
         value={value}
         fieldName={fieldName}
+        description={description}
         hideField={hideField}
       />
     );
