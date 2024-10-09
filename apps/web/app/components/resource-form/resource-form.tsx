@@ -26,7 +26,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
   const [name, setName] = useState<string>(initialValues?.metadata?.name ?? "");
 
   return (
-    <form className="space-y-4 overflow-hidden max-h-[80vh]" onSubmit={(e) => {
+    <form className="flex flex-col h-full space-y-4 overflow-hidden" onSubmit={(e) => {
       e.preventDefault();
       const meta: ObjectMetadata = {
         name,
@@ -36,30 +36,32 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
 
       handleSubmit(meta, formData);
     }}>
-      <div className="space-y-4 border-b pb-4 ml-2 mr-2">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
-            <Input required id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
-            <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="system" className={"opacity-50"}>System</Label>
-            <Input required id="system" placeholder="System" disabled={true} value="demo" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-4 border-b pb-4 mb-8 ml-2 mr-2">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
+              <Input required id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
+              <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="system" className={"opacity-50"}>System</Label>
+              <Input required id="system" placeholder="System" disabled={true} value="demo" />
+            </div>
           </div>
         </div>
-      </div>
-      <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
-        <FieldRenderer
-          schema={schema}
-          path=""
-          formData={formData}
-          updateFormData={setFormData}
-          hideField={true}
-        />
+        <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
+          <FieldRenderer
+            schema={schema}
+            path=""
+            formData={formData}
+            updateFormData={setFormData}
+            hideField={true}
+          />
+        </div>
       </div>
       <div className="flex justify-between">
         <Button variant="outline" onClick={handleBack}>

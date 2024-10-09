@@ -23,11 +23,13 @@ export const CreateNewResourceForm = ({
   }, [resourceType.schema]);
 
   return (
-    <FormGenerator
-      schema={cleanedSchema}
-      isLoading={isLoading}
-      initialValues={initialValues}
-      handleBack={handleBack}
-      handleSubmit={handleCreate} />
+    <div className="flex flex-col h-full">
+      <FormGenerator
+        schema={cleanedSchema}
+        isLoading={isLoading}
+        initialValues={initialValues}
+        handleBack={handleBack}
+        handleSubmit={handleCreate} />
+    </div>
   )
 }

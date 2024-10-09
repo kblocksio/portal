@@ -98,7 +98,7 @@ export const CreateResourceWizard = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[90%]"
+      <DialogContent className="flex flex-col min-w-[90vh] h-[90vh]"
         aria-description="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
@@ -133,14 +133,14 @@ export const CreateResourceWizard = ({
         </DialogHeader>
         {
           step === 1 ? (
-            <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
+            <div className="grid grid-cols-3 gap-4 overflow-auto">
               <ResourceTypesCards
                 isLoading={isLoading}
                 filtereResources={filtereResources}
                 handleResourceSelect={handleResourceSelect} />
             </div>
           ) : (
-            <div className="space-y-4 p-2">
+            <div className="space-y-4 p-2 h-full">
               {selectedResourceType &&
                 <CreateNewResourceForm
                   resourceType={selectedResourceType}
