@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
+import { parseDescription } from "./description-parser";
 
 interface ObjectFormProps {
   properties: any;
@@ -237,7 +238,7 @@ const PrimitiveFieldRenderer = ({
           </Label>
           {description && (
             <div className="text-xs pt-1 text-muted-foreground">
-              {description}
+              {parseDescription(description)}
             </div>
           )}
         </div>
@@ -291,7 +292,7 @@ export const FieldRenderer = ({
               </div>
               {objectDescription && (
                 <div className="text-xs pt-1 text-muted-foreground">
-                  {objectDescription}
+                  {parseDescription(objectDescription)}
                 </div>
               )}
             </div>
@@ -331,7 +332,7 @@ export const FieldRenderer = ({
               </DialogTitle>
               {objectDescription && (
                 <DialogDescription className="text-sm text-muted-foreground">
-                  {objectDescription}
+                  {parseDescription(objectDescription)}
                 </DialogDescription>
               )}
             </DialogHeader>
@@ -389,7 +390,7 @@ export const FieldRenderer = ({
             {fieldName}
             {description && (
               <CardDescription className="text-xs text-muted-foreground">
-                {description}
+                {parseDescription(description)}
               </CardDescription>
             )}
           </CardTitle>
@@ -446,7 +447,7 @@ export const FieldRenderer = ({
               </DialogTitle>
               {description && (
                 <DialogDescription className="text-sm text-muted-foreground">
-                  {description}
+                  {parseDescription(description)}
                 </DialogDescription>
               )}
             </DialogHeader>
