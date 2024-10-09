@@ -8,7 +8,7 @@ import {
 import { Button } from "~/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { ImportGHRepo } from "./import-gh-repo";
+import { ImportGHRepo } from "./gh-repos-selection";
 import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
@@ -109,7 +109,7 @@ export const ImportResourceWizard = ({
           ) : (
             selectedResourceType?.kind === 'RepositoryRef' ? (
               <div className="space-y-4 p-2">
-                <ImportGHRepo handleBack={handleBack} handleOnImport={handleImportResources} />
+                {/* <ImportGHRepo handleBack={handleBack} handleOnSelection={handleImportResources}/> */}
               </div>
             ) : null
           )

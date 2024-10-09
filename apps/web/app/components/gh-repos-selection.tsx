@@ -1,19 +1,28 @@
-import { Button } from "./ui/button";
+import { Button } from "./ui/button.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFetch } from "~/hooks/use-fetch";
 import { Installation, Repository } from "@repo/shared";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
 import { Input } from "./ui/input.js";
-import { Skeleton } from "./ui/skeleton";
-import { Checkbox } from "./ui/checkbox";
+import { Skeleton } from "./ui/skeleton.js";
+import { Checkbox } from "./ui/checkbox.js";
 import { Loader, RefreshCw } from "lucide-react";
 
 export interface ImportGHRepoProps {
-  handleBack: () => void;
-  handleOnImport: (providedValues: any[]) => void;
+  singleSelection?: boolean;
+  singleActionLabel: string;
+  multipleActionLabel: string;
+  handleBack?: () => void;
+  handleOnSelection: (repositories: Repository[]) => void;
 }
 
-export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) => {
+export const ImportGHRepo = (
+  { singleSelection,
+    singleActionLabel,
+    multipleActionLabel,
+    handleBack,
+    handleOnSelection
+  }: ImportGHRepoProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
   const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
@@ -77,23 +86,16 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
 
-  const handleImportRepo = useCallback((repo?: Repository) => {
+  const handleRepoSelectionAction = useCallback((repo?: Repository) => {
     if (!repo) {
       const providedValues =
-        repositories?.filter((repo) => selectedRepos
-          .has(repo.full_name))
-          .map((repo) => ({
-            name: repo.full_name,
-            owner: repo.owner.login,
-          })) || [];
-      handleOnImport(providedValues);
+        (repositories?.filter((repo) => selectedRepos
+          .has(repo.full_name))) || [];
+      handleOnSelection(providedValues);
     } else {
-      handleOnImport([{
-        name: repo.full_name,
-        owner: repo.owner.login,
-      }]);
+      handleOnSelection([repo]);
     }
-  }, [handleOnImport, selectedRepos, repositories])
+  }, [handleOnSelection, selectedRepos, repositories])
 
 
   return (
@@ -112,13 +114,15 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
           ) : (
             <>
               <div className="flex justify-between">
-                <div className="mb-4 flex items-center">
-                  <Checkbox
-                    checked={isAllSelected}
-                    onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
-                  />
-                  <span className="ml-2">Select All</span>
-                </div>
+                {
+                  !singleSelection && <div className="mb-4 flex items-center">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
+                    />
+                    <span className="ml-2">Select All</span>
+                  </div>
+                }
                 <Button
                   disabled={isLoading}
                   variant="outline"
@@ -134,13 +138,15 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
                   key={repo.full_name}
                   className="mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0"
                 >
-                  <Checkbox
-                    className="self-center"
-                    checked={selectedRepos.has(repo.full_name)}
-                    onCheckedChange={(checked) =>
-                      handleCheckboxChange(repo.full_name, checked as boolean)
-                    }
-                  />
+                  {
+                    !singleSelection && <Checkbox
+                      className="self-center"
+                      checked={selectedRepos.has(repo.full_name)}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(repo.full_name, checked as boolean)
+                      }
+                    />
+                  }
                   <Avatar>
                     <AvatarImage alt={`@${repo.owner.login}`} src={repo.owner.avatar_url} />
                     <AvatarFallback>{repo.owner.login}</AvatarFallback>
@@ -159,9 +165,9 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
                   <Button disabled={selectedRepos.size > 0 || isLoading}
                     variant="outline"
                     onClick={() => {
-                      handleImportRepo(repo);
+                      handleRepoSelectionAction(repo);
                     }}>
-                    Import
+                    {singleActionLabel}
                     {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
                   </Button>
                 </div>
@@ -184,16 +190,21 @@ export const ImportGHRepo = ({ handleBack, handleOnImport }: ImportGHRepoProps) 
         </p>
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" onClick={handleBack}>
-          Back
-        </Button>
-        <Button
-          disabled={isLoading || selectedRepos.size === 0}
-          onClick={() => handleImportRepo()}
-        >
-          Import Selected
-          {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
-        </Button>
+        {
+          handleBack && <Button variant="outline" onClick={handleBack}>
+            Back
+          </Button>
+        }
+        {
+          !singleSelection &&
+          <Button
+            disabled={isLoading || selectedRepos.size === 0}
+            onClick={() => handleRepoSelectionAction()}
+          >
+            {multipleActionLabel}
+            {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
+          </Button>
+        }
       </div>
     </div>
   );
