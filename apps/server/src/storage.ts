@@ -1,6 +1,7 @@
 import * as kblocks from "@kblocks/api";
 import { createClient } from "redis";
 import { getEnv } from "./util";
+import { slackNotify } from "./slack-notify";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
@@ -42,6 +43,10 @@ function keyForObject(blockUri: string) {
 
 function keyForLogs(blockUri: string) {
   return `logs:${blockUri}`;
+}
+
+function keyForSlackThread(blockUri: string) {
+  return `slack:${blockUri}`;
 }
 
 async function saveObject(blockUri: string, obj: kblocks.ApiObject | {}) {
@@ -128,6 +133,22 @@ export async function loadLogs(objUri: string): Promise<kblocks.LogEvent[]> {
   return values.map(value => JSON.parse(value));
 }
 
+export async function getSlackThread(objUri: string): Promise<string | undefined> {
+  const redis = await connection();
+  const key = keyForSlackThread(objUri);
+  const value = await redis.get(key);
+  if (!value) {
+    return undefined;
+  }
+  return value;
+}
+
+export async function setSlackThread(objUri: string, thread: string) {
+  const redis = await connection();
+  const key = keyForSlackThread(objUri);
+  await redis.set(key, thread);
+}
+
 async function patchObject(objUri: string, patch: kblocks.ApiObject) {
   const obj = await loadObject(objUri);
   if (!obj) {
@@ -157,5 +178,9 @@ async function storeEvent(event: kblocks.WorkerEvent) {
 export function handleEvent(event: kblocks.WorkerEvent) {
   storeEvent(event).catch(e => {
     console.error(`Error storing event: ${JSON.stringify(event)}: ${e.message}`);
+  });
+
+  slackNotify(event).catch(e => {
+    console.error(`Error sending slack notification: ${e.message}`);
   });
 }
