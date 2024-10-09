@@ -7,6 +7,7 @@ import { Input } from "./ui/input.js";
 import { Skeleton } from "./ui/skeleton.js";
 import { Checkbox } from "./ui/checkbox.js";
 import { Loader, RefreshCw } from "lucide-react";
+import { cn } from "~/lib/utils.js";
 
 export interface ImportGHRepoProps {
   singleSelection?: boolean;
@@ -87,12 +88,15 @@ export const ImportGHRepo = (
   }, [isLoadingInstallations, isLoadingRepositories]);
 
   const handleRepoSelectionAction = useCallback((repo?: Repository) => {
+    // if no repo is provided, we are selecting multiple repos
     if (!repo) {
-      const providedValues =
+      const repos =
         (repositories?.filter((repo) => selectedRepos
           .has(repo.full_name))) || [];
-      handleOnSelection(providedValues);
+      handleOnSelection(repos);
     } else {
+      // if a repo is provided, we are selecting a single repo by clicking on the action button
+      setSelectedRepos(new Set([repo.full_name]));
       handleOnSelection([repo]);
     }
   }, [handleOnSelection, selectedRepos, repositories])
@@ -136,8 +140,8 @@ export const ImportGHRepo = (
               {filteredRepositories.map((repo) => (
                 <div
                   key={repo.full_name}
-                  className="mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0"
-                >
+                  className={cn("mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0",
+                    selectedRepos.has(repo.full_name) && "bg-accent")}>
                   {
                     !singleSelection && <Checkbox
                       className="self-center"
