@@ -8,6 +8,7 @@ import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
 import { parseDescription } from "./description-parser";
+import { EnumField } from "./enum-field";
 
 interface ObjectFormProps {
   properties: any;
@@ -34,6 +35,7 @@ interface PrimitiveFieldRendererProps {
   description?: string;
   hideField?: boolean;
   required?: boolean;
+  schema: any;
 }
 
 interface FieldRendererProps {
@@ -174,6 +176,7 @@ export const ArrayItemForm = ({
               fieldName={fieldName}
               description={schema?.description}
               required={schema.required?.includes(fieldName)}
+              schema={schema}
             />
           )}
         </div>
@@ -199,6 +202,7 @@ export const ArrayItemForm = ({
 };
 
 const PrimitiveFieldRenderer = ({
+  schema,
   type,
   handleChange,
   value,
@@ -207,7 +211,6 @@ const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
-
   const getPrimitiveWidget = useMemo(() => {
     switch (type) {
       case 'boolean':
@@ -215,8 +218,30 @@ const PrimitiveFieldRenderer = ({
           <SwitchField
             value={value}
             onChange={handleChange}
+            required={required}
           />
         )
+      case 'string': {
+        if (schema?.enum) {
+          return (
+            <EnumField
+              values={schema.enum}
+              selectedValue={value || schema.default}
+              onChange={handleChange}
+              required={required}
+            />
+          )
+        } else {
+          return (
+            <InputField
+              value={value}
+              onChange={handleChange}
+              required={required}
+              type={type}
+            />
+          )
+        }
+      }
       default:
         return (
           <InputField
@@ -480,6 +505,7 @@ export const FieldRenderer = ({
         fieldName={fieldName}
         description={description}
         hideField={hideField}
+        schema={schema}
       />
     );
   }
