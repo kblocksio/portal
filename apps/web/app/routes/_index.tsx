@@ -3,12 +3,9 @@ import { useContext, useState } from "react";
 import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ResourceContext } from "~/ResourceContext";
-import { ResourceType } from "@repo/shared";
-import { ApiObject } from "@kblocks/api";
 import { Search } from "lucide-react";
 import { ProjectHeader } from "~/components/project-header";
 import { Input } from "~/components/ui/input";
-import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
 import { ProjectGroups } from "~/components/project-groups";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
@@ -22,25 +19,9 @@ export default function _index() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
-  const [isImportResourceLoading, setIsImportResourceLoading] = useState(false);
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
-
-  const handleImportResources = async (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => {
-    setIsImportResourceLoading(true);
-    for (const obj of newResources.objects) {
-      await createResource("demo", newResources.resourceType, obj);
-    }
-    setIsImportResourceLoading(false);
-    setIsImportWizardOpen(false);
-  };
-
-  const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => !r.kind?.endsWith("Ref"));
-  const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
     <div className="bg-background flex h-screen">
@@ -58,21 +39,14 @@ export default function _index() {
             />
           </div>
           <Button onClick={() => openCreateWizard()}>New Resource...</Button>
-          <ImportResourceWizard
-            isOpen={isImportWizardOpen}
-            handleOnOpenChange={setIsImportWizardOpen}
-            handleOnImport={handleImportResources}
-            resourceTypes={importResourceTypes}
-            isLoading={isImportResourceLoading || isLoading}
-          />
           <ResourceDetailsDrawer />
         </div>
         <div className={"container mx-auto mt-12"}>
-          {isLoading || !types || Object.keys(types).length === 0 ? (
+          {isLoading || !resourceTypes || Object.keys(resourceTypes).length === 0 ? (
             <LoadingSkeleton />
           ) : (
             <ProjectGroups
-              resourceTypes={types}
+              resourceTypes={resourceTypes}
               searchQuery={searchQuery}
               isLoading={isLoading}
             />
