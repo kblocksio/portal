@@ -1,102 +1,85 @@
-import React, { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group'
-import { ScrollArea } from '../ui/scroll-area'
-import { Label } from '../ui/label'
-// Define the props for the PricingCard component
-interface InstanceTypeCardProps {
-  id: string
-  title: string
-  ram: string
-  cpu: string
-  price: string
+import { Cpu, Microchip, HardDrive } from "lucide-react"
+import { Card, CardContent, CardTitle, CardHeader } from '../ui/card'
+import { Slider } from '../ui/slider'
+import { Badge } from '../ui/badge'
+import { useState } from "react"
+
+export interface InstanceType {
+  name: string
+  cpu: number
+  ram: number
+  storage: number
+  price: number
 }
 
-const InstanceTypeCard: React.FC<InstanceTypeCardProps & {
-  isSelected: boolean,
-  onSelect: () => void
-}> = ({ id, title, ram, cpu, price, isSelected, onSelect }) => {
+interface InstanceSelectorProps {
+  instanceTypes: InstanceType[]
+  onInstanceChange: (instance: InstanceType) => void
+}
+
+export const InstanceTypeField = ({ instanceTypes, onInstanceChange }: InstanceSelectorProps) => {
+
+  const [selectedInstance, setSelectedInstance] = useState<InstanceType>(instanceTypes[0])
+
+  const handleSliderChange = (value: number[]) => {
+    setSelectedInstance(instanceTypes[value[0]])
+    onInstanceChange(instanceTypes[value[0]])
+  }
 
   return (
-    <Card
-      className={`w-full cursor-pointer transition-all ${isSelected ? 'ring-2 ring-primary' : ''}`}
-      onClick={onSelect}
-    >
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-xl font-bold text-center">Choose Your Instance</CardTitle>
       </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{ram}</p>
-        <p>{cpu}</p>
-        <p className="text-sm text-muted-foreground">{price}</p>
-      </CardContent>
-    </Card>)
-}
-
-// Define the props for the PricingGrid component
-interface InstanceTypeFieldProps {
-  cards: InstanceTypeCardProps[]
-  onSelectionChange: (selectedCard: InstanceTypeCardProps | null) => void
-}
-
-export const InstanceTypeField = ({ cards, onSelectionChange }: InstanceTypeFieldProps) => {
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
-
-  const handleSelection = (cardId: string) => {
-    setSelectedCardId(cardId)
-    const selectedCard = cards.find(card => card.id === cardId) || null
-    onSelectionChange(selectedCard)
-  }
-
-  return (
-    <div className="w-full max-w-4xl mx-auto">
-      <ScrollArea className="h-[calc(2*12rem)] w-full rounded-md border" contentClassName="content-center">
-        <div className="grid grid-cols-2 gap-4 p-4">
-          {cards.map((card) => (
-            <Label htmlFor={card.id} key={card.id} className="cursor-pointer">
-              <InstanceTypeCard
-                {...card}
-                isSelected={card.id === selectedCardId}
-                onSelect={() => handleSelection(card.id)}
-              />
-            </Label>
-          ))}
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="font-bold">{selectedInstance.name}</span>
+          </div>
+          <Slider
+            min={0}
+            max={instanceTypes.length - 1}
+            step={1}
+            value={[instanceTypes.indexOf(selectedInstance)]}
+            onValueChange={handleSliderChange}
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            {instanceTypes.map((instance, index) => (
+              <span key={instance.name} className={index === instanceTypes.indexOf(selectedInstance) ? 'font-bold text-primary' : ''}>
+                |
+              </span>
+            ))}
+          </div>
         </div>
-      </ScrollArea>
-    </div>
-  )
-}
 
-// Example usage
-export const ExampleUsage = () => {
-  const pricingCards = [
-    { id: "starter", title: "Starter", ram: "512 MB RAM", cpu: "0.5 CPU", price: "0.016¢ / min" },
-    { id: "standard", title: "Standard", ram: "2 GB RAM", cpu: "1 CPU", price: "0.058¢ / min" },
-    { id: "pro", title: "Pro", ram: "4 GB RAM", cpu: "2 CPU", price: "0.197¢ / min" },
-    { id: "pro-plus", title: "Pro Plus", ram: "8 GB RAM", cpu: "4 CPU", price: "0.405¢ / min" },
-  ]
-
-  useEffect(() => {
-    console.log('init')
-  }, [])
-
-
-  const handleSelectionChange = (selectedCard: InstanceTypeCardProps | null) => {
-    console.log('Selected card:', selectedCard)
-    // Here you can update your form state or perform any other action
-  }
-
-
-
-  return (
-    <div className="space-y-4">
-      <Label htmlFor="instance-type" className="text-sm font-medium">
-        Instance Type
-      </Label>
-      <InstanceTypeField cards={pricingCards} onSelectionChange={handleSelectionChange} />
-    </div>
-
+        <Card className="bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Selected Instance</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-2xl font-bold">{selectedInstance.name}</span>
+              <Badge variant="secondary" className="text-lg">
+                ${selectedInstance.price.toFixed(4)}/hour
+              </Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col items-center justify-center p-3 bg-background rounded-lg">
+                <Cpu className="h-6 w-6 mb-2 text-primary" />
+                <span className="text-sm font-medium">{selectedInstance.cpu} CPU</span>
+              </div>
+              <div className="flex flex-col items-center justify-center p-3 bg-background rounded-lg">
+                <Microchip className="h-6 w-6 mb-2 text-primary" />
+                <span className="text-sm font-medium">{selectedInstance.ram} GB RAM</span>
+              </div>
+              <div className="flex flex-col items-center justify-center p-3 bg-background rounded-lg">
+                <HardDrive className="h-6 w-6 mb-2 text-primary" />
+                <span className="text-sm font-medium">{selectedInstance.storage} GB Storage</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   )
 }
