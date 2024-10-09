@@ -3,8 +3,8 @@ import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
-import { ResourceRow } from "./resource-row";
 import { Resource, ResourceContext } from "~/ResourceContext";
+import { ResourceTable } from "./tasks/resource-table";
 
 export interface ProjectGroupProps {
   objType: string;
@@ -27,7 +27,7 @@ export const ProjectGroup = ({
       return
     };
     setResourcesForType(Array.from(resources.get(objType)?.values() || []));
-  }, [resources]);
+  }, [resources, objType]);
 
   const filteredData = useMemo(() => {
     if (!resourcesForType) return null;
@@ -65,14 +65,9 @@ export const ProjectGroup = ({
         {!isLoading &&
           filteredData &&
           filteredData.length > 0 &&
-          filteredData.map((item: Resource, index: number) => (
-            <ResourceRow
-              key={index}
-              item={item}
-              isFirst={index === 0}
-              isLast={index === filteredData.length - 1}
-            />
-          ))}
+          <ResourceTable objects={filteredData} resourceType={resourceType} />
+        }
+
       </div>
     </section>
   );

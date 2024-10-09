@@ -1,8 +1,8 @@
 import { GetTypesResponse, ResourceType } from '@repo/shared';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent } from "@kblocks/api";
+import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri } from "@kblocks/api";
 import { toast } from 'react-hot-toast'; // Add this import
 
 const WS_URL = import.meta.env.VITE_WS_URL;
@@ -21,6 +21,9 @@ export type SelectedResourceId = {
 };
 
 export interface ResourceContextValue {
+  objects: Record<string, Resource>;
+  systems: string[];
+  namespaces: string[];
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
   // objType -> objUri -> Resource
@@ -35,6 +38,9 @@ export interface ResourceContextValue {
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
+  systems: [],
+  namespaces: [],
+  objects: {},
   resources: new Map<string, Map<string, Resource>>(),
   logs: new Map<string, Record<string, LogEvent>>(),
   handleObjectMessages: () => { },
@@ -68,7 +74,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
   const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
   const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
-
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
@@ -208,7 +213,30 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     };
   }, [getWebSocket]);
 
+  const { objects, systems, namespaces } = useMemo(() => {
+    const result: Record<string, Resource> = {};
+    const systems = new Set<string>();
+    const namespaces = new Set<string>();
+
+    for (const resourcesForType of resources.values()) {
+      for (const resource of resourcesForType.values()) {
+        result[resource.objUri] = resource;
+
+
+        const { system, namespace } = parseBlockUri(resource.objUri);
+        systems.add(system);
+        namespaces.add(namespace);
+      }
+    }
+
+    console.log('systems', systems);
+    return { objects: result, systems: Array.from(systems), namespaces: Array.from(namespaces) };
+  }, [resources]);  
+
   const value: ResourceContextValue = {
+    objects,
+    systems,
+    namespaces,
     resourceTypes,
     resources,
     logs,

@@ -2,12 +2,12 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "~/com
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
-import { StatusBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
 import { type LogEvent } from "@kblocks/api";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { Button } from "~/components/ui/button";
 import { DeleteResourceDialog } from "./delete-resource";
+import { StatusBadge } from "./badges";
 export const ResourceDetailsDrawer = () => {
 
   const logContainerRef = useRef<HTMLDivElement>(null);
@@ -127,7 +127,7 @@ export const ResourceDetailsDrawer = () => {
           <div>
             <h2 className="text-sm font-medium text-gray-500">Status</h2>
             <div className="mt-1 flex items-center">
-              <StatusBadge readyCondition={readyCondition} />
+              {selectedResource && <StatusBadge obj={selectedResource} />}
               <span className="ml-2 text-sm capitalize">{readyCondition?.message}</span>
             </div>
           </div>

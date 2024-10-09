@@ -10,9 +10,9 @@ import { ProjectHeader } from "~/components/project-header";
 import { Input } from "~/components/ui/input";
 import { ImportResourceWizard } from "~/components/import-resource-wizard";
 import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
-import { ProjectGroups } from "~/components/project-groups";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { Button } from "~/components/ui/button";
+import { ProjectGroups } from "~/components/project-groups";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
@@ -39,7 +39,6 @@ export default function _index() {
   };
 
   const types = resourceTypes ?? {};
-  const createResourceTypes = Object.values(types).filter(r => !r.kind?.endsWith("Ref"));
   const importResourceTypes = Object.values(types).filter(r => r.kind?.endsWith("Ref"));
 
   return (
@@ -71,13 +70,10 @@ export default function _index() {
           {isLoading || !types || Object.keys(types).length === 0 ? (
             <LoadingSkeleton />
           ) : (
-            <ProjectGroups
-              resourceTypes={types}
-              searchQuery={searchQuery}
-              isLoading={isLoading}
-            />
+            <ProjectGroups resourceTypes={resourceTypes} isLoading={isLoading} />
           )}
         </div>
+        
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-import { format } from "date-fns/format";
 import { ChevronRightIcon } from "lucide-react";
 import { useContext } from "react";
 import { ResourceContext } from "~/ResourceContext";
@@ -9,10 +8,13 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
 
   const events = logs.get(objUri) ?? {};
   const last = Object.keys(events).pop();
-  const log = last ? events[last] : undefined;
+  const log = last ? events[last] : {
+    message: "No logs",
+    timestamp: new Date().toISOString(),
+  };
 
   return (
-    <div className="relative h-6 min-w-0 flex-grow overflow-hidden"> {/* Adjusted the container */}
+    <div className="relative h-6 min-w-0 flex-grow overflow-hidden">
       <AnimatePresence>
         {log && (
           <motion.div
@@ -26,11 +28,11 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
             <span className="text-muted-foreground">
               <ChevronRightIcon className="w-4 h-4 text-muted-foreground" />
             </span>
-            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+            {/* <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
               {format(new Date(log?.timestamp), "yyyy-MM-dd HH:mm:ss")}
-            </span>
+            </span> */}
             <span
-              className="text-sm truncate text-muted-foreground font-mono flex-grow min-w-0"
+              className="text-xs truncate text-muted-foreground font-mono flex-grow min-w-0"
               title={log?.message}
             >
               {log?.message}

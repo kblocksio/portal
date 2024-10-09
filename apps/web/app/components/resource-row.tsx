@@ -1,12 +1,11 @@
 import { Card } from "./ui/card";
 import { CalendarIcon, MoreVertical } from "lucide-react";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
-import { ApiObject, parseBlockUri } from "@kblocks/api";
+import { ApiObject } from "@kblocks/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,14 +15,14 @@ import {
 import { DeleteResourceDialog } from "./delete-resource"; // Add this import
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 import { ResourceType } from "@repo/shared";
-import { Badge } from "./ui/badge"; // Add this import
+import { StatusBadge, SystemBadge } from "./badges";
 
 export const ResourceRow = ({
   item,
   isFirst,
   isLast,
 }: {
-  item: ApiObject;
+  item: Resource;
   isFirst: boolean;
   isLast: boolean;
 }) => {
@@ -50,10 +49,6 @@ export const ResourceRow = ({
     borders.push("rounded-b-lg");
   }
 
-  const readyCondition = item?.status?.conditions?.find(
-    (condition: any) => condition.type === "Ready",
-  );
-
   return (
     <Card
       className={cn("flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50", borders.join(" "))}
@@ -64,7 +59,7 @@ export const ResourceRow = ({
         {/* Left Section: Status Badge, Namespace, Name, and LastUpdated */}
 
         <div className="flex items-center space-x-4 flex-shrink-0">
-          <StatusBadge readyCondition={readyCondition} message={readyCondition?.message} />
+          <StatusBadge obj={item} />
 
           <div className="flex-shrink-0">
             <div className="flex items-center space-x-2">
@@ -90,7 +85,7 @@ export const ResourceRow = ({
         {/* Right Section: System ID Badge and Ellipsis Menu */}
         <div className="flex items-center space-x-4 flex-shrink-0">
           &nbsp;
-          <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
+          <LastUpdated obj={item} />
           {selectedResource && selectedResourceType
             && <ActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
         </div>
@@ -100,69 +95,27 @@ export const ResourceRow = ({
   );
 }
 
-export function SystemBadge({ blockUri }: { blockUri: string }) {
-  const block = parseBlockUri(blockUri);
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>
-          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)}`}>
-            {block.system}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>System</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+export function LastUpdated({ obj }: { obj: ApiObject }) {
+  const readyCondition = obj?.status?.conditions?.find(
+    (condition: any) => condition.type === "Ready",
   );
-}
 
-function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
+  const lastUpdated = readyCondition?.lastTransitionTime ?? obj.metadata.creationTimestamp
+
   if (!lastUpdated) return <></>;
 
-  const relativeTime = formatDistanceToNow(lastUpdated, { addSuffix: true });
+  const relativeTime = formatDistanceToNow(lastUpdated);
 
   return (
-    <div className="text-muted-foreground text-xs">
+    <div className="text-muted-foreground">
       <p className="flex items-center">
         <CalendarIcon className="mr-1 h-3 w-3" />
-        Updated {relativeTime}
+        {relativeTime}
       </p>
     </div>
   );
 }
 
-export function StatusBadge({ readyCondition, message }: { readyCondition?: any, message?: string }) {
-
-  const color = readyCondition
-    ? (readyCondition.status === "True"
-      ? "green" : (message === "In Progress"
-        ? "yellow" : "red")) : "yellow";
-
-  const div = <div
-    className={cn(
-      "ml-1",
-      "inline-block rounded-full",
-      "h-3 w-3",
-      `bg-${color}-500`,
-      "transition-transform duration-200 hover:scale-125",
-    )}
-  />;
-
-  return message ? (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>
-          {div}
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{readyCondition?.message ?? "In Progress"}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  ) : div;
-}
 
 function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -200,19 +153,4 @@ function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceT
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
-
-function getSystemIdColor(systemId: string): string {
-  const colors = [
-    "bg-red-100 text-red-800",
-    "bg-blue-100 text-blue-800",
-    "bg-green-100 text-green-800",
-    "bg-yellow-100 text-yellow-800",
-    "bg-purple-100 text-purple-800",
-    "bg-pink-100 text-pink-800",
-    "bg-indigo-100 text-indigo-800",
-  ];
-
-  const index = systemId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-  return colors[index];
 }
