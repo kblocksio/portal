@@ -1,8 +1,8 @@
 import { Cpu, Microchip, HardDrive } from "lucide-react"
-import { Card, CardContent, CardTitle, CardHeader } from '../ui/card'
+import { Card, CardContent } from '../ui/card'
 import { Slider } from '../ui/slider'
 import { useState } from "react"
-import { KblocksInstancePickerData, KblocksInstanceType } from "./kblocks-ui-fileds"
+import { KblocksInstancePickerData, KblocksInstanceType } from "./kblocks-ui-fileds-parser"
 import { cn } from "~/lib/utils"
 interface InstanceSelectorProps {
   defaultInstanceName: string

@@ -9,8 +9,9 @@ import { InputField } from "./input-field";
 import { parseDescription } from "./description-parser";
 import { EnumField } from "./enum-field";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
-import { KblocksInstancePickerData, parseKblocksField } from "./kblocks-ui-fileds";
+import { KblocksImagePickerData, KblocksInstancePickerData, kblocksUiFieldsParser } from "./kblocks-ui-fileds-parser";
 import { InstanceTypeField } from "./instance-type-field";
+import { ImagePickerField } from "./image-picker-field";
 
 interface ObjectFormProps {
   properties: any;
@@ -213,8 +214,12 @@ const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
-  const { fieldType: kblocksFieldType, data: kblocksFieldData } = parseKblocksField(description ?? '') ?? {};
-  const sanitizedDescription = description?.replace(/@ui\s+kblocks\.io\/([a-zA-Z0-9_-]+):\s*({[\s\S]*})/g, '');
+  const { fieldType: kblocksFieldType, data: kblocksFieldData } = kblocksUiFieldsParser(description ?? '') ?? {};
+  const sanitizedDescription = description
+    ?.replace(
+      /@ui\s+kblocks\.io\/[a-zA-Z0-9_-]+(?:\s*:\s*{[\s\S]*?})?(?=\n|$)/g, '').trim();
+  console.log("kblocksFieldType", kblocksFieldType)
+  console.log("kblocksFieldData", kblocksFieldData)
 
   // handle primitive field types
   const getPrimitiveWidget = useMemo(() => {
@@ -230,6 +235,9 @@ const PrimitiveFieldRenderer = ({
             instanceTypes={instancePickerData}
             onInstanceChange={handleChange}
           />;
+        }
+        case 'image-picker': {
+          return <ImagePickerField />;
         }
       }
     }
