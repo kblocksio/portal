@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, ResourceType } from "@repo/shared";
+import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, ResourceType, GetEventsResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
@@ -8,7 +8,7 @@ import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
 import { ApiObject, blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
-import { getAllObjects, handleEvent, loadLogs, resetStorage } from "./storage";
+import { getAllObjects, handleEvent, loadEvents, resetStorage } from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -132,8 +132,22 @@ app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", 
     namespace,
     name,
   });
-  const logs = await loadLogs(objUri);
+  const logs = (await loadEvents(objUri)).filter(e => e.type === "LOG");
   return res.status(200).json({ objUri, logs } as GetLogsResponse);
+});
+
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const events = await loadEvents(objUri);
+  return res.status(200).json({ objUri, events } as GetEventsResponse);
 });
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {

@@ -23,4 +23,9 @@ export type GetLogsResponse = {
   logs: kblocks.LogEvent[];
 };
 
+export type GetEventsResponse = {
+  objUri: string;
+  events: kblocks.WorkerEvent[];
+};
+
 export type CreateResourceResponse = { };

@@ -5,6 +5,7 @@ import { slackNotify } from "./slack-notify";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
+const objPrefix = "obj:";
 
 const config = {
   password: REDIS_PASSWORD,
@@ -35,13 +36,11 @@ async function connection() {
 }
 
 
-const objPrefix = "obj:";
-
 function keyForObject(blockUri: string) {
   return objPrefix + blockUri;
 }
 
-function keyForLogs(blockUri: string) {
+function keyForEvents(blockUri: string) {
   return `logs:${blockUri}`;
 }
 
@@ -114,17 +113,17 @@ export async function getAllObjects() {
   return result;
 }
 
-async function storeLog(objUri: string, log: kblocks.LogEvent) {
+async function store(objUri: string, log: kblocks.WorkerEvent) {
   const redis = await connection();
 
-  const key = keyForLogs(objUri);
+  const key = keyForEvents(objUri);
   await redis.rPush(key, JSON.stringify(log));
 }
 
-export async function loadLogs(objUri: string): Promise<kblocks.LogEvent[]> {
+export async function loadEvents(objUri: string): Promise<kblocks.WorkerEvent[]> {
   const redis = await connection();
 
-  const key = keyForLogs(objUri);
+  const key = keyForEvents(objUri);
   const values = await redis.lRange(key, 0, -1);
   if (!values) {
     return [];
@@ -170,9 +169,8 @@ async function storeEvent(event: kblocks.WorkerEvent) {
     return patchObject(event.objUri, event.patch);
   }
 
-  if (event.type === "LOG") {
-    return storeLog(event.objUri, event);
-  }
+  // store all other events
+  return store(event.objUri, event);
 }
 
 export function handleEvent(event: kblocks.WorkerEvent) {
