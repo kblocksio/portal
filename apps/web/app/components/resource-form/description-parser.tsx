@@ -18,7 +18,7 @@ export const parseDescription = (description: string): React.ReactNode[] => {
     const text = linkText || url;
 
     parts.push(
-      <a href={url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer" key={lastIndex}>
+      <a href={url} className="text-sky-500 hover:underline" target="_blank" rel="noopener noreferrer" key={lastIndex}>
         {text}
       </a>
     );

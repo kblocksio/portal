@@ -3,12 +3,12 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Pencil, Plus, X, Check } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
 import { parseDescription } from "./description-parser";
 import { EnumField } from "./enum-field";
+import { splitAndCapitalizeCamelCase } from "./label-formater";
 
 interface ObjectFormProps {
   properties: any;
@@ -91,14 +91,14 @@ export const ObjectFieldForm = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
+    <div className="w-full">
+      <div className="p-1">
         <form onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
           onSave(objectData);
         }}>
-          <div className="space-y-4 ml-2 mr-2">
+          <div className="space-y-6 ml-2 mr-2">
             {properties
               ? Object.keys(properties).map((key) => (
                 <FieldRenderer
@@ -131,8 +131,8 @@ export const ObjectFieldForm = ({
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -156,9 +156,9 @@ export const ArrayItemForm = ({
   };
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div className="space-y-4 ml-2 mr-2">
+    <div className="w-full">
+      <div className="p-1">
+        <div className="space-y-6 ml-2 mr-2">
           {type === 'object' || type === 'array' ? (
             <FieldRenderer
               schema={schema}
@@ -196,8 +196,8 @@ export const ArrayItemForm = ({
             Save
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -255,16 +255,16 @@ const PrimitiveFieldRenderer = ({
   }, [type, fieldName, value, required, handleChange]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-6">
       {!hideField && fieldName && (
         <div className="flex flex-col">
           <Label htmlFor={fieldName} className="text-sm font-medium">
-            {fieldName}
+            {splitAndCapitalizeCamelCase(fieldName)}
           </Label>
           {description && (
-            <div className="text-xs pt-1 text-muted-foreground">
+            <p className="text-[0.8rem] text-muted-foreground pt-1">
               {parseDescription(description)}
-            </div>
+            </p>
           )}
         </div>
       )}
@@ -302,12 +302,12 @@ export const FieldRenderer = ({
     const objectProperties = properties || additionalProperties.properties;
     const objectDescription = description || additionalProperties?.description;
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 mb-6">
         {!hideField && fieldName ? (
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <Label className="text-sm font-medium">{fieldName}</Label>
+                <Label className="text-sm font-medium">{splitAndCapitalizeCamelCase(fieldName)}</Label>
                 {isObjectPopulated(objectData) && (
                   <Badge variant="secondary" className="text-xs">
                     <Check className="w-3 h-3 mr-1" />
@@ -316,23 +316,23 @@ export const FieldRenderer = ({
                 )}
               </div>
               {objectDescription && (
-                <div className="text-xs pt-1 text-muted-foreground">
+                <p className="text-[0.8rem] text-muted-foreground pt-1">
                   {parseDescription(objectDescription)}
-                </div>
+                </p>
               )}
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={handleEditObject}
-              className="h-8 px-3 text-xs mr-2"
+              className="h-8 px-3 text-xs mr-2 ml-2"
             >
               <Pencil className="w-3 h-3 mr-1" />
               Edit
             </Button>
           </div>
         ) : (
-          <div className="space-y-4 ml-2 mr-2">
+          <div className="space-y-6 ml-2 mr-2">
             {objectProperties
               ? Object.keys(objectProperties).map((key) => (
                 <FieldRenderer
@@ -353,7 +353,7 @@ export const FieldRenderer = ({
           <DialogContent className="sm:max-w-[800px]">
             <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
               <DialogTitle className="text-lg">
-                {fieldName}
+                {splitAndCapitalizeCamelCase(fieldName ?? '')}
               </DialogTitle>
               {objectDescription && (
                 <DialogDescription className="text-sm text-muted-foreground">
@@ -409,28 +409,28 @@ export const FieldRenderer = ({
     };
 
     return (
-      <Card className="mt-4">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            {fieldName}
+      <div className="space-y-4 mb-6">
+        <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="text-sm font-medium">
+            {splitAndCapitalizeCamelCase(fieldName ?? '')}
             {description && (
-              <CardDescription className="text-xs text-muted-foreground">
+              <p className="text-[0.8rem] text-muted-foreground pt-1">
                 {parseDescription(description)}
-              </CardDescription>
+              </p>
             )}
-          </CardTitle>
+          </div>
           <Button
             type="button"
             variant="outline"
             onClick={handleAddItem}
-            className="h-8 px-3 text-xs"
+            className="h-8 px-3 text-xs mr-2 ml-2"
           >
             <Plus className="w-3 h-3 mr-1" />
             Add
           </Button>
-        </CardHeader>
-        <CardContent>
-          {items.length > 0 ? (
+        </div>
+        <div>
+          {items.length > 0 && (
             <div className="space-y-2">
               {items.map((item: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-md">
@@ -460,15 +460,13 @@ export const FieldRenderer = ({
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No items added yet.</p>
           )}
-        </CardContent>
+        </div>
         <Dialog open={showArrayModal} onOpenChange={(open: boolean) => setShowArrayModal(open)}>
           <DialogContent className="sm:max-w-[800px]">
             <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
               <DialogTitle className="text-lg">
-                {fieldName} item
+                {splitAndCapitalizeCamelCase(fieldName ?? '')} item
               </DialogTitle>
               {description && (
                 <DialogDescription className="text-sm text-muted-foreground">
@@ -485,7 +483,7 @@ export const FieldRenderer = ({
             />
           </DialogContent>
         </Dialog>
-      </Card>
+      </div>
     )
   } else {
     // Primitive type
