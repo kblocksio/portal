@@ -9,10 +9,9 @@ import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
-import { ResourceType } from "@repo/shared";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "./resource-form/resource-form";
-import { Resource } from "~/ResourceContext";
+import { Resource, ResourceType } from "~/ResourceContext";
 
 export interface EditModeData {
   resourceType: ResourceType;

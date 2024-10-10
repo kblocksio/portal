@@ -1,6 +1,6 @@
-import { ResourceType } from "@repo/shared";
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "~/lib/hero-icon";
 import { CardTitle, CardDescription } from "./ui/card";
+import { ResourceType } from "~/ResourceContext";
 
 export interface WizardSimpleHeaderProps {
   title: string;
@@ -9,10 +9,8 @@ export interface WizardSimpleHeaderProps {
 }
 
 export const WizardSimpleHeader = ({ title, description, resourceType }: WizardSimpleHeaderProps) => {
-
-  const ResourceIcon = getIconComponent({ icon: resourceType?.icon });
+  const ResourceIcon = resourceType?.iconComponent;
   const iconColor = getResourceIconColors({ color: resourceType?.color });
-
 
   return (
     <div className="flex items-center space-x-2">

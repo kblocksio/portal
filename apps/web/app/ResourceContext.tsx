@@ -1,9 +1,11 @@
-import { GetTypesResponse, ResourceType } from '@repo/shared';
-import React, { createContext, useEffect, useState } from 'react';
+import { GetTypesResponse } from '@repo/shared';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri } from "@kblocks/api";
+import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri, Manifest } from "@kblocks/api";
 import { toast } from 'react-hot-toast'; // Add this import
+import { request } from './lib/backend';
+import { getIconComponent } from './lib/hero-icon';
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -20,6 +22,12 @@ export type SelectedResourceId = {
   objType: string;
 };
 
+type Definition = Manifest["definition"];;
+
+export interface ResourceType extends Definition {
+  iconComponent: React.ComponentType<{ className?: string }>;
+}
+
 export interface ResourceContextValue {
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
@@ -31,6 +39,8 @@ export interface ResourceContextValue {
   isLoading: boolean;
   selectedResourceId: SelectedResourceId | undefined;
   setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
+  objects: Record<string, Resource>;
+  events: Record<string, WorkerEvent>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -41,6 +51,8 @@ export const ResourceContext = createContext<ResourceContextValue>({
   isLoading: true,
   selectedResourceId: undefined,
   setSelectedResourceId: () => { },
+  objects: {},
+  events: {},
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
@@ -49,6 +61,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
   const [logs, setLogs] = useState<Map<string, Record<string, LogEvent>>>(new Map());
   const [selectedResourceId, setSelectedResourceId] = useState<SelectedResourceId | undefined>(undefined);
+  const [events, setEvents] = useState<Record<string, WorkerEvent>>({});
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
@@ -69,7 +82,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
   const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
 
-
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
       console.log("resourceTypesData", resourceTypesData);
@@ -79,7 +91,10 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
           continue;
         }
 
-        result[k] = v;
+        result[k] = {
+          ...v,
+          iconComponent: getIconComponent({ icon: v.icon ?? "CircleDotIcon" })
+        };
       }
 
       setResourceTypes(result);
@@ -162,16 +177,39 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     setLogs((prevLogs) => {
       const copy = new Map(prevLogs);
       const existingMessages = copy.get(objUri) ?? {};
-      existingMessages[message.timestamp] = message;
+      existingMessages[message.timestamp.toISOString()] = message;
       copy.set(objUri, existingMessages);
       return copy;
     });
+  };
+
+  const addEvent = (event: WorkerEvent) => {
+    let timestamp = (event as any).timestamp ?? new Date();
+    if (timestamp && typeof timestamp === "string") {
+      timestamp = new Date(timestamp);
+      event.timestamp = timestamp; 
+    }
+
+    const eventKey = `${timestamp.toISOString()}.${event.objUri}`;
+
+    // ignore OBJECT and PATCH events because they are handled by the respective handlers
+    if (event.type === "OBJECT" || event.type === "PATCH") {
+      return;
+    }
+
+    setEvents(events => ({
+      ...events,
+      [eventKey]: event,
+    }));
   };
 
   useEffect(() => {
     if (!lastJsonMessage) {
       return;
     }
+
+    addEvent(lastJsonMessage);
+
     switch (lastJsonMessage.type) {
       case 'OBJECT':
         handleObjectMessage(lastJsonMessage as ObjectEvent);
@@ -183,11 +221,11 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
         handleLogMessage(lastJsonMessage as LogEvent);
         break;
       case 'ERROR':
-        toast.error((lastJsonMessage as any).message || 'Unknown error');
+        toast.error(lastJsonMessage.message ?? 'Unknown error');
         break;
       default: {
         const blockUri = parseBlockUri(lastJsonMessage.objUri);
-        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, { duration: 2000, icon: "🔔" });
+        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, { duration: 2000, icon: "" });
       }
     }
   }, [lastJsonMessage]);
@@ -203,10 +241,49 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     };
   }, [getWebSocket]);
 
+
+  const objects = useMemo(() => {
+    const result: Record<string, Resource> = {};
+    for (const resourcesForType of resources.values()) {
+      for (const [objUri, resource] of resourcesForType.entries()) {
+        result[objUri] = resource;
+      }
+    }
+    return result;
+  }, [resources]);
+
+
+  // initial fetch of events
+  useEffect(() => {
+    const requests = [];
+
+    for (const obj of Object.values(objects)) {
+      const uri = parseBlockUri(obj.objUri);
+
+      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+      const fetchEvents = async () => {
+        console.log(`GET ${eventsUrl}`);
+        const response = await request("GET", eventsUrl);
+
+        for (const event of response.events) {
+          addEvent(event);
+        }
+      };
+
+      requests.push(fetchEvents());
+    }
+
+    Promise.all(requests).catch(e => {
+      console.error(e);
+    });
+  }, [objects]);
+
   const value: ResourceContextValue = {
     resourceTypes,
+    objects,
     resources,
     logs,
+    events,
     handleObjectMessages,
     isLoading,
     selectedResourceId,

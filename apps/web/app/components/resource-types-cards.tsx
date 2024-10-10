@@ -1,7 +1,7 @@
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "~/lib/hero-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import { ResourceType } from "@repo/shared";
+import { ResourceType } from "~/ResourceContext";
 
 export interface ResourceTypesCardsProps {
   filtereResources: ResourceType[];
@@ -14,7 +14,7 @@ export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isL
       <ResourceCardSkeleton key={index} />
     )) : (
       filtereResources.map((resource, index) => {
-        const Icon = getIconComponent({ icon: resource.icon });
+        const Icon = resource.iconComponent;
         const iconColor = getResourceIconColors({
           color: resource?.color,
         });

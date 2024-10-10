@@ -1,10 +1,9 @@
-import { ResourceType } from "@repo/shared";
 import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "~/lib/hero-icon";
 import { ResourceRow } from "./resource-row";
-import { Resource, ResourceContext } from "~/ResourceContext";
+import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
 
 export interface ProjectGroupProps {
   objType: string;
@@ -37,7 +36,8 @@ export const ProjectGroup = ({
     );
   }, [resourcesForType, searchQuery]);
 
-  const Icon = getIconComponent({ icon: resourceType.icon });
+  const Icon = resourceType.iconComponent;
+  
   // use default color for now
   const iconColor = getResourceIconColors({
     // color: resourceType?.color,
