@@ -1,6 +1,5 @@
 import { useAppContext } from "~/AppContext";
 import { useContext, useState } from "react";
-import { createResource } from "~/lib/backend";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ResourceContext } from "~/ResourceContext";
 import { Search } from "lucide-react";
