@@ -1,16 +1,15 @@
 import { Installation, Repository } from "@repo/shared";
 import { useEffect, useMemo, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Loader2 } from "lucide-react";
+import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
 
 interface GhRepoSelectionFieldProps {
   handleOnSelection: (repository: Repository) => void;
+  initialValue?: Repository;
 }
 
-export const GhRepoSelectionField = ({ handleOnSelection }: GhRepoSelectionFieldProps) => {
-
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
+export const GhRepoSelectionField = ({ handleOnSelection, initialValue }: GhRepoSelectionFieldProps) => {
 
   const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
     "/api/github/installations"
@@ -38,7 +37,11 @@ export const GhRepoSelectionField = ({ handleOnSelection }: GhRepoSelectionField
 
   return (
     <div className="flex flex-col gap-4 ml-2 mr-2">
-      <Select disabled={isLoading}>
+      <Select
+        disabled={isLoading}
+        onValueChange={(value) => handleOnSelection(repositories?.find(repo => repo.full_name === value) as Repository ?? null)}
+        value={initialValue?.full_name}
+      >
         <SelectTrigger className="w-full">
           {isLoading ? (
             <div className="flex items-center">
@@ -51,8 +54,11 @@ export const GhRepoSelectionField = ({ handleOnSelection }: GhRepoSelectionField
         </SelectTrigger>
         <SelectContent>
           {repositories && repositories.map((repo) => (
-            <SelectItem key={repo.name} value={repo.name}>
-              {repo.name}
+            <SelectItem key={repo.full_name} value={repo.full_name}>
+              <div className="flex items-center">
+                <Github className="mr-2 h-4 w-4" />
+                {repo.full_name}
+              </div>
             </SelectItem>
           ))}
         </SelectContent>

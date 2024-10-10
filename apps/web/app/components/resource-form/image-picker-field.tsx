@@ -36,7 +36,8 @@ export interface ImagePickerFieldProps {
  * code snippet input field
  */
 export const ImagePickerField = () => {
-  const [imageName, setImageName] = useState("")
+  const [imageName, setImageName] = useState("");
+  const [githubRepo, setGithubRepo] = useState<Repository>();
 
   return (
     <Tabs defaultValue="github" className="flex w-full">
@@ -57,7 +58,8 @@ export const ImagePickerField = () => {
       <div className="flex-grow border-l w-full min-h-[160px] border-gray-200">
         <TabsContent value="github" className="pl-2 w-full h-full">
           <GhRepoSelectionField
-            handleOnSelection={(repo) => setImageName(`${repo.owner}/${repo.name}`)}
+            handleOnSelection={(repo) => setGithubRepo(repo)}
+            initialValue={githubRepo}
           />
         </TabsContent>
         <TabsContent value="image" className="pl-2 h-full">

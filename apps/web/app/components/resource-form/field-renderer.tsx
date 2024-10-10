@@ -218,8 +218,6 @@ const PrimitiveFieldRenderer = ({
   const sanitizedDescription = description
     ?.replace(
       /@ui\s+kblocks\.io\/[a-zA-Z0-9_-]+(?:\s*:\s*{[\s\S]*?})?(?=\n|$)/g, '').trim();
-  console.log("kblocksFieldType", kblocksFieldType)
-  console.log("kblocksFieldData", kblocksFieldData)
 
   // handle primitive field types
   const getPrimitiveWidget = useMemo(() => {

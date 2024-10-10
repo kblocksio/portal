@@ -17,8 +17,6 @@ export const kblocksUiFieldsParser = (description: string): KblocksUiAnnotation 
   const regex = /@ui\s+kblocks\.io\/([a-zA-Z0-9_-]+)(?:\s*:\s*({[\s\S]*?}))?(?=\n|$)/;
   const match = description.match(regex);
 
-  console.log("match", match)
-
   if (match) {
     const fieldType = match[1];
     const jsonString = match[2];
