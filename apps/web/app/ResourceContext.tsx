@@ -2,7 +2,7 @@ import { GetTypesResponse } from '@repo/shared';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useFetch } from './hooks/use-fetch';
-import { LogEvent, ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri, Manifest } from "@kblocks/api";
+import { ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri, Manifest } from "@kblocks/api";
 import { toast } from 'react-hot-toast'; // Add this import
 import { request } from './lib/backend';
 import { getIconComponent } from './lib/hero-icon';
@@ -34,34 +34,31 @@ export interface ResourceContextValue {
   // objType -> objUri -> Resource
   resources: Map<string, Map<string, Resource>>;
   // objUri -> Record<timestamp, LogEvent>
-  logs: Map<string, Record<string, LogEvent>>;
   handleObjectMessages: (messages: ObjectEvent[]) => void;
   isLoading: boolean;
   selectedResourceId: SelectedResourceId | undefined;
   setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
   objects: Record<string, Resource>;
-  events: Record<string, WorkerEvent>;
+  eventsPerObject: Record<string, Record<string, WorkerEvent>>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
   resources: new Map<string, Map<string, Resource>>(),
-  logs: new Map<string, Record<string, LogEvent>>(),
   handleObjectMessages: () => { },
   isLoading: true,
   selectedResourceId: undefined,
   setSelectedResourceId: () => { },
   objects: {},
-  events: {},
+  eventsPerObject: {},
 });
 
 export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [resourceTypes, setResourceTypes] = useState<Record<string, ResourceType>>({});
   const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
-  const [logs, setLogs] = useState<Map<string, Record<string, LogEvent>>>(new Map());
   const [selectedResourceId, setSelectedResourceId] = useState<SelectedResourceId | undefined>(undefined);
-  const [events, setEvents] = useState<Record<string, WorkerEvent>>({});
+  const [eventsPerObject, setEventsPerObject] = useState<Record<string, Record<string, WorkerEvent>>>({});
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
@@ -87,7 +84,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       console.log("resourceTypesData", resourceTypesData);
       const result: Record<string, ResourceType> = {};
       for (const [k, v] of Object.entries(resourceTypesData.types).sort(([l], [r]) => l.localeCompare(r))) {
-        if (!k.startsWith("acme.com/v1")) {
+        if (k.startsWith("kblocks.io/v1")) {
           continue;
         }
 
@@ -172,17 +169,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     });
   };
 
-  const handleLogMessage = (message: LogEvent) => {
-    const { objUri } = message;
-    setLogs((prevLogs) => {
-      const copy = new Map(prevLogs);
-      const existingMessages = copy.get(objUri) ?? {};
-      existingMessages[message.timestamp.toISOString()] = message;
-      copy.set(objUri, existingMessages);
-      return copy;
-    });
-  };
-
   const addEvent = (event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
@@ -197,10 +183,15 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       return;
     }
 
-    setEvents(events => ({
-      ...events,
-      [eventKey]: event,
-    }));
+    setEventsPerObject(eventsPerObject => {
+      return {
+        ...eventsPerObject,
+        [event.objUri]: {
+          ...eventsPerObject[event.objUri],
+          [eventKey]: event,
+        },
+      };
+    });
   };
 
   useEffect(() => {
@@ -209,6 +200,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     }
 
     addEvent(lastJsonMessage);
+    const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
     switch (lastJsonMessage.type) {
       case 'OBJECT':
@@ -217,16 +209,12 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       case 'PATCH':
         handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
-      case 'LOG':
-        handleLogMessage(lastJsonMessage as LogEvent);
-        break;
       case 'ERROR':
         toast.error(lastJsonMessage.message ?? 'Unknown error');
         break;
-      default: {
-        const blockUri = parseBlockUri(lastJsonMessage.objUri);
+      case 'LIFECYCLE':
         toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, { duration: 2000, icon: "" });
-      }
+        break;
     }
   }, [lastJsonMessage]);
 
@@ -282,8 +270,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     resourceTypes,
     objects,
     resources,
-    logs,
-    events,
+    eventsPerObject,
     handleObjectMessages,
     isLoading,
     selectedResourceId,
