@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
-import { Resource, ResourceContext } from "~/ResourceContext";
+import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
 import { ApiObject, Condition, parseBlockUri, StatusReason } from "@kblocks/api";
 import {
   DropdownMenu,
@@ -15,7 +15,6 @@ import {
 } from "./ui/dropdown-menu";
 import { DeleteResourceDialog } from "./delete-resource"; // Add this import
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
-import { ResourceType } from "@repo/shared";
 import { Badge } from "./ui/badge"; // Add this import
 
 export const ResourceRow = ({
@@ -100,13 +99,13 @@ export const ResourceRow = ({
   );
 }
 
-export function SystemBadge({ blockUri }: { blockUri: string }) {
+export function SystemBadge({ blockUri, className }: { blockUri: string, className?: string }) {
   const block = parseBlockUri(blockUri);
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)}`}>
+          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)} ${className}`} tabIndex={-1}>
             {block.system}
           </Badge>
         </TooltipTrigger>

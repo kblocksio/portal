@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "~/com
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import { getResourceIconColors } from "~/lib/hero-icon";
-import { StatusBadge } from "./resource-row";
+import { StatusBadge, SystemBadge } from "./resource-row";
 import { useFetch } from "~/hooks/use-fetch";
 import { type LogEvent } from "@kblocks/api";
 import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
@@ -11,14 +11,11 @@ import { DeleteResourceDialog } from "./delete-resource";
 import Timeline from "./events/timeline";
 
 export const ResourceDetailsDrawer = () => {
-
-  const logContainerRef = useRef<HTMLDivElement>(null);
-
   const { openWizard: openEditWizard } = useCreateResourceWizard();
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const { selectedResourceId, setSelectedResourceId, resourceTypes, logs, resources, events } = useContext(ResourceContext);
+  const { selectedResourceId, setSelectedResourceId, resourceTypes, resources, eventsPerObject } = useContext(ResourceContext);
 
   const selectedResource = useMemo(() => {
     if (!selectedResourceId) return undefined;
@@ -32,65 +29,11 @@ export const ResourceDetailsDrawer = () => {
 
   const Icon = selectedResourceType?.iconComponent;
 
-  const logsUrl = (resource?: Resource) => {
-    if (!resource) {
-      return "";
-    }
-    const uri = resource.objUri.split("kblocks://")[1];
-    return `/api/resources/${uri}/logs`;
-  };
-
-  const { data: oldLogs, refetch } = useFetch(logsUrl(selectedResource), {}, false);
-
-  const resourceEvents = useMemo(() => {
-    return Object.values(events).filter((event) => event.objUri === selectedResource?.objUri);
-  }, [selectedResource, events]);
-
-  useEffect(() => {
-    if (selectedResource) {
-      refetch(logsUrl(selectedResource));
-    }
-  }, [selectedResource, refetch]);
-
-  const finalLogs = useMemo(() => {
-    const resourceLogs = selectedResource ? logs.get(selectedResource.objUri) : {};
-    const map: Record<string, LogEvent> = { ...resourceLogs };
-    for (const entry of (oldLogs as any)?.logs ?? []) {
-      map[entry.timestamp] = entry;
-    }
-
-    const result = [];
-    for (const entry of Object.keys(map).sort().map((k) => map[k])) {
-      for (const line of entry.message.split("\n")) {
-        result.push({ ...entry, message: line });
-      }
-    }
-    return result;
-  }, [oldLogs, logs, selectedResource]);
-
-  const scrollToBottom = useCallback(() => {
-    if (logContainerRef.current) {
-      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
-    }
-  }, [logContainerRef]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [finalLogs, scrollToBottom]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom]);
-
   const iconColor = useMemo(() => (
     getResourceIconColors({
       color: selectedResource?.color,
     })
   ), [selectedResource]);
-
-  const readyCondition = useMemo(() => (
-    selectedResource?.status?.conditions?.find((condition: any) => condition.type === "Ready")
-  ), [selectedResource?.status?.conditions]);
 
   const properties: Record<string, string> = {};
   const outputs: Record<string, string> = {};
@@ -112,17 +55,25 @@ export const ResourceDetailsDrawer = () => {
 
   return (
     <Sheet open={!!selectedResource} onOpenChange={(x) => (!x ? setSelectedResourceId(undefined) : null)}>
-      <SheetContent className="min-w-[1000px] sm:w-[540px] sm:max-w-[50vw] flex flex-col h-full">
+      <SheetContent className="min-w-[1000px] sm:w-[540px] sm:max-w-[50vw] flex flex-col h-full gap-0">
         <SheetHeader>
-          <SheetTitle className="text-2xl font-bold flex items-center gap-2">
+          <SheetTitle className="text-2xl font-bold flex items-center gap-2 ml-1 mb-0 border-b border-b-muted-foreground/10 pb-2">
             {Icon && <Icon className={`${iconColor} h-7 w-7`} />}
             <span className="text-muted-foreground whitespace-nowrap">{selectedResource?.metadata.namespace}</span>
             <span className="text-muted-foreground mx-1">·</span>
             {selectedResource?.metadata.name}
+
+            {selectedResource && (
+              <SystemBadge 
+                blockUri={selectedResource.objUri} 
+                className="mb-2 ml-6" 
+                
+              />
+            )}
           </SheetTitle>
         </SheetHeader>
         
-        <Timeline events={resourceEvents} />
+        {selectedResource && <Timeline events={Object.values(eventsPerObject[selectedResource.objUri])} />}
         
         <SheetFooter>
           {selectedResourceType && selectedResource &&
