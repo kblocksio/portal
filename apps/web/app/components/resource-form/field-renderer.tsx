@@ -9,6 +9,8 @@ import { InputField } from "./input-field";
 import { parseDescription } from "./description-parser";
 import { EnumField } from "./enum-field";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
+import { KblocksInstancePickerData, parseKblocksField } from "./kblocks-ui-fileds";
+import { InstanceTypeField } from "./instance-type-field";
 
 interface ObjectFormProps {
   properties: any;
@@ -211,7 +213,28 @@ const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
+  const { fieldType: kblocksFieldType, data: kblocksFieldData } = parseKblocksField(description ?? '') ?? {};
+  const sanitizedDescription = description?.replace(/@ui\s+kblocks\.io\/([a-zA-Z0-9_-]+):\s*({[\s\S]*})/g, '');
+
+  // handle primitive field types
   const getPrimitiveWidget = useMemo(() => {
+
+    // handle kblocks field types
+    if (kblocksFieldType) {
+      switch (kblocksFieldType) {
+        case 'instance-picker': {
+          const instancePickerData = kblocksFieldData as KblocksInstancePickerData;
+          const defaultInstance = schema.default;
+          return <InstanceTypeField
+            defaultInstanceName={defaultInstance}
+            instanceTypes={instancePickerData}
+            onInstanceChange={handleChange}
+          />;
+        }
+      }
+    }
+
+
     switch (type) {
       case 'boolean':
         return (
@@ -261,9 +284,9 @@ const PrimitiveFieldRenderer = ({
           <Label htmlFor={fieldName} className="text-sm font-medium">
             {splitAndCapitalizeCamelCase(fieldName)}
           </Label>
-          {description && (
+          {sanitizedDescription && (
             <p className="text-[0.8rem] text-muted-foreground pt-1">
-              {parseDescription(description)}
+              {parseDescription(sanitizedDescription)}
             </p>
           )}
         </div>

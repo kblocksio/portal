@@ -63,7 +63,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           />
         </div>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={handleBack}>
           Back
         </Button>
