@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { ResourceType } from "@repo/shared";
 import { CreateResourceWizard, EditModeData } from './components/create-resource-wizard';
-import { ResourceContext } from './ResourceContext';
+import { ResourceType, ResourceContext } from './ResourceContext';
 import { createResource } from './lib/backend';
 
 interface CreateResourceWizardContextType {

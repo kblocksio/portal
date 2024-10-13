@@ -35,5 +35,3 @@ export type Installation = {
   access_tokens_url: string;
   repositories_url: string;
 };
-
-export type ResourceType = Manifest["definition"];

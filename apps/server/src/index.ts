@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, ResourceType, GetEventsResponse } from "@repo/shared";
+import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, GetEventsResponse } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
@@ -105,7 +105,7 @@ app.get("/api/projects", async (_, res) => {
 });
 
 app.get("/api/types", async (_, res) => {
-  const result: Record<string, ResourceType> = {};
+  const result: GetTypesResponse = { types: {} };
 
   const all = await getAllObjects();
 
@@ -116,10 +116,10 @@ app.get("/api/types", async (_, res) => {
     }
 
     const type = `${object.spec.group}/${object.spec.version}/${object.spec.plural}`;
-    result[type] = object.spec as ResourceType;
+    result.types[type] = object.spec;
   }
 
-  return res.status(200).json({ types: result } as GetTypesResponse);
+  return res.status(200).json(result);
 });
 
 app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {

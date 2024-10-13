@@ -1,12 +1,11 @@
-import { ResourceType } from "@repo/shared";
 import { useContext, useEffect, useState } from "react";
 import { CatalogSidebar, SidebarBody, SidebarLabel } from "~/components/catalog/catalog-sidebar";
 import { loadingStates } from "~/components/catalog/loading-states";
 import { MultiStepLoader } from "~/components/ui/multi-step-loader";
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "~/lib/hero-icon";
 import { cn } from "~/lib/utils";
-import { ResourceContext } from "~/ResourceContext";
 import { MarkdownWrapper } from "~/components/markdown";
+import { ResourceContext, ResourceType } from "~/ResourceContext";
 
 export default function Catalog() {
   const { isLoading, resourceTypes } = useContext(ResourceContext);
@@ -41,7 +40,7 @@ export default function Catalog() {
               {resourceTypes &&
                 Object.values(resourceTypes).map((resourceType, idx) => {
                   const resourceTypeName = resourceType.kind;
-                  const Icon = getIconComponent({ icon: resourceType?.icon });
+                  const Icon = resourceType.iconComponent;
                   const iconColor = getResourceIconColors({
                     color: resourceType?.color,
                   });
