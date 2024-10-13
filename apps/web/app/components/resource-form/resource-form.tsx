@@ -46,7 +46,10 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
         <div className="space-y-4 border-b pb-4 mb-8 ml-2 mr-2">
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
+              <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>
+                Name
+                <span className="text-destructive">*</span>
+              </Label>
               <Input
                 required
                 id="name"
@@ -58,7 +61,10 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
+              <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>
+                Namespace
+                <span className="text-destructive">*</span>
+              </Label>
               <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
             </div>
             <div className="space-y-2">
