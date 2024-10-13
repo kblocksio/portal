@@ -304,6 +304,7 @@ const PrimitiveFieldRenderer = ({
         <div className="flex flex-col">
           <Label htmlFor={fieldName} className="text-sm font-medium">
             {splitAndCapitalizeCamelCase(fieldName)}
+            {required && <span className="text-destructive">*</span>}
           </Label>
           {sanitizedDescription && (
             <p className="text-[0.8rem] text-muted-foreground pt-1">
@@ -353,7 +354,10 @@ export const FieldRenderer = ({
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <Label className="text-sm font-medium">{splitAndCapitalizeCamelCase(fieldName)}</Label>
+                <Label className="text-sm font-medium">
+                  {splitAndCapitalizeCamelCase(fieldName)}
+                  {required && <span className="text-destructive">*</span>}
+                </Label>
                 {isObjectPopulated(objectData) && (
                   <Badge variant="secondary" className="text-xs">
                     <Check className="w-3 h-3 mr-1" />
@@ -461,6 +465,7 @@ export const FieldRenderer = ({
         <div className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="text-sm font-medium">
             {splitAndCapitalizeCamelCase(fieldName ?? '')}
+            {required && <span className="text-destructive">*</span>}
             {description && (
               <p className="text-[0.8rem] text-muted-foreground pt-1">
                 {parseDescription(description)}
