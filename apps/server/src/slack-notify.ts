@@ -52,8 +52,8 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
 
 
     case "ERROR":
-      if (event.explanation) {
-        return event.explanation;
+      if (event.explanation?.blocks) {
+        return event.explanation?.blocks;
       } else {
         return [
           {
