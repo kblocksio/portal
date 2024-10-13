@@ -92,10 +92,6 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
     );
   }, [kind, group, plural, version, selectedEngine, directory]);
 
-  useEffect(() => {
-    console.log("selectedEngine", selectedEngine);
-  }, [selectedEngine]);
-
   const enginesCards = useMemo(() => {
     return (
       <div className="grid grid-cols-3 gap-4 overflow-auto">
