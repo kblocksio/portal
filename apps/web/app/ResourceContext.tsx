@@ -129,7 +129,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
           console.error('WebSocket Object Message unknown object type:', objType, object, prevResourcesForTypes);
           return prevResourcesForTypes;
         }
-        
+
         const newResourcesForTypeMap = new Map(resoucesForTypeMap);
         newResourcesForTypeMap.delete(objUri);
         const newResources = new Map(prevResourcesForTypes);
@@ -172,7 +172,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
       timestamp = new Date(timestamp);
-      event.timestamp = timestamp; 
+      event.timestamp = timestamp;
     }
 
     const eventKey = `${timestamp.toISOString()}.${event.objUri}`;

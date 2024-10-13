@@ -71,8 +71,8 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
   const [group, setGroup] = useState<string>("");
   const [plural, setPlural] = useState<string>("");
   const [selectedEngine, setSelectedEngine] = useState<string>("");
-  const [version, setVersion] = useState<string>("");
-  const [directory, setDirectory] = useState<string>("");
+  const [version, setVersion] = useState<string>("v1");
+  const [directory, setDirectory] = useState<string>("my-kblock");
   const handleOpenChange = useCallback((open: boolean) => {
     if (!open) {
       setStep(1);
@@ -163,18 +163,14 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
             <div className="space-y-4 border-b pb-4 ml-2 mr-2">
               <div className="grid grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="directory">
-                    Directory
+                  <Label htmlFor="group">
+                    Group
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    disabled={step !== 1}
-                    required
-                    id="directory"
-                    placeholder="Directory"
-                    value={directory}
-                    onChange={(e) => setDirectory(e.target.value)}
-                  />
+                  <Input disabled={step !== 1} required id="group"
+                    placeholder="Group"
+                    value={group}
+                    onChange={(e) => setGroup(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="kind">
@@ -189,16 +185,6 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
                     value={kind}
                     onChange={(e) => setKind(e.target.value)}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="group">
-                    Group
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <Input disabled={step !== 1} required id="group"
-                    placeholder="Group"
-                    value={group}
-                    onChange={(e) => setGroup(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="plural">
@@ -220,6 +206,20 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
                     value={version}
                     onChange={(e) => setVersion(e.target.value)} />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="directory">
+                    Directory
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    disabled={step !== 1}
+                    required
+                    id="directory"
+                    placeholder="Directory"
+                    value={directory}
+                    onChange={(e) => setDirectory(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -227,13 +227,23 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
             {step === 1 && enginesCards}
             {step === 2 && (
               <div className="p-4">
-                <div className="flex flex-col gap-2">
-                  <Label className="text-md font-medium">
+                <div className="flex flex-col gap-4">
+                  <CardTitle>
                     Copy and paste the following command into your terminal:
-                  </Label>
+                  </CardTitle>
                   <MarkdownWrapper
                     content={codeSnippet}
                   />
+                </div>
+                <div className="text-sm">
+                  For more information and examples visit
+                  {" "}
+                  <a className="underline text-blue-500"
+                    href="https://github.com/winglang/kblocks-gallery"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    Kblocks Gallery
+                  </a>
                 </div>
               </div>
             )}
