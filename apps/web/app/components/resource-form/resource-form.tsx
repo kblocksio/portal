@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { ApiObject } from '@kblocks/api';
 
 export interface ObjectMetadata {
   name: string;
@@ -16,14 +17,23 @@ export interface FormGeneratorProps {
   isLoading: boolean,
   handleBack: () => void,
   handleSubmit: (meta: ObjectMetadata, fields: any) => void,
-  initialValues?: any;
+  initialValues?: ApiObject;
+  initialMeta: Partial<ObjectMetadata>;
 };
 
-export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, initialValues }: FormGeneratorProps) => {
+export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, initialValues, initialMeta }: FormGeneratorProps) => {
   const [formData, setFormData] = useState<any>(initialValues || {});
-  const [system] = useState<string>("demo");
-  const [namespace, setNamespace] = useState<string>(initialValues?.metadata?.namespace ?? "default");
-  const [name, setName] = useState<string>(initialValues?.metadata?.name ?? "");
+  const [system] = useState<string>(initialMeta?.system ?? "demo");
+  const [namespace, setNamespace] = useState<string>(initialMeta?.namespace ?? "default");
+  const [name, setName] = useState<string>(initialMeta?.name ?? "");
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus on the name input when it's empty
+  useEffect(() => {
+    if (name.length === 0 && nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, [name]);
 
   return (
     <form className="flex flex-col h-full space-y-4 overflow-hidden" onSubmit={(e) => {
@@ -41,7 +51,15 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>Name</Label>
-              <Input required id="name" placeholder="Resource name" disabled={!!initialValues} value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                required
+                id="name"
+                placeholder="Resource name"
+                disabled={!!initialValues}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                ref={nameInputRef}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>Namespace</Label>
@@ -49,7 +67,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
             </div>
             <div className="space-y-2">
               <Label htmlFor="system" className={"opacity-50"}>System</Label>
-              <Input required id="system" placeholder="System" disabled={true} value="demo" />
+              <Input required id="system" placeholder="System" disabled={true} value={system} />
             </div>
           </div>
         </div>

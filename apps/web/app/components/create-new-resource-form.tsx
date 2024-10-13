@@ -1,6 +1,7 @@
-import { ResourceType } from "@repo/shared";
+import { ResourceType } from "~/ResourceContext";
 import { FormGenerator, ObjectMetadata } from "./resource-form/resource-form";
 import { useMemo } from "react";
+import { ApiObject } from "@kblocks/api";
 
 export const CreateNewResourceForm = ({
   resourceType,
@@ -8,9 +9,11 @@ export const CreateNewResourceForm = ({
   handleCreate,
   handleBack,
   isLoading,
+  initialMeta,
 }: {
   resourceType: ResourceType;
-  initialValues?: any;
+  initialValues?: ApiObject;
+  initialMeta: Partial<ObjectMetadata>;
   handleCreate: (meta: ObjectMetadata, fields: any) => void;
   handleBack: () => void;
   isLoading: boolean;
@@ -28,6 +31,7 @@ export const CreateNewResourceForm = ({
         schema={cleanedSchema}
         isLoading={isLoading}
         initialValues={initialValues}
+        initialMeta={initialMeta}
         handleBack={handleBack}
         handleSubmit={handleCreate} />
     </div>

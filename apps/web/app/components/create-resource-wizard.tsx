@@ -9,7 +9,7 @@ import { ResourceTypesCards } from "./resource-types-cards";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
-import { ApiObject } from "@kblocks/api";
+import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { ObjectMetadata } from "./resource-form/resource-form";
 import { Resource, ResourceType } from "~/ResourceContext";
 
@@ -95,10 +95,23 @@ export const CreateResourceWizard = ({
     setSelectedResourceType(editModeData?.resourceType || null);
   }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
 
+  function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
+    if (!objUri) {
+      return {};
+    }
+
+    const uri = parseBlockUri(objUri);
+    return {
+      system: uri.system,
+      namespace: uri.namespace,
+      name: uri.name,
+    };
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="flex flex-col min-w-[90vh] h-[90vh]"
-        aria-description="Create a new resource"
+        aria-describedby="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
             event.preventDefault()
@@ -143,6 +156,7 @@ export const CreateResourceWizard = ({
               {selectedResourceType &&
                 <CreateNewResourceForm
                   resourceType={selectedResourceType}
+                  initialMeta={renderInitialMeta(editModeData?.resource?.objUri)}
                   initialValues={editModeData?.resource}
                   handleCreate={handleCreate}
                   handleBack={handleBack}
