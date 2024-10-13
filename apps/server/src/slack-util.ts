@@ -55,7 +55,7 @@ export async function sendSlackMessage(channel: string, blocks: Blocks, thread_t
     };
   } catch (e) {
     console.error('Failed to send message to Slack: ', e);
-    console.error({ channel, thread_ts, blocks });
+    console.error(JSON.stringify({ channel, thread_ts, blocks }, null, 2));
     return {
       ts: undefined,
       channel: undefined,
