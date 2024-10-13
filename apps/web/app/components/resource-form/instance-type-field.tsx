@@ -1,7 +1,7 @@
 import { Cpu, Microchip, HardDrive } from "lucide-react"
 import { Card, CardContent } from '../ui/card'
 import { Slider } from '../ui/slider'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { KblocksInstancePickerData, KblocksInstanceType } from "./kblocks-ui-fileds-parser"
 import { cn } from "~/lib/utils"
 interface InstanceSelectorProps {
@@ -15,6 +15,13 @@ export const InstanceTypeField = ({ defaultInstanceName, instanceTypes, onInstan
   const [selectedInstance, setSelectedInstance] = useState<KblocksInstanceType>(
     () => instanceTypes.find((instance) => instance.name === defaultInstanceName) ?? instanceTypes[0]
   )
+
+  // make sure default instance name value is set in form data
+  useEffect(() => {
+    if (defaultInstanceName) {
+      onInstanceChange(defaultInstanceName);
+    }
+  }, [defaultInstanceName]);
 
   const handleSliderChange = (value: number[]) => {
     setSelectedInstance(instanceTypes[value[0]]);

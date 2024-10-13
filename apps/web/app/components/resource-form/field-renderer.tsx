@@ -235,11 +235,12 @@ const PrimitiveFieldRenderer = ({
           />;
         }
         case 'image-picker': {
-          return <ImagePickerField />;
+          return <ImagePickerField
+            onImageNameChange={handleChange}
+          />;
         }
       }
     }
-
 
     switch (type) {
       case 'boolean':

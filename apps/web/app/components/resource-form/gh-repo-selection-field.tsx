@@ -3,13 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
+import { Button } from "../ui/button";
 
 interface GhRepoSelectionFieldProps {
-  handleOnSelection: (repository: Repository) => void;
-  initialValue?: Repository;
+  handleOnSelection: (repository: Repository | null) => void;
+  initialValue?: Repository | null;
 }
 
 export const GhRepoSelectionField = ({ handleOnSelection, initialValue }: GhRepoSelectionFieldProps) => {
+
+  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(initialValue ?? null);
 
   const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
     "/api/github/installations"
@@ -37,32 +40,45 @@ export const GhRepoSelectionField = ({ handleOnSelection, initialValue }: GhRepo
 
   return (
     <div className="flex flex-col gap-4 ml-2 mr-2">
-      <Select
-        disabled={isLoading}
-        onValueChange={(value) => handleOnSelection(repositories?.find(repo => repo.full_name === value) as Repository ?? null)}
-        value={initialValue?.full_name}
-      >
-        <SelectTrigger className="w-full">
-          {isLoading ? (
-            <div className="flex items-center">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>Loading...</span>
-            </div>
-          ) : (
-            <SelectValue placeholder="Select an option" />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          {repositories && repositories.map((repo) => (
-            <SelectItem key={repo.full_name} value={repo.full_name}>
+      <div className="flex items-center justify-between">
+        <Select
+          disabled={isLoading}
+          onValueChange={(value) => setSelectedRepo(repositories?.find(repo => repo.full_name === value) as Repository ?? null)}
+          value={initialValue?.full_name}
+        >
+          <SelectTrigger className="w-full">
+            {isLoading ? (
               <div className="flex items-center">
-                <Github className="mr-2 h-4 w-4" />
-                {repo.full_name}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Loading...</span>
               </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+            ) : (
+              <SelectValue placeholder="Select an option" />
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            {repositories && repositories.map((repo) => (
+              <SelectItem key={repo.full_name} value={repo.full_name}>
+                <div className="flex items-center">
+                  <Github className="mr-2 h-4 w-4" />
+                  {repo.full_name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button variant="outline"
+          role="button"
+          className="ml-2"
+          disabled={!selectedRepo || isLoading}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOnSelection(repositories?.find(repo => repo.full_name === selectedRepo?.full_name) as Repository ?? null)
+          }}>
+          Choose
+        </Button>
+      </div>
       <div className="mt-4 mb-4 text-sm text-muted-foreground">
         <p>
           Can't find the repository you're looking for? You may need to adjust your GitHub App installation.{' '}

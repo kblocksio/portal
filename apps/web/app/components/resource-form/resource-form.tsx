@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
@@ -24,6 +24,10 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
   const [system] = useState<string>("demo");
   const [namespace, setNamespace] = useState<string>(initialValues?.metadata?.namespace ?? "default");
   const [name, setName] = useState<string>(initialValues?.metadata?.name ?? "");
+
+  useEffect(() => {
+    console.log("formData", formData);
+  }, [formData]);
 
   return (
     <form className="flex flex-col h-full space-y-4 overflow-hidden" onSubmit={(e) => {
