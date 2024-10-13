@@ -6,6 +6,8 @@ import { createResource } from './lib/backend';
 interface CreateResourceWizardContextType {
   isOpen: boolean;
   isLoading: boolean;
+  selectedResourceType: ResourceType | undefined;
+  setSelectedResourceType: (resourceType: ResourceType | undefined) => void;
   openWizard: (editModeData?: EditModeData) => void;
   closeWizard: () => void;
 }
@@ -30,6 +32,7 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editModeData, setEditModeData] = useState<EditModeData | undefined>(undefined);
+  const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | undefined>(undefined);
   const { resourceTypes } = useContext(ResourceContext);
 
   const filteredResourceTypes = useMemo(() => {
@@ -44,6 +47,7 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
   const closeWizard = useCallback(() => {
     setIsOpen(false);
     setEditModeData(undefined);
+    setSelectedResourceType(undefined);
   }, []);
 
   const handleCreateResource = async (system: string, resourceType: ResourceType, providedValues: any) => {
@@ -51,6 +55,7 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
     await createResource(system, resourceType, providedValues);
     setIsLoading(false);
     setIsOpen(false);
+    setSelectedResourceType(undefined);
   };
 
   const handleEditResource = useCallback(async (system: string, resourceType: ResourceType, providedValues: any) => {
@@ -62,6 +67,7 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
     await createResource(system, resourceType, updatedResource);
     setIsLoading(false);
     setIsOpen(false);
+    setSelectedResourceType(undefined);
   }, [editModeData]);
 
   const handleCreateOrEdit = useCallback(async (system: string, resourceType: ResourceType, providedValues: any) => {
@@ -75,6 +81,8 @@ export const CreateResourceWizardProvider: React.FC<CreateResourceWizardProvider
   const value = {
     isOpen,
     isLoading,
+    selectedResourceType,
+    setSelectedResourceType,
     openWizard,
     closeWizard,
   };

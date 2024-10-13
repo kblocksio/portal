@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
 import { FieldRenderer } from './field-renderer';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { ApiObject } from '@kblocks/api';
-
-export interface ObjectMetadata {
-  name: string;
-  namespace: string;
-  system: string;
-}
+import { ObjectMetadata } from '@repo/shared';
 
 export interface FormGeneratorProps {
   schema: any,
@@ -35,19 +30,16 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
     }
   }, [name]);
 
-  useEffect(() => {
-    console.log("formData", formData);
-  }, [formData]);
+  const metadataObject: ObjectMetadata = useMemo(() => ({
+    name,
+    namespace,
+    system,
+  }), [name, namespace, system]);
 
   return (
     <form className="flex flex-col h-full space-y-4 overflow-hidden" onSubmit={(e) => {
       e.preventDefault();
-      const meta: ObjectMetadata = {
-        name,
-        namespace,
-        system,
-      };
-
+      const meta: ObjectMetadata = metadataObject;
       handleSubmit(meta, formData);
     }}>
       <div className="flex-1 overflow-y-auto">
@@ -77,6 +69,7 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
         </div>
         <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
           <FieldRenderer
+            objectMetadata={metadataObject}
             schema={schema}
             path=""
             formData={formData}

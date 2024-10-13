@@ -1,33 +1,39 @@
 import { Github, Code, Check } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Input } from "../ui/input"
-import { useEffect, useState, version } from "react"
-import { Repository } from "@repo/shared"
+import { useEffect, useMemo, useState, version } from "react"
+import { ObjectMetadata, Repository } from "@repo/shared"
 import { GhRepoSelectionField } from "./gh-repo-selection-field"
 import { MarkdownWrapper } from "../markdown"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { EnumField } from "./enum-field"
 import { Label } from "../ui/label"
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext"
 
-const snippet = (group: string, version: string, plural: string, namespace: string, name: string, field: string, image: string) => `
+const snippet = (
+  group: string,
+  version: string,
+  plural: string,
+  system: string,
+  namespace: string,
+  name: string,
+  fieldName: string,
+  imageName: string
+) => `
 \`\`\`bash
 curl \\
   -X PATCH \\
   -H "content-type: application/json" \\
   -H "Authorization: Bearer $KBLOCKS_API_TOKEN" \\
-  -d '{ "${field}": "$IMAGE" }' \\
-  https://kblocks.io/api/resources/${group}/${version}/${plural}/${namespace}/${name}
+  -d '{ "${fieldName}": "${imageName}" }' \\
+  https://kblocks.io/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}
 \`\`\`
 `;
 
 export interface ImagePickerFieldProps {
-  group?: string
-  version?: string
-  plural?: string
-  namespace?: string
-  name?: string
-  fieldName?: string
+  objectMetadata: ObjectMetadata;
+  fieldName: string
   onImageNameChange: (imageName: string) => void
 }
 
@@ -38,8 +44,11 @@ const SetBadge = () => (
   </Badge>
 );
 
-export const ImagePickerField = ({ onImageNameChange }: ImagePickerFieldProps) => {
-  const [selectedImageValue, setSelectedImageValue] = useState<string | null>(null);
+const IMAGE_PLACEHOLDER = "$IMAGE_PLACEHOLDER";
+
+export const ImagePickerField = ({ onImageNameChange, objectMetadata, fieldName }: ImagePickerFieldProps) => {
+  const { selectedResourceType } = useCreateResourceWizard();
+  const [selectedImageValue, setSelectedImageValue] = useState<string | null>("IMAGE_PLACEHOLDER");
   const [selectedImageType, setSelectedImageType] = useState<"github" | "image" | "code">("code");
   const [imageName, setImageName] = useState("");
   const [githubRepo, setGithubRepo] = useState<Repository | null>(null);
@@ -49,6 +58,19 @@ export const ImagePickerField = ({ onImageNameChange }: ImagePickerFieldProps) =
   useEffect(() => {
     onImageNameChange(selectedImageValue ?? "");
   }, [selectedImageType]);
+
+  const getCodeSnippet = useMemo(() => {
+    return snippet(
+      selectedResourceType?.kind ?? "",
+      selectedResourceType?.version ?? "",
+      selectedResourceType?.plural ?? "",
+      objectMetadata?.system ?? "",
+      objectMetadata?.namespace ?? "",
+      objectMetadata?.name ?? "",
+      fieldName ?? "",
+      IMAGE_PLACEHOLDER
+    );
+  }, [selectedResourceType, objectMetadata, fieldName]);
 
   const handleSetImage = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -61,16 +83,16 @@ export const ImagePickerField = ({ onImageNameChange }: ImagePickerFieldProps) =
   const handleGithubRepoChange = (repo: Repository | null) => {
     setGithubRepo(repo);
     setSelectedImageType("github");
-    setSelectedImageValue("IMAGE_PLACEHOLDER");
+    setSelectedImageValue(IMAGE_PLACEHOLDER);
   }
 
   const handleCodeSnippetSelection = () => {
     setSelectedImageType("code");
-    setSelectedImageValue("IMAGE_PLACEHOLDER");
+    setSelectedImageValue(IMAGE_PLACEHOLDER);
   }
 
   return (
-    <Tabs defaultValue="github" className="flex w-full">
+    <Tabs defaultValue={selectedImageType} className="flex w-full">
       <TabsList className="flex flex-col min-w-[220px] h-full justify-start bg-white">
         <TabsTrigger
           value="github"
@@ -135,6 +157,7 @@ export const ImagePickerField = ({ onImageNameChange }: ImagePickerFieldProps) =
           <div>
             <Button
               variant="outline"
+              disabled={imageName.length === 0}
               role="button"
               className="mt-2"
               onClick={handleSetImage}
@@ -145,7 +168,7 @@ export const ImagePickerField = ({ onImageNameChange }: ImagePickerFieldProps) =
         </TabsContent>
         <TabsContent value="code" className="pl-2 h-full">
           <MarkdownWrapper
-            content={snippet("group", "version", "plural", "namespace", "name", "field", imageName)}
+            content={getCodeSnippet}
             onCopy={handleCodeSnippetSelection}
           />
         </TabsContent>

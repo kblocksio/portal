@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
@@ -9,9 +9,10 @@ import { InputField } from "./input-field";
 import { parseDescription } from "./description-parser";
 import { EnumField } from "./enum-field";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
-import { KblocksImagePickerData, KblocksInstancePickerData, kblocksUiFieldsParser } from "./kblocks-ui-fileds-parser";
+import { KblocksInstancePickerData, kblocksUiFieldsParser } from "./kblocks-ui-fileds-parser";
 import { InstanceTypeField } from "./instance-type-field";
 import { ImagePickerField } from "./image-picker-field";
+import { ObjectMetadata } from "@repo/shared";
 
 interface ObjectFormProps {
   properties: any;
@@ -20,6 +21,7 @@ interface ObjectFormProps {
   initialData?: any;
   hideField?: boolean;
   requiredFields?: string[];
+  objectMetadata: ObjectMetadata;
 }
 
 interface ArrayItemFormProps {
@@ -28,6 +30,7 @@ interface ArrayItemFormProps {
   onSave: (data: any) => void;
   onCancel: () => void;
   initialData?: any;
+  objectMetadata: ObjectMetadata;
 }
 
 interface PrimitiveFieldRendererProps {
@@ -39,12 +42,14 @@ interface PrimitiveFieldRendererProps {
   hideField?: boolean;
   required?: boolean;
   schema: any;
+  objectMetadata: ObjectMetadata;
 }
 
 interface FieldRendererProps {
   schema: any;
   path: string;
   formData: any;
+  objectMetadata: ObjectMetadata;
   updateFormData: (data: any) => void;
   fieldName?: string;
   hideField?: boolean;
@@ -86,6 +91,7 @@ export const ObjectFieldForm = ({
   onCancel,
   initialData = {},
   hideField = false,
+  objectMetadata,
 }: ObjectFormProps) => {
   const [objectData, setObjectData] = useState<any>(initialData);
 
@@ -111,6 +117,7 @@ export const ObjectFieldForm = ({
                   formData={objectData}
                   updateFormData={updateObjectData}
                   fieldName={key}
+                  objectMetadata={objectMetadata}
                   hideField={hideField}
                   required={requiredFields?.includes(key)}
                 />
@@ -145,6 +152,7 @@ export const ArrayItemForm = ({
   onSave,
   onCancel,
   initialData,
+  objectMetadata,
 }: ArrayItemFormProps) => {
   const { type } = schema;
 
@@ -164,6 +172,7 @@ export const ArrayItemForm = ({
         <div className="space-y-6 ml-2 mr-2">
           {type === 'object' || type === 'array' ? (
             <FieldRenderer
+              objectMetadata={objectMetadata}
               schema={schema}
               path=""
               formData={itemData}
@@ -180,6 +189,7 @@ export const ArrayItemForm = ({
               description={schema?.description}
               required={schema.required?.includes(fieldName)}
               schema={schema}
+              objectMetadata={objectMetadata}
             />
           )}
         </div>
@@ -213,7 +223,9 @@ const PrimitiveFieldRenderer = ({
   description,
   hideField = false,
   required = false,
+  objectMetadata,
 }: PrimitiveFieldRendererProps) => {
+
   const { fieldType: kblocksFieldType, data: kblocksFieldData } = kblocksUiFieldsParser(description ?? '') ?? {};
   const sanitizedDescription = description
     ?.replace(
@@ -236,6 +248,8 @@ const PrimitiveFieldRenderer = ({
         }
         case 'image-picker': {
           return <ImagePickerField
+            objectMetadata={objectMetadata}
+            fieldName={fieldName ?? ''}
             onImageNameChange={handleChange}
           />;
         }
@@ -307,11 +321,13 @@ export const FieldRenderer = ({
   schema,
   path,
   formData,
+  objectMetadata,
   updateFormData,
   fieldName,
   hideField = false,
   required = false,
 }: FieldRendererProps) => {
+
   const { type, properties, additionalProperties, description } = schema;
 
   if (type === 'object' && (properties || additionalProperties)) {
@@ -367,6 +383,7 @@ export const FieldRenderer = ({
               ? Object.keys(objectProperties).map((key) => (
                 <FieldRenderer
                   key={key}
+                  objectMetadata={objectMetadata}
                   schema={objectProperties[key]}
                   path={path ? `${path}.${key}` : key}
                   formData={formData}
@@ -392,6 +409,7 @@ export const FieldRenderer = ({
               )}
             </DialogHeader>
             <ObjectFieldForm
+              objectMetadata={objectMetadata}
               requiredFields={schema.required}
               properties={objectProperties}
               initialData={objectData}
@@ -505,6 +523,7 @@ export const FieldRenderer = ({
               )}
             </DialogHeader>
             <ArrayItemForm
+              objectMetadata={objectMetadata}
               fieldName={fieldName ?? ''}
               schema={schema.items}
               initialData={editIndex !== null ? items[editIndex] : undefined}
@@ -526,6 +545,7 @@ export const FieldRenderer = ({
 
     return (
       <PrimitiveFieldRenderer
+        objectMetadata={objectMetadata}
         required={required}
         type={type}
         handleChange={handleChange}

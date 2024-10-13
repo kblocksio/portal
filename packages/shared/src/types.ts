@@ -35,3 +35,10 @@ export type Installation = {
   access_tokens_url: string;
   repositories_url: string;
 };
+
+export interface ObjectMetadata {
+  name: string;
+  namespace: string;
+  system: string;
+}
+

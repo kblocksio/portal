@@ -10,8 +10,9 @@ import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
-import { ObjectMetadata } from "./resource-form/resource-form";
 import { Resource, ResourceType } from "~/ResourceContext";
+import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
+import { ObjectMetadata } from "@repo/shared";
 
 export interface EditModeData {
   resourceType: ResourceType;
@@ -44,6 +45,8 @@ export const CreateResourceWizard = ({
     setSearchQuery(e.target.value);
   }, []);
 
+  const { setSelectedResourceType: updateSelectedResourceTypeInContext } = useCreateResourceWizard();
+
   useEffect(() => {
     setStep(editModeData ? 2 : 1);
     setSelectedResourceType(editModeData?.resourceType || null);
@@ -57,8 +60,9 @@ export const CreateResourceWizard = ({
     );
   }, [resourceTypes, searchQuery]);
 
-  const handleResourceSelect = (resource: any) => {
-    setSelectedResourceType(resource);
+  const handleResourceSelect = (resourceType: ResourceType) => {
+    setSelectedResourceType(resourceType);
+    updateSelectedResourceTypeInContext(resourceType);
     setStep(2);
   };
 
@@ -68,8 +72,9 @@ export const CreateResourceWizard = ({
     } else {
       setStep(1);
       setSelectedResourceType(null);
+      updateSelectedResourceTypeInContext(undefined);
     }
-  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
+  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType, updateSelectedResourceTypeInContext]);
 
   const handleCreate = useCallback((meta: ObjectMetadata, values: any) => {
     if (!selectedResourceType) {
