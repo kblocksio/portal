@@ -81,7 +81,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
-      console.log("resourceTypesData", resourceTypesData);
       const result: Record<string, ResourceType> = {};
       for (const [k, v] of Object.entries(resourceTypesData.types).sort(([l], [r]) => l.localeCompare(r))) {
         if (k.startsWith("kblocks.io/v1")) {
@@ -250,7 +249,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
       const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
       const fetchEvents = async () => {
-        console.log(`GET ${eventsUrl}`);
         const response = await request("GET", eventsUrl);
 
         for (const event of response.events) {

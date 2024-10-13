@@ -1,54 +1,72 @@
 import { ScrollArea } from "~/components/ui/scroll-area"
-import { Activity, XCircle, CheckCircle, RefreshCw } from 'lucide-react'
+import { Activity, XCircle, CheckCircle, RefreshCw, ChevronRight } from 'lucide-react'
 import { EventAction, EventReason, LifecycleEvent, LogEvent, WorkerEvent } from "@kblocks/api"
-import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
+import { cn } from "~/lib/utils";
 
 type EventGroup = {
   lifecycleEvent: LifecycleEvent;
   logs: LogEvent[];
 }
 
-export default function Timeline({ events }: { events: WorkerEvent[] }) {
+export default function Timeline({ events, className }: { events: WorkerEvent[], className?: string }) {
   const eventGroups = groupEventsByLifecycle(events);
 
   return (
-    <ScrollArea>
-      <div className="space-y-8 relative">
-        <div className="absolute left-4 top-[-40px] bottom-0 w-px bg-gray-200"></div>
-        {eventGroups.map((eventGroup, index) => (
-          <EventItem key={index} eventGroup={eventGroup} />
-        ))}
-      </div>
-      <div ref={(el) => {
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-      }}></div>
+    <ScrollArea contentClassName={cn("h-full pb-30", className)} className="mt-0">
+      <div className="absolute left-3.5 w-px bg-gray-200 h-full"></div>
+
+      {eventGroups.map((eventGroup, index) => (
+        <EventItem key={index} eventGroup={eventGroup} isLast={index === eventGroups.length - 1} />
+      ))}
+
+      <div ref={(el) => el && el.scrollIntoView({ behavior: 'smooth', block: 'end' })}/>
     </ScrollArea>
   )
 }
 
-
-function EventItem({ eventGroup }: { eventGroup: EventGroup }) {
+function EventItem({ eventGroup, isLast }: { eventGroup: EventGroup, isLast: boolean }) {
   const event = eventGroup.lifecycleEvent;
   const timestamp = event.timestamp.toLocaleString();
   const ReasonIcon = getReasonIcon(event.event.reason);
   const reasonColor = getReasonColor(event.event.reason);
   const action = getActionLabel(event.event.action);
+  const [isOpen, setIsOpen] = useState(isLast);
+
+  const isClickable = eventGroup.logs.length > 0;
 
   return (
-    <div className="relative pl-12">
-      <div className="absolute left-0 top-1.5 w-9 h-9 rounded-full bg-white border-4 border-gray-200 flex items-center justify-center">
+    <div className="relative pl-10">
+      <div className="absolute left-0 w-7 h-7 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
         <ReasonIcon className={`w-5 h-5 ${reasonColor}`} />
       </div>
-      <div className="pt-3 mb-4 flex gap-2">
-        <span>{timestamp}</span>
-        <span className="font-bold">{ action }</span>
-        <DoubleArrowRightIcon className="w-3 h-3 mt-2" />
-        <span className="font-bold">  { event.event.message }</span>
+      <div
+        className={cn("pl-0 pr-2 pt-0 pb-4 flex gap-2 rounded-md")}
+        onClick={() => setIsOpen(!isOpen)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            setIsOpen(!isOpen);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+
+        <span className="text-gray-500">{timestamp}</span>
+        <span className="font-bold text-gray-500">{action}</span>
+        <span className="font-bold">{event.event.message}</span>
+
+        {isClickable && (
+          <ChevronRight
+            className={cn(
+              "mt-1 w-4 h-4 transition-transform duration-300",
+              isOpen ? "rotate-90" : "rotate-0"
+            )}
+          />
+        )}
       </div>
-      {eventGroup.logs.length > 0 && (
-        <div className="bg-black text-xs font-mono rounded-sm p-4 space-y-1 mr-10 shadow-md">
+      {isOpen && eventGroup.logs.length > 0 && (
+        <div className="bg-slate-800 text-xs font-mono rounded-sm p-4 space-y-1 mr-10 mb-10 shadow-md mt-0 pb-4">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
@@ -63,7 +81,7 @@ function LogItem({ log }: { log: LogEvent }) {
   const message = log.message.trimStart();
   return (
     <div className="text-sm">
-      <div className="grid grid-cols-[100px_1fr]">
+      <div className="grid grid-cols-[110px_1fr]">
         <span className="text-gray-500">{timestamp}</span>
         <span className="text-gray-200">
           <pre className="whitespace-pre-wrap">{message}</pre>
@@ -106,7 +124,7 @@ const getReasonColor = (reason: EventReason) => {
       return 'text-gray-500';
   }
 }
-  
+
 function groupEventsByLifecycle(events: WorkerEvent[]) {
   const groups: EventGroup[] = [];
 
@@ -123,7 +141,7 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
       if (currentGroup) {
         currentGroup.logs.push(event);
       } else {
-        console.error('No current group found for log event');
+        // ignore
       }
     }
   }

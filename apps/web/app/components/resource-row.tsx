@@ -6,7 +6,7 @@ import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
-import { ApiObject, Condition, parseBlockUri, StatusReason } from "@kblocks/api";
+import { ApiObject, parseBlockUri, StatusReason } from "@kblocks/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +63,7 @@ export const ResourceRow = ({
         {/* Left Section: Status Badge, Namespace, Name, and LastUpdated */}
 
         <div className="flex items-center space-x-4 flex-shrink-0">
-          <StatusBadge readyCondition={readyCondition} message={readyCondition?.message} />
+          <StatusBadge obj={selectedResource} />
 
           <div className="flex-shrink-0">
             <div className="flex items-center space-x-2">
@@ -91,7 +91,7 @@ export const ResourceRow = ({
           &nbsp;
           <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
           {selectedResource && selectedResourceType
-            && <ActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
+            && <ResourceActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
         </div>
       </div>
 
@@ -104,8 +104,8 @@ export function SystemBadge({ blockUri, className }: { blockUri: string, classNa
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
-          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)} ${className}`} tabIndex={-1}>
+        <TooltipTrigger tabIndex={-1} className="focus:outline-none cursor-default">
+          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)} ${className}`} tabIndex={-1} aria-hidden="true">
             {block.system}
           </Badge>
         </TooltipTrigger>
@@ -132,7 +132,8 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   );
 }
 
-export function StatusBadge({ readyCondition, message }: { readyCondition?: Condition, message?: string }) {
+export function StatusBadge({ obj, showMessage }: { obj?: ApiObject, showMessage?: boolean }) {
+  const readyCondition = obj?.status?.conditions?.find(c => c.type === 'Ready');
   const reason = readyCondition?.reason as StatusReason;
   
   const getStatusContent = (reason: StatusReason) => {
@@ -158,11 +159,12 @@ export function StatusBadge({ readyCondition, message }: { readyCondition?: Cond
     </div>
   );
 
-  return message ? (
+  return readyCondition?.message ? (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
           {wrapper}
+          {showMessage && <span className="ml-2">{readyCondition?.message}</span>}
         </TooltipTrigger>
         <TooltipContent>
           <p>{readyCondition?.message ?? "In Progress"}</p>
@@ -172,7 +174,7 @@ export function StatusBadge({ readyCondition, message }: { readyCondition?: Cond
   ) : wrapper;
 }
 
-function ActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
+export function ResourceActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
   const [isOpen, setIsOpen] = useState(false);
   const { openWizard: openEditWizard } = useCreateResourceWizard();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
