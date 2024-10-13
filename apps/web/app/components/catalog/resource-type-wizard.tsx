@@ -88,14 +88,7 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
   const codeSnippet = useMemo(() => {
     return (
       `\`\`\`bash
-      $kb init \\
-        --engine ${selectedEngine} \\
-        --group ${group} \\ 
-        --kind ${kind} \\
-        --plural ${plural} \\
-        --version ${version} \\
-        ${directory}
-      `
+      kb init --engine ${selectedEngine.toLowerCase()} --group ${group.toLowerCase()} --kind ${kind.toLowerCase()} --plural ${plural.toLowerCase()} --version ${version} ./${directory}`
     );
   }, [kind, group, plural, version, selectedEngine, directory]);
 
@@ -154,11 +147,15 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
         <DialogHeader>
           <DialogTitle className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Logo />
-              Create a New Kblock
+              {step === 1 && <Logo />}
+              {step === 2 && (
+                <img src={engines.find((engine) => engine.name === selectedEngine)?.src}
+                  alt={selectedEngine} className="h-10 w-10" />
+              )}
+              Create a New {step === 2 && selectedEngine} Kblock
             </div>
             <DialogDescription>
-              Create a new Kblock
+              Create a new {step === 2 && selectedEngine} Kblock
             </DialogDescription>
           </DialogTitle>
         </DialogHeader>
