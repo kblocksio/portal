@@ -1,7 +1,8 @@
 import { ResourceType } from "~/ResourceContext";
-import { FormGenerator, ObjectMetadata } from "./resource-form/resource-form";
+import { FormGenerator } from "./resource-form/resource-form";
 import { useMemo } from "react";
 import { ApiObject } from "@kblocks/api";
+import { ObjectMetadata } from "@repo/shared";
 
 export const CreateNewResourceForm = ({
   resourceType,

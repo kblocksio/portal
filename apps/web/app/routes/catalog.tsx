@@ -6,10 +6,13 @@ import { getResourceIconColors } from "~/lib/hero-icon";
 import { cn } from "~/lib/utils";
 import { MarkdownWrapper } from "~/components/markdown";
 import { ResourceContext, ResourceType } from "~/ResourceContext";
+import { Button } from "~/components/ui/button";
+import { ResourceTypeWizard } from "~/components/catalog/resource-type-wizard";
 
 export default function Catalog() {
   const { isLoading, resourceTypes } = useContext(ResourceContext);
   const [currentResourceType, setCurrentResourceType] = useState<ResourceType | null>(null);
+  const [isResourceTypeWizardOpen, setIsResourceTypeWizardOpen] = useState(false);
 
   useEffect(() => {
     if (resourceTypes) {
@@ -24,7 +27,6 @@ export default function Catalog() {
       duration={1500} // 1.5 seconds mock progress
       loop={false}
       ready={!isLoading}
-    // onReady={() => setLoading(false)}
     />
   ) : (
     <div
@@ -33,9 +35,14 @@ export default function Catalog() {
         "h-full",
       )}
     >
+      <ResourceTypeWizard
+        isOpen={isResourceTypeWizardOpen}
+        handleOnOpenChange={setIsResourceTypeWizardOpen}
+      />
       <CatalogSidebar animate={false}>
         <SidebarBody className="justify-between gap-10 bg-muted border-r">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <Button className="mb-4" variant="default" onClick={() => setIsResourceTypeWizardOpen(true)}>New Kblock...</Button>
             <div className="flex flex-col">
               {resourceTypes &&
                 Object.values(resourceTypes).map((resourceType, idx) => {
@@ -44,7 +51,6 @@ export default function Catalog() {
                   const iconColor = getResourceIconColors({
                     color: resourceType?.color,
                   });
-
                   return (
                     <SidebarLabel
                       key={idx}

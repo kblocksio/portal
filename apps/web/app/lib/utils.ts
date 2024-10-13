@@ -1,4 +1,3 @@
-import { ClassValue } from "class-variance-authority/types";
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
 
