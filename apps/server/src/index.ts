@@ -115,8 +115,14 @@ app.get("/api/types", async (_, res) => {
       continue;
     }
 
-    const type = `${object.spec.definition.group}/${object.spec.definition.version}/${object.spec.definition.plural}`;
-    result.types[type] = object.spec.definition;
+    const def = object.spec?.definition;
+    if (!def) {
+      console.warn(`block object ${objUri} has no definition:`, JSON.stringify(object));
+      continue;
+    }
+
+    const type = `${def.group}/${def.version}/${def.plural}`;
+    result.types[type] = def;
   }
 
   return res.status(200).json(result);
