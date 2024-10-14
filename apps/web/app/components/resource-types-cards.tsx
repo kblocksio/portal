@@ -23,6 +23,15 @@ export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isL
             key={index}
             className="hover:bg-accent cursor-pointer max-h-[240px] flex flex-col justify-center"
             onClick={() => handleResourceSelect(resource)}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                console.log("Enter or space key pressed");
+                e.preventDefault();
+                e.stopPropagation();
+                handleResourceSelect(resource);
+              }
+            }}
           >
             <CardHeader className="flex flex-row h-[75px] text-center border-b border-b-gray-200 items-center align-middle">
               <div className="w-full flex self-center items-center">
