@@ -25,7 +25,7 @@ import { getUserInitials } from "~/lib/user-initials";
 
 function Logo() {
   return (
-    <a href="/" className="flex items-center space-x-2">
+    <a href="/" className="flex w-8 items-center justify-around">
       <img
         src="/wing.svg"
         alt="Wing Logo"
