@@ -72,7 +72,7 @@ export const ResourceDetailsDrawer = () => {
       open={!!selectedResource}
       onOpenChange={(x) => (!x ? setSelectedResourceId(undefined) : null)}
     >
-      <SheetContent className="sm:w-5/6">
+      <SheetContent className="w-5/6 xl:w-4/6">
         <SheetHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center space-x-4">
             {Icon && <Icon className={`${iconColor} h-8 w-8`} />}
