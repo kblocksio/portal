@@ -2,7 +2,6 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { vercelPreset } from "@vercel/remix/vite";
-import FullReload from "vite-plugin-full-reload";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -15,9 +14,6 @@ export default defineConfig(({ mode }) => ({
       presets: [vercelPreset()],
     }),
     tsconfigPaths(),
-    mode === "development" && FullReload(
-      ["**/*.tsx", "**/*.ts"],
-    ),
   ],
   optimizeDeps: {
     include: ["lucide-react"],
@@ -25,11 +21,14 @@ export default defineConfig(({ mode }) => ({
   ssr: {
     noExternal: ["lucide-react"],
   },
-  server: mode === "development" ? {
-    proxy: {
-      "/api": {
-        target: "https://kblocks.io",
-      }
-    },
-  } : undefined,
+  server:
+    mode === "development"
+      ? {
+          proxy: {
+            "/api": {
+              target: "https://kblocks.io",
+            },
+          },
+        }
+      : undefined,
 }));
