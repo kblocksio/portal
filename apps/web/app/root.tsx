@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import {
   Links,
   Meta,
@@ -14,21 +14,21 @@ import "./styles/global.css";
 import { UserProvider } from "./hooks/use-user.js";
 import { PortalSidebar } from "./components/portal-sidebar";
 import { ResourceProvider } from "./ResourceContext";
-import toast, { ToastBar, Toaster } from 'react-hot-toast';
-import { CreateResourceWizardProvider } from './CreateResourceWizardContext';
+import toast, { ToastBar, Toaster } from "react-hot-toast";
+import { CreateResourceWizardProvider } from "./CreateResourceWizardContext";
 
 export default function App() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         toast.dismiss();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -41,22 +41,28 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className={cn("font-inter overflow-hidden")}>
+      <body className="overflow-hidden">
         <AppProvider>
           <UserProvider>
             <ResourceProvider>
               <CreateResourceWizardProvider>
                 <div className="flex h-screen flex-col">
                   <Header />
-                  <div className="flex h-[calc(100vh-theme(height.14))] bg-background">
+                  <div className="bg-background flex h-[calc(100vh-theme(height.14))]">
                     <PortalSidebar />
                     <div className="flex-grow overflow-hidden">
                       <Outlet />
                     </div>
                   </div>
-                  <Toaster position="bottom-right" toastOptions={{ duration: Infinity }}>
+                  <Toaster
+                    position="bottom-right"
+                    toastOptions={{ duration: Infinity }}
+                  >
                     {(t) => (
-                      <ToastBar toast={t} style={{ overflowX: 'auto', maxWidth: '700px' }}>
+                      <ToastBar
+                        toast={t}
+                        style={{ overflowX: "auto", maxWidth: "700px" }}
+                      >
                         {({ icon, message }) => (
                           <div className="flex items-center justify-between">
                             <button onClick={() => toast.dismiss(t.id)}>
