@@ -1,28 +1,49 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "~/components/ui/sheet"
-import { useMemo, useContext } from "react";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "~/components/ui/sheet";
+import { useMemo, useContext, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
 import { getResourceIconColors } from "~/lib/hero-icon";
 import { ResourceActionsMenu, StatusBadge, SystemBadge } from "./resource-row";
 import Timeline from "./events/timeline";
-import { Table, TableBody, TableCell, TableRow } from "./ui/table";
 import { WorkerEvent } from "@kblocks/api";
+import { X, ChevronUp, ChevronDown } from "lucide-react";
+import { Button } from "./ui/button.js";
+import { ScrollArea } from "./ui/scroll-area.js";
 
 export const ResourceDetailsDrawer = () => {
-  const { selectedResourceId, setSelectedResourceId, resourceTypes, resources, eventsPerObject } = useContext(ResourceContext);
+  const {
+    selectedResourceId,
+    setSelectedResourceId,
+    resourceTypes,
+    resources,
+    eventsPerObject,
+  } = useContext(ResourceContext);
 
   const selectedResource = useMemo(() => {
     if (!selectedResourceId) return undefined;
-    return resources.get(selectedResourceId.objType)?.get(selectedResourceId.objUri);
+    return resources
+      .get(selectedResourceId.objType)
+      ?.get(selectedResourceId.objUri);
   }, [selectedResourceId, resources]);
 
-  const selectedResourceType = useMemo(() => (selectedResource ? resourceTypes[selectedResource.objType] : undefined),
-    [resourceTypes, selectedResource]);
+  const selectedResourceType = useMemo(
+    () =>
+      selectedResource ? resourceTypes[selectedResource.objType] : undefined,
+    [resourceTypes, selectedResource],
+  );
 
   const Icon = selectedResourceType?.iconComponent;
 
-  const iconColor = useMemo(() => (
-    getResourceIconColors({ color: selectedResource?.color })
-  ), [selectedResource]);
+  const iconColor = useMemo(
+    () => getResourceIconColors({ color: selectedResource?.color }),
+    [selectedResource],
+  );
 
   const properties: Record<string, string> = {};
   const outputs: Record<string, string> = {};
@@ -47,33 +68,59 @@ export const ResourceDetailsDrawer = () => {
   }
 
   return (
-    <Sheet open={!!selectedResource} onOpenChange={(x) => (!x ? setSelectedResourceId(undefined) : null)}>
-      <SheetContent className="min-w-[700px] flex flex-col h-full gap-0 pb-0">
-        <SheetHeader>
-          <SheetTitle className="text-2xl font-bold flex items-center gap-2 ml-1 mb-0 border-b border-b-muted-foreground/10 pb-2">
-            {Icon && <Icon className={`${iconColor} h-7 w-7`} />}
-            <span className="text-muted-foreground whitespace-nowrap">{selectedResource?.metadata.namespace}</span>
-            <span className="text-muted-foreground mx-1">·</span>
-            {selectedResource.metadata.name}
-
-            <SystemBadge
-              blockUri={selectedResource.objUri}
-              className="mb-2 ml-6"
+    <Sheet
+      open={!!selectedResource}
+      onOpenChange={(x) => (!x ? setSelectedResourceId(undefined) : null)}
+    >
+      <SheetContent className="sm:w-5/6">
+        <SheetHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {Icon && <Icon className={`${iconColor} h-8 w-8`} />}
+            <div>
+              <SheetTitle className="text-2xl font-bold">
+                {selectedResource.metadata.name}
+              </SheetTitle>
+              <SheetDescription className="text-muted-foreground flex gap-4 text-sm">
+                {selectedResource?.metadata.namespace}
+                <SystemBadge blockUri={selectedResource.objUri} />
+              </SheetDescription>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <ResourceActionsMenu
+              resource={selectedResource}
+              resourceType={selectedResourceType}
             />
-
-            <div className="flex-grow"></div>
-            <ResourceActionsMenu resource={selectedResource} resourceType={selectedResourceType} />
-          </SheetTitle>
-
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </SheetClose>
+          </div>
         </SheetHeader>
 
-        <ResourceInfo selectedResource={selectedResource} selectedResourceType={selectedResourceType} eventsPerObject={eventsPerObject} />
+        <ScrollArea className="mt-6 h-[calc(100vh-8rem)]">
+          <ResourceInfo
+            selectedResource={selectedResource}
+            selectedResourceType={selectedResourceType}
+            eventsPerObject={eventsPerObject}
+          />
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
-}
+};
 
-function ResourceInfo({ selectedResource, selectedResourceType, eventsPerObject }: { selectedResource: Resource, selectedResourceType: ResourceType, eventsPerObject: Record<string, Record<string, WorkerEvent>> }) {
+function ResourceInfo({
+  selectedResource,
+  selectedResourceType,
+  eventsPerObject,
+}: {
+  selectedResource: Resource;
+  selectedResourceType: ResourceType;
+  eventsPerObject: Record<string, Record<string, WorkerEvent>>;
+}) {
   const outputs: Record<string, string | undefined> = {
     ...selectedResource.status,
   };
@@ -81,52 +128,81 @@ function ResourceInfo({ selectedResource, selectedResourceType, eventsPerObject 
   delete outputs.conditions;
   delete outputs.lastStateHash;
 
+  const outputsEntries = Object.entries(outputs);
+  const [outputsExpanded, setOutputsExpanded] = useState(false);
+
   return (
-    <div className="mt-4 space-y-4 flex flex-col overflow-hidden">
-      <div>
-        <h1 className="text-lg">Type</h1>
-        <p className="mt-1">
-          {selectedResourceType?.group}/{selectedResourceType?.version}.{selectedResourceType?.kind}
-        </p>
-      </div>
-
-      <div>
-        <h1 className="text-lg">Status</h1>
-        <div className="mt-1 flex items-center">
-          <StatusBadge obj={selectedResource} showMessage={true} />
-
-        </div>
-      </div>
-
-      {Object.keys(outputs).length > 0 && (
-        <div>
-          <h1 className="text-lg">Outputs</h1>
-          <PropertiesTable properties={outputs} />
-        </div>
-      )}
-
-      <h1 className="text-lg">Events</h1>
-      <div className="w-full h-px bg-gray-200"></div>
-      {selectedResource && <Timeline events={Object.values(eventsPerObject[selectedResource.objUri] ?? [])} className="mt-0" />}
+    <div className="space-y-6">
+      <section>
+        <h3 className="mb-2 text-lg font-semibold">Properties</h3>
+        <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
+          <dt className="text-muted-foreground flex items-center justify-end whitespace-nowrap text-sm font-medium">
+            Type
+          </dt>
+          <dd className="flex items-center">
+            {selectedResourceType?.group}/{selectedResourceType?.version}.
+            {selectedResourceType?.kind}
+          </dd>
+          <dt className="text-muted-foreground flex items-center justify-end whitespace-nowrap text-sm font-medium">
+            Status
+          </dt>
+          <dd className="flex items-center">
+            <StatusBadge obj={selectedResource} showMessage={true} />
+          </dd>
+        </dl>
+      </section>
+      <section>
+        <h3 className="mb-2 text-lg font-semibold">Outputs</h3>
+        <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
+          {outputsEntries
+            .slice(0, outputsExpanded ? undefined : 3)
+            .map(([key, value]) => (
+              <>
+                <dt
+                  key={`${key}-key`}
+                  className="text-muted-foreground flex items-center justify-end text-sm font-medium"
+                >
+                  {key}
+                </dt>
+                <dd key={`${key}-value`} className="flex items-center">
+                  {formatValue(value)}
+                </dd>
+              </>
+            ))}
+        </dl>
+        {outputsEntries.length > 3 && (
+          <div className="mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setOutputsExpanded(!outputsExpanded)}
+            >
+              {outputsExpanded
+                ? "Show Less"
+                : `Show More (${outputsEntries.length - 3})`}
+              {outputsExpanded ? (
+                <ChevronUp className="ml-2 h-4 w-4" />
+              ) : (
+                <ChevronDown className="ml-2 h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        )}
+      </section>
+      <section>
+        <h3 className="mb-2 text-lg font-semibold">Events</h3>
+        {selectedResource && (
+          <Timeline
+            events={Object.values(
+              eventsPerObject[selectedResource.objUri] ?? [],
+            )}
+            className="mt-0"
+          />
+        )}
+      </section>
     </div>
   );
-}
-
-function PropertiesTable({ properties }: { properties: Record<string, any> }) {
-  return (
-    <Table>
-      <TableBody>
-        {Object.entries(properties).map(([key, value]) => (
-          <TableRow key={key}>
-            <TableCell>
-              <span className="font-extrabold">{key}</span>
-            </TableCell>
-            <TableCell>{formatValue(value)}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
 }
 
 function formatValue(value: any) {
@@ -134,14 +210,21 @@ function formatValue(value: any) {
     return value;
   }
 
-  if (typeof value === "undefined" || (typeof value === "object" && value === null)) {
+  if (
+    typeof value === "undefined" ||
+    (typeof value === "object" && value === null)
+  ) {
     return "(n/a)";
   }
 
   return JSON.stringify(value);
 }
 
-function addProperty(target: Record<string, string>, value: any, keyPrefix: string[] = []) {
+function addProperty(
+  target: Record<string, string>,
+  value: any,
+  keyPrefix: string[] = [],
+) {
   if (value === undefined) {
     return;
   }
