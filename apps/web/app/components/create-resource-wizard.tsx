@@ -157,7 +157,7 @@ export const CreateResourceWizard = ({
                 handleResourceSelect={handleResourceSelect} />
             </div>
           ) : (
-            <div className="space-y-4 p-2 h-full">
+            <div className="flex flex-col space-y-4 p-2 h-full overflow-hidden">
               {selectedResourceType &&
                 <CreateNewResourceForm
                   resourceType={selectedResourceType}

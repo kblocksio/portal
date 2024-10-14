@@ -20,16 +20,24 @@ export const CreateNewResourceForm = ({
   isLoading: boolean;
 }) => {
 
-  const cleanedSchema = useMemo(() => {
-    const schema = { ...resourceType.schema };
+  const sanitizedOrderedSchema = useMemo(() => {
+    let orderedSchema = null;
+    try {
+      orderedSchema = JSON.parse(resourceType.schema.properties?.orderedJson);
+    } catch (e) {
+      console.error("Error parsing ordered schema fallback to full schema", e);
+      orderedSchema = resourceType.schema;
+    }
+    const schema = { ...orderedSchema };
     delete schema.properties?.status;
+    delete schema.properties?.orderedJson;
     return schema;
   }, [resourceType.schema]);
 
   return (
     <div className="flex flex-col h-full">
       <FormGenerator
-        schema={cleanedSchema}
+        schema={sanitizedOrderedSchema}
         isLoading={isLoading}
         initialValues={initialValues}
         initialMeta={initialMeta}

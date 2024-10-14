@@ -6,6 +6,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { ApiObject } from '@kblocks/api';
 import { ObjectMetadata } from '@repo/shared';
+import { DialogFooter } from '../ui/dialog';
 
 export interface FormGeneratorProps {
   schema: any,
@@ -42,38 +43,38 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
       const meta: ObjectMetadata = metadataObject;
       handleSubmit(meta, formData);
     }}>
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-4 border-b pb-4 mb-8 ml-2 mr-2">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>
-                Name
-                <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                required
-                id="name"
-                placeholder="Resource name"
-                disabled={!!initialValues}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                ref={nameInputRef}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>
-                Namespace
-                <span className="text-destructive">*</span>
-              </Label>
-              <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="system" className={"opacity-50"}>System</Label>
-              <Input required id="system" placeholder="System" disabled={true} value={system} />
-            </div>
+      <div className="space-y-4 border-b pb-4 ml-2 mr-2">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className={`${initialValues ? "opacity-50" : ""}`}>
+              Name
+              <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              required
+              id="name"
+              placeholder="Resource name"
+              disabled={!!initialValues}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              ref={nameInputRef}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="namespace" className={`${initialValues ? "opacity-50" : ""}`}>
+              Namespace
+              <span className="text-destructive">*</span>
+            </Label>
+            <Input required id="namespace" placeholder="Namespace" disabled={!!initialValues} value={namespace} onChange={(e) => setNamespace(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="system" className={"opacity-50"}>System</Label>
+            <Input required id="system" placeholder="System" disabled={true} value={system} />
           </div>
         </div>
-        <div className="space-y-4 pb-4 overflow-y-auto max-h-[60vh]">
+      </div>
+      <div className="overflow-y-auto flex-1">
+        <div className="space-y-4 pb-4 overflow-y-auto">
           <FieldRenderer
             objectMetadata={metadataObject}
             schema={schema}
@@ -99,6 +100,6 @@ export const FormGenerator = ({ schema, isLoading, handleBack, handleSubmit, ini
           )}
         </Button>
       </div>
-    </form>
+    </form >
   );
 };
