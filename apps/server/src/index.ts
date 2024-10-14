@@ -7,7 +7,7 @@ import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import { ApiObject, blockTypeFromUri, formatBlockUri, ObjectEvent, WorkerEvent } from "@kblocks/api";
+import { ApiObject, blockTypeFromUri, formatBlockUri, Manifest, ObjectEvent, WorkerEvent } from "@kblocks/api";
 import { getAllObjects, handleEvent, loadEvents, resetStorage } from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
@@ -110,13 +110,19 @@ app.get("/api/types", async (_, res) => {
   const all = await getAllObjects();
 
   // find all the kblocks.io/v1/blocks objects
-  for (const [objUri, object] of Object.entries(all)) {
+  for (const [objUri, object] of Object.entries(all) as [string, ApiObject & { spec: Manifest }][]) {
     if (!objUri.startsWith("kblocks://kblocks.io/v1/blocks")) {
       continue;
     }
 
-    const type = `${object.spec.group}/${object.spec.version}/${object.spec.plural}`;
-    result.types[type] = object.spec;
+    const def = object.spec?.definition;
+    if (!def) {
+      console.warn(`block object ${objUri} has no definition:`, JSON.stringify(object));
+      continue;
+    }
+
+    const type = `${def.group}/${def.version}/${def.plural}`;
+    result.types[type] = def;
   }
 
   return res.status(200).json(result);
