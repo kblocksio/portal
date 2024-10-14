@@ -7,10 +7,10 @@ export interface KblocksInstanceType {
 
 export type KblocksInstancePickerData = KblocksInstanceType[];
 export type KblocksImagePickerData = null;
-
+export type KblocksRepoPickerData = null;
 interface KblocksUiAnnotation {
-  fieldType: 'instance-picker' | 'image-picker'
-  data: KblocksInstancePickerData | KblocksImagePickerData
+  fieldType: 'instance-picker' | 'image-picker' | 'repo-picker'
+  data: KblocksInstancePickerData | KblocksImagePickerData | KblocksRepoPickerData
 }
 
 export const kblocksUiFieldsParser = (description: string): KblocksUiAnnotation | null => {
@@ -23,6 +23,9 @@ export const kblocksUiFieldsParser = (description: string): KblocksUiAnnotation 
     if (!jsonString) {
       if (fieldType === 'image-picker') {
         return { fieldType, data: null as KblocksImagePickerData };
+      }
+      if (fieldType === 'repo-picker') {
+        return { fieldType, data: null as KblocksRepoPickerData };
       }
     }
     try {

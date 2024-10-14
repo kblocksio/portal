@@ -13,6 +13,7 @@ import { KblocksInstancePickerData, kblocksUiFieldsParser } from "./kblocks-ui-f
 import { InstanceTypeField } from "./instance-type-field";
 import { ImagePickerField } from "./image-picker-field";
 import { ObjectMetadata } from "@repo/shared";
+import { GhRepoSelectionField } from "./gh-repo-selection-field";
 
 interface ObjectFormProps {
   properties: any;
@@ -249,6 +250,12 @@ const PrimitiveFieldRenderer = ({
             objectMetadata={objectMetadata}
             fieldName={fieldName ?? ''}
             onImageNameChange={handleChange}
+          />;
+        }
+        case 'repo-picker': {
+          return <GhRepoSelectionField
+            handleOnSelection={(repo) => handleChange(repo?.full_name ?? '')}
+            initialValue={value}
           />;
         }
       }
