@@ -25,8 +25,7 @@ export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isL
             onClick={() => handleResourceSelect(resource)}
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                console.log("Enter or space key pressed");
+              if (e.key === ' ') {
                 e.preventDefault();
                 e.stopPropagation();
                 handleResourceSelect(resource);

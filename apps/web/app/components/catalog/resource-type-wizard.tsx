@@ -102,6 +102,14 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
               className={cn("hover:bg-accent cursor-pointer max-h-[240px] flex flex-col justify-center",
                 engine.name === selectedEngine && "bg-accent")}
               onClick={() => setSelectedEngine(engine.name)}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedEngine(engine.name);
+                }
+              }}
             >
               <CardHeader className="flex flex-row h-[75px] text-center border-b border-b-gray-200 items-center align-middle">
                 <div className="w-full flex self-center items-center">
@@ -256,7 +264,7 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
           {step === 2 && (
             <DialogFooter>
               <Button type="button" onClick={handleBack}>Back</Button>
-              <Button type="button" onClick={handleDone}>Done</Button>
+              <Button type="submit" onClick={handleDone}>Done</Button>
             </DialogFooter>
           )}
         </form>
