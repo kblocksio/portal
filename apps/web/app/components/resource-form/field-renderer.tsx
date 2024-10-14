@@ -6,7 +6,7 @@ import { Pencil, Plus, X, Check } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
-import { parseDescription } from "./description-parser";
+import { parseDescription, sanitizeDescription } from "./description-parser";
 import { EnumField } from "./enum-field";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
 import { KblocksInstancePickerData, kblocksUiFieldsParser } from "./kblocks-ui-fileds-parser";
@@ -227,9 +227,7 @@ const PrimitiveFieldRenderer = ({
 }: PrimitiveFieldRendererProps) => {
 
   const { fieldType: kblocksFieldType, data: kblocksFieldData } = kblocksUiFieldsParser(description ?? '') ?? {};
-  const sanitizedDescription = description
-    ?.replace(
-      /@ui\s+kblocks\.io\/[a-zA-Z0-9_-]+(?:\s*:\s*{[\s\S]*?})?(?=\n|$)/g, '').trim();
+  const sanitizedDescription = sanitizeDescription(description ?? '');
 
   // handle primitive field types
   const getPrimitiveWidget = useMemo(() => {
@@ -347,7 +345,7 @@ export const FieldRenderer = ({
     };
 
     const objectProperties = properties || additionalProperties.properties;
-    const objectDescription = description || additionalProperties?.description;
+    const objectDescription = sanitizeDescription(description || additionalProperties?.description);
     return (
       <div className="space-y-4 mb-6">
         {!hideField && fieldName ? (
@@ -468,7 +466,7 @@ export const FieldRenderer = ({
             {required && <span className="text-destructive">*</span>}
             {description && (
               <p className="text-[0.8rem] text-muted-foreground pt-1">
-                {parseDescription(description)}
+                {parseDescription(sanitizeDescription(description))}
               </p>
             )}
           </div>

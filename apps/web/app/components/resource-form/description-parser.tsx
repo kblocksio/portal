@@ -33,3 +33,9 @@ export const parseDescription = (description: string): React.ReactNode[] => {
 
   return parts;
 }
+
+export const sanitizeDescription = (description: string) => {
+  return description
+    ?.replace(
+      /@ui\s+kblocks\.io\/[a-zA-Z0-9_-]+(?:\s*:\s*{[\s\S]*?})?(?=\n|$)/g, '').trim();
+}
