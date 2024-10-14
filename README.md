@@ -60,3 +60,24 @@ Or even watch for changes with hot reloading:
 ```sh
 skaffold dev
 ```
+
+## Deploying to a fresh cluster
+
+### Install the Workload kblock
+
+In the kblocks-gallery repo, run:
+
+```sh
+./scripts/install-secrets.sh
+./install.sh kblocks/workload
+```
+
+### Deploy the Portal
+
+In this repo (all secrets are in 1password), run:
+
+```sh
+./scripts/install-secrets.sh
+./scripts/install-certs.sh <path-to-key-file> <path-to-cert-file>
+./install.sh
+```
