@@ -34,8 +34,13 @@ export const parseDescription = (description: string): React.ReactNode[] => {
   return parts;
 }
 
-export const sanitizeDescription = (description: string) => {
-  return description
-    ?.replace(
-      /@ui\s+kblocks\.io\/[a-zA-Z0-9_-]+(?:\s*:\s*{[\s\S]*?})?(?=\n|$)/g, '').trim();
+/**
+ * Remove all doctags from the description (lines that start with @)
+ */
+export const sanitizeDescription = (description: string | undefined) => {
+  if (!description) {
+    return "";
+  }
+
+  return description.split("\n").filter(s => !s.startsWith("@")).join("\n").trim();
 }

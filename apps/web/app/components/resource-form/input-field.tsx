@@ -5,16 +5,18 @@ export interface InputFieldProps {
   onChange: (value: string | number) => void;
   required?: boolean;
   type?: string;
+  placeholder?: string;
 }
 
 const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
-export const InputField = ({ value, onChange, required, type }: InputFieldProps) => {
+export const InputField = ({ value, onChange, required, type, placeholder }: InputFieldProps) => {
   return (
     <Input
       required={required}
       type={type === 'number' ? 'number' : 'text'}
       value={value}
+      placeholder={placeholder}
       onChange={(e) => {
         const value =
           type === 'number' && isNumeric(e.target.value)

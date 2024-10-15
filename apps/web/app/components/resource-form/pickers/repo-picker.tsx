@@ -1,17 +1,46 @@
 import { Installation, Repository } from "@repo/shared";
 import { useEffect, useMemo, useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
+import { InputField } from "../input-field";
+import { Field } from "../field-renderer";
 
-interface GhRepoSelectionFieldProps {
+interface RepoPickerProps {
   handleOnSelection: (repository: Repository | null) => void;
   initialValue?: Repository | null;
 }
 
-export const GhRepoSelectionField = ({ handleOnSelection, initialValue }: GhRepoSelectionFieldProps) => {
+export const RepoPicker = ({ handleOnSelection, initialValue }: RepoPickerProps) => {
 
+  return (
+    <Field 
+      fieldName="repo"
+      required
+      description="The GitHub repository to use for the service."
+    >
+      <InputField
+        value={initialValue?.full_name ?? ""}
+        onChange={(value) => {
+          handleOnSelection({
+            full_name: value as string,
+            name: "dummy",
+            owner: {
+              login: "dummy",
+              avatar_url: "dummy",
+            },
+            html_url: `https://dummy.com`,
+            description: "dummy",
+          });
+        }}
+      />
+    </Field>
+  )
+}
+
+// TODO: fix this!
+export const RepoPicker2 = ({ handleOnSelection, initialValue }: RepoPickerProps) => {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(initialValue ?? null);
 
   const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
