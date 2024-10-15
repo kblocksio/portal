@@ -151,45 +151,47 @@ function ResourceInfo({
           </dd>
         </dl>
       </section>
-      <section>
-        <h3 className="mb-2 text-lg font-semibold">Outputs</h3>
-        <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
-          {outputsEntries
-            .slice(0, outputsExpanded ? undefined : 3)
-            .map(([key, value]) => (
-              <>
-                <dt
-                  key={`${key}-key`}
-                  className="text-muted-foreground flex items-center justify-end text-sm font-medium"
-                >
-                  {key}
-                </dt>
-                <dd key={`${key}-value`} className="flex items-center">
-                  {formatValue(value)}
-                </dd>
-              </>
-            ))}
-        </dl>
-        {outputsEntries.length > 3 && (
-          <div className="mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => setOutputsExpanded(!outputsExpanded)}
-            >
-              {outputsExpanded
-                ? "Show Less"
-                : `Show More (${outputsEntries.length - 3})`}
-              {outputsExpanded ? (
-                <ChevronUp className="ml-2 h-4 w-4" />
-              ) : (
-                <ChevronDown className="ml-2 h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        )}
-      </section>
+      {outputsEntries.length > 0 && (
+        <section>
+          <h3 className="mb-2 text-lg font-semibold">Outputs</h3>
+          <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
+            {outputsEntries
+              .slice(0, outputsExpanded ? undefined : 3)
+              .map(([key, value]) => (
+                <>
+                  <dt
+                    key={`${key}-key`}
+                    className="text-muted-foreground flex items-center justify-end text-sm font-medium"
+                  >
+                    {key}
+                  </dt>
+                  <dd key={`${key}-value`} className="flex items-center">
+                    {formatValue(value)}
+                  </dd>
+                </>
+              ))}
+          </dl>
+          {outputsEntries.length > 3 && (
+            <div className="mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => setOutputsExpanded(!outputsExpanded)}
+              >
+                {outputsExpanded
+                  ? "Show Less"
+                  : `Show More (${outputsEntries.length - 3})`}
+                {outputsExpanded ? (
+                  <ChevronUp className="ml-2 h-4 w-4" />
+                ) : (
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
       <section>
         <h3 className="mb-2 text-lg font-semibold">Events</h3>
         {selectedResource && (
