@@ -16,15 +16,6 @@
 npm i
 ```
 
-#### Access our cluster
-
-Install the [quickube](https://github.com/winglang/quickube) CLI (see instructions in README)
-switch to the `portal-backend` cluster:
-
-```sh
-qkube use portal-backend.quickube.sh
-```
-
 #### Sign in to Docker Hub
 
 We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1password]:
@@ -38,12 +29,26 @@ Password: <SEE 1PASSWORD>
 
 ## Local development
 
-Run `npm run dev` from the root and it will connect to the qkube cluster that's in your current
-context.
+We only have support for local development of the frontend, but not the backend (at the moment).
 
-## Remote development
+Simply:
 
-Deploy to the cluster:
+```sh
+cd apps/web
+npm run dev
+```
+
+This will start the frontend locally and connect it to the production backend.
+
+## Backend development cycle
+
+Switch to the backend cluster:
+
+```sh
+qkube use portal-backend.quickube.sh
+```
+
+Deploy:
 
 ```sh
 skaffold run
