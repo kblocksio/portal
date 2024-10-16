@@ -118,36 +118,102 @@ export const ResourceRow = ({
   );
 };
 
+const systemColors = [
+  "bg-blue-100 text-blue-800",
+  "bg-green-100 text-green-800",
+  "bg-yellow-100 text-yellow-800",
+  "bg-red-100 text-red-800",
+  "bg-indigo-100 text-indigo-800",
+];
+
+const namespaceColors = [
+  "bg-purple-100 text-purple-800",
+  "bg-pink-100 text-pink-800",
+  "bg-teal-100 text-teal-800",
+  "bg-orange-100 text-orange-800",
+  "bg-cyan-100 text-cyan-800",
+];
+
 export function SystemBadge({
   blockUri,
-  className,
+  // className,
 }: {
   blockUri: string;
-  className?: string;
+  // className?: string;
 }) {
+  // const block = parseBlockUri(blockUri);
+  // return (
+  //   <TooltipProvider>
+  //     <Tooltip>
+  //       <TooltipTrigger
+  //         tabIndex={-1}
+  //         className="cursor-default focus:outline-none"
+  //       >
+  //         <Badge
+  //           variant="outline"
+  //           className={`px-1.5 py-0.5 text-xs ${getSystemIdColor(block.system)} ${className}`}
+  //           tabIndex={-1}
+  //           aria-hidden="true"
+  //         >
+  //           {block.system}
+  //         </Badge>
+  //       </TooltipTrigger>
+  //       <TooltipContent>
+  //         <p>System</p>
+  //       </TooltipContent>
+  //     </Tooltip>
+  //   </TooltipProvider>
+  // );
   const block = parseBlockUri(blockUri);
+
+  const acronyms = block.system
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase());
+
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger
-          tabIndex={-1}
-          className="cursor-default focus:outline-none"
-        >
+        <TooltipTrigger>
           <Badge
             variant="outline"
-            className={`px-1.5 py-0.5 text-xs ${getSystemIdColor(block.system)} ${className}`}
-            tabIndex={-1}
-            aria-hidden="true"
+            className={`px-1.5 py-0.5 text-xs ${chooseColor(block.system, systemColors)}`}
           >
-            {block.system}
+            {acronyms.join("")}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>System</p>
+          <p>{block.system}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
+}
+
+export function NamespaceBadge({ namespace }: { namespace: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge
+            variant="outline"
+            className={`px-1.5 py-0.5 text-xs ${chooseColor(namespace, namespaceColors)}`}
+          >
+            {namespace}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{namespace} Namespace</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function chooseColor(key: string, palette: string[]): string {
+  const index =
+    key.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+    palette.length;
+  return palette[index];
 }
 
 function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
