@@ -46,7 +46,7 @@ app.use(
 console.log("express-ws, will you work?");
 
 app.get("/", async (_, res) => {
-  return res.status(200).json({ message: "Hello, portal-backend!" });
+  return res.status(200).json({ message: "Hello, kblocks backend!" });
 });
 
 app.ws("/api/events", (ws) => {
