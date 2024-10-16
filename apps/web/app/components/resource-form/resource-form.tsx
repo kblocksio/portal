@@ -114,6 +114,7 @@ export const FormGenerator = ({
           <FieldRenderer
             objectMetadata={metadataObject}
             schema={schema}
+            fieldName=""
             path=""
             formData={formData}
             updateFormData={setFormData}

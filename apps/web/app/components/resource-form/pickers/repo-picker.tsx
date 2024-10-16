@@ -10,51 +10,17 @@ import {
 import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
 import { Button } from "../../ui/button";
-import { InputField } from "../input-field";
-import { Field } from "../field-renderer";
 
 interface RepoPickerProps {
   handleOnSelection: (repository: Repository | null) => void;
-  initialValue?: Repository | null;
+  initialValue?: string | null;
 }
 
 export const RepoPicker = ({
   handleOnSelection,
   initialValue,
 }: RepoPickerProps) => {
-  return (
-    <Field
-      fieldName="repo"
-      required
-      description="The GitHub repository to use for the service."
-    >
-      <InputField
-        value={initialValue?.full_name ?? ""}
-        onChange={(value) => {
-          handleOnSelection({
-            full_name: value as string,
-            name: "dummy",
-            owner: {
-              login: "dummy",
-              avatar_url: "dummy",
-            },
-            html_url: `https://dummy.com`,
-            description: "dummy",
-          });
-        }}
-      />
-    </Field>
-  );
-};
-
-// TODO: fix this!
-export const RepoPicker2 = ({
-  handleOnSelection,
-  initialValue,
-}: RepoPickerProps) => {
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(
-    initialValue ?? null,
-  );
+  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
 
   const {
     data: installations,
@@ -80,6 +46,16 @@ export const RepoPicker2 = ({
     );
   }, [installations, refetchRepositories]);
 
+  // set the selected repo if the initial value is set
+  useEffect(() => {
+    if (!repositories || !initialValue) {
+      return;
+    }
+    setSelectedRepo(repositories?.find(
+      (repo) => repo.full_name === initialValue,
+      ) as Repository);
+  }, [initialValue, repositories]);
+
   const isLoading = useMemo(() => {
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
@@ -88,7 +64,7 @@ export const RepoPicker2 = ({
     <div className="ml-2 mr-2 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Select
-          disabled={isLoading}
+          disabled={isLoading || !repositories}
           onValueChange={(value) =>
             setSelectedRepo(
               (repositories?.find(
@@ -96,7 +72,11 @@ export const RepoPicker2 = ({
               ) as Repository) ?? null,
             )
           }
-          value={initialValue?.full_name}
+          value={
+            repositories?.find(
+              (repo) => repo.full_name === initialValue,
+            )?.full_name ?? ""
+          }
         >
           <SelectTrigger className="w-full">
             {isLoading ? (

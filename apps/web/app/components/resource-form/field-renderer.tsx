@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Pencil, Plus, X, Check } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { SwitchField } from "./switch-field";
@@ -65,7 +59,7 @@ interface FieldRendererProps {
 }
 
 export const updateDataByPath = (data: any, path: string, value: any): any => {
-  const keys = path.split(".");
+  const keys = path.split('.');
   const newData = { ...data };
 
   let obj = newData;
@@ -85,9 +79,7 @@ export const updateDataByPath = (data: any, path: string, value: any): any => {
 
 export const getDataByPath = (data: any, path: string) => {
   if (!path) return data;
-  return path
-    .split(".")
-    .reduce((acc, key) => (acc ? acc[key] : undefined), data);
+  return path.split('.').reduce((acc, key) => (acc ? acc[key] : undefined), data);
 };
 
 const isObjectPopulated = (obj: any) => {
@@ -108,28 +100,33 @@ export const ObjectFieldForm = ({
   return (
     <div className="w-full">
       <div className="p-1">
-        <form
-          onSubmit={(e) => {
-            if (onSave) {
-              e.preventDefault();
-              e.stopPropagation();
-              onSave(formData);
-            }
-          }}
-        >
-          {FormFields({
-            properties,
-            formData,
-            setFormData,
-            objectMetadata,
-            hideField,
-            requiredFields,
+        <form onSubmit={(e) => {
+          if (onSave) {
+            e.preventDefault();
+            e.stopPropagation();
+            onSave(formData);
+          }
+        }}>
+          {FormFields({ 
+            properties, 
+            formData, 
+            setFormData, 
+            objectMetadata, 
+            hideField, 
+            requiredFields 
           })}
-          <div className="mt-6 flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="default">
+            <Button
+              type="submit"
+              variant="default"
+            >
               Save
             </Button>
           </div>
@@ -149,9 +146,7 @@ export const ArrayItemForm = ({
 }: ArrayItemFormProps) => {
   const { type } = schema;
 
-  const [itemData, setItemData] = useState<any>(
-    initialData ?? (type === "object" ? {} : ""),
-  );
+  const [itemData, setItemData] = useState<any>(initialData ?? (type === 'object' ? {} : ''));
 
   const updateItemData = (newData: any) => {
     setItemData(newData);
@@ -164,8 +159,8 @@ export const ArrayItemForm = ({
   return (
     <div className="w-full">
       <div className="p-1">
-        <div className="ml-2 mr-2 space-y-6">
-          {type === "object" || type === "array" ? (
+        <div className="space-y-6 ml-2 mr-2">
+          {type === 'object' || type === 'array' ? (
             <FieldRenderer
               objectMetadata={objectMetadata}
               schema={schema}
@@ -189,11 +184,19 @@ export const ArrayItemForm = ({
             />
           )}
         </div>
-        <div className="mt-6 flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
             Cancel
           </Button>
-          <Button type="button" variant="default" onClick={handleSave}>
+          <Button
+            type="button"
+            variant="default"
+            onClick={handleSave}
+          >
             Save
           </Button>
         </div>
@@ -213,180 +216,112 @@ const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
 }: PrimitiveFieldRendererProps) => {
+
   const getPrimitiveWidget = () => {
     switch (type) {
-      case "boolean":
-        return (
-          <SwitchField
-            value={value}
-            onChange={handleChange}
-            required={required}
-          />
-        );
-      case "string": {
+      case 'boolean': return <SwitchField value={value} onChange={handleChange} required={required} />;
+      case 'string': {
         if (schema?.enum) {
-          return (
-            <EnumField
-              values={schema.enum}
-              selectedValue={value || schema.default}
-              onChange={handleChange}
-              required={required}
-            />
-          );
+          return <EnumField values={schema.enum} selectedValue={value || schema.default} onChange={handleChange} required={required} />;
         }
 
-        return (
-          <InputField
-            value={value}
-            onChange={handleChange}
-            placeholder={defaultValue}
-            required={required}
-            type={type}
-          />
-        );
+        return <InputField value={value} onChange={handleChange} placeholder={defaultValue} required={required} type={type} />;
       }
 
-      default:
-        return (
-          <InputField
-            value={value}
-            onChange={handleChange}
-            required={required}
-            type={type}
-            placeholder={defaultValue}
-          />
-        );
+      default: return <InputField value={value} onChange={handleChange} required={required} type={type} placeholder={defaultValue} />
     }
   };
 
   return (
-    <Field
-      hideField={hideField}
-      fieldName={fieldName}
-      required={required}
-      description={description}
-    >
+    <Field hideField={hideField} fieldName={fieldName} required={required} description={description}>
       {getPrimitiveWidget()}
     </Field>
   );
-};
+}
 
-export const Field = ({
-  hideField = false,
-  fieldName,
-  required,
-  description,
-  children,
-}: {
-  hideField?: boolean;
-  fieldName: string;
-  required?: boolean;
-  description?: string;
-  children: React.ReactNode;
+export const Field = ({ hideField = false, fieldName, required, description, children }: { 
+  hideField?: boolean, 
+  fieldName: string, 
+  required?: boolean, 
+  description?: string,
+  children: React.ReactNode
 }) => {
   const sanitizedDescription = sanitizeDescription(description);
-  return (
-    <div className="mb-6 space-y-4">
-      {!hideField && (
-        <div className="flex flex-col">
-          <Label htmlFor={fieldName} className="text-sm font-medium">
-            {splitAndCapitalizeCamelCase(fieldName)}
-            {required && <span className="text-destructive">*</span>}
-          </Label>
-          {sanitizedDescription && (
-            <p className="text-muted-foreground pt-1 text-[0.8rem]">
-              {parseDescription(sanitizedDescription)}
-            </p>
-          )}
-        </div>
-      )}
-      {children}
-    </div>
-  );
+  return <div className="space-y-4 mb-6">
+    {!hideField && (
+      <div className="flex flex-col">
+        <Label htmlFor={fieldName} className="text-sm font-medium">
+          {splitAndCapitalizeCamelCase(fieldName)}
+          {required && <span className="text-destructive">*</span>}
+        </Label>
+        {sanitizedDescription && (
+          <p className="text-[0.8rem] text-muted-foreground pt-1">
+            {parseDescription(sanitizedDescription)}
+          </p>
+        )}
+      </div>
+    )}
+    {children}
+  </div>
 };
 
-const resolvePickerField = ({
-  pickerType,
-  pickerConfig,
-  fieldName,
-  required,
-  schema,
-  handleChange,
-  objectMetadata,
-  value,
-  hideField,
-  description,
-  formData,
-  updateFormData,
-  path,
-}: {
-  pickerType: string;
-  pickerConfig: any;
-  fieldName: string;
-  required: boolean;
-  schema: any;
-  handleChange: (value: string | number | boolean) => void;
-  objectMetadata: ObjectMetadata;
-  formData: any;
-  updateFormData: (data: any) => void;
-  path: string;
-  value: any;
-  hideField?: boolean;
-  description?: string;
+const resolvePickerField = ({ pickerType, pickerConfig, fieldName, required,  schema, handleChange, objectMetadata , value, hideField, description, formData, updateFormData, path }: { 
+  pickerType: string, 
+  pickerConfig: any, 
+  fieldName: string, 
+  required: boolean, 
+  schema: any, 
+  handleChange: (value: string | number | boolean) => void, 
+  objectMetadata: ObjectMetadata,
+  formData: any,
+  updateFormData: (data: any) => void,
+  path: string,
+  value: any,
+  hideField?: boolean,
+  description?: string,
 }) => {
   switch (pickerType) {
-    case "instance-picker": {
-      return (
-        <InstancePicker
-          fieldName={fieldName}
-          required={required}
-          description={description}
-          hideField={hideField}
-          defaultInstanceName={schema.default}
-          config={pickerConfig}
-          onInstanceChange={handleChange}
-        />
-      );
+    case 'instance-picker': {
+      return <InstancePicker
+        fieldName={fieldName}
+        initialValue={value}
+        required={required}
+        description={description}
+        hideField={hideField}
+        defaultInstanceName={schema.default}
+        config={pickerConfig}
+        onInstanceChange={handleChange}
+      />;
     }
-    case "repo-picker": {
-      return (
-        <RepoPicker
-          initialValue={{
-            full_name: value,
-            name: "dummy",
-            description: "dummy",
-            html_url: "dummy",
-            owner: { login: "dummy", avatar_url: "dummy" },
-          }}
-          handleOnSelection={(repo) => {
-            if (repo?.full_name) {
-              handleChange(repo?.full_name);
-            }
-          }}
-        />
-      );
+    case 'repo-picker': {
+      return <RepoPicker
+        initialValue={value}
+        handleOnSelection={(repo) => {
+          if (repo?.full_name) {
+            handleChange(repo?.full_name)
+          }
+        }}
+      />;
     }
-    case "one-of": {
-      return (
-        <OneOfPicker
-          schema={schema}
-          fieldName={fieldName}
-          hideField={hideField}
-          required={required}
-          description={description}
-          formData={formData}
-          setFormData={updateFormData}
-          objectMetadata={objectMetadata}
-          path={path}
-        />
-      );
+    case 'one-of': {
+      return <OneOfPicker
+        schema={schema} 
+        fieldName={fieldName} 
+        hideField={hideField} 
+        required={required} 
+        description={description} 
+        formData={formData}
+        setFormData={updateFormData} 
+        objectMetadata={objectMetadata} 
+        path={path} 
+        />;
     }
-    case "cron-picker": // <-- meanwhile, just render as a normal field
+    case 'cron-picker': // <-- meanwhile, just render as a normal field
     default: {
       return undefined;
     }
   }
-};
+}
 
 export const FieldRenderer = ({
   schema,
@@ -399,7 +334,7 @@ export const FieldRenderer = ({
   required = false,
 }: FieldRendererProps) => {
   const { type, properties, additionalProperties, description } = schema;
-  const uiPicker = uiPickerParser(description ?? "");
+  const uiPicker = uiPickerParser(description ?? '');
 
   const [showObjectModal, setShowObjectModal] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
@@ -435,49 +370,45 @@ export const FieldRenderer = ({
   }
 
   if (type === "object" && properties) {
-    return (
-      <ObjectFieldRenderer
-        objectMetadata={objectMetadata}
-        schema={schema}
-        formData={formData}
-        path={path}
-        updateFormData={updateFormData}
-        fieldName={fieldName}
-        required={required}
-        hideField={hideField}
-        setShowObjectModal={setShowObjectModal}
-        showObjectModal={showObjectModal}
-        properties={properties}
-        additionalProperties={additionalProperties}
-        description={description}
-      />
-    );
+    return <ObjectFieldRenderer
+      objectMetadata={objectMetadata}
+      schema={schema}
+      formData={formData}
+      path={path}
+      updateFormData={updateFormData}
+      fieldName={fieldName}
+      required={required}
+      hideField={hideField}
+      setShowObjectModal={setShowObjectModal}
+      showObjectModal={showObjectModal}
+      properties={properties}
+      additionalProperties={additionalProperties}
+      description={description}
+    />
   }
 
   if (type === "object" && additionalProperties) {
-    // TODO: fix this because this shuold be a map
-    return (
-      <ObjectFieldRenderer
-        objectMetadata={objectMetadata}
-        schema={schema}
-        formData={formData}
-        path={path}
-        updateFormData={updateFormData}
-        fieldName={fieldName}
-        required={required}
-        hideField={hideField}
-        setShowObjectModal={setShowObjectModal}
-        showObjectModal={showObjectModal}
-        properties={properties}
-        additionalProperties={additionalProperties}
-        description={description}
-      />
-    );
+    // TODO: fix this because this shuold be a map 
+    return <ObjectFieldRenderer
+      objectMetadata={objectMetadata}
+      schema={schema}
+      formData={formData}
+      path={path}
+      updateFormData={updateFormData}
+      fieldName={fieldName}
+      required={required}
+      hideField={hideField}
+      setShowObjectModal={setShowObjectModal}
+      showObjectModal={showObjectModal}
+      properties={properties}
+      additionalProperties={additionalProperties}
+      description={description}
+    />
+
   }
 
   if (type === "array") {
-    return (
-      <ArrayFieldRenderer
+    return <ArrayFieldRenderer
         formData={formData}
         path={path}
         updateFormData={updateFormData}
@@ -490,61 +421,49 @@ export const FieldRenderer = ({
         editIndex={editIndex}
         objectMetadata={objectMetadata}
         description={description}
-      />
-    );
+      />;
   }
 
   return (
-    <PrimitiveFieldRenderer
-      objectMetadata={objectMetadata}
-      required={required}
-      type={type}
-      handleChange={handleChange}
-      value={value}
-      fieldName={fieldName}
-      description={description}
-      hideField={hideField}
-      schema={schema}
-    />
+      <PrimitiveFieldRenderer
+        objectMetadata={objectMetadata}
+        required={required}
+        type={type}
+        handleChange={handleChange}
+        value={value}
+        fieldName={fieldName}
+        description={description}
+        hideField={hideField}
+        schema={schema}
+      />
   );
 };
 
-export function FormFields({
-  properties,
-  formData,
-  setFormData,
-  objectMetadata,
-  hideField,
-  requiredFields,
-  path,
-}: {
-  properties: any;
-  formData: any;
-  setFormData: (data: any) => void;
-  objectMetadata: ObjectMetadata;
-  hideField: boolean;
-  path?: string;
-  requiredFields: string[] | undefined;
+export function FormFields({ properties, formData, setFormData, objectMetadata, hideField, requiredFields, path }: { 
+  properties: any, 
+  formData: any, 
+  setFormData: (data: any) => void, 
+  objectMetadata: ObjectMetadata, 
+  hideField: boolean, 
+  path?: string,
+  requiredFields: string[] | undefined
 }) {
-  return (
-    <div className="ml-2 mr-2 space-y-6">
-      {properties
-        ? Object.keys(properties).map((key) => (
-            <FieldRenderer
-              key={key}
-              schema={properties[key]}
-              path={path ? `${path}.${key}` : key}
-              formData={formData}
-              updateFormData={setFormData}
-              fieldName={key}
-              objectMetadata={objectMetadata}
-              hideField={hideField}
-              required={requiredFields?.includes(key)}
-            />
-          ))
-        : null}
-    </div>
-  );
+  return <div className="space-y-6 ml-2 mr-2">
+    {properties
+      ? Object.keys(properties).map((key) => (
+        <FieldRenderer
+          key={key}
+          schema={properties[key]}
+          path={path ? `${path}.${key}` : key}
+          formData={formData}
+          updateFormData={setFormData}
+          fieldName={key}
+          objectMetadata={objectMetadata}
+          hideField={hideField}
+          required={requiredFields?.includes(key)} />
+      ))
+      : null}
+  </div>;
 }
 
 function ArrayFieldRenderer({
@@ -606,13 +525,13 @@ function ArrayFieldRenderer({
   };
 
   return (
-    <div className="mb-6 space-y-4">
+    <div className="space-y-4 mb-6">
       <div className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="text-sm font-medium">
-          {splitAndCapitalizeCamelCase(fieldName ?? "")}
+          {splitAndCapitalizeCamelCase(fieldName ?? '')}
           {required && <span className="text-destructive">*</span>}
           {description && (
-            <p className="text-muted-foreground pt-1 text-[0.8rem]">
+            <p className="text-[0.8rem] text-muted-foreground pt-1">
               {parseDescription(description)}
             </p>
           )}
@@ -621,9 +540,9 @@ function ArrayFieldRenderer({
           type="button"
           variant="outline"
           onClick={handleAddItem}
-          className="ml-2 mr-2 h-8 px-3 text-xs"
+          className="h-8 px-3 text-xs mr-2 ml-2"
         >
-          <Plus className="mr-1 h-3 w-3" />
+          <Plus className="w-3 h-3 mr-1" />
           Add
         </Button>
       </div>
@@ -631,12 +550,9 @@ function ArrayFieldRenderer({
         {items.length > 0 && (
           <div className="space-y-2">
             {items.map((item: any, index: number) => (
-              <div
-                key={index}
-                className="bg-secondary flex items-center justify-between rounded-md p-2"
-              >
+              <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-md">
                 <div className="flex-1 truncate text-sm">
-                  {typeof item === "object" ? `Item ${index + 1}` : item}
+                  {typeof item === 'object' ? `Item ${index + 1}` : item}
                 </div>
                 <div className="flex space-x-2">
                   <Button
@@ -645,7 +561,7 @@ function ArrayFieldRenderer({
                     onClick={() => handleEditItem(index)}
                     className="h-8 w-8 p-0"
                   >
-                    <Pencil className="h-3 w-3" />
+                    <Pencil className="w-3 h-3" />
                     <span className="sr-only">Edit item</span>
                   </Button>
                   <Button
@@ -654,7 +570,7 @@ function ArrayFieldRenderer({
                     onClick={() => handleRemoveItem(index)}
                     className="h-8 w-8 p-0"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="w-3 h-3" />
                     <span className="sr-only">Remove item</span>
                   </Button>
                 </div>
@@ -663,24 +579,21 @@ function ArrayFieldRenderer({
           </div>
         )}
       </div>
-      <Dialog
-        open={showArrayModal}
-        onOpenChange={(open: boolean) => setShowArrayModal(open)}
-      >
+      <Dialog open={showArrayModal} onOpenChange={(open: boolean) => setShowArrayModal(open)}>
         <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader className="mb-1 border-b border-gray-200 pb-4">
+          <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
             <DialogTitle className="text-lg">
-              {splitAndCapitalizeCamelCase(fieldName ?? "")} item
+              {splitAndCapitalizeCamelCase(fieldName ?? '')} item
             </DialogTitle>
             {description && (
-              <DialogDescription className="text-muted-foreground text-sm">
+              <DialogDescription className="text-sm text-muted-foreground">
                 {parseDescription(description)}
               </DialogDescription>
             )}
           </DialogHeader>
           <ArrayItemForm
             objectMetadata={objectMetadata}
-            fieldName={fieldName ?? ""}
+            fieldName={fieldName ?? ''}
             schema={schema.items}
             initialData={editIndex !== null ? items[editIndex] : undefined}
             onSave={handleSaveItem}
@@ -689,7 +602,7 @@ function ArrayFieldRenderer({
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
 
 function ObjectFieldRenderer({
@@ -736,7 +649,7 @@ function ObjectFieldRenderer({
   const objectProperties = properties ?? additionalProperties?.properties;
 
   return (
-    <div className="mb-6 space-y-4">
+    <div className="space-y-4 mb-6">
       {!hideField && fieldName ? (
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
@@ -747,13 +660,13 @@ function ObjectFieldRenderer({
               </Label>
               {isObjectPopulated(objectData) && (
                 <Badge variant="secondary" className="text-xs">
-                  <Check className="mr-1 h-3 w-3" />
+                  <Check className="w-3 h-3 mr-1" />
                   Set
                 </Badge>
               )}
             </div>
             {description && (
-              <p className="text-muted-foreground pt-1 text-[0.8rem]">
+              <p className="text-[0.8rem] text-muted-foreground pt-1">
                 {parseDescription(description)}
               </p>
             )}
@@ -762,41 +675,39 @@ function ObjectFieldRenderer({
             type="button"
             variant="outline"
             onClick={handleEditObject}
-            className="ml-2 mr-2 h-8 px-3 text-xs"
+            className="h-8 px-3 text-xs mr-2 ml-2"
           >
-            <Pencil className="mr-1 h-3 w-3" />
+            <Pencil className="w-3 h-3 mr-1" />
             Edit
           </Button>
         </div>
       ) : (
-        <div className="ml-2 mr-2 space-y-6">
+        <div className="space-y-6 ml-2 mr-2">
           {objectProperties
             ? Object.keys(objectProperties).map((key) => (
-                <FieldRenderer
-                  key={key}
-                  objectMetadata={objectMetadata}
-                  schema={objectProperties[key]}
-                  path={path ? `${path}.${key}` : key}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  fieldName={key}
-                  required={schema.required?.includes(key)}
-                />
-              ))
-            : null}
+              <FieldRenderer
+                key={key}
+                objectMetadata={objectMetadata}
+                schema={objectProperties[key]}
+                path={path ? `${path}.${key}` : key}
+                formData={formData}
+                updateFormData={updateFormData}
+                fieldName={key}
+                required={schema.required?.includes(key)}
+              />
+            ))
+            : null
+          }
         </div>
       )}
-      <Dialog
-        open={showObjectModal}
-        onOpenChange={(open: boolean) => setShowObjectModal(open)}
-      >
+      <Dialog open={showObjectModal} onOpenChange={(open: boolean) => setShowObjectModal(open)}>
         <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader className="mb-1 border-b border-gray-200 pb-4">
+          <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
             <DialogTitle className="text-lg">
-              {splitAndCapitalizeCamelCase(fieldName ?? "")}
+              {splitAndCapitalizeCamelCase(fieldName ?? '')}
             </DialogTitle>
             {description && (
-              <DialogDescription className="text-muted-foreground text-sm">
+              <DialogDescription className="text-sm text-muted-foreground">
                 {parseDescription(description)}
               </DialogDescription>
             )}

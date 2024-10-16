@@ -16,6 +16,7 @@ export type InstancePickerConfig = Record<string, InstanceConfig>;
 type InstanceItem = InstanceConfig & { name: string };
 
 export const InstancePicker = ({
+  initialValue, 
   defaultInstanceName,
   config,
   onInstanceChange,
@@ -24,6 +25,7 @@ export const InstancePicker = ({
   description,
   fieldName,
 }: {
+  initialValue?: string;
   defaultInstanceName: string;
   hideField?: boolean;
   required?: boolean;
@@ -42,7 +44,7 @@ export const InstancePicker = ({
 
   const [selectedInstance, setSelectedInstance] = useState<InstanceItem>(
     () =>
-      instanceTypes.find((instance) => instance.name === defaultInstanceName) ??
+      instanceTypes.find((instance) => instance.name === initialValue) ??
       instanceTypes[0],
   );
 
