@@ -114,6 +114,9 @@ We will use `$PORTAL` and `$GALLERY` to refer to these directories throughout th
 The following steps need to be performed once in order to install configuration and secrets to our
 clusters.
 
+Configuration and secrets are all managed together in `.env` files that can be downloaded from a [1Password secret] and
+stored in Kubernetes secrets within the clusters. These secrets are referenced by pods.
+
 First, let's create a directory for our secrets:
 
 ```sh
@@ -130,6 +133,8 @@ following files:
 * `kblocks-gallery.env` - environment for kblocks-gallery
 * `portal.env` - environment for portal-backend
 * `kblocks_io.key` and `kblocks_io.pem` - SSL certificates for kblocks.io
+
+And we are ready to install the secrets:
 
 1. Install the **gallery secrets** to the `kblocks-demo.quickube.sh` cluster:
 
