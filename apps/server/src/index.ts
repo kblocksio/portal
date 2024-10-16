@@ -1,14 +1,32 @@
 import express from "express";
 import cors from "cors";
-import { GetUserResponse, GetTypesResponse, GetResourceResponse, GetLogsResponse, GetEventsResponse } from "@repo/shared";
+import {
+  GetUserResponse,
+  GetTypesResponse,
+  GetResourceResponse,
+  GetLogsResponse,
+  GetEventsResponse,
+} from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
 import * as pubsub from "./pubsub";
-import { ApiObject, blockTypeFromUri, formatBlockUri, Manifest, ObjectEvent, WorkerEvent } from "@kblocks/api";
-import { getAllObjects, handleEvent, loadEvents, resetStorage } from "./storage";
+import {
+  ApiObject,
+  blockTypeFromUri,
+  formatBlockUri,
+  Manifest,
+  ObjectEvent,
+  WorkerEvent,
+} from "@kblocks/api";
+import {
+  getAllObjects,
+  handleEvent,
+  loadEvents,
+  resetStorage,
+} from "./storage";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -48,12 +66,17 @@ app.ws("/api/events", (ws) => {
 
 app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const { group, version, plural } = req.params;
-  const { system: sys, system_id } = req.query as unknown as { system?: string, system_id?: string };
+  const { system: sys, system_id } = req.query as unknown as {
+    system?: string;
+    system_id?: string;
+  };
 
   const system = sys ?? system_id;
 
   if (!group || !version || !plural || !system) {
-    console.error("Invalid control connection request. Missing one of group, version, plural, system query params.");
+    console.error(
+      "Invalid control connection request. Missing one of group, version, plural, system query params.",
+    );
     console.log("Query params:", req.query);
     return ws.close();
   }
@@ -61,13 +84,18 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const resourceType = `${group}/${version}/${plural}`;
   console.log(`control connection: ${resourceType} for ${system}`);
 
-  const { unsubscribe } = pubsub.subscribeToControlRequests({ system, group, version, plural }, (message) => {
-    console.log(`sending control message to ${resourceType}:`, message);
-    ws.send(message);
-  });
+  const { unsubscribe } = pubsub.subscribeToControlRequests(
+    { system, group, version, plural },
+    (message) => {
+      console.log(`sending control message to ${resourceType}:`, message);
+      ws.send(message);
+    },
+  );
 
   ws.on("close", () => {
-    console.log(`control connection closed: ${resourceType} for system ${system}`);
+    console.log(
+      `control connection closed: ${resourceType} for system ${system}`,
+    );
     unsubscribe();
   });
 });
@@ -110,14 +138,20 @@ app.get("/api/types", async (_, res) => {
   const all = await getAllObjects();
 
   // find all the kblocks.io/v1/blocks objects
-  for (const [objUri, object] of Object.entries(all) as [string, ApiObject & { spec: Manifest }][]) {
+  for (const [objUri, object] of Object.entries(all) as [
+    string,
+    ApiObject & { spec: Manifest },
+  ][]) {
     if (!objUri.startsWith("kblocks://kblocks.io/v1/blocks")) {
       continue;
     }
 
     const def = object.spec?.definition;
     if (!def) {
-      console.warn(`block object ${objUri} has no definition:`, JSON.stringify(object));
+      console.warn(
+        `block object ${objUri} has no definition:`,
+        JSON.stringify(object),
+      );
       continue;
     }
 
@@ -128,33 +162,39 @@ app.get("/api/types", async (_, res) => {
   return res.status(200).json(result);
 });
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const logs = (await loadEvents(objUri)).filter(e => e.type === "LOG");
-  return res.status(200).json({ objUri, logs } as GetLogsResponse);
-});
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
+    return res.status(200).json({ objUri, logs } as GetLogsResponse);
+  },
+);
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const events = await loadEvents(objUri);
-  return res.status(200).json({ objUri, events } as GetEventsResponse);
-});
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/events",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const events = await loadEvents(objUri);
+    return res.status(200).json({ objUri, events } as GetEventsResponse);
+  },
+);
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
@@ -162,7 +202,9 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
 
   const system = req.query.system as string;
   if (!system) {
-    return res.status(400).json({ error: "'system' is required as a query param" });
+    return res
+      .status(400)
+      .json({ error: "'system' is required as a query param" });
   }
 
   const obj = req.body as ApiObject;
@@ -173,71 +215,100 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
 
   // verify that the request has the correct `apiVersion` and `kind`
   if (obj.apiVersion !== apiVersion) {
-    return res.status(400).json({ error: `Invalid "apiVersion" in object. Expected ${apiVersion}, but got ${obj.apiVersion}` });
+    return res.status(400).json({
+      error: `Invalid "apiVersion" in object. Expected ${apiVersion}, but got ${obj.apiVersion}`,
+    });
   }
 
   // verify that the request as a metadata.name
   if (!obj.metadata?.name) {
-    return res.status(400).json({ error: `Object is missing "metadata.name" field` });
+    return res
+      .status(400)
+      .json({ error: `Object is missing "metadata.name" field` });
   }
 
-  pubsub.publishControlRequest({ system, group, version, plural }, {
-    type: "APPLY",
-    object: obj,
-  });
+  pubsub.publishControlRequest(
+    { system, group, version, plural },
+    {
+      type: "APPLY",
+      object: obj,
+    },
+  );
 
-  return res.status(200).json({ message: "Create request accepted", objType: `${group}/${version}/${plural}`, obj });
+  return res.status(200).json({
+    message: "Create request accepted",
+    objType: `${group}/${version}/${plural}`,
+    obj,
+  });
 });
 
-app.patch("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
+app.patch(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
 
-  if (!system) {
-    return res.status(400).json({ error: "'system' is required as a query param" });
-  }
+    if (!system) {
+      return res
+        .status(400)
+        .json({ error: "'system' is required as a query param" });
+    }
 
-  const obj = req.body as ApiObject;
+    const obj = req.body as ApiObject;
 
-  console.log("patching object:", JSON.stringify(obj));
+    console.log("patching object:", JSON.stringify(obj));
 
-  sanitizeObject(obj);
+    sanitizeObject(obj);
 
-  pubsub.publishControlRequest({ system, group, version, plural }, {
-    type: "PATCH",
-    objUri,
-    object: obj,
-  });
+    pubsub.publishControlRequest(
+      { system, group, version, plural },
+      {
+        type: "PATCH",
+        objUri,
+        object: obj,
+      },
+    );
 
-  return res.status(200).json({ message: "Patch request accepted", objType: `${group}/${version}/${plural}`, obj });
-});
+    return res.status(200).json({
+      message: "Patch request accepted",
+      objType: `${group}/${version}/${plural}`,
+      obj,
+    });
+  },
+);
 
-app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
+app.delete(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
 
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
 
-  pubsub.publishControlRequest({ system, group, version, plural }, {
-    type: "DELETE",
-    objUri,
-  });
+    pubsub.publishControlRequest(
+      { system, group, version, plural },
+      {
+        type: "DELETE",
+        objUri,
+      },
+    );
 
-  return res.status(200).json({ message: "Delete request accepted" });
-});
+    return res.status(200).json({ message: "Delete request accepted" });
+  },
+);
 
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
@@ -264,14 +335,20 @@ app.get("/api/auth/sign-out", async (req, res) => {
 app.get("/api/auth/reject", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   await supabase.auth.signOut();
-  return res.status(200).json({ error: "User is not whitelisted and was signed out" });
+  return res
+    .status(200)
+    .json({ error: "User is not whitelisted and was signed out" });
 });
 
 app.get("/api/auth/callback/supabase", async (req, res) => {
   const { error, error_description } = req.query;
   if (error) {
-    console.error(`Supabase auth error: ${error}, Description: ${error_description}`);
-    return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${error}&description=${error_description}`);
+    console.error(
+      `Supabase auth error: ${error}, Description: ${error_description}`,
+    );
+    return res.redirect(
+      `${WEBSITE_ORIGIN}/auth-error?error=${error}&description=${error_description}`,
+    );
   }
 
   const code = req.query.code?.toString();
@@ -281,7 +358,8 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
   }
 
   const supabase = createServerSupabase(req, res);
-  const { error: supabaseError } = await supabase.auth.exchangeCodeForSession(code);
+  const { error: supabaseError } =
+    await supabase.auth.exchangeCodeForSession(code);
   if (supabaseError) {
     return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${supabaseError}`);
   }
@@ -328,7 +406,7 @@ app.get("/api/auth/callback/github", async (req, res) => {
   }
 
   const next = (req.query.next ?? "/").toString();
-  return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`)
+  return res.redirect(303, `${WEBSITE_ORIGIN}/${next.slice(1)}`);
 });
 
 app.get("/api/github/installations", async (req, res) => {
@@ -407,8 +485,8 @@ app.get("/api/users", async (req, res) => {
   const { data: users, error } = await supabase.auth.admin.listUsers();
 
   if (error) {
-    console.error('Error fetching users:', error);
-    return res.status(500).json({ error: 'Failed to fetch users' });
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ error: "Failed to fetch users" });
   }
 
   return res.status(200).json(users.users);

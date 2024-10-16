@@ -8,7 +8,13 @@ import { markdownOverrides } from "~/lib/markdown-overides";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
-export const MarkdownWrapper = ({ content, onCopy }: { content: string, onCopy?: () => void }) => {
+export const MarkdownWrapper = ({
+  content,
+  onCopy,
+}: {
+  content: string;
+  onCopy?: () => void;
+}) => {
   return (
     <Markdown
       className={"pb-2"}
@@ -29,13 +35,10 @@ export const MarkdownWrapper = ({ content, onCopy }: { content: string, onCopy?:
 
           return match ? (
             <div style={{ position: "relative" }}>
-              <CopyToClipboard
-                text={String(children)}
-                onCopy={handleCopy}
-              >
+              <CopyToClipboard text={String(children)} onCopy={handleCopy}>
                 <button
                   className={
-                    "absolute top-0 right-0 bg-transparent p-2 focus:outline-none"
+                    "absolute right-0 top-0 bg-transparent p-2 focus:outline-none"
                   }
                 >
                   {copied ? (
@@ -65,5 +68,5 @@ export const MarkdownWrapper = ({ content, onCopy }: { content: string, onCopy?:
         },
       }}
     />
-  )
-}
+  );
+};

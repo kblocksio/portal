@@ -11,13 +11,13 @@ const config = {
   password: REDIS_PASSWORD,
   socket: {
     host: REDIS_HOST,
-    port: 18284
-  }
+    port: 18284,
+  },
 };
 
 const client = createClient(config);
 
-client.connect().catch(e => {
+client.connect().catch((e) => {
   console.error(`Error connecting to Redis: ${e.message}`);
 });
 
@@ -28,13 +28,12 @@ async function connection() {
   try {
     await client.ping();
   } catch (error) {
-    console.error('Redis connection lost. Reconnecting...');
+    console.error("Redis connection lost. Reconnecting...");
     await client.connect();
   }
 
   return client;
 }
-
 
 function keyForObject(blockUri: string) {
   return objPrefix + blockUri;
@@ -57,7 +56,9 @@ async function saveObject(blockUri: string, obj: kblocks.ApiObject | {}) {
   await redis.set(keyForObject(blockUri), JSON.stringify(obj));
 }
 
-export async function loadObject(blockUri: string): Promise<kblocks.ApiObject | null> {
+export async function loadObject(
+  blockUri: string,
+): Promise<kblocks.ApiObject | null> {
   const redis = await connection();
   const value = await redis.get(keyForObject(blockUri));
   if (!value) {
@@ -69,8 +70,8 @@ export async function loadObject(blockUri: string): Promise<kblocks.ApiObject | 
 async function listAllObjects() {
   const redis = await connection();
   return (await redis.keys(objPrefix + "*"))
-    .map(key => key.slice(objPrefix.length))
-    .filter(key => {
+    .map((key) => key.slice(objPrefix.length))
+    .filter((key) => {
       try {
         kblocks.parseBlockUri(key);
         return true;
@@ -97,7 +98,7 @@ export async function getAllObjects() {
   }
 
   const redis = await connection();
-  const values = await redis.mGet(keys.map(key => keyForObject(key)));
+  const values = await redis.mGet(keys.map((key) => keyForObject(key)));
 
   const result: Record<string, kblocks.ApiObject> = {};
   for (let i = 0; i < keys.length; i++) {
@@ -120,7 +121,9 @@ async function store(objUri: string, log: kblocks.WorkerEvent) {
   await redis.rPush(key, JSON.stringify(log));
 }
 
-export async function loadEvents(objUri: string): Promise<kblocks.WorkerEvent[]> {
+export async function loadEvents(
+  objUri: string,
+): Promise<kblocks.WorkerEvent[]> {
   const redis = await connection();
 
   const key = keyForEvents(objUri);
@@ -129,10 +132,12 @@ export async function loadEvents(objUri: string): Promise<kblocks.WorkerEvent[]>
     return [];
   }
 
-  return values.map(value => JSON.parse(value));
+  return values.map((value) => JSON.parse(value));
 }
 
-export async function getSlackThread(objUri: string): Promise<string | undefined> {
+export async function getSlackThread(
+  objUri: string,
+): Promise<string | undefined> {
   const redis = await connection();
   const key = keyForSlackThread(objUri);
   const value = await redis.get(key);
@@ -159,7 +164,6 @@ async function patchObject(objUri: string, patch: kblocks.ApiObject) {
   return saveObject(objUri, newObj);
 }
 
-
 async function storeEvent(event: kblocks.WorkerEvent) {
   if (event.type === "OBJECT") {
     return saveObject(event.objUri, event.object as kblocks.ApiObject);
@@ -174,11 +178,13 @@ async function storeEvent(event: kblocks.WorkerEvent) {
 }
 
 export function handleEvent(event: kblocks.WorkerEvent) {
-  storeEvent(event).catch(e => {
-    console.error(`Error storing event: ${JSON.stringify(event)}: ${e.message}`);
+  storeEvent(event).catch((e) => {
+    console.error(
+      `Error storing event: ${JSON.stringify(event)}: ${e.message}`,
+    );
   });
 
-  slackNotify(event).catch(e => {
+  slackNotify(event).catch((e) => {
     console.error(`Error sending slack notification: ${e.message}`);
   });
 }

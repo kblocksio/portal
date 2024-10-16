@@ -1,31 +1,66 @@
-import { ScrollArea } from "~/components/ui/scroll-area"
-import { Activity, XCircle, CheckCircle, RefreshCw, ChevronRight } from 'lucide-react'
-import { EventAction, EventReason, LifecycleEvent, LogEvent, WorkerEvent } from "@kblocks/api"
+import { ScrollArea } from "~/components/ui/scroll-area";
+import {
+  Activity,
+  XCircle,
+  CheckCircle,
+  RefreshCw,
+  ChevronRight,
+} from "lucide-react";
+import {
+  EventAction,
+  EventReason,
+  LifecycleEvent,
+  LogEvent,
+  WorkerEvent,
+} from "@kblocks/api";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 
 type EventGroup = {
   lifecycleEvent: LifecycleEvent;
   logs: LogEvent[];
-}
+};
 
-export default function Timeline({ events, className }: { events: WorkerEvent[], className?: string }) {
+export default function Timeline({
+  events,
+  className,
+}: {
+  events: WorkerEvent[];
+  className?: string;
+}) {
   const eventGroups = groupEventsByLifecycle(events);
 
   return (
-    <ScrollArea contentClassName={cn("h-full pb-30", className)} className="mt-0">
-      <div className="absolute left-3.5 w-px bg-gray-200 h-full"></div>
+    <ScrollArea
+      contentClassName={cn("h-full pb-30", className)}
+      className="mt-0"
+    >
+      <div className="absolute left-3.5 h-full w-px bg-gray-200"></div>
 
       {eventGroups.map((eventGroup, index) => (
-        <EventItem key={index} eventGroup={eventGroup} isLast={index === eventGroups.length - 1} />
+        <EventItem
+          key={index}
+          eventGroup={eventGroup}
+          isLast={index === eventGroups.length - 1}
+        />
       ))}
 
-      <div ref={(el) => el && el.scrollIntoView({ behavior: 'smooth', block: 'end' })}/>
+      <div
+        ref={(el) =>
+          el && el.scrollIntoView({ behavior: "smooth", block: "end" })
+        }
+      />
     </ScrollArea>
-  )
+  );
 }
 
-function EventItem({ eventGroup, isLast }: { eventGroup: EventGroup, isLast: boolean }) {
+function EventItem({
+  eventGroup,
+  isLast,
+}: {
+  eventGroup: EventGroup;
+  isLast: boolean;
+}) {
   const event = eventGroup.lifecycleEvent;
   const timestamp = event.timestamp.toLocaleString();
   const ReasonIcon = getReasonIcon(event.event.reason);
@@ -37,21 +72,20 @@ function EventItem({ eventGroup, isLast }: { eventGroup: EventGroup, isLast: boo
 
   return (
     <div className="relative pl-10">
-      <div className="absolute left-0 w-7 h-7 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
-        <ReasonIcon className={`w-5 h-5 ${reasonColor}`} />
+      <div className="absolute left-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-gray-200 bg-white">
+        <ReasonIcon className={`h-5 w-5 ${reasonColor}`} />
       </div>
       <div
-        className={cn("pl-0 pr-2 pt-0 pb-4 flex gap-2 rounded-md")}
+        className={cn("flex gap-2 rounded-md pb-4 pl-0 pr-2 pt-0")}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (e.key === "Enter" || e.key === " ") {
             setIsOpen(!isOpen);
           }
         }}
         role="button"
         tabIndex={0}
       >
-
         <span className="text-gray-500">{timestamp}</span>
         <span className="font-bold text-gray-500">{action}</span>
         <span className="font-bold">{event.event.message}</span>
@@ -59,14 +93,14 @@ function EventItem({ eventGroup, isLast }: { eventGroup: EventGroup, isLast: boo
         {isClickable && (
           <ChevronRight
             className={cn(
-              "mt-1 w-4 h-4 transition-transform duration-300",
-              isOpen ? "rotate-90" : "rotate-0"
+              "mt-1 h-4 w-4 transition-transform duration-300",
+              isOpen ? "rotate-90" : "rotate-0",
             )}
           />
         )}
       </div>
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="bg-slate-800 text-xs font-mono rounded-sm p-4 space-y-1 mr-10 mb-10 shadow-md mt-0 pb-4">
+        <div className="mb-10 mr-10 mt-0 space-y-1 rounded-sm bg-slate-800 p-4 pb-4 font-mono text-xs shadow-md">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
@@ -106,24 +140,24 @@ const getReasonIcon = (reason: EventReason) => {
     default:
       return Activity;
   }
-}
+};
 
 const getReasonColor = (reason: EventReason) => {
   switch (reason) {
     case EventReason.Started:
-      return 'text-blue-500';
+      return "text-blue-500";
     case EventReason.Succeeded:
-      return 'text-green-500';
+      return "text-green-500";
     case EventReason.Failed:
-      return 'text-red-500';
+      return "text-red-500";
     case EventReason.Resolving:
-      return 'text-yellow-500';
+      return "text-yellow-500";
     case EventReason.Resolved:
-      return 'text-green-500';
+      return "text-green-500";
     default:
-      return 'text-gray-500';
+      return "text-gray-500";
   }
-}
+};
 
 function groupEventsByLifecycle(events: WorkerEvent[]) {
   const groups: EventGroup[] = [];
@@ -131,13 +165,13 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
   let currentGroup: EventGroup | null = null;
 
   for (const event of events) {
-    if (event.type === 'LIFECYCLE') {
+    if (event.type === "LIFECYCLE") {
       currentGroup = {
         lifecycleEvent: event,
         logs: [],
       };
       groups.push(currentGroup);
-    } else if (event.type === 'LOG') {
+    } else if (event.type === "LOG") {
       if (currentGroup) {
         currentGroup.logs.push(event);
       } else {
@@ -152,14 +186,14 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
 const getActionLabel = (action: EventAction) => {
   switch (action) {
     case EventAction.Create:
-      return 'Create';
+      return "Create";
     case EventAction.Delete:
-      return 'Delete';
+      return "Delete";
     case EventAction.Update:
-      return 'Update';
+      return "Update";
     case EventAction.Sync:
-      return 'Sync';
+      return "Sync";
     default:
-      return '';
+      return "";
   }
-}
+};

@@ -1,49 +1,69 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { MarkdownWrapper } from "../markdown";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { cn } from "~/lib/utils";
 
 const engines = [
   {
     name: "Terraform",
-    description: "Terraform is an open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud providers.",
-    src: "/terraform.svg"
+    description:
+      "Terraform is an open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud providers.",
+    src: "/terraform.svg",
   },
   {
     name: "CloudFormation",
-    description: "CloudFormation is a service that enables you to model and set up your Amazon Web Services resources so that they can be provisioned and managed efficiently.",
-    src: "/cloudformation.svg"
+    description:
+      "CloudFormation is a service that enables you to model and set up your Amazon Web Services resources so that they can be provisioned and managed efficiently.",
+    src: "/cloudformation.svg",
   },
   {
     name: "Pulumi",
-    description: "Pulumi is an open-source infrastructure as code software tool that enables you to preview, deploy, and manage infrastructure on any cloud using your favorite language.",
-    src: "/pulumi.svg"
+    description:
+      "Pulumi is an open-source infrastructure as code software tool that enables you to preview, deploy, and manage infrastructure on any cloud using your favorite language.",
+    src: "/pulumi.svg",
   },
   {
     name: "AWS CDK",
-    description: "AWS Cloud Development Kit (AWS CDK) is an open-source software development framework that enables you to define cloud infrastructure in code and provision it through AWS CloudFormation.",
-    src: "/aws_cdk.svg"
+    description:
+      "AWS Cloud Development Kit (AWS CDK) is an open-source software development framework that enables you to define cloud infrastructure in code and provision it through AWS CloudFormation.",
+    src: "/aws_cdk.svg",
   },
   {
     name: "Helm",
-    description: "Helm is an open-source package manager for Kubernetes that allows you to define, install, and upgrade even the most complex Kubernetes applications.",
-    src: "/helm.svg"
+    description:
+      "Helm is an open-source package manager for Kubernetes that allows you to define, install, and upgrade even the most complex Kubernetes applications.",
+    src: "/helm.svg",
   },
   {
     name: "OpenTofu",
-    description: "OpenTofu is an open-source infrastructure as code software tool that enables you to manage your infrastructure as code.",
-    src: "/opentofu.svg"
+    description:
+      "OpenTofu is an open-source infrastructure as code software tool that enables you to manage your infrastructure as code.",
+    src: "/opentofu.svg",
   },
   {
     name: "Winglang",
-    description: "Winglang is an open-source programming language that enables you to build cloud applications.",
-    src: "/winglang.svg"
+    description:
+      "Winglang is an open-source programming language that enables you to build cloud applications.",
+    src: "/winglang.svg",
   },
-]
+];
 
 function Logo() {
   return (
@@ -64,7 +84,10 @@ export interface ResourceTypeWizardProps {
   handleOnOpenChange: (isOpen: boolean) => void;
 }
 
-export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeWizardProps) => {
+export const ResourceTypeWizard = ({
+  isOpen,
+  handleOnOpenChange,
+}: ResourceTypeWizardProps) => {
   const [step, setStep] = useState(1);
 
   const [kind, setKind] = useState<string>("");
@@ -73,23 +96,24 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
   const [selectedEngine, setSelectedEngine] = useState<string>("");
   const [version, setVersion] = useState<string>("v1");
   const [directory, setDirectory] = useState<string>("my-kblock");
-  const handleOpenChange = useCallback((open: boolean) => {
-    if (!open) {
-      setStep(1);
-      setKind("");
-      setGroup("");
-      setPlural("");
-      setVersion("");
-      setDirectory("");
-    }
-    handleOnOpenChange(open);
-  }, [handleOnOpenChange]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        setStep(1);
+        setKind("");
+        setGroup("");
+        setPlural("");
+        setVersion("");
+        setDirectory("");
+      }
+      handleOnOpenChange(open);
+    },
+    [handleOnOpenChange],
+  );
 
   const codeSnippet = useMemo(() => {
-    return (
-      `\`\`\`bash
-      kb init --engine ${selectedEngine.toLowerCase()} --group ${group.toLowerCase()} --kind ${kind.toLowerCase()} --plural ${plural.toLowerCase()} --version ${version} ./${directory}`
-    );
+    return `\`\`\`bash
+      kb init --engine ${selectedEngine.toLowerCase()} --group ${group.toLowerCase()} --kind ${kind.toLowerCase()} --plural ${plural.toLowerCase()} --version ${version} ./${directory}`;
   }, [kind, group, plural, version, selectedEngine, directory]);
 
   const enginesCards = useMemo(() => {
@@ -99,28 +123,32 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
           return (
             <Card
               key={index}
-              className={cn("hover:bg-accent cursor-pointer max-h-[240px] flex flex-col justify-center",
-                engine.name === selectedEngine && "bg-accent")}
+              className={cn(
+                "hover:bg-accent flex max-h-[240px] cursor-pointer flex-col justify-center",
+                engine.name === selectedEngine && "bg-accent",
+              )}
               onClick={() => setSelectedEngine(engine.name)}
               tabIndex={0}
               onKeyDown={(e) => {
-                if (e.key === ' ') {
+                if (e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
                   setSelectedEngine(engine.name);
                 }
               }}
             >
-              <CardHeader className="flex flex-row h-[75px] text-center border-b border-b-gray-200 items-center align-middle">
-                <div className="w-full flex self-center items-center">
-                  <img src={engine.src} alt={engine.name} className="h-10 w-10" />
+              <CardHeader className="flex h-[75px] flex-row items-center border-b border-b-gray-200 text-center align-middle">
+                <div className="flex w-full items-center self-center">
+                  <img
+                    src={engine.src}
+                    alt={engine.name}
+                    className="h-10 w-10"
+                  />
                 </div>
               </CardHeader>
-              <CardContent className="flex p-4 flex-start flex-col min-h-[165px]">
+              <CardContent className="flex-start flex min-h-[165px] flex-col p-4">
                 <CardTitle className="mb-2">{engine.name}</CardTitle>
-                <CardDescription>
-                  {engine.description}
-                </CardDescription>
+                <CardDescription>{engine.description}</CardDescription>
               </CardContent>
             </Card>
           );
@@ -134,7 +162,14 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
   }, []);
 
   const handleGenerate = useCallback(() => {
-    if (!selectedEngine || !group || !kind || !plural || !version || !directory) {
+    if (
+      !selectedEngine ||
+      !group ||
+      !kind ||
+      !plural ||
+      !version ||
+      !directory
+    ) {
       return;
     }
     setStep(2);
@@ -146,15 +181,23 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="flex flex-col min-w-[90vh] h-[90vh]"
-        aria-describedby="Create a new Kblock">
+      <DialogContent
+        className="flex h-[90vh] min-w-[90vh] flex-col"
+        aria-describedby="Create a new Kblock"
+      >
         <DialogHeader>
           <DialogTitle className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               {step === 1 && <Logo />}
               {step === 2 && (
-                <img src={engines.find((engine) => engine.name === selectedEngine)?.src}
-                  alt={selectedEngine} className="h-10 w-10" />
+                <img
+                  src={
+                    engines.find((engine) => engine.name === selectedEngine)
+                      ?.src
+                  }
+                  alt={selectedEngine}
+                  className="h-10 w-10"
+                />
               )}
               Create a New {step === 2 && selectedEngine} Kblock
             </div>
@@ -163,22 +206,29 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
             </DialogDescription>
           </DialogTitle>
         </DialogHeader>
-        <form className="flex flex-col h-full space-y-4 overflow-hidden" onSubmit={(e) => {
-          e.preventDefault();
-          handleGenerate();
-        }}>
+        <form
+          className="flex h-full flex-col space-y-4 overflow-hidden"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleGenerate();
+          }}
+        >
           <div className="flex overflow-auto">
-            <div className="space-y-4 border-b pb-4 ml-2 mr-2">
+            <div className="ml-2 mr-2 space-y-4 border-b pb-4">
               <div className="grid grid-cols-5 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="group">
                     Group
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Input disabled={step !== 1} required id="group"
+                  <Input
+                    disabled={step !== 1}
+                    required
+                    id="group"
                     placeholder="Group"
                     value={group}
-                    onChange={(e) => setGroup(e.target.value)} />
+                    onChange={(e) => setGroup(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="kind">
@@ -199,20 +249,28 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
                     Plural
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Input disabled={step !== 1} required id="plural"
+                  <Input
+                    disabled={step !== 1}
+                    required
+                    id="plural"
                     placeholder="Plural"
                     value={plural}
-                    onChange={(e) => setPlural(e.target.value)} />
+                    onChange={(e) => setPlural(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="version">
                     Version
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Input disabled={step !== 1} required id="version"
+                  <Input
+                    disabled={step !== 1}
+                    required
+                    id="version"
                     placeholder="Version"
                     value={version}
-                    onChange={(e) => setVersion(e.target.value)} />
+                    onChange={(e) => setVersion(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="directory">
@@ -239,17 +297,16 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
                   <CardTitle>
                     Copy and paste the following command into your terminal:
                   </CardTitle>
-                  <MarkdownWrapper
-                    content={codeSnippet}
-                  />
+                  <MarkdownWrapper content={codeSnippet} />
                 </div>
                 <div className="text-sm">
-                  For more information and examples visit
-                  {" "}
-                  <a className="underline text-blue-500"
+                  For more information and examples visit{" "}
+                  <a
+                    className="text-blue-500 underline"
                     href="https://github.com/winglang/kblocks-gallery"
                     target="_blank"
-                    rel="noopener noreferrer">
+                    rel="noopener noreferrer"
+                  >
                     Kblocks Gallery
                   </a>
                 </div>
@@ -263,8 +320,12 @@ export const ResourceTypeWizard = ({ isOpen, handleOnOpenChange }: ResourceTypeW
           )}
           {step === 2 && (
             <DialogFooter>
-              <Button type="button" onClick={handleBack}>Back</Button>
-              <Button type="submit" onClick={handleDone}>Done</Button>
+              <Button type="button" onClick={handleBack}>
+                Back
+              </Button>
+              <Button type="submit" onClick={handleDone}>
+                Done
+              </Button>
             </DialogFooter>
           )}
         </form>

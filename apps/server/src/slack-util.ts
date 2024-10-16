@@ -1,22 +1,28 @@
-type Context  = {
+type Context = {
   ts?: string;
   channel?: string;
 };
 
 export type Blocks = Array<{
-  type: "section",
+  type: "section";
   text: {
-    type: "mrkdwn",
-    text: string,
-  },
+    type: "mrkdwn";
+    text: string;
+  };
 }>;
 
 const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN;
 if (!SLACK_API_TOKEN) {
-  console.error('Warning: SLACK_API_TOKEN environment variable is not set, not sending message to Slack');
+  console.error(
+    "Warning: SLACK_API_TOKEN environment variable is not set, not sending message to Slack",
+  );
 }
 
-export async function sendSlackMessage(channel: string, blocks: Blocks, thread_ts?: string): Promise<Context> {
+export async function sendSlackMessage(
+  channel: string,
+  blocks: Blocks,
+  thread_ts?: string,
+): Promise<Context> {
   try {
     if (!SLACK_API_TOKEN) {
       return {
@@ -27,7 +33,7 @@ export async function sendSlackMessage(channel: string, blocks: Blocks, thread_t
 
     const channelID = channel;
 
-    const url = 'https://slack.com/api/chat.postMessage';
+    const url = "https://slack.com/api/chat.postMessage";
 
     const payload = {
       channel: channelID,
@@ -36,10 +42,10 @@ export async function sendSlackMessage(channel: string, blocks: Blocks, thread_t
     };
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SLACK_API_TOKEN}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SLACK_API_TOKEN}`,
       },
       body: JSON.stringify(payload),
     });
@@ -54,7 +60,7 @@ export async function sendSlackMessage(channel: string, blocks: Blocks, thread_t
       channel: body.channel,
     };
   } catch (e) {
-    console.error('Failed to send message to Slack: ', e);
+    console.error("Failed to send message to Slack: ", e);
     console.error(JSON.stringify({ channel, thread_ts, blocks }, null, 2));
     return {
       ts: undefined,
@@ -68,46 +74,52 @@ export async function editSlackMessage(ctx: Context, blocks: any) {
     if (!SLACK_API_TOKEN) {
       return;
     }
-  
-    const url = 'https://slack.com/api/chat.update';
-  
+
+    const url = "https://slack.com/api/chat.update";
+
     const payload = {
       channel: ctx.channel,
       ts: ctx.ts,
       blocks,
     };
-  
+
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SLACK_API_TOKEN}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SLACK_API_TOKEN}`,
       },
       body: JSON.stringify(payload),
     });
-  
+
     const body = await response.json();
     if (!body.ok) {
       throw new Error(`Failed to send message to Slack: ${body.error}`);
-    }  
+    }
   } catch (e) {
-    console.error('Failed to send message to Slack: ', e);
+    console.error("Failed to send message to Slack: ", e);
     console.error({ ctx, blocks });
   }
 }
 
-export const newSlackThread = async (channel: string, initialMessage: string) => {
+export const newSlackThread = async (
+  channel: string,
+  initialMessage: string,
+) => {
   const renderBlocks = (message: string): Blocks => [
     {
-      type: 'section',
+      type: "section",
       text: {
-        type: 'mrkdwn',
+        type: "mrkdwn",
         text: message,
       },
     },
   ];
 
-  const threadContext = await sendSlackMessage(channel, renderBlocks(initialMessage));
+  const threadContext = await sendSlackMessage(
+    channel,
+    renderBlocks(initialMessage),
+  );
   if (!threadContext) {
     return {
       update: async () => {},
@@ -116,13 +128,15 @@ export const newSlackThread = async (channel: string, initialMessage: string) =>
     };
   }
 
-  const postBlocks = async (blocks: Blocks)  => sendSlackMessage(channel, blocks, threadContext.ts);
-  const post       = async (message: string) => postBlocks(renderBlocks(message));
-  const update     = async (message: string) => editSlackMessage(threadContext, renderBlocks(message));
+  const postBlocks = async (blocks: Blocks) =>
+    sendSlackMessage(channel, blocks, threadContext.ts);
+  const post = async (message: string) => postBlocks(renderBlocks(message));
+  const update = async (message: string) =>
+    editSlackMessage(threadContext, renderBlocks(message));
 
   return {
     update,
     post,
     postBlocks,
-  }
+  };
 };

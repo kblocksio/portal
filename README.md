@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-* [docker](https://www.docker.com/)
-* [kubectl](https://kubernetes.io/docs/reference/kubectl/)
-* [helm](https://helm.sh/)
-* [skaffold](https://skaffold.dev/)
-* [quickube](https://github.com/winglang/quickube)
+- [docker](https://www.docker.com/)
+- [kubectl](https://kubernetes.io/docs/reference/kubectl/)
+- [helm](https://helm.sh/)
+- [skaffold](https://skaffold.dev/)
+- [quickube](https://github.com/winglang/quickube)
 
 ## Setup
 

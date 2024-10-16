@@ -1,5 +1,11 @@
 import { getResourceIconColors } from "~/lib/hero-icon";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { ResourceType } from "~/ResourceContext";
 
@@ -8,12 +14,16 @@ export interface ResourceTypesCardsProps {
   handleResourceSelect: (resource: any) => void;
   isLoading: boolean;
 }
-export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isLoading }: ResourceTypesCardsProps) => {
-  return isLoading ?
-    Array.from({ length: 3 }).map((_, index) => (
-      <ResourceCardSkeleton key={index} />
-    )) : (
-      filtereResources.map((resource, index) => {
+export const ResourceTypesCards = ({
+  filtereResources,
+  handleResourceSelect,
+  isLoading,
+}: ResourceTypesCardsProps) => {
+  return isLoading
+    ? Array.from({ length: 3 }).map((_, index) => (
+        <ResourceCardSkeleton key={index} />
+      ))
+    : filtereResources.map((resource, index) => {
         const Icon = resource.iconComponent;
         const iconColor = getResourceIconColors({
           color: resource?.color,
@@ -21,48 +31,45 @@ export const ResourceTypesCards = ({ filtereResources, handleResourceSelect, isL
         return (
           <Card
             key={index}
-            className="hover:bg-accent cursor-pointer max-h-[240px] flex flex-col justify-center"
+            className="hover:bg-accent flex max-h-[240px] cursor-pointer flex-col justify-center"
             onClick={() => handleResourceSelect(resource)}
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === ' ') {
+              if (e.key === " ") {
                 e.preventDefault();
                 e.stopPropagation();
                 handleResourceSelect(resource);
               }
             }}
           >
-            <CardHeader className="flex flex-row h-[75px] text-center border-b border-b-gray-200 items-center align-middle">
-              <div className="w-full flex self-center items-center">
+            <CardHeader className="flex h-[75px] flex-row items-center border-b border-b-gray-200 text-center align-middle">
+              <div className="flex w-full items-center self-center">
                 <Icon className={`${iconColor} h-8 w-8`} />
               </div>
             </CardHeader>
-            <CardContent className="flex p-4 flex-start flex-col min-h-[165px]">
+            <CardContent className="flex-start flex min-h-[165px] flex-col p-4">
               <CardTitle className="mb-2">{resource.kind}</CardTitle>
-              <CardDescription>
-                {resource.description}
-              </CardDescription>
+              <CardDescription>{resource.description}</CardDescription>
             </CardContent>
           </Card>
         );
-      })
-    );
+      });
 };
 
 const ResourceCardSkeleton = () => (
-  <Card className="max-h-[160px] flex flex-col justify-center cursor-pointer">
-    <CardHeader className="flex flex-row h-[50px] text-center border-b border-b-gray-200 items-center align-middle">
-      <div className="w-full flex self-center items-center justify-center">
+  <Card className="flex max-h-[160px] cursor-pointer flex-col justify-center">
+    <CardHeader className="flex h-[50px] flex-row items-center border-b border-b-gray-200 text-center align-middle">
+      <div className="flex w-full items-center justify-center self-center">
         <Skeleton className="h-7 w-7" />
       </div>
     </CardHeader>
-    <CardContent className="flex p-2 flex-col h-[110px]">
+    <CardContent className="flex h-[110px] flex-col p-2">
       <CardTitle className="mb-2">
-        <Skeleton className="w-1/2 h-6" />
+        <Skeleton className="h-6 w-1/2" />
       </CardTitle>
       <CardDescription>
-        <Skeleton className="w-full h-4" />
-        <Skeleton className="w-3/4 h-4 mt-2" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="mt-2 h-4 w-3/4" />
       </CardDescription>
     </CardContent>
   </Card>

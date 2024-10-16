@@ -88,7 +88,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-neutral-800 w-[250px] flex-shrink-0",
+          "hidden h-full w-[250px] flex-shrink-0 bg-white px-4 py-4 md:flex md:flex-col dark:bg-neutral-800",
           className,
         )}
         animate={{
@@ -114,11 +114,11 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full",
+          "flex h-10 w-full flex-row items-center justify-between bg-neutral-100 px-4 py-4 md:hidden dark:bg-neutral-800",
         )}
         {...props}
       >
-        <div className="flex justify-end z-20 w-full">
+        <div className="z-20 flex w-full justify-end">
           <Menu
             className="text-neutral-800 dark:text-neutral-200"
             onClick={() => setOpen(!open)}
@@ -135,7 +135,7 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+                "fixed inset-0 z-[100] flex h-full w-full flex-col justify-between bg-white p-10 dark:bg-neutral-900",
                 className,
               )}
             >
@@ -169,7 +169,7 @@ export const SidebarLink = ({
     <a
       onClick={() => navigate(link.navigate)}
       className={cn(
-        "flex items-center justify-start gap-2  group/sidebar py-2 hover:cursor-pointer",
+        "group/sidebar flex items-center justify-start gap-2 py-2 hover:cursor-pointer",
         className,
       )}
       {...props}
@@ -181,7 +181,7 @@ export const SidebarLink = ({
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className="!m-0 inline-block whitespace-pre !p-0 text-sm text-neutral-700 transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200"
       >
         {link.label}
       </motion.span>
@@ -209,9 +209,9 @@ export const SidebarLabel = ({
     <a
       onClick={onClick}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar p-2 hover:cursor-pointer",
+        "group/sidebar flex items-center justify-start gap-2 p-2 hover:cursor-pointer",
         className,
-        isActive ? "text-primary bg-gray-200 rounded-lg" : ""
+        isActive ? "text-primary rounded-lg bg-gray-200" : "",
       )}
       {...props}
     >
@@ -222,8 +222,10 @@ export const SidebarLabel = ({
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className={cn("text-base leading-relaxed text-grey-700 dark:text-neutral-200 group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0",
-          isActive ? "font-bold" : "")}
+        className={cn(
+          "text-grey-700 !m-0 inline-block whitespace-pre !p-0 text-base leading-relaxed transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200",
+          isActive ? "font-bold" : "",
+        )}
       >
         {label}
       </motion.span>

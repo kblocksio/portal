@@ -35,16 +35,16 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
             animate={{ y: "0%", opacity: 1 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex items-center space-x-1 min-w-0 gap-2"
+            className="absolute inset-0 flex min-w-0 items-center gap-2 space-x-1"
           >
             <span className="text-muted-foreground">
-              <ChevronRightIcon className="w-4 h-4 text-muted-foreground" />
+              <ChevronRightIcon className="text-muted-foreground h-4 w-4" />
             </span>
-            <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+            <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap text-xs">
               {format(new Date(last.timestamp), "yyyy-MM-dd HH:mm:ss")}
             </span>
             <span
-              className="text-sm truncate text-muted-foreground font-mono flex-grow min-w-0"
+              className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-sm"
               title={message}
             >
               {message}

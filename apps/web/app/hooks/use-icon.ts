@@ -1,5 +1,5 @@
 import { Box } from "lucide-react";
-import icons from "lucide-react/dynamicIconImports"
+import icons from "lucide-react/dynamicIconImports";
 import { lazy, useEffect, useState } from "react";
 
 export function useIcon(name: string) {
@@ -8,7 +8,7 @@ export function useIcon(name: string) {
   useEffect(() => {
     const i = icons[name as keyof typeof icons];
     if (i) {
-      setIcon(lazy(i))
+      setIcon(lazy(i));
     }
   }, [name]);
 

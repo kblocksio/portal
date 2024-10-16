@@ -8,7 +8,6 @@ export interface ResourceQuery {
   name?: string;
 }
 
-
 export type Project = {
   label: string;
   value: string;
@@ -41,4 +40,3 @@ export interface ObjectMetadata {
   namespace: string;
   system: string;
 }
-

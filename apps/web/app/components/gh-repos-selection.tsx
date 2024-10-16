@@ -17,21 +17,25 @@ export interface ImportGHRepoProps {
   handleOnSelection: (repositories: Repository[]) => void;
 }
 
-export const ImportGHRepo = (
-  { singleSelection,
-    singleActionLabel,
-    multipleActionLabel,
-    handleBack,
-    handleOnSelection
-  }: ImportGHRepoProps) => {
+export const ImportGHRepo = ({
+  singleSelection,
+  singleActionLabel,
+  multipleActionLabel,
+  handleBack,
+  handleOnSelection,
+}: ImportGHRepoProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
-  const { data: installations, isLoading: isLoadingInstallations, refetch: refetchInstallations } = useFetch<Installation[]>(
-    "/api/github/installations"
-  );
-  const { data: repositories, refetch: refetchRepositories, isLoading: isLoadingRepositories } = useFetch<
-    Repository[]
-  >(
+  const {
+    data: installations,
+    isLoading: isLoadingInstallations,
+    refetch: refetchInstallations,
+  } = useFetch<Installation[]>("/api/github/installations");
+  const {
+    data: repositories,
+    refetch: refetchRepositories,
+    isLoading: isLoadingRepositories,
+  } = useFetch<Repository[]>(
     `/api/github/repositories?installation_id=${installations?.[0]?.id}`,
     undefined,
     false,
@@ -68,7 +72,9 @@ export const ImportGHRepo = (
 
   const handleSelectAllChange = (checked: boolean) => {
     if (checked) {
-      setSelectedRepos(new Set(filteredRepositories.map((repo) => repo.full_name)));
+      setSelectedRepos(
+        new Set(filteredRepositories.map((repo) => repo.full_name)),
+      );
     } else {
       setSelectedRepos(new Set());
     }
@@ -87,20 +93,22 @@ export const ImportGHRepo = (
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
 
-  const handleRepoSelectionAction = useCallback((repo?: Repository) => {
-    // if no repo is provided, we are selecting multiple repos
-    if (!repo) {
-      const repos =
-        (repositories?.filter((repo) => selectedRepos
-          .has(repo.full_name))) || [];
-      handleOnSelection(repos);
-    } else {
-      // if a repo is provided, we are selecting a single repo by clicking on the action button
-      setSelectedRepos(new Set([repo.full_name]));
-      handleOnSelection([repo]);
-    }
-  }, [handleOnSelection, selectedRepos, repositories])
-
+  const handleRepoSelectionAction = useCallback(
+    (repo?: Repository) => {
+      // if no repo is provided, we are selecting multiple repos
+      if (!repo) {
+        const repos =
+          repositories?.filter((repo) => selectedRepos.has(repo.full_name)) ||
+          [];
+        handleOnSelection(repos);
+      } else {
+        // if a repo is provided, we are selecting a single repo by clicking on the action button
+        setSelectedRepos(new Set([repo.full_name]));
+        handleOnSelection([repo]);
+      }
+    },
+    [handleOnSelection, selectedRepos, repositories],
+  );
 
   return (
     <div className="flex flex-col gap-4 py-4">
@@ -118,21 +126,23 @@ export const ImportGHRepo = (
           ) : (
             <>
               <div className="flex justify-between">
-                {
-                  !singleSelection && <div className="mb-4 flex items-center">
+                {!singleSelection && (
+                  <div className="mb-4 flex items-center">
                     <Checkbox
                       checked={isAllSelected}
-                      onCheckedChange={(checked) => handleSelectAllChange(checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleSelectAllChange(checked as boolean)
+                      }
                     />
                     <span className="ml-2">Select All</span>
                   </div>
-                }
+                )}
                 <Button
                   disabled={isLoading}
                   variant="outline"
                   size="sm"
                   onClick={() => refetchInstallations()}
-                  className="flex items-center mb-4 mr-2 p-2"
+                  className="mb-4 mr-2 flex items-center p-2"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -140,19 +150,25 @@ export const ImportGHRepo = (
               {filteredRepositories.map((repo) => (
                 <div
                   key={repo.full_name}
-                  className={cn("mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0",
-                    selectedRepos.has(repo.full_name) && "bg-accent")}>
-                  {
-                    !singleSelection && <Checkbox
+                  className={cn(
+                    "mb-2 grid grid-cols-[auto_40px_1fr_auto] items-start gap-4 border-b pb-2 pr-2 last:border-b-0",
+                    selectedRepos.has(repo.full_name) && "bg-accent",
+                  )}
+                >
+                  {!singleSelection && (
+                    <Checkbox
                       className="self-center"
                       checked={selectedRepos.has(repo.full_name)}
                       onCheckedChange={(checked) =>
                         handleCheckboxChange(repo.full_name, checked as boolean)
                       }
                     />
-                  }
+                  )}
                   <Avatar>
-                    <AvatarImage alt={`@${repo.owner.login}`} src={repo.owner.avatar_url} />
+                    <AvatarImage
+                      alt={`@${repo.owner.login}`}
+                      src={repo.owner.avatar_url}
+                    />
                     <AvatarFallback>{repo.owner.login}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 pr-4">
@@ -164,15 +180,21 @@ export const ImportGHRepo = (
                     >
                       {repo.full_name}
                     </a>
-                    <p className="text-muted-foreground text-sm">{repo.description}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {repo.description}
+                    </p>
                   </div>
-                  <Button disabled={selectedRepos.size > 0 || isLoading}
+                  <Button
+                    disabled={selectedRepos.size > 0 || isLoading}
                     variant="outline"
                     onClick={() => {
                       handleRepoSelectionAction(repo);
-                    }}>
+                    }}
+                  >
                     {singleActionLabel}
-                    {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
+                    {isLoading && (
+                      <Loader className="ml-2 h-5 w-5 animate-spin" />
+                    )}
                   </Button>
                 </div>
               ))}
@@ -180,9 +202,10 @@ export const ImportGHRepo = (
           )}
         </div>
       </div>
-      <div className="mt-4 mb-4 text-sm text-muted-foreground">
+      <div className="text-muted-foreground mb-4 mt-4 text-sm">
         <p>
-          Can't find the repository you're looking for? You may need to adjust your GitHub App installation.{' '}
+          Can't find the repository you're looking for? You may need to adjust
+          your GitHub App installation.{" "}
           <a
             href="https://github.com/apps/kblocks-io/installations/new"
             target="_blank"
@@ -194,13 +217,12 @@ export const ImportGHRepo = (
         </p>
       </div>
       <div className="flex justify-between">
-        {
-          handleBack && <Button variant="outline" onClick={handleBack}>
+        {handleBack && (
+          <Button variant="outline" onClick={handleBack}>
             Back
           </Button>
-        }
-        {
-          !singleSelection &&
+        )}
+        {!singleSelection && (
           <Button
             disabled={isLoading || selectedRepos.size === 0}
             onClick={() => handleRepoSelectionAction()}
@@ -208,13 +230,11 @@ export const ImportGHRepo = (
             {multipleActionLabel}
             {isLoading && <Loader className="ml-2 h-5 w-5 animate-spin" />}
           </Button>
-        }
+        )}
       </div>
     </div>
   );
 };
-
-
 
 const LoadingRepositories = () => {
   return (
@@ -233,7 +253,7 @@ const LoadingRepositories = () => {
         >
           <Skeleton className="h-5 w-5 self-center" />
           <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="flex-1 pr-4 self-center">
+          <div className="flex-1 self-center pr-4">
             <Skeleton className="h-5 w-[150px]" />
           </div>
         </div>

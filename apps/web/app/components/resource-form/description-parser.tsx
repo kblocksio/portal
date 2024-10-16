@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const parseDescription = (description: string): React.ReactNode[] => {
   const regex = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -18,9 +18,15 @@ export const parseDescription = (description: string): React.ReactNode[] => {
     const text = linkText || url;
 
     parts.push(
-      <a href={url} className="text-sky-500 hover:underline" target="_blank" rel="noopener noreferrer" key={lastIndex}>
+      <a
+        href={url}
+        className="text-sky-500 hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+        key={lastIndex}
+      >
         {text}
-      </a>
+      </a>,
     );
 
     lastIndex = match.index + fullMatch.length;
@@ -32,7 +38,7 @@ export const parseDescription = (description: string): React.ReactNode[] => {
   }
 
   return parts;
-}
+};
 
 /**
  * Remove all doctags from the description (lines that start with @)
@@ -42,5 +48,9 @@ export const sanitizeDescription = (description: string | undefined) => {
     return "";
   }
 
-  return description.split("\n").filter(s => !s.startsWith("@")).join("\n").trim();
-}
+  return description
+    .split("\n")
+    .filter((s) => !s.startsWith("@"))
+    .join("\n")
+    .trim();
+};

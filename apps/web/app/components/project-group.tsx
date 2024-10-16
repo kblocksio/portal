@@ -23,8 +23,8 @@ export const ProjectGroup = ({
 
   useEffect(() => {
     if (!resources || !resources.get(objType)) {
-      return
-    };
+      return;
+    }
     setResourcesForType(Array.from(resources.get(objType)?.values() || []));
   }, [resources]);
 
@@ -37,11 +37,11 @@ export const ProjectGroup = ({
   }, [resourcesForType, searchQuery]);
 
   const Icon = resourceType.iconComponent;
-  
+
   // use default color for now
   const iconColor = getResourceIconColors({
     // color: resourceType?.color,
-    color: undefined
+    color: undefined,
   });
 
   return !isLoading && (!filteredData || filteredData?.length === 0) ? null : (
@@ -77,4 +77,3 @@ export const ProjectGroup = ({
     </section>
   );
 };
-

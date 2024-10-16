@@ -27,4 +27,4 @@ export type GetEventsResponse = {
   events: kblocks.WorkerEvent[];
 };
 
-export type CreateResourceResponse = { };
+export type CreateResourceResponse = {};
