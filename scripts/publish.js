@@ -5,13 +5,15 @@ const socket = new ws("wss://api.kblocks.io/api/events/upstream");
 socket.on("open", () => {
   console.log("Connected to server");
 
-  socket.send(JSON.stringify({
-    type: "event",
-    data: {
-      type: "test",
-      data: "test"
-    }
-  }));
+  socket.send(
+    JSON.stringify({
+      type: "event",
+      data: {
+        type: "test",
+        data: "test",
+      },
+    }),
+  );
 });
 
 socket.on("error", (error) => {

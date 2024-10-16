@@ -19,7 +19,11 @@ interface DeleteResourceDialogProps {
   onClose: () => void;
 }
 
-export function DeleteResourceDialog({ resource, isOpen, onClose }: DeleteResourceDialogProps) {
+export function DeleteResourceDialog({
+  resource,
+  isOpen,
+  onClose,
+}: DeleteResourceDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -35,7 +39,9 @@ export function DeleteResourceDialog({ resource, isOpen, onClose }: DeleteResour
       await deleteResource(resource.objUri);
       onClose();
     } catch (error: any) {
-      setDeleteError(error.message ?? "An error occurred while deleting the resource");
+      setDeleteError(
+        error.message ?? "An error occurred while deleting the resource",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -50,25 +56,31 @@ export function DeleteResourceDialog({ resource, isOpen, onClose }: DeleteResour
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={(open) => {
-      if (!open) {
-        onClose();
-      }
-    }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Are you sure you want to delete <span className="font-mono">
+            Are you sure you want to delete{" "}
+            <span className="font-mono">
               {resource.metadata.namespace && `${resource.metadata.namespace}/`}
               {resource.metadata.name}
-            </span>?
+            </span>
+            ?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the resource and remove its data from the cluster.
+            This action cannot be undone. This will permanently delete the
+            resource and remove its data from the cluster.
           </AlertDialogDescription>
           {deleteError && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+            <div className="mt-4 flex items-start rounded-md border border-red-200 bg-red-50 p-4">
+              <AlertCircle className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
               <div className="text-sm text-red-800">
                 <strong className="font-medium">Error:</strong> {deleteError}
               </div>
@@ -85,11 +97,7 @@ export function DeleteResourceDialog({ resource, isOpen, onClose }: DeleteResour
             className="bg-destructive text-destructive-foreground"
             disabled={isDeleting}
           >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4" />
-            ) : (
-              "Delete"
-            )}
+            {isDeleting ? <Loader2 className="h-4 w-4" /> : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

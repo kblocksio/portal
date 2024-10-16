@@ -8,14 +8,17 @@ export interface WizardSearchHeaderProps {
   handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const WizardSearchHeader = ({ title, description, searchQuery, handleSearch }: WizardSearchHeaderProps) => {
+export const WizardSearchHeader = ({
+  title,
+  description,
+  searchQuery,
+  handleSearch,
+}: WizardSearchHeaderProps) => {
   return (
     <div>
       {title}
-      <p className="mt-2 text-sm text-gray-500">
-        {description}
-      </p>
-      <div className="relative flex-grow mt-4 mb-2">
+      <p className="mt-2 text-sm text-gray-500">{description}</p>
+      <div className="relative mb-2 mt-4 flex-grow">
         <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
         <Input
           type="text"

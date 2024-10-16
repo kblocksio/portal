@@ -23,7 +23,11 @@ export interface CreateResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnCreate: (system: string, resourceType: ResourceType, obj: ApiObject) => void;
+  handleOnCreate: (
+    system: string,
+    resourceType: ResourceType,
+    obj: ApiObject,
+  ) => void;
   resourceTypes: ResourceType[];
   editModeData?: EditModeData;
 }
@@ -37,15 +41,17 @@ export const CreateResourceWizard = ({
   editModeData,
 }: CreateResourceWizardProps) => {
   const [step, setStep] = useState(editModeData ? 2 : 1);
-  const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | null>(
-    editModeData ? editModeData.resourceType : null,
-  );
+  const [selectedResourceType, setSelectedResourceType] =
+    useState<ResourceType | null>(
+      editModeData ? editModeData.resourceType : null,
+    );
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
-  const { setSelectedResourceType: updateSelectedResourceTypeInContext } = useCreateResourceWizard();
+  const { setSelectedResourceType: updateSelectedResourceTypeInContext } =
+    useCreateResourceWizard();
 
   useEffect(() => {
     setStep(editModeData ? 2 : 1);
@@ -74,31 +80,43 @@ export const CreateResourceWizard = ({
       setSelectedResourceType(null);
       updateSelectedResourceTypeInContext(undefined);
     }
-  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType, updateSelectedResourceTypeInContext]);
+  }, [
+    editModeData,
+    handleOnOpenChange,
+    setStep,
+    setSelectedResourceType,
+    updateSelectedResourceTypeInContext,
+  ]);
 
-  const handleCreate = useCallback((meta: ObjectMetadata, values: any) => {
-    if (!selectedResourceType) {
-      return;
-    }
+  const handleCreate = useCallback(
+    (meta: ObjectMetadata, values: any) => {
+      if (!selectedResourceType) {
+        return;
+      }
 
-    delete values.metadata?.system;
+      delete values.metadata?.system;
 
-    handleOnCreate(meta.system, selectedResourceType, {
-      apiVersion: `${selectedResourceType.group}/${selectedResourceType.version}`,
-      kind: selectedResourceType.kind,
-      metadata: {
-        name: meta.name,
-        namespace: meta.namespace,
-      },
-      ...values,
-    });
-  }, [selectedResourceType, handleOnCreate]);
+      handleOnCreate(meta.system, selectedResourceType, {
+        apiVersion: `${selectedResourceType.group}/${selectedResourceType.version}`,
+        kind: selectedResourceType.kind,
+        metadata: {
+          name: meta.name,
+          namespace: meta.namespace,
+        },
+        ...values,
+      });
+    },
+    [selectedResourceType, handleOnCreate],
+  );
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    handleOnOpenChange(open);
-    setStep(editModeData ? 2 : 1);
-    setSelectedResourceType(editModeData?.resourceType || null);
-  }, [editModeData, handleOnOpenChange, setStep, setSelectedResourceType]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      handleOnOpenChange(open);
+      setStep(editModeData ? 2 : 1);
+      setSelectedResourceType(editModeData?.resourceType || null);
+    },
+    [editModeData, handleOnOpenChange, setStep, setSelectedResourceType],
+  );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
     if (!objUri) {
@@ -115,61 +133,62 @@ export const CreateResourceWizard = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="flex flex-col min-w-[90vh] h-[90vh]"
+      <DialogContent
+        className="flex h-[90vh] min-w-[90vh] flex-col"
         aria-describedby="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
-            event.preventDefault()
+            event.preventDefault();
           }
         }}
         onEscapeKeyDown={(event) => {
           if (isLoading) {
-            event.preventDefault()
+            event.preventDefault();
           }
-        }}>
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
-            {
-              step === 1 ? (
-                <WizardSearchHeader
-                  title="Create a new resource"
-                  description="Select the type of resource you want to create"
-                  searchQuery={searchQuery}
-                  handleSearch={handleSearch}
-                />
-              ) : (
-                selectedResourceType &&
+            {step === 1 ? (
+              <WizardSearchHeader
+                title="Create a new resource"
+                description="Select the type of resource you want to create"
+                searchQuery={searchQuery}
+                handleSearch={handleSearch}
+              />
+            ) : (
+              selectedResourceType && (
                 <WizardSimpleHeader
                   title={`${editModeData ? "Edit" : "New"} ${selectedResourceType?.kind} resource`}
                   description={selectedResourceType?.description || ""}
                   resourceType={selectedResourceType}
                 />
               )
-            }
+            )}
           </DialogTitle>
         </DialogHeader>
-        {
-          step === 1 ? (
-            <div className="grid grid-cols-3 gap-4 overflow-auto">
-              <ResourceTypesCards
+        {step === 1 ? (
+          <div className="grid grid-cols-3 gap-4 overflow-auto">
+            <ResourceTypesCards
+              isLoading={isLoading}
+              filtereResources={filtereResources}
+              handleResourceSelect={handleResourceSelect}
+            />
+          </div>
+        ) : (
+          <div className="flex h-full flex-col space-y-4 overflow-hidden p-2">
+            {selectedResourceType && (
+              <CreateNewResourceForm
+                resourceType={selectedResourceType}
+                initialMeta={renderInitialMeta(editModeData?.resource?.objUri)}
+                initialValues={editModeData?.resource}
+                handleCreate={handleCreate}
+                handleBack={handleBack}
                 isLoading={isLoading}
-                filtereResources={filtereResources}
-                handleResourceSelect={handleResourceSelect} />
-            </div>
-          ) : (
-            <div className="flex flex-col space-y-4 p-2 h-full overflow-hidden">
-              {selectedResourceType &&
-                <CreateNewResourceForm
-                  resourceType={selectedResourceType}
-                  initialMeta={renderInitialMeta(editModeData?.resource?.objUri)}
-                  initialValues={editModeData?.resource}
-                  handleCreate={handleCreate}
-                  handleBack={handleBack}
-                  isLoading={isLoading}
-                />}
-            </div>
-          )
-        }
+              />
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

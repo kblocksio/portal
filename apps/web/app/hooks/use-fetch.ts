@@ -18,13 +18,16 @@ export function useFetch<T = unknown>(
     shouldFetch ? [url, params, refetchCount] : null,
     async ([currentUrl, currentParams, currentRefetchCount]) => {
       setIsLoading(true);
-      const response = await get(currentUrl, currentParams as Record<string, string>);
+      const response = await get(
+        currentUrl,
+        currentParams as Record<string, string>,
+      );
       setIsLoading(false);
       return response;
     },
     {
-      revalidateOnFocus: false
-    }
+      revalidateOnFocus: false,
+    },
   );
 
   const refetch = useCallback(
@@ -33,7 +36,8 @@ export function useFetch<T = unknown>(
       if (newParams) setParams(newParams);
       setShouldFetch(true);
       setRefetchCount((prevCount) => prevCount + 1);
-    }, []
+    },
+    [],
   );
 
   return { data, isLoading, error, refetch };

@@ -18,7 +18,10 @@ export interface ImportResourceWizardProps {
   isOpen: boolean;
   isLoading: boolean;
   handleOnOpenChange: (open: boolean) => void;
-  handleOnImport: (newResources: { resourceType: ResourceType, objects: ApiObject[] }) => void;
+  handleOnImport: (newResources: {
+    resourceType: ResourceType;
+    objects: ApiObject[];
+  }) => void;
   resourceTypes: ResourceType[];
 }
 
@@ -30,9 +33,8 @@ export const ImportResourceWizard = ({
   resourceTypes,
 }: ImportResourceWizardProps) => {
   const [step, setStep] = useState(1);
-  const [selectedResourceType, setSelectedResourceType] = useState<ResourceType | null>(
-    null,
-  );
+  const [selectedResourceType, setSelectedResourceType] =
+    useState<ResourceType | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -56,11 +58,14 @@ export const ImportResourceWizard = ({
     setSelectedResourceType(null);
   };
 
-  const handleImportResources = useCallback((objects: ApiObject[]) => {
-    if (selectedResourceType) {
-      handleOnImport({ resourceType: selectedResourceType, objects });
-    }
-  }, [handleOnImport, selectedResourceType]);
+  const handleImportResources = useCallback(
+    (objects: ApiObject[]) => {
+      if (selectedResourceType) {
+        handleOnImport({ resourceType: selectedResourceType, objects });
+      }
+    },
+    [handleOnImport, selectedResourceType],
+  );
 
   const handleOpenChange = (open: boolean) => {
     handleOnOpenChange(open);
@@ -71,49 +76,42 @@ export const ImportResourceWizard = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
-          Import...
-        </Button>
+        <Button>Import...</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>
-            {
-              step === 1 ? (
-                <WizardSearchHeader
-                  title="Import existing resources to your project"
-                  description="Connect to an external system and import existing resources to be managed in your project"
-                  searchQuery={searchQuery}
-                  handleSearch={handleSearch}
-                />
-              ) : (
-                selectedResourceType &&
+            {step === 1 ? (
+              <WizardSearchHeader
+                title="Import existing resources to your project"
+                description="Connect to an external system and import existing resources to be managed in your project"
+                searchQuery={searchQuery}
+                handleSearch={handleSearch}
+              />
+            ) : (
+              selectedResourceType && (
                 <WizardSimpleHeader
                   title={`Import ${selectedResourceType?.kind} resources to your project`}
                   description="Select the repositories you want to import into your project"
                   resourceType={selectedResourceType}
                 />
               )
-            }
+            )}
           </DialogTitle>
         </DialogHeader>
-        {
-          step === 1 ? (
-            <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-              <ResourceTypesCards
-                isLoading={isLoading}
-                filtereResources={filtereResources}
-                handleResourceSelect={handleResourceSelect}
-              />
-            </div>
-          ) : (
-            selectedResourceType?.kind === 'RepositoryRef' ? (
-              <div className="space-y-4 p-2">
-                {/* <ImportGHRepo handleBack={handleBack} handleOnSelection={handleImportResources}/> */}
-              </div>
-            ) : null
-          )
-        }
+        {step === 1 ? (
+          <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
+            <ResourceTypesCards
+              isLoading={isLoading}
+              filtereResources={filtereResources}
+              handleResourceSelect={handleResourceSelect}
+            />
+          </div>
+        ) : selectedResourceType?.kind === "RepositoryRef" ? (
+          <div className="space-y-4 p-2">
+            {/* <ImportGHRepo handleBack={handleBack} handleOnSelection={handleImportResources}/> */}
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

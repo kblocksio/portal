@@ -6,14 +6,14 @@ export interface SwitchFieldProps {
   required?: boolean;
 }
 
-export const SwitchField = ({ value, onChange, required }: SwitchFieldProps) => {
+export const SwitchField = ({
+  value,
+  onChange,
+  required,
+}: SwitchFieldProps) => {
   return (
     <div className="flex items-center space-x-2">
-      <Switch
-        checked={value}
-        onCheckedChange={onChange}
-        required={required}
-      />
+      <Switch checked={value} onCheckedChange={onChange} required={required} />
     </div>
-  )
-}
+  );
+};

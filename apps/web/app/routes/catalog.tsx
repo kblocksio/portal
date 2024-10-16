@@ -1,5 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { CatalogSidebar, SidebarBody, SidebarLabel } from "~/components/catalog/catalog-sidebar";
+import {
+  CatalogSidebar,
+  SidebarBody,
+  SidebarLabel,
+} from "~/components/catalog/catalog-sidebar";
 import { loadingStates } from "~/components/catalog/loading-states";
 import { MultiStepLoader } from "~/components/ui/multi-step-loader";
 import { getResourceIconColors } from "~/lib/hero-icon";
@@ -11,8 +15,10 @@ import { ResourceTypeWizard } from "~/components/catalog/resource-type-wizard";
 
 export default function Catalog() {
   const { isLoading, resourceTypes } = useContext(ResourceContext);
-  const [currentResourceType, setCurrentResourceType] = useState<ResourceType | null>(null);
-  const [isResourceTypeWizardOpen, setIsResourceTypeWizardOpen] = useState(false);
+  const [currentResourceType, setCurrentResourceType] =
+    useState<ResourceType | null>(null);
+  const [isResourceTypeWizardOpen, setIsResourceTypeWizardOpen] =
+    useState(false);
 
   useEffect(() => {
     if (resourceTypes) {
@@ -31,7 +37,7 @@ export default function Catalog() {
   ) : (
     <div
       className={cn(
-        "flex flex-col md:flex-row dark:bg-neutral-800 w-full flex-1 mx-auto overflow-hidden",
+        "mx-auto flex w-full flex-1 flex-col overflow-hidden md:flex-row dark:bg-neutral-800",
         "h-full",
       )}
     >
@@ -40,9 +46,15 @@ export default function Catalog() {
         handleOnOpenChange={setIsResourceTypeWizardOpen}
       />
       <CatalogSidebar animate={false}>
-        <SidebarBody className="justify-between gap-10 bg-muted border-r">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <Button className="mb-4" variant="default" onClick={() => setIsResourceTypeWizardOpen(true)}>New Kblock...</Button>
+        <SidebarBody className="bg-muted justify-between gap-10 border-r">
+          <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <Button
+              className="mb-4"
+              variant="default"
+              onClick={() => setIsResourceTypeWizardOpen(true)}
+            >
+              New Kblock...
+            </Button>
             <div className="flex flex-col">
               {resourceTypes &&
                 Object.values(resourceTypes).map((resourceType, idx) => {
@@ -58,7 +70,8 @@ export default function Catalog() {
                       icon={
                         <Icon
                           className={`${iconColor} h-5 w-5 flex-shrink-0`}
-                        />}
+                        />
+                      }
                       onClick={() => setCurrentResourceType(resourceType)}
                       isActive={currentResourceType?.kind === resourceType.kind}
                     />
@@ -68,11 +81,11 @@ export default function Catalog() {
           </div>
         </SidebarBody>
       </CatalogSidebar>
-      <div className="flex flex-1 overflow-hidden bg-background">
+      <div className="bg-background flex flex-1 overflow-hidden">
         <div className="flex flex-1 overflow-hidden bg-slate-50">
           {/* Parent container wrapping both markdown and metadata */}
-          <div className="flex flex-row flex-1 h-full overflow-auto">
-            <div className="p-2 md:p-8 text-left rounded-tl-2xl dark:border-neutral-700 flex flex-col gap-2 flex-1 w-full h-full">
+          <div className="flex h-full flex-1 flex-row overflow-auto">
+            <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl p-2 text-left md:p-8 dark:border-neutral-700">
               {currentResourceType && (
                 <MarkdownWrapper content={currentResourceType.readme || ""} />
               )}

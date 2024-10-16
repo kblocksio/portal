@@ -4,9 +4,10 @@ interface UIPicker {
 }
 
 export const uiPickerParser = (description: string): UIPicker | undefined => {
-  const regex = /@ui\s+kblocks\.io\/([a-zA-Z0-9_-]+)(?:\s*:\s*({[\s\S]*?}))?(?=\n|$)/;
+  const regex =
+    /@ui\s+kblocks\.io\/([a-zA-Z0-9_-]+)(?:\s*:\s*({[\s\S]*?}))?(?=\n|$)/;
   const match = description.match(regex);
-  if (!match) { 
+  if (!match) {
     return undefined;
   }
 
@@ -24,7 +25,10 @@ function tryParseJson(fieldName: string, jsonString?: string) {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.warn(`Unable to parse JSON value '${jsonString}' for field ${fieldName}`, error);
+    console.warn(
+      `Unable to parse JSON value '${jsonString}' for field ${fieldName}`,
+      error,
+    );
     return undefined;
   }
 }

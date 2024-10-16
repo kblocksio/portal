@@ -5,14 +5,14 @@ kind: Config
 
 build:
   artifacts:
-  - image: wingcloudbot/kblocks-backend
-    docker:
-      buildArgs: 
-        ENV: prod
-    sync:
-      infer:
-        - apps/server/src/**/*.ts
-        - packages/shared/src/**/*.ts
+    - image: wingcloudbot/kblocks-backend
+      docker:
+        buildArgs:
+          ENV: prod
+      sync:
+        infer:
+          - apps/server/src/**/*.ts
+          - packages/shared/src/**/*.ts
 
 deploy:
   helm:

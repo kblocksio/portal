@@ -10,7 +10,7 @@ export async function slackNotify(event: WorkerEvent) {
   }
 
   const thread = await getSlackThread(event.objUri);
-  
+
   const ctx = await sendSlackMessage(slackChannel, message, thread);
   if (ctx.ts) {
     await setSlackThread(event.objUri, ctx.ts);
@@ -38,7 +38,7 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
           default:
             return "ℹ️";
         }
-      }
+      };
 
       return [
         {
@@ -49,7 +49,6 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
           },
         },
       ];
-
 
     case "ERROR":
       if (event.explanation?.blocks) {

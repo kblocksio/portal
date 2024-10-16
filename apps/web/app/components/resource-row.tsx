@@ -1,7 +1,12 @@
 import { Card } from "./ui/card";
 import { CalendarIcon, MoreVertical, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 import { cn } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { useContext, useMemo, useState } from "react";
@@ -26,15 +31,17 @@ export const ResourceRow = ({
   isFirst: boolean;
   isLast: boolean;
 }) => {
-  const { setSelectedResourceId, resources, resourceTypes } = useContext(ResourceContext);
+  const { setSelectedResourceId, resources, resourceTypes } =
+    useContext(ResourceContext);
 
   const selectedResource = useMemo(() => {
     return resources.get(item.objType)?.get(item.objUri);
   }, [resources, item.objType, item.objUri]);
 
-  const selectedResourceType = useMemo(() => (
-    resourceTypes[item.objType]
-  ), [resourceTypes, item.objType]);
+  const selectedResourceType = useMemo(
+    () => resourceTypes[item.objType],
+    [resourceTypes, item.objType],
+  );
 
   const borders = [];
 
@@ -55,14 +62,18 @@ export const ResourceRow = ({
 
   return (
     <Card
-      className={cn("flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-gray-50", borders.join(" "))}
-      onClick={() => setSelectedResourceId({ objType: item.objType, objUri: item.objUri })}
+      className={cn(
+        "flex cursor-pointer items-center justify-between p-4 transition-colors duration-200 hover:bg-gray-50",
+        borders.join(" "),
+      )}
+      onClick={() =>
+        setSelectedResourceId({ objType: item.objType, objUri: item.objUri })
+      }
     >
-
-      <div className="flex w-full justify-between items-center">
+      <div className="flex w-full items-center justify-between">
         {/* Left Section: Status Badge, Namespace, Name, and LastUpdated */}
 
-        <div className="flex items-center space-x-4 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center space-x-4">
           <StatusBadge obj={selectedResource} />
 
           <div className="flex-shrink-0">
@@ -72,40 +83,62 @@ export const ResourceRow = ({
                   {item.metadata.namespace}
                 </span>
                 <span className="text-muted-foreground mx-1">·</span>
-                <span className="font-semibold whitespace-nowrap">{item.metadata.name}</span>
+                <span className="whitespace-nowrap font-semibold">
+                  {item.metadata.name}
+                </span>
               </h3>
               <SystemBadge blockUri={item.objUri} />
             </div>
           </div>
-
         </div>
 
-
         {/* Middle Section: Log Message & Timestamp */}
-        <div className="flex-grow min-w-0 px-6">
+        <div className="min-w-0 flex-grow px-6">
           <LastLogMessage objUri={item.objUri} />
         </div>
 
         {/* Right Section: System ID Badge and Ellipsis Menu */}
-        <div className="flex items-center space-x-4 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center space-x-4">
           &nbsp;
-          <LastUpdated lastUpdated={readyCondition?.lastTransitionTime || item.metadata.creationTimestamp} />
-          {selectedResource && selectedResourceType
-            && <ResourceActionsMenu resource={selectedResource} resourceType={selectedResourceType} />}
+          <LastUpdated
+            lastUpdated={
+              readyCondition?.lastTransitionTime ||
+              item.metadata.creationTimestamp
+            }
+          />
+          {selectedResource && selectedResourceType && (
+            <ResourceActionsMenu
+              resource={selectedResource}
+              resourceType={selectedResourceType}
+            />
+          )}
         </div>
       </div>
-
     </Card>
   );
-}
+};
 
-export function SystemBadge({ blockUri, className }: { blockUri: string, className?: string }) {
+export function SystemBadge({
+  blockUri,
+  className,
+}: {
+  blockUri: string;
+  className?: string;
+}) {
   const block = parseBlockUri(blockUri);
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger tabIndex={-1} className="focus:outline-none cursor-default">
-          <Badge variant="outline" className={`text-xs px-1.5 py-0.5 ${getSystemIdColor(block.system)} ${className}`} tabIndex={-1} aria-hidden="true">
+        <TooltipTrigger
+          tabIndex={-1}
+          className="cursor-default focus:outline-none"
+        >
+          <Badge
+            variant="outline"
+            className={`px-1.5 py-0.5 text-xs ${getSystemIdColor(block.system)} ${className}`}
+            tabIndex={-1}
+            aria-hidden="true"
+          >
             {block.system}
           </Badge>
         </TooltipTrigger>
@@ -132,24 +165,32 @@ function LastUpdated({ lastUpdated }: { lastUpdated?: string }) {
   );
 }
 
-export function StatusBadge({ obj, showMessage }: { obj?: ApiObject, showMessage?: boolean }) {
-  const readyCondition = obj?.status?.conditions?.find(c => c.type === 'Ready');
+export function StatusBadge({
+  obj,
+  showMessage,
+}: {
+  obj?: ApiObject;
+  showMessage?: boolean;
+}) {
+  const readyCondition = obj?.status?.conditions?.find(
+    (c) => c.type === "Ready",
+  );
   const reason = readyCondition?.reason as StatusReason;
-  
+
   const getStatusContent = (reason: StatusReason) => {
     switch (reason) {
       case StatusReason.Completed:
-        return <div className="bg-green-500 h-3 w-3 rounded-full" />;
+        return <div className="h-3 w-3 rounded-full bg-green-500" />;
       case StatusReason.ResolvingReferences:
       case StatusReason.InProgress:
-        return <Loader2 className="h-3 w-3 text-yellow-500 animate-spin" />;
+        return <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />;
       case StatusReason.Error:
-        return <div className="bg-red-500 h-3 w-3 rounded-full" />;
+        return <div className="h-3 w-3 rounded-full bg-red-500" />;
       default:
         console.log("unknown reason", readyCondition);
-        return <div className="bg-gray-500 h-3 w-3 rounded-full" />;
+        return <div className="h-3 w-3 rounded-full bg-gray-500" />;
     }
-  }
+  };
 
   const statusContent = getStatusContent(reason);
 
@@ -164,17 +205,27 @@ export function StatusBadge({ obj, showMessage }: { obj?: ApiObject, showMessage
       <Tooltip>
         <TooltipTrigger>
           {wrapper}
-          {showMessage && <span className="ml-2">{readyCondition?.message}</span>}
+          {showMessage && (
+            <span className="ml-2">{readyCondition?.message}</span>
+          )}
         </TooltipTrigger>
         <TooltipContent>
           <p>{readyCondition?.message ?? "In Progress"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  ) : wrapper;
+  ) : (
+    wrapper
+  );
 }
 
-export function ResourceActionsMenu({ resource, resourceType }: { resource: Resource, resourceType: ResourceType }) {
+export function ResourceActionsMenu({
+  resource,
+  resourceType,
+}: {
+  resource: Resource;
+  resourceType: ResourceType;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const { openWizard: openEditWizard } = useCreateResourceWizard();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -183,20 +234,28 @@ export function ResourceActionsMenu({ resource, resourceType }: { resource: Reso
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger className="focus:outline-none" onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuTrigger
+        className="focus:outline-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
       </DropdownMenuTrigger>
       <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem onSelect={() => {
-          openEditWizard({ resource, resourceType });
-          closeMenu();
-        }}>
+        <DropdownMenuItem
+          onSelect={() => {
+            openEditWizard({ resource, resourceType });
+            closeMenu();
+          }}
+        >
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive" onSelect={(e) => {
-          e.preventDefault();
-          setIsDeleteOpen(true);
-        }}>
+        <DropdownMenuItem
+          className="text-destructive"
+          onSelect={(e) => {
+            e.preventDefault();
+            setIsDeleteOpen(true);
+          }}
+        >
           Delete...
         </DropdownMenuItem>
         <DeleteResourceDialog
@@ -223,6 +282,8 @@ function getSystemIdColor(systemId: string): string {
     "bg-indigo-100 text-indigo-800",
   ];
 
-  const index = systemId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  const index =
+    systemId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+    colors.length;
   return colors[index];
 }

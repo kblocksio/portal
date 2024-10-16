@@ -19,18 +19,18 @@ export const CreateNewResourceForm = ({
   handleBack: () => void;
   isLoading: boolean;
 }) => {
-
   delete resourceType.schema.properties?.orderedJson;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <FormGenerator
         schema={resourceType.schema}
         isLoading={isLoading}
         initialValues={initialValues}
         initialMeta={initialMeta}
         handleBack={handleBack}
-        handleSubmit={handleCreate} />
+        handleSubmit={handleCreate}
+      />
     </div>
-  )
-}
+  );
+};

@@ -1,15 +1,22 @@
-import { GetTypesResponse } from '@repo/shared';
-import React, { createContext, useEffect, useMemo, useState } from 'react';
-import useWebSocket from 'react-use-websocket';
-import { useFetch } from './hooks/use-fetch';
-import { ObjectEvent, PatchEvent, ApiObject, WorkerEvent, parseBlockUri, Manifest } from "@kblocks/api";
-import { toast } from 'react-hot-toast'; // Add this import
-import { request } from './lib/backend';
-import { getIconComponent } from './lib/hero-icon';
+import { GetTypesResponse } from "@repo/shared";
+import React, { createContext, useEffect, useMemo, useState } from "react";
+import useWebSocket from "react-use-websocket";
+import { useFetch } from "./hooks/use-fetch";
+import {
+  ObjectEvent,
+  PatchEvent,
+  ApiObject,
+  WorkerEvent,
+  parseBlockUri,
+  Manifest,
+} from "@kblocks/api";
+import { toast } from "react-hot-toast"; // Add this import
+import { request } from "./lib/backend";
+import { getIconComponent } from "./lib/hero-icon";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
-  console.error('WebSocket URL is not set');
+  console.error("WebSocket URL is not set");
 }
 
 export type Resource = ApiObject & {
@@ -22,7 +29,7 @@ export type SelectedResourceId = {
   objType: string;
 };
 
-type Definition = Manifest["definition"];;
+type Definition = Manifest["definition"];
 
 export interface ResourceType extends Definition {
   iconComponent: React.ComponentType<{ className?: string }>;
@@ -45,51 +52,67 @@ export interface ResourceContextValue {
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
   resources: new Map<string, Map<string, Resource>>(),
-  handleObjectMessages: () => { },
+  handleObjectMessages: () => {},
   isLoading: true,
   selectedResourceId: undefined,
-  setSelectedResourceId: () => { },
+  setSelectedResourceId: () => {},
   objects: {},
   eventsPerObject: {},
 });
 
-export const ResourceProvider = ({ children }: { children: React.ReactNode }) => {
+export const ResourceProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [resourceTypes, setResourceTypes] = useState<Record<string, ResourceType>>({});
-  const [resources, setResources] = useState<Map<string, Map<string, Resource>>>(new Map());
-  const [selectedResourceId, setSelectedResourceId] = useState<SelectedResourceId | undefined>(undefined);
-  const [eventsPerObject, setEventsPerObject] = useState<Record<string, Record<string, WorkerEvent>>>({});
+  const [resourceTypes, setResourceTypes] = useState<
+    Record<string, ResourceType>
+  >({});
+  const [resources, setResources] = useState<
+    Map<string, Map<string, Resource>>
+  >(new Map());
+  const [selectedResourceId, setSelectedResourceId] = useState<
+    SelectedResourceId | undefined
+  >(undefined);
+  const [eventsPerObject, setEventsPerObject] = useState<
+    Record<string, Record<string, WorkerEvent>>
+  >({});
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
-      console.log('WebSocket shouldReconnect...', closeEvent);
+      console.log("WebSocket shouldReconnect...", closeEvent);
       return true;
     },
     onOpen: () => {
-      console.log('WebSocket connected');
+      console.log("WebSocket connected");
     },
     onClose: () => {
-      console.log('WebSocket disconnected');
+      console.log("WebSocket disconnected");
     },
     onError: (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     },
   });
 
-  const { data: resourceTypesData, isLoading: isResourceTypesLoading } = useFetch<GetTypesResponse>("/api/types");
-  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
+  const { data: resourceTypesData, isLoading: isResourceTypesLoading } =
+    useFetch<GetTypesResponse>("/api/types");
+  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } =
+    useFetch<{ objects: ObjectEvent[] }>("/api/resources");
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
       const result: Record<string, ResourceType> = {};
-      for (const [k, v] of Object.entries(resourceTypesData.types).sort(([l], [r]) => l.localeCompare(r))) {
+      for (const [k, v] of Object.entries(resourceTypesData.types).sort(
+        ([l], [r]) => l.localeCompare(r),
+      )) {
         if (k.startsWith("kblocks.io/v1")) {
           continue;
         }
 
         result[k] = {
           ...v,
-          iconComponent: getIconComponent({ icon: v.icon ?? "CircleDotIcon" })
+          iconComponent: getIconComponent({ icon: v.icon ?? "CircleDotIcon" }),
         };
       }
 
@@ -115,9 +138,14 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
 
     if (Object.keys(object).length > 0) {
       setResources((prevResourcesForTypes) => {
-        const resoucesForTypeMap = prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
+        const resoucesForTypeMap =
+          prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
         const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-        newResourcesForTypeMap.set(objUri, { ...object, objUri, objType } as Resource);
+        newResourcesForTypeMap.set(objUri, {
+          ...object,
+          objUri,
+          objType,
+        } as Resource);
         const newResources = new Map(prevResourcesForTypes);
         newResources.set(objType, newResourcesForTypeMap);
         return newResources;
@@ -126,7 +154,12 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       setResources((prevResourcesForTypes) => {
         const resoucesForTypeMap = prevResourcesForTypes.get(objType);
         if (!resoucesForTypeMap) {
-          console.error('WebSocket Object Message unknown object type:', objType, object, prevResourcesForTypes);
+          console.error(
+            "WebSocket Object Message unknown object type:",
+            objType,
+            object,
+            prevResourcesForTypes,
+          );
           return prevResourcesForTypes;
         }
 
@@ -146,17 +179,21 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const handlePatchMessage = (message: PatchEvent) => {
-    console.log('handlePatchMessage', message);
+    console.log("handlePatchMessage", message);
     const { objUri, objType, patch } = message;
     setResources((prevResourcesForTypes) => {
       const resoucesForTypeMap = prevResourcesForTypes.get(objType);
       if (!resoucesForTypeMap) {
-        console.error('WebSocket Patch Message unknown object type:', objType, patch);
+        console.error(
+          "WebSocket Patch Message unknown object type:",
+          objType,
+          patch,
+        );
         return prevResourcesForTypes;
       }
       const oldObject = resoucesForTypeMap.get(objUri);
       if (!oldObject) {
-        console.error('No existing object to patch', objType, objUri);
+        console.error("No existing object to patch", objType, objUri);
         return prevResourcesForTypes;
       }
       const newObject = { ...oldObject, ...patch };
@@ -182,7 +219,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       return;
     }
 
-    setEventsPerObject(eventsPerObject => {
+    setEventsPerObject((eventsPerObject) => {
       return {
         ...eventsPerObject,
         [event.objUri]: {
@@ -202,17 +239,20 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
     switch (lastJsonMessage.type) {
-      case 'OBJECT':
+      case "OBJECT":
         handleObjectMessage(lastJsonMessage as ObjectEvent);
         break;
-      case 'PATCH':
+      case "PATCH":
         handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
-      case 'ERROR':
-        toast.error(lastJsonMessage.message ?? 'Unknown error');
+      case "ERROR":
+        toast.error(lastJsonMessage.message ?? "Unknown error");
         break;
-      case 'LIFECYCLE':
-        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, { duration: 2000, icon: "" });
+      case "LIFECYCLE":
+        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, {
+          duration: 2000,
+          icon: "",
+        });
         break;
     }
   }, [lastJsonMessage]);
@@ -220,14 +260,13 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
     return () => {
-      console.log('Resource Context unmounted, closing websocket');
+      console.log("Resource Context unmounted, closing websocket");
       const websocket = getWebSocket();
       if (websocket) {
         websocket.close();
       }
     };
   }, [getWebSocket]);
-
 
   const objects = useMemo(() => {
     const result: Record<string, Resource> = {};
@@ -238,7 +277,6 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     }
     return result;
   }, [resources]);
-
 
   // initial fetch of events
   useEffect(() => {
@@ -259,7 +297,7 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
       requests.push(fetchEvents());
     }
 
-    Promise.all(requests).catch(e => {
+    Promise.all(requests).catch((e) => {
       console.error(e);
     });
   }, [objects]);
@@ -275,5 +313,9 @@ export const ResourceProvider = ({ children }: { children: React.ReactNode }) =>
     setSelectedResourceId,
   };
 
-  return <ResourceContext.Provider value={value}>{children}</ResourceContext.Provider>;
+  return (
+    <ResourceContext.Provider value={value}>
+      {children}
+    </ResourceContext.Provider>
+  );
 };

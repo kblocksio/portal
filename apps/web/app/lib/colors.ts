@@ -1,12 +1,12 @@
 export type Colors =
-    | "orange"
-    | "sky"
-    | "emerald"
-    | "lime"
-    | "pink"
-    | "amber"
-    | "cyan"
-    | "purple"
-    | "red"
-    | "violet"
-    | "slate";
+  | "orange"
+  | "sky"
+  | "emerald"
+  | "lime"
+  | "pink"
+  | "amber"
+  | "cyan"
+  | "purple"
+  | "red"
+  | "violet"
+  | "slate";

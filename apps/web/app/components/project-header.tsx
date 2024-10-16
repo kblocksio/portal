@@ -24,7 +24,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
 
   return (
     <div className="container mx-auto pb-12">
-      <div className="flex flex-col md:flex-row items-start justify-between">
+      <div className="flex flex-col items-start justify-between md:flex-row">
         <div className="flex-1 space-y-4">
           <h1 className="text-3xl font-bold tracking-tight">
             {selectedProject ? selectedProject.label : ""}
@@ -37,7 +37,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
           <div className="grid grid-cols-4 gap-0">
             {(users ?? []).map((user, index) => (
               <div key={index} className="relative">
-                <Avatar className="w-12 h-12 border-2 border-background">
+                <Avatar className="border-background h-12 w-12 border-2">
                   <AvatarImage
                     alt={`@${user.user_metadata.full_name}`}
                     src={user.user_metadata.avatar_url}

@@ -41,7 +41,9 @@ export default function _index() {
           <ResourceDetailsDrawer />
         </div>
         <div className={"container mx-auto mt-12"}>
-          {isLoading || !resourceTypes || Object.keys(resourceTypes).length === 0 ? (
+          {isLoading ||
+          !resourceTypes ||
+          Object.keys(resourceTypes).length === 0 ? (
             <LoadingSkeleton />
           ) : (
             <ProjectGroups

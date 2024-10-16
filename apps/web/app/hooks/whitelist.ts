@@ -4,7 +4,7 @@ export const whitelist = [
   "eladb@wing.cloud",
   "shaib@monada.co",
   "cristianp@wing.cloud",
-  "wing.cloud.apps@wing.cloud"
+  "wing.cloud.apps@wing.cloud",
 ];
 
 export const isUserWhitelisted = (email?: string) => {

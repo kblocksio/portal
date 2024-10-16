@@ -10,16 +10,22 @@ export interface InputFieldProps {
 
 const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
-export const InputField = ({ value, onChange, required, type, placeholder }: InputFieldProps) => {
+export const InputField = ({
+  value,
+  onChange,
+  required,
+  type,
+  placeholder,
+}: InputFieldProps) => {
   return (
     <Input
       required={required}
-      type={type === 'number' ? 'number' : 'text'}
+      type={type === "number" ? "number" : "text"}
       value={value}
       placeholder={placeholder}
       onChange={(e) => {
         const value =
-          type === 'number' && isNumeric(e.target.value)
+          type === "number" && isNumeric(e.target.value)
             ? Number(e.target.value)
             : e.target.value;
 
@@ -27,5 +33,5 @@ export const InputField = ({ value, onChange, required, type, placeholder }: Inp
       }}
       className="w-full"
     />
-  )
-}
+  );
+};
