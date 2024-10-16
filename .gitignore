@@ -14,3 +14,7 @@ public/dist
 */.vercel
 apps/web/.vercel
 .history/
+
+# Do not accidentally commit secrets
+kblocks-gallery.env
+portal.env
