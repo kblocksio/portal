@@ -291,15 +291,14 @@ function ProjectGroup(props: {
                     colSpan={header.colSpan}
                     className={cn(
                       header.column.id === "status" ||
-                        header.column.id === "name" ||
-                        header.column.id === "kind" ||
-                        header.column.id === "system" ||
-                        header.column.id === "namespace" ||
+                        // header.column.id === "name" ||
+                        // header.column.id === "kind" ||
+                        // header.column.id === "system" ||
+                        // header.column.id === "namespace" ||
                         header.column.id === "actions"
                         ? "w-0"
                         : undefined,
                     )}
-                    // className="w-0"
                   >
                     {header.isPlaceholder
                       ? null
@@ -473,7 +472,7 @@ export function DataTableToolbar<TData>({
             ]}
           />
         )}
-        {table.getColumn("kind") && (
+        {/* {table.getColumn("kind") && (
           <DataTableFacetedFilter
             column={table.getColumn("kind")}
             title="Kind"
@@ -483,7 +482,7 @@ export function DataTableToolbar<TData>({
               icon: getIconComponent({ icon: resourceType.icon }),
             }))}
           />
-        )}
+        )} */}
 
         {table.getColumn("system") && (
           <DataTableFacetedFilter
