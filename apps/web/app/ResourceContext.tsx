@@ -46,6 +46,8 @@ export interface ResourceContextValue {
   selectedResourceId: SelectedResourceId | undefined;
   setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
   objects: Record<string, Resource>;
+  systems: string[];
+  namespaces: string[];
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
 }
 
@@ -57,6 +59,8 @@ export const ResourceContext = createContext<ResourceContextValue>({
   selectedResourceId: undefined,
   setSelectedResourceId: () => {},
   objects: {},
+  systems: [],
+  namespaces: [],
   eventsPerObject: {},
 });
 
@@ -278,6 +282,21 @@ export const ResourceProvider = ({
     return result;
   }, [resources]);
 
+  const { systems, namespaces } = useMemo(() => {
+    const systems = new Set<string>();
+    const namespaces = new Set<string>();
+
+    for (const resourcesForType of resources.values()) {
+      for (const resource of resourcesForType.values()) {
+        const { system, namespace } = parseBlockUri(resource.objUri);
+        systems.add(system);
+        namespaces.add(namespace);
+      }
+    }
+
+    return { systems: Array.from(systems), namespaces: Array.from(namespaces) };
+  }, [resources]);
+
   // initial fetch of events
   useEffect(() => {
     const requests = [];
@@ -305,6 +324,8 @@ export const ResourceProvider = ({
   const value: ResourceContextValue = {
     resourceTypes,
     objects,
+    systems,
+    namespaces,
     resources,
     eventsPerObject,
     handleObjectMessages,
