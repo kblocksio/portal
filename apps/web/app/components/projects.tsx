@@ -3,7 +3,9 @@ import {
   getCoreRowModel,
   ColumnDef,
   ColumnFiltersState,
+  ColumnSort,
   getFilteredRowModel,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
@@ -63,8 +65,8 @@ export const Projects = (props: ProjectsProps) => {
           return row.original.metadata.name.includes(filterValue);
         },
         sortingFn: (rowA, rowB) => {
-          return rowA.original.obj.metadata.name.localeCompare(
-            rowB.original.obj.metadata.name,
+          return rowA.original.metadata.name.localeCompare(
+            rowB.original.metadata.name,
           );
         },
       },
@@ -139,8 +141,8 @@ export const Projects = (props: ProjectsProps) => {
         ),
         cell: (props) => <LastUpdated resource={props.row.original} />,
         sortingFn: (rowA, rowB) => {
-          const readyConditionA = getReadyCondition(rowA.original.obj);
-          const readyConditionB = getReadyCondition(rowB.original.obj);
+          const readyConditionA = getReadyCondition(rowA.original);
+          const readyConditionB = getReadyCondition(rowB.original);
           const lastUpdatedA =
             readyConditionA?.lastTransitionTime ??
             rowA.original.metadata.creationTimestamp;
@@ -167,16 +169,20 @@ export const Projects = (props: ProjectsProps) => {
   }, [resourceTypes]);
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<ColumnSort[]>([]);
 
   const table = useReactTable({
     data: props.resources,
     columns,
     state: {
       columnFilters,
+      sorting,
     },
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -191,6 +197,8 @@ export const Projects = (props: ProjectsProps) => {
           columns={columns}
           columnFilters={columnFilters}
           onColumnFiltersChange={setColumnFilters}
+          sorting={sorting}
+          onSortingChange={setSorting}
         />
       ))}
     </div>

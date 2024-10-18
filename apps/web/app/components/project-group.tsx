@@ -6,6 +6,8 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
   OnChangeFn,
+  ColumnSort,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { useContext, useMemo } from "react";
 import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
@@ -28,6 +30,8 @@ export function ProjectGroup(props: {
   columns: ColumnDef<Resource>[];
   columnFilters: ColumnFiltersState;
   onColumnFiltersChange: OnChangeFn<ColumnFiltersState>;
+  sorting: ColumnSort[];
+  onSortingChange: OnChangeFn<ColumnSort[]>;
 }) {
   const resources = useMemo(() => {
     return props.resources.filter(
@@ -40,10 +44,13 @@ export function ProjectGroup(props: {
     columns: props.columns,
     state: {
       columnFilters: props.columnFilters,
+      sorting: props.sorting,
     },
     onColumnFiltersChange: props.onColumnFiltersChange,
+    onSortingChange: props.onSortingChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   const Icon = props.resourceType.iconComponent;
