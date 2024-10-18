@@ -1,5 +1,5 @@
 import { Resource } from "~/ResourceContext";
-import { cn } from "~/lib/utils.js";
+import { cn, getReadyCondition } from "~/lib/utils.js";
 
 export function StatusBadge({
   obj,
@@ -8,10 +8,7 @@ export function StatusBadge({
   obj: Resource;
   className?: string;
 }) {
-  const readyCondition = obj?.status?.conditions?.find(
-    (condition: any) => condition.type === "Ready",
-  );
-
+  const readyCondition = getReadyCondition(obj);
   const color = readyCondition
     ? readyCondition.status === "True"
       ? "green"

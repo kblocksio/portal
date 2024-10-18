@@ -19,6 +19,7 @@ import { parseBlockUri } from "@kblocks/api";
 import { DataTableToolbar } from "~/components/data-table-toolbar";
 import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
+import { getReadyCondition } from "~/lib/utils";
 
 export interface ProjectsProps {
   resources: Resource[];
@@ -33,6 +34,10 @@ export const Projects = (props: ProjectsProps) => {
         accessorKey: "status",
         header: () => <></>,
         cell: (props) => <StatusBadge obj={props.row.original} />,
+        filterFn: (row, columnId, filterValue) => {
+          const readyCondition = getReadyCondition(row.original);
+          return filterValue.includes(readyCondition?.status);
+        },
       },
       {
         accessorKey: "name",
