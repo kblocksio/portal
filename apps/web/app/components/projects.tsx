@@ -38,6 +38,16 @@ export const Projects = (props: ProjectsProps) => {
           const readyCondition = getReadyCondition(row.original);
           return filterValue.includes(readyCondition?.status);
         },
+        sortingFn: (rowA, rowB) => {
+          const readyConditionA = getReadyCondition(rowA.original.obj);
+          const readyConditionB = getReadyCondition(rowB.original.obj);
+
+          if (!readyConditionA?.status || !readyConditionB?.status) {
+            return 0;
+          }
+
+          return readyConditionA.status.localeCompare(readyConditionB.status);
+        },
       },
       {
         accessorKey: "name",
@@ -51,6 +61,11 @@ export const Projects = (props: ProjectsProps) => {
         ),
         filterFn: (row, columnId, filterValue) => {
           return row.original.metadata.name.includes(filterValue);
+        },
+        sortingFn: (rowA, rowB) => {
+          return rowA.original.obj.metadata.name.localeCompare(
+            rowB.original.obj.metadata.name,
+          );
         },
       },
       {
@@ -73,6 +88,9 @@ export const Projects = (props: ProjectsProps) => {
         filterFn: (row, columnId, filterValue) => {
           return filterValue.includes(row.original.kind);
         },
+        sortingFn: (rowA, rowB) => {
+          return rowA.original.kind.localeCompare(rowB.original.kind);
+        },
       },
       {
         accessorKey: "system",
@@ -88,6 +106,11 @@ export const Projects = (props: ProjectsProps) => {
           const { system } = parseBlockUri(row.original.objUri);
           return filterValue.includes(system);
         },
+        sortingFn: (rowA, rowB) => {
+          const { system: systemA } = parseBlockUri(rowA.original.objUri);
+          const { system: systemB } = parseBlockUri(rowB.original.objUri);
+          return systemA.localeCompare(systemB);
+        },
       },
       {
         accessorKey: "namespace",
@@ -100,8 +123,13 @@ export const Projects = (props: ProjectsProps) => {
           ),
         filterFn: (row, columnId, filterValue) => {
           return filterValue.includes(
-            row.original.obj.metadata.namespace ?? "default",
+            row.original.metadata.namespace ?? "default",
           );
+        },
+        sortingFn: (rowA, rowB) => {
+          const namespaceA = rowA.original.metadata.namespace ?? "default";
+          const namespaceB = rowB.original.metadata.namespace ?? "default";
+          return namespaceA.localeCompare(namespaceB);
         },
       },
       {
@@ -110,6 +138,20 @@ export const Projects = (props: ProjectsProps) => {
           <DataTableColumnHeader column={props.column} title="Last Updated" />
         ),
         cell: (props) => <LastUpdated resource={props.row.original} />,
+        sortingFn: (rowA, rowB) => {
+          const readyConditionA = getReadyCondition(rowA.original.obj);
+          const readyConditionB = getReadyCondition(rowB.original.obj);
+          const lastUpdatedA =
+            readyConditionA?.lastTransitionTime ??
+            rowA.original.metadata.creationTimestamp;
+          const lastUpdatedB =
+            readyConditionB?.lastTransitionTime ??
+            rowB.original.metadata.creationTimestamp;
+          if (!lastUpdatedA || !lastUpdatedB) {
+            return 0;
+          }
+          return lastUpdatedA.localeCompare(lastUpdatedB);
+        },
       },
       {
         accessorKey: "actions",
