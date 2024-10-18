@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Resource } from "~/ResourceContext";
 import { CalendarIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 
 export function LastUpdated({ resource }: { resource: Resource }) {
   const readyCondition = useMemo(
