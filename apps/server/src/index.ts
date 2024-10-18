@@ -101,10 +101,10 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
 });
 
 // publish an event to the events stream (called by workers)
-app.post("/api/events", (req, res) => {
+app.post("/api/events", async (req, res) => {
   const body = JSON.stringify(req.body);
   console.log("EVENT:", body);
-  pubsub.publishEvent(body);
+  await pubsub.publishEvent(body);
   handleEvent(req.body as WorkerEvent); // <-- runs in the background
   return res.status(200);
 });
