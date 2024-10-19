@@ -29,7 +29,7 @@ export function LastUpdated({ resource }: { resource: Resource }) {
   if (!lastUpdated) return <></>;
 
   return (
-    <div className="text-muted-foreground text-xs">
+    <div className="text-muted-foreground whitespace-nowrap text-xs">
       <p className="flex items-center">
         <CalendarIcon className="mr-1 h-3 w-3" />
         Updated {relativeTime}

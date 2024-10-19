@@ -23,6 +23,7 @@ import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
 import { getReadyCondition } from "~/lib/utils";
 import { ResourceDetailsDrawer } from "./resource-details-drawer";
+import { LastLogMessage } from "./last-log-message";
 
 export interface ProjectsProps {
   resources: Resource[];
@@ -161,6 +162,13 @@ export const Projects = (props: ProjectsProps) => {
           }
           return lastUpdatedA.localeCompare(lastUpdatedB);
         },
+      },
+      {
+        accessorKey: "logs",
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Logs" />
+        ),
+        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
       },
       {
         accessorKey: "actions",
