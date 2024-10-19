@@ -22,6 +22,7 @@ import { DataTableToolbar } from "~/components/data-table-toolbar";
 import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
 import { getReadyCondition } from "~/lib/utils";
+import { ResourceDetailsDrawer } from "./resource-details-drawer";
 
 export interface ProjectsProps {
   resources: Resource[];
@@ -207,6 +208,7 @@ export const Projects = (props: ProjectsProps) => {
           onSortingChange={setSorting}
         />
       ))}
+      <ResourceDetailsDrawer />
     </div>
   );
 };

@@ -21,7 +21,6 @@ import {
   TableRow,
 } from "~/components/ui/table.jsx";
 import { getResourceIconColors } from "~/lib/hero-icon.jsx";
-import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 
 export function ProjectGroup(props: {
   objType: string;
@@ -132,15 +131,14 @@ function ResourceTableRow({
   resource: Resource;
   children: React.ReactNode;
 }) {
-  const { openWizard: openEditWizard } = useCreateResourceWizard();
-  const { resourceTypes } = useContext(ResourceContext);
+  const { setSelectedResourceId } = useContext(ResourceContext);
   return (
     <TableRow
       className="cursor-pointer"
       onClick={() =>
-        openEditWizard({
-          resource,
-          resourceType: resourceTypes[resource.objType],
+        setSelectedResourceId({
+          objType: resource.objType,
+          objUri: resource.objUri,
         })
       }
     >
