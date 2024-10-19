@@ -17,7 +17,7 @@ import {
 } from "~/components/resource-row.jsx";
 import { getIconComponent } from "~/lib/hero-icon.jsx";
 import { DataTableColumnHeader } from "~/components/data-table-column-header.jsx";
-import { parseBlockUri } from "@kblocks/api";
+import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { DataTableToolbar } from "~/components/data-table-toolbar";
 import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
@@ -38,7 +38,13 @@ export const Projects = (props: ProjectsProps) => {
         cell: (props) => <StatusBadge obj={props.row.original} />,
         filterFn: (row, columnId, filterValue) => {
           const readyCondition = getReadyCondition(row.original);
-          return filterValue.includes(readyCondition?.status);
+          const status =
+            readyCondition?.reason === StatusReason.Completed
+              ? "Ready"
+              : readyCondition?.reason === StatusReason.Error
+                ? "Failed"
+                : undefined;
+          return filterValue.includes(status);
         },
         sortingFn: (rowA, rowB) => {
           const readyConditionA = getReadyCondition(rowA.original.obj);
