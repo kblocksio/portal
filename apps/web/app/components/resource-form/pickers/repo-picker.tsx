@@ -9,7 +9,6 @@ import {
 } from "../../ui/select";
 import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "~/hooks/use-fetch";
-import { Button } from "../../ui/button";
 
 interface RepoPickerProps {
   handleOnSelection: (repository: Repository | null) => void;
@@ -65,18 +64,14 @@ export const RepoPicker = ({
       <div className="flex items-center justify-between">
         <Select
           disabled={isLoading || !repositories}
-          onValueChange={(value) =>
-            setSelectedRepo(
-              (repositories?.find(
-                (repo) => repo.full_name === value,
-              ) as Repository) ?? null,
-            )
-          }
-          value={
-            repositories?.find(
-              (repo) => repo.full_name === initialValue,
-            )?.full_name ?? ""
-          }
+          onValueChange={(value) => {
+            const selectedRepo = repositories?.find(
+              (repo) => repo.full_name === value,
+            ) as Repository;
+            setSelectedRepo(selectedRepo);
+            handleOnSelection(selectedRepo);
+          }}
+          value={selectedRepo?.full_name}
         >
           <SelectTrigger className="w-full">
             {isLoading ? (
@@ -100,23 +95,6 @@ export const RepoPicker = ({
               ))}
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          role="button"
-          className="ml-2"
-          disabled={!selectedRepo || isLoading}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleOnSelection(
-              (repositories?.find(
-                (repo) => repo.full_name === selectedRepo?.full_name,
-              ) as Repository) ?? null,
-            );
-          }}
-        >
-          Choose
-        </Button>
       </div>
       <div className="text-muted-foreground mb-4 mt-4 text-sm">
         <p>
