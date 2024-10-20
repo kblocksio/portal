@@ -7,10 +7,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 import {
+  Event,
   EventAction,
   EventReason,
   LifecycleEvent,
   LogEvent,
+  LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
 import { useState } from "react";
@@ -69,6 +71,8 @@ function EventItem({
   const [isOpen, setIsOpen] = useState(isLast);
 
   const isClickable = eventGroup.logs.length > 0;
+  const messageColor = getMessageColor(event.event);
+  const message = formatMessage(event.event.message);
 
   return (
     <div className="relative pl-10">
@@ -87,8 +91,10 @@ function EventItem({
         tabIndex={0}
       >
         <span className="text-gray-500">{timestamp}</span>
-        <span className="font-bold text-gray-500">{action}</span>
-        <span className="font-bold">{event.event.message}</span>
+        <span className="text-gray-500">{action}</span>
+        <span className={messageColor}>
+          <pre className="font-sans">{message}</pre>
+        </span>
 
         {isClickable && (
           <ChevronRight
@@ -112,7 +118,7 @@ function EventItem({
 
 function LogItem({ log }: { log: LogEvent }) {
   const timestamp = log.timestamp.toLocaleTimeString();
-  const message = log.message.trimStart();
+  const message = log.message;
   return (
     <div className="text-sm">
       <div className="grid grid-cols-[110px_1fr]">
@@ -170,6 +176,23 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
         lifecycleEvent: event,
         logs: [],
       };
+
+      const messageLines = event.event.message.split("\n");
+      if (messageLines.length > 1) {
+        const renderLogEvent = (line: string): LogEvent => {
+          return {
+            type: "LOG",
+            level: LogLevel.ERROR,
+            message: line,
+            objUri: event.objUri,
+            objType: event.objType,
+            timestamp: event.timestamp,
+          };
+        };
+
+        currentGroup.logs.push(...messageLines.map(renderLogEvent));
+      }
+
       groups.push(currentGroup);
     } else if (event.type === "LOG") {
       if (currentGroup) {
@@ -196,4 +219,16 @@ const getActionLabel = (action: EventAction) => {
     default:
       return "";
   }
+};
+
+const getMessageColor = (event: Event) => {
+  if (event.reason === EventReason.Failed) {
+    return "text-red-700";
+  }
+  return "text-gray-800";
+};
+
+const formatMessage = (message: string) => {
+  const first = message.split("\n")[0];
+  return first.replace("Error: Error: ", "Error: ");
 };
