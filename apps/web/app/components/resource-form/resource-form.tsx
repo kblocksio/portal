@@ -6,7 +6,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
-import { DialogFooter } from "../ui/dialog";
 
 export interface FormGeneratorProps {
   schema: any;
@@ -110,7 +109,7 @@ export const FormGenerator = ({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-4 overflow-y-auto pb-4">
+        <div className="space-y-4 overflow-y-auto pb-4 pr-4">
           <FieldRenderer
             objectMetadata={metadataObject}
             schema={schema}

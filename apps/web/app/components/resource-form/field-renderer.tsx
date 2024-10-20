@@ -45,6 +45,7 @@ interface PrimitiveFieldRendererProps {
   required?: boolean;
   schema: any;
   objectMetadata: ObjectMetadata;
+  showLabel?: boolean;
 }
 
 interface FieldRendererProps {
@@ -56,6 +57,15 @@ interface FieldRendererProps {
   fieldName: string;
   hideField?: boolean;
   required?: boolean;
+
+  /**
+   * Indicates that the field is part of a "one-off" picker, so objects should be rendered inline.
+   * and not in a modal dialog that opens when an "Edit" button is clicked.
+   *
+   * Additionally, the field will not have a label since the label is already displayed in the
+   * picker.
+   */
+  inline?: boolean;
 }
 
 export const updateDataByPath = (data: any, path: string, value: any): any => {
@@ -106,15 +116,17 @@ export const ObjectFieldForm = ({
             e.stopPropagation();
             onSave(formData);
           }
-        }}>
-          {FormFields({ 
-            properties, 
-            formData, 
-            setFormData, 
-            objectMetadata, 
-            hideField, 
-            requiredFields 
-          })}
+        }} className="space-y-6 ml-2 mr-2">
+          <div className="pb-2">
+            {FormFields({ 
+              properties, 
+              formData, 
+              setFormData, 
+              objectMetadata, 
+              hideField, 
+              requiredFields 
+            })}
+          </div>
           <div className="flex justify-end space-x-2 mt-6">
             <Button
               type="button"
@@ -215,11 +227,13 @@ const PrimitiveFieldRenderer = ({
   description,
   hideField = false,
   required = false,
+  showLabel = true,
 }: PrimitiveFieldRendererProps) => {
 
   const getPrimitiveWidget = () => {
     switch (type) {
-      case 'boolean': return <SwitchField value={value} onChange={handleChange} required={required} />;
+      case 'boolean': 
+        return <SwitchField value={value} onChange={handleChange} required={required} />;
       case 'string': {
         if (schema?.enum) {
           return <EnumField values={schema.enum} selectedValue={value || schema.default} onChange={handleChange} required={required} />;
@@ -233,27 +247,30 @@ const PrimitiveFieldRenderer = ({
   };
 
   return (
-    <Field hideField={hideField} fieldName={fieldName} required={required} description={description}>
+    <Field hideField={hideField} fieldName={fieldName} required={required} description={description} showLabel={showLabel}>
       {getPrimitiveWidget()}
     </Field>
   );
 }
 
-export const Field = ({ hideField = false, fieldName, required, description, children }: { 
+export const Field = ({ hideField = false, fieldName, required, description, children, showLabel = true }: { 
   hideField?: boolean, 
   fieldName: string, 
   required?: boolean, 
   description?: string,
-  children: React.ReactNode
+  children: React.ReactNode,
+  showLabel?: boolean,
 }) => {
   const sanitizedDescription = sanitizeDescription(description);
   return <div className="space-y-4 mb-6">
     {!hideField && (
       <div className="flex flex-col">
-        <Label htmlFor={fieldName} className="text-sm font-medium">
-          {splitAndCapitalizeCamelCase(fieldName)}
-          {required && <span className="text-destructive">*</span>}
-        </Label>
+        {showLabel && (
+          <Label htmlFor={fieldName} className="text-sm font-medium">
+            {splitAndCapitalizeCamelCase(fieldName)}
+            {required && <span className="text-destructive">*</span>}
+          </Label>
+        )}
         {sanitizedDescription && (
           <p className="text-[0.8rem] text-muted-foreground pt-1">
             {parseDescription(sanitizedDescription)}
@@ -332,6 +349,7 @@ export const FieldRenderer = ({
   fieldName,
   hideField = false,
   required = false,
+  inline = false,
 }: FieldRendererProps) => {
   const { type, properties, additionalProperties, description } = schema;
   const uiPicker = uiPickerParser(description ?? '');
@@ -381,6 +399,7 @@ export const FieldRenderer = ({
       hideField={hideField}
       setShowObjectModal={setShowObjectModal}
       showObjectModal={showObjectModal}
+      inline={inline}
       properties={properties}
       additionalProperties={additionalProperties}
       description={description}
@@ -401,6 +420,7 @@ export const FieldRenderer = ({
       setShowObjectModal={setShowObjectModal}
       showObjectModal={showObjectModal}
       properties={properties}
+      inline={inline}
       additionalProperties={additionalProperties}
       description={description}
     />
@@ -435,6 +455,7 @@ export const FieldRenderer = ({
         description={description}
         hideField={hideField}
         schema={schema}
+        showLabel={!inline}
       />
   );
 };
@@ -448,7 +469,7 @@ export function FormFields({ properties, formData, setFormData, objectMetadata, 
   path?: string,
   requiredFields: string[] | undefined
 }) {
-  return <div className="space-y-6 ml-2 mr-2">
+  return <div>
     {properties
       ? Object.keys(properties).map((key) => (
         <FieldRenderer
@@ -615,6 +636,7 @@ function ObjectFieldRenderer({
   updateFormData,
   schema,
   fieldName,
+  inline,
   required,
   hideField,
   setShowObjectModal,
@@ -631,6 +653,7 @@ function ObjectFieldRenderer({
   fieldName?: string;
   required: boolean;
   hideField: boolean;
+  inline?: boolean;
   setShowObjectModal: (show: boolean) => void;
   showObjectModal: boolean;
 }) {
@@ -647,6 +670,29 @@ function ObjectFieldRenderer({
   };
 
   const objectProperties = properties ?? additionalProperties?.properties;
+
+  // if we are rendering inline, just put the form fields directly and not inside a modal dialog.
+  if (inline) {
+    return (
+      <div className="flex flex-col">
+        {description && (
+          <p className="text-[0.8rem] text-muted-foreground pb-6">
+            {parseDescription(description)}
+          </p>
+        )}
+
+        <FormFields
+          path={path}
+          hideField={hideField}
+          objectMetadata={objectMetadata}
+          requiredFields={schema.required}
+          properties={objectProperties}
+          formData={formData}
+          setFormData={updateFormData}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 mb-6">

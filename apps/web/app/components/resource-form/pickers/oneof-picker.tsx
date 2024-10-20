@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { splitAndCapitalizeCamelCase } from "../label-formater";
-import { Field, FormFields, updateDataByPath } from "../field-renderer";
+import { Field, FieldRenderer, updateDataByPath } from "../field-renderer";
 
 export function OneOfPicker({
   schema,
@@ -67,23 +67,22 @@ export function OneOfPicker({
     const key = value;
     const selectedPath = path ? `${path}.${key}` : key;
 
-    // TODO (shaib): this doesn't work if the selected schema is a "string" or other primitive.
-    // there's an assumption that the selected schema is always an object.
-
     return (
-      <Card className="rounded-md px-2 py-4">
-        <FormFields
+      <Card className="rounded-md px-4 pt-4 pb-0">
+        <FieldRenderer
           path={selectedPath}
           hideField={hideField}
           objectMetadata={objectMetadata}
-          requiredFields={selectedSchema.required}
-          properties={selectedSchema.properties}
+          required={selectedSchema.required}
+          schema={selectedSchema}
           formData={newFormData}
-          setFormData={setFormData}
+          updateFormData={setFormData}
+          inline={true}
+          fieldName={fieldName}
         />
       </Card>
     );
-  }, [value, schema, formData, setFormData, objectMetadata, path, hideField]);
+  }, [formData, schema, objectMetadata, path, fieldName, hideField, setFormData, value]);
 
   return (
     <Field
@@ -93,19 +92,21 @@ export function OneOfPicker({
       description={description}
     >
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-[200px] justify-between"
-          >
+        <div className="flex flex-row gap-2 items-center">
+            <PopoverTrigger asChild>
+              <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-[200px] justify-between"
+            >
             {value
               ? options.find((framework) => framework.value === value)?.label
               : `Select...`}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+        </div>
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>
@@ -134,7 +135,6 @@ export function OneOfPicker({
           </Command>
         </PopoverContent>
       </Popover>
-
       {details}
     </Field>
   );
