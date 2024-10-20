@@ -339,6 +339,8 @@ export const FieldRenderer = ({
   const [showObjectModal, setShowObjectModal] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [editKey, setEditKey] = useState<string | null>(null);
 
   const value = getDataByPath(formData, path);
 
@@ -382,14 +384,13 @@ export const FieldRenderer = ({
       setShowObjectModal={setShowObjectModal}
       showObjectModal={showObjectModal}
       properties={properties}
-      additionalProperties={additionalProperties}
       description={description}
     />
   }
 
   if (type === "object" && additionalProperties) {
     // TODO: fix this because this shuold be a map 
-    return <ObjectFieldRenderer
+    return <MapFieldRenderer
       objectMetadata={objectMetadata}
       schema={schema}
       formData={formData}
@@ -397,12 +398,11 @@ export const FieldRenderer = ({
       updateFormData={updateFormData}
       fieldName={fieldName}
       required={required}
-      hideField={hideField}
-      setShowObjectModal={setShowObjectModal}
-      showObjectModal={showObjectModal}
-      properties={properties}
-      additionalProperties={additionalProperties}
+      setShowMapModal={setShowObjectModal}
+      showMapModal={showObjectModal}
       description={description}
+      setEditKey={setEditKey}
+      editKey={editKey}
     />
 
   }
@@ -465,6 +465,147 @@ export function FormFields({ properties, formData, setFormData, objectMetadata, 
       : null}
   </div>;
 }
+
+
+function MapFieldRenderer({
+  formData,
+  path,
+  updateFormData,
+  fieldName,
+  required,
+  schema,
+  setEditKey,
+  setShowMapModal,
+  showMapModal,
+  editKey,
+  objectMetadata,
+  description,
+}: {
+  formData: any;
+  path: string;
+  updateFormData: (data: any) => void;
+  fieldName?: string;
+  required: boolean;
+  schema: any;
+  setEditKey: (key: string | null) => void;
+  setShowMapModal: (show: boolean) => void;
+  showMapModal: boolean;
+  editKey: string | null;
+  description: string;
+  objectMetadata: ObjectMetadata;
+}) {
+  const items = getDataByPath(formData, path) || new Map();
+
+  const handleAddItem = () => {
+    setEditKey(null);
+    setShowMapModal(true);
+  };
+
+  const handleEditItem = (key: string) => {
+    setEditKey(key);
+    setShowMapModal(true);
+  };
+
+  const handleRemoveItem = (key: string) => {
+    const currentData = new Map(items);
+    currentData.delete(key);
+    const newFormData = updateDataByPath(formData, path, currentData);
+    updateFormData(newFormData);
+  };
+
+  const handleSaveItem = (itemData: any) => {
+    const currentData = new Map(items);
+    if (editKey !== null) {
+      currentData.set(editKey, itemData);
+    } else {
+      currentData.set(itemData.key, itemData.value);
+    }
+    const newFormData = updateDataByPath(formData, path, currentData);
+    updateFormData(newFormData);
+    setShowMapModal(false);
+  };
+
+  return (
+    <div className="space-y-4 mb-6">
+      <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="text-sm font-medium">
+          {splitAndCapitalizeCamelCase(fieldName ?? '')}
+          {required && <span className="text-destructive">*</span>}
+          {description && (
+            <p className="text-[0.8rem] text-muted-foreground pt-1">
+              {parseDescription(description)}
+            </p>
+          )}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleAddItem}
+          className="h-8 px-3 text-xs mr-2 ml-2"
+        >
+          <Plus className="w-3 h-3 mr-1" />
+          Add
+        </Button>
+      </div>
+      <div>
+        {items.length > 0 && (
+          <div className="space-y-2">
+            {items.map((item: any, index: number) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-md">
+                <div className="flex-1 truncate text-sm">
+                  {typeof item === 'object' ? `Item ${index + 1}` : item}
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => handleEditItem(item.key)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span className="sr-only">Edit item</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => handleRemoveItem(item.key)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                    <span className="sr-only">Remove item</span>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <Dialog open={showMapModal} onOpenChange={(open: boolean) => setShowMapModal(open)}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader className="border-b border-gray-200 pb-4 mb-1">
+            <DialogTitle className="text-lg">
+              {splitAndCapitalizeCamelCase(fieldName ?? '')} item
+            </DialogTitle>
+            {description && (
+              <DialogDescription className="text-sm text-muted-foreground">
+                {parseDescription(description)}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <ArrayItemForm
+            objectMetadata={objectMetadata}
+            fieldName={fieldName ?? ''}
+            schema={schema.items}
+            initialData={editKey !== null ? items[editKey] : undefined}
+            onSave={handleSaveItem}
+            onCancel={() => setShowMapModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
 
 function ArrayFieldRenderer({
   formData,
@@ -607,8 +748,7 @@ function ArrayFieldRenderer({
 
 function ObjectFieldRenderer({
   properties,
-  additionalProperties,
-  description,
+ description,
   formData,
   path,
   objectMetadata,
@@ -621,7 +761,6 @@ function ObjectFieldRenderer({
   showObjectModal,
 }: {
   properties: any;
-  additionalProperties: any;
   description: string;
   formData: any;
   path: string;
@@ -646,7 +785,7 @@ function ObjectFieldRenderer({
     setShowObjectModal(false);
   };
 
-  const objectProperties = properties ?? additionalProperties?.properties;
+  const objectProperties = properties;
 
   return (
     <div className="space-y-4 mb-6">
