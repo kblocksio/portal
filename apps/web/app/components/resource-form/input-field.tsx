@@ -11,7 +11,7 @@ export interface InputFieldProps {
 const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
 export const InputField = ({
-  value,
+  value = "",
   onChange,
   required,
   type,

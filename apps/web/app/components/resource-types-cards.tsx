@@ -19,26 +19,23 @@ export const ResourceTypesCards = ({
   handleResourceSelect,
   isLoading,
 }: ResourceTypesCardsProps) => {
-  return isLoading
-    ? Array.from({ length: 3 }).map((_, index) => (
-        <ResourceCardSkeleton key={index} />
-      ))
-    : filtereResources.map((resource, index) => {
-        const Icon = resource.iconComponent;
-        const iconColor = getResourceIconColors({
-          color: resource?.color,
-        });
+  return isLoading ? (
+    Array.from({ length: 3 }).map((_, index) => <ResourceCardSkeleton key={index} />)
+  ) : (
+      filtereResources.map((resource, index) => {
+        const Icon = resource.iconComponent
+        const iconColor = getResourceIconColors({ color: resource?.color })
         return (
           <Card
             key={index}
-            className="hover:bg-accent flex max-h-[240px] cursor-pointer flex-col justify-center"
+            className="hover:bg-accent flex h-[240px] cursor-pointer flex-col justify-between"
             onClick={() => handleResourceSelect(resource)}
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                handleResourceSelect(resource);
+                e.preventDefault()
+                e.stopPropagation()
+                handleResourceSelect(resource)
               }
             }}
           >
@@ -47,13 +44,16 @@ export const ResourceTypesCards = ({
                 <Icon className={`${iconColor} h-8 w-8`} />
               </div>
             </CardHeader>
-            <CardContent className="flex-start flex min-h-[165px] flex-col p-4">
+            <CardContent className="flex flex-col min-h-[165px] p-4">
               <CardTitle className="mb-2">{resource.kind}</CardTitle>
-              <CardDescription>{resource.description}</CardDescription>
+              <CardDescription className="line-clamp-5 overflow-hidden text-ellipsis">
+                {resource.description}
+              </CardDescription>
             </CardContent>
           </Card>
-        );
-      });
+      );
+    })
+  );
 };
 
 const ResourceCardSkeleton = () => (

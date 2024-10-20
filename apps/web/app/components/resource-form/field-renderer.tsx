@@ -771,7 +771,7 @@ function ArrayFieldRenderer({
           {required && <span className="text-destructive">*</span>}
           {description && (
             <p className="text-[0.8rem] text-muted-foreground pt-1">
-              {parseDescription(description)}
+              {parseDescription(sanitizeDescription(description))}
             </p>
           )}
         </div>
@@ -826,7 +826,7 @@ function ArrayFieldRenderer({
             </DialogTitle>
             {description && (
               <DialogDescription className="text-sm text-muted-foreground">
-                {parseDescription(description)}
+                {parseDescription(sanitizeDescription(description))}
               </DialogDescription>
             )}
           </DialogHeader>
@@ -893,7 +893,7 @@ function ObjectFieldRenderer({
       <div className="flex flex-col">
         {description && (
           <p className="text-[0.8rem] text-muted-foreground pb-6">
-            {parseDescription(description)}
+            {parseDescription(sanitizeDescription(description))}
           </p>
         )}
 
@@ -929,7 +929,7 @@ function ObjectFieldRenderer({
             </div>
             {description && (
               <p className="text-[0.8rem] text-muted-foreground pt-1">
-                {parseDescription(description)}
+                {parseDescription(sanitizeDescription(description))}
               </p>
             )}
           </div>
@@ -970,7 +970,7 @@ function ObjectFieldRenderer({
             </DialogTitle>
             {description && (
               <DialogDescription className="text-sm text-muted-foreground">
-                {parseDescription(description)}
+                {parseDescription(sanitizeDescription(description))}
               </DialogDescription>
             )}
           </DialogHeader>
