@@ -1,56 +1,34 @@
 import { useAppContext } from "~/AppContext";
-import { useContext, useState } from "react";
+import { useContext, useMemo } from "react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ResourceContext } from "~/ResourceContext";
-import { Search } from "lucide-react";
 import { ProjectHeader } from "~/components/project-header";
-import { Input } from "~/components/ui/input";
-import { ResourceDetailsDrawer } from "~/components/resource-details-drawer";
-import { ProjectGroups } from "~/components/project-groups";
-import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
-import { Button } from "~/components/ui/button";
+import { Projects } from "~/components/projects";
 
 export default function _index() {
   const { selectedProject } = useAppContext();
 
-  const { isLoading, resourceTypes } = useContext(ResourceContext);
-  const { openWizard: openCreateWizard } = useCreateResourceWizard();
+  const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+  const allResources = useMemo(() => {
+    return [...resources.values()]
+      .flatMap((resources) => [...resources.values()])
+      .filter((resource) => resource.kind !== "Block");
+  }, [resources]);
 
   return (
-    <div className="bg-background flex h-screen">
-      <div className="flex h-full w-full flex-col overflow-auto bg-slate-50 pb-12 pl-32 pr-32 pt-12">
+    <div className="flex h-screen bg-slate-50">
+      <div className="flex h-full w-full flex-col overflow-auto py-12 sm:px-6 lg:px-8">
         <ProjectHeader selectedProject={selectedProject} />
-        <div className="container mx-auto flex items-center space-x-4 rounded-lg">
-          <div className="relative flex-grow">
-            <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
-            <Input
-              type="text"
-              placeholder="Search resource..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
-            />
-          </div>
-          <Button onClick={() => openCreateWizard()}>New Resource...</Button>
-          <ResourceDetailsDrawer />
-        </div>
-        <div className={"container mx-auto mt-12"}>
+        <div className={"container mx-auto"}>
           {isLoading ||
           !resourceTypes ||
           Object.keys(resourceTypes).length === 0 ? (
             <LoadingSkeleton />
           ) : (
-            <ProjectGroups
-              resourceTypes={resourceTypes}
-              searchQuery={searchQuery}
-              isLoading={isLoading}
-            />
+            <>
+              <Projects resources={allResources} />
+            </>
           )}
         </div>
       </div>

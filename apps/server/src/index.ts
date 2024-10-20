@@ -46,7 +46,7 @@ app.use(
 console.log("express-ws, will you work?");
 
 app.get("/", async (_, res) => {
-  return res.status(200).json({ message: "Hello, portal-backend!" });
+  return res.status(200).json({ message: "Hello, kblocks backend!" });
 });
 
 app.ws("/api/events", (ws) => {
@@ -101,10 +101,10 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
 });
 
 // publish an event to the events stream (called by workers)
-app.post("/api/events", (req, res) => {
+app.post("/api/events", async (req, res) => {
   const body = JSON.stringify(req.body);
   console.log("EVENT:", body);
-  pubsub.publishEvent(body);
+  await pubsub.publishEvent(body);
   handleEvent(req.body as WorkerEvent); // <-- runs in the background
   return res.status(200);
 });

@@ -11,6 +11,8 @@ export async function slackNotify(event: WorkerEvent) {
 
   const thread = await getSlackThread(event.objUri);
 
+  console.log(`Sending slack message ${JSON.stringify(message)} to ${slackChannel} with thread ${thread}`);
+
   const ctx = await sendSlackMessage(slackChannel, message, thread);
   if (ctx.ts) {
     await setSlackThread(event.objUri, ctx.ts);

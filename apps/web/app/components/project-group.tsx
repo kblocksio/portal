@@ -1,79 +1,149 @@
-import { Card } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { getResourceIconColors } from "~/lib/hero-icon";
-import { ResourceRow } from "./resource-row";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+  ColumnFiltersState,
+  getFilteredRowModel,
+  OnChangeFn,
+  ColumnSort,
+  getSortedRowModel,
+} from "@tanstack/react-table";
+import { useContext, useMemo } from "react";
 import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
+import { cn } from "~/lib/utils.js";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table.jsx";
+import { getResourceIconColors } from "~/lib/hero-icon.jsx";
 
-export interface ProjectGroupProps {
+export function ProjectGroup(props: {
   objType: string;
   resourceType: ResourceType;
-  isLoading: boolean;
-  searchQuery?: string;
-}
-export const ProjectGroup = ({
-  objType,
-  resourceType,
-  searchQuery,
-  isLoading,
-}: ProjectGroupProps) => {
-  const { resources } = useContext(ResourceContext);
-
-  const [resourcesForType, setResourcesForType] = useState<Resource[]>([]);
-
-  useEffect(() => {
-    if (!resources || !resources.get(objType)) {
-      return;
-    }
-    setResourcesForType(Array.from(resources.get(objType)?.values() || []));
-  }, [resources]);
-
-  const filteredData = useMemo(() => {
-    if (!resourcesForType) return null;
-    if (!searchQuery) return resourcesForType;
-    return resourcesForType.filter((resource: any) =>
-      resource.metadata.name.includes(searchQuery),
+  resources: Resource[];
+  columns: ColumnDef<Resource>[];
+  columnFilters: ColumnFiltersState;
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>;
+  sorting: ColumnSort[];
+  onSortingChange: OnChangeFn<ColumnSort[]>;
+}) {
+  const resources = useMemo(() => {
+    return props.resources.filter(
+      (resource) => resource.objType === props.objType,
     );
-  }, [resourcesForType, searchQuery]);
+  }, [props.resources, props.objType]);
 
-  const Icon = resourceType.iconComponent;
+  const table = useReactTable({
+    data: resources,
+    columns: props.columns,
+    state: {
+      columnFilters: props.columnFilters,
+      sorting: props.sorting,
+    },
+    onColumnFiltersChange: props.onColumnFiltersChange,
+    onSortingChange: props.onSortingChange,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
-  // use default color for now
+  const Icon = props.resourceType.iconComponent;
+
   const iconColor = getResourceIconColors({
     // color: resourceType?.color,
     color: undefined,
   });
 
-  return !isLoading && (!filteredData || filteredData?.length === 0) ? null : (
-    <section className="mb-8">
+  return resources.length > 0 ? (
+    <section>
       <div className="mb-4 flex items-center">
         <Icon className={`${iconColor} mr-2 h-6 w-6`} />
-        <h2 className="text-xl font-semibold">{resourceType.plural}</h2>
+        <h2 className="text-xl font-semibold">{props.resourceType.plural}</h2>
       </div>
-      <div>
-        {isLoading && (!filteredData || filteredData?.length === 0) && (
-          <Card className="flex items-center justify-between p-4">
-            <Skeleton className="h-6 w-32" />
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-8 w-20 rounded-md" />{" "}
-              <Skeleton className="h-6 w-16 rounded-full" />
-            </div>
-          </Card>
-        )}
-
-        {!isLoading &&
-          filteredData &&
-          filteredData.length > 0 &&
-          filteredData.map((item: Resource, index: number) => (
-            <ResourceRow
-              key={index}
-              item={item}
-              isFirst={index === 0}
-              isLast={index === filteredData.length - 1}
-            />
-          ))}
+      <div className="overflow-x-auto rounded-md border bg-white">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={cn(
+                      header.column.id === "status" ||
+                        header.column.id === "name" ||
+                        header.column.id === "kind" ||
+                        header.column.id === "system" ||
+                        header.column.id === "namespace" ||
+                        header.column.id === "lastUpdated" ||
+                        header.column.id === "actions"
+                        ? "w-0"
+                        : undefined,
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <ResourceTableRow key={row.id} resource={row.original}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </ResourceTableRow>
+            ))}
+            {table.getRowModel().rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={props.columns.length}>
+                  <div className="flex h-16 items-center justify-center">
+                    <p className="text-muted-foreground">No resources found</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </section>
+  ) : (
+    <></>
   );
-};
+}
+
+function ResourceTableRow({
+  resource,
+  children,
+}: {
+  resource: Resource;
+  children: React.ReactNode;
+}) {
+  const { setSelectedResourceId } = useContext(ResourceContext);
+  return (
+    <TableRow
+      className="cursor-pointer"
+      onClick={() =>
+        setSelectedResourceId({
+          objType: resource.objType,
+          objUri: resource.objUri,
+        })
+      }
+    >
+      {children}
+    </TableRow>
+  );
+}
