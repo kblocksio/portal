@@ -34,6 +34,15 @@ interface ArrayItemFormProps {
   objectMetadata: ObjectMetadata;
 }
 
+interface MapItemFormProps {
+  fieldName: string;
+  schema: any;
+  onSave: (data: any) => void;
+  onCancel: () => void;
+  initialData?: any;
+  objectMetadata: ObjectMetadata;
+}
+
 interface PrimitiveFieldRendererProps {
   type: string;
   handleChange: (value: string | number | boolean) => void;
@@ -156,6 +165,75 @@ export const ArrayItemForm = ({
   initialData,
   objectMetadata,
 }: ArrayItemFormProps) => {
+  const { type } = schema;
+
+  const [itemData, setItemData] = useState<any>(initialData ?? (type === 'object' ? {} : ''));
+
+  const updateItemData = (newData: any) => {
+    setItemData(newData);
+  };
+
+  const handleSave = () => {
+    onSave(itemData);
+  };
+
+  return (
+    <div className="w-full">
+      <div className="p-1">
+        <div className="space-y-6 ml-2 mr-2">
+          {type === 'object' || type === 'array' ? (
+            <FieldRenderer
+              objectMetadata={objectMetadata}
+              schema={schema}
+              path=""
+              formData={itemData}
+              updateFormData={updateItemData}
+              fieldName={fieldName}
+              hideField={true}
+              required={schema.required?.includes(fieldName)}
+            />
+          ) : (
+            <PrimitiveFieldRenderer
+              type={type}
+              handleChange={setItemData}
+              value={itemData}
+              fieldName={fieldName}
+              description={schema?.description}
+              required={schema.required?.includes(fieldName)}
+              schema={schema}
+              objectMetadata={objectMetadata}
+            />
+          )}
+        </div>
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="default"
+            onClick={handleSave}
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const MapItemForm = ({
+  fieldName,
+  schema,
+  onSave,
+  onCancel,
+  initialData,
+  objectMetadata,
+}: MapItemFormProps) => {
   const { type } = schema;
 
   const [itemData, setItemData] = useState<any>(initialData ?? (type === 'object' ? {} : ''));
@@ -612,10 +690,10 @@ function MapFieldRenderer({
               </DialogDescription>
             )}
           </DialogHeader>
-          <ArrayItemForm
+          <MapItemForm
             objectMetadata={objectMetadata}
             fieldName={fieldName ?? ''}
-            schema={schema.items}
+            schema={schema.properties}
             initialData={editKey !== null ? items[editKey] : undefined}
             onSave={handleSaveItem}
             onCancel={() => setShowMapModal(false)}
