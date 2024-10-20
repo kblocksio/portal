@@ -142,7 +142,7 @@ export const OneOfPicker = ({
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>
-              <CommandEmpty>No framework found.</CommandEmpty>
+              <CommandEmpty>No options.</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => (
                   <CommandItem
