@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
@@ -20,7 +19,7 @@ import {
 import { splitAndCapitalizeCamelCase } from "../label-formater";
 import { Field, FieldRenderer, updateDataByPath } from "../field-renderer";
 
-export function OneOfPicker({
+export const OneOfPicker = ({
   schema,
   fieldName,
   hideField = false,
@@ -40,7 +39,7 @@ export function OneOfPicker({
   setFormData: (data: any) => void;
   objectMetadata: any;
   path: string;
-}) {
+}) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -139,10 +138,3 @@ export function OneOfPicker({
     </Field>
   );
 }
-
-/*
-
-export function TabsDemo() {
-  return 
-}
-*/
