@@ -14,6 +14,7 @@ import { InstancePicker } from "./pickers/instance-picker";
 import { ObjectMetadata } from "@repo/shared";
 import { OneOfPicker } from "./pickers/oneof-picker";
 import { RepoPicker } from "./pickers/repo-picker";
+import { reorderProperties } from "./utils";
 
 interface ObjectFormProps {
   properties: any;
@@ -351,7 +352,8 @@ export const FieldRenderer = ({
   required = false,
   inline = false,
 }: FieldRendererProps) => {
-  const { type, properties, additionalProperties, description } = schema;
+  const reorderedSchema = reorderProperties(schema);
+  const { type, properties, additionalProperties, description } = reorderedSchema;
   const uiPicker = uiPickerParser(description ?? '');
 
   const [showObjectModal, setShowObjectModal] = useState(false);
