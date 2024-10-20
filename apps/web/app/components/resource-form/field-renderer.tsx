@@ -267,29 +267,15 @@ export const MapItemForm = ({
             />
           </div>
           <div className="flex-1">
-            {type === "object" || type === "array" ? (
-              <FieldRenderer
-                objectMetadata={objectMetadata}
-                schema={schema}
-                path=""
-                formData={valueData}
-                updateFormData={updateValueData}
-                fieldName={fieldName}
-                hideField={true}
-                required={schema.required?.includes(fieldName)}
-              />
-            ) : (
-              <PrimitiveFieldRenderer
-                type={type}
-                handleChange={setValueData}
-                value={valueData}
-                fieldName={fieldName}
-                description={schema?.description}
-                required={schema.required?.includes(fieldName)}
-                schema={schema}
-                objectMetadata={objectMetadata}
-              />
-            )}
+            <FieldRenderer
+              objectMetadata={objectMetadata}
+              schema={schema}
+              path=""
+              formData={valueData}
+              updateFormData={updateValueData}
+              fieldName={fieldName}
+              required={schema.required?.includes(fieldName)}
+            />
           </div>
         </div>
       </div>
@@ -509,7 +495,8 @@ export const FieldRenderer = ({
   inline = false,
 }: FieldRendererProps) => {
   const reorderedSchema = reorderProperties(schema);
-  const { type, properties, additionalProperties, description } = reorderedSchema;
+  const { type, properties, additionalProperties, description } =
+    reorderedSchema;
   const uiPicker = uiPickerParser(description ?? "");
 
   const [showObjectModal, setShowObjectModal] = useState(false);
@@ -568,7 +555,6 @@ export const FieldRenderer = ({
   }
 
   if (type === "object" && additionalProperties) {
-    // TODO: fix this because this shuold be a map
     return (
       <MapFieldRenderer
         objectMetadata={objectMetadata}
@@ -726,7 +712,7 @@ function MapFieldRenderer({
           {required && <span className="text-destructive">*</span>}
           {description && (
             <p className="text-muted-foreground pt-1 text-[0.8rem]">
-              {parseDescription(description)}
+              {parseDescription(sanitizeDescription(description))}
             </p>
           )}
         </div>
@@ -783,14 +769,14 @@ function MapFieldRenderer({
         open={showMapModal}
         onOpenChange={(open: boolean) => setShowMapModal(open)}
       >
-        <DialogContent className="sm:max-w-[800px]">
+        <DialogContent className="min-h-[400px] sm:max-w-[800px]">
           <DialogHeader className="mb-1 border-b border-gray-200 pb-4">
             <DialogTitle className="text-lg">
               {splitAndCapitalizeCamelCase(fieldName ?? "")} item
             </DialogTitle>
             {description && (
               <DialogDescription className="text-muted-foreground text-sm">
-                {parseDescription(description)}
+                {parseDescription(sanitizeDescription(description))}
               </DialogDescription>
             )}
           </DialogHeader>

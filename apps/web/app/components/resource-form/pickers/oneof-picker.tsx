@@ -41,9 +41,32 @@ export const OneOfPicker = ({
   path: string;
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
 
-  const options = Object.keys(schema.properties).map((key: any) => ({
+  const getDataByPath = (data: any, path: string) => {
+    if (!path) return data;
+    return path
+      .split(".")
+      .reduce(
+        (acc: any, part: string) =>
+          acc && acc[part] !== undefined ? acc[part] : undefined,
+        data,
+      );
+  };
+
+  const properties = schema?.properties || {};
+
+  const [value, setValue] = React.useState(() => {
+    for (const key of Object.keys(properties)) {
+      const optionPath = path ? `${path}.${key}` : key;
+      const dataAtPath = getDataByPath(formData, optionPath);
+      if (dataAtPath !== undefined && dataAtPath !== null) {
+        return key;
+      }
+    }
+    return "";
+  });
+
+  const options = Object.keys(properties).map((key: any) => ({
     value: key,
     label: splitAndCapitalizeCamelCase(key),
   }));
@@ -53,21 +76,22 @@ export const OneOfPicker = ({
       return null;
     }
 
-    // clear value from all other options beside the selected one
+    // Clear values from all other options besides the selected one
     let newFormData = formData;
-    for (const other of Object.keys(schema.properties).filter(
-      (k) => k !== value,
-    )) {
+    for (const other of Object.keys(properties).filter((k) => k !== value)) {
       const otherPath = path ? `${path}.${other}` : other;
       newFormData = updateDataByPath(newFormData, otherPath, undefined);
     }
 
-    const selectedSchema = schema.properties[value];
+    const selectedSchema = properties[value];
+    if (!selectedSchema) {
+      return null;
+    }
     const key = value;
     const selectedPath = path ? `${path}.${key}` : key;
 
     return (
-      <Card className="rounded-md px-4 pt-4 pb-0">
+      <Card className="rounded-md px-4 pb-0 pt-4">
         <FieldRenderer
           path={selectedPath}
           hideField={hideField}
@@ -81,7 +105,16 @@ export const OneOfPicker = ({
         />
       </Card>
     );
-  }, [formData, schema, objectMetadata, path, fieldName, hideField, setFormData, value]);
+  }, [
+    formData,
+    properties,
+    objectMetadata,
+    path,
+    fieldName,
+    hideField,
+    setFormData,
+    value,
+  ]);
 
   return (
     <Field
@@ -91,17 +124,17 @@ export const OneOfPicker = ({
       description={description}
     >
       <Popover open={open} onOpenChange={setOpen}>
-        <div className="flex flex-row gap-2 items-center">
-            <PopoverTrigger asChild>
-              <Button
+        <div className="flex flex-row items-center gap-2">
+          <PopoverTrigger asChild>
+            <Button
               variant="outline"
               role="combobox"
               aria-expanded={open}
               className="w-[200px] justify-between"
             >
-            {value
-              ? options.find((framework) => framework.value === value)?.label
-              : `Select...`}
+              {value
+                ? options.find((option) => option.value === value)?.label
+                : `Select...`}
               <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -137,4 +170,4 @@ export const OneOfPicker = ({
       {details}
     </Field>
   );
-}
+};
