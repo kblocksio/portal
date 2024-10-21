@@ -8,7 +8,7 @@ import {
   GetEventsResponse,
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
-import { exchangeCodeForTokens } from "./github.js";
+import { exchangeCodeForTokens, refreshToken } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv } from "./util";
@@ -410,25 +410,8 @@ app.get("/api/auth/callback/github", async (req, res) => {
 });
 
 app.get("/api/github/installations", async (req, res) => {
-  const supabase = createServerSupabase(req, res);
-  const user = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("user_ghtokens")
-    .select("access_token")
-    .eq("user_id", user.data.user?.id)
-    .single();
-  if (error) {
-    console.error("error getting access token", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-
-  const { Octokit } = await import("octokit");
-
-  const octokit = new Octokit({
-    auth: data.access_token,
-  });
-
   try {
+    const octokit = await getUserOctokit(req, res);
     const { data: installations } =
       await octokit.rest.apps.listInstallationsForAuthenticatedUser({
         page: 0,
@@ -449,24 +432,7 @@ app.get("/api/github/repositories", async (req, res) => {
   if (!installation_id) {
     return res.status(400).json({ error: "Installation ID is required" });
   }
-  const supabase = createServerSupabase(req, res);
-  const user = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("user_ghtokens")
-    .select("access_token")
-    .eq("user_id", user.data.user?.id)
-    .single();
-  if (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
-  }
-
-  const { Octokit } = await import("octokit");
-
-  const octokit = new Octokit({
-    auth: data.access_token,
-  });
-
+  const octokit = await getUserOctokit(req, res);
   const { data: repositories } =
     await octokit.rest.apps.listInstallationReposForAuthenticatedUser({
       installation_id,
@@ -527,3 +493,48 @@ function sanitizeObject(obj: ApiObject) {
 }
 
 export default app;
+
+async function getUserAccessToken(req: express.Request, res: express.Response) {
+  const supabase = createServerSupabase(req, res);
+  const user = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from("user_ghtokens")
+    .select("refresh_token")
+    .eq("user_id", user.data.user?.id)
+    .single();
+
+  if (error) {
+    console.error("Error getting access token", error);
+    throw error;
+  }
+
+  const tokens = await refreshToken(data.refresh_token);
+
+  {
+    const { error } = await supabase.from("user_ghtokens").upsert([
+      {
+        user_id: user.data.user?.id,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_in: tokens.expires_in,
+        refresh_token_expires_in: tokens.refresh_token_expires_in,
+        token_type: tokens.token_type,
+        scope: tokens.scope,
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+    }
+  }
+
+  return {
+    accessToken: tokens.access_token,
+  };
+}
+
+async function getUserOctokit(req: express.Request, res: express.Response) {
+  const { accessToken } = await getUserAccessToken(req, res);
+  const { Octokit } = await import("octokit");
+  return new Octokit({ auth: accessToken });
+}
