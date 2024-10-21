@@ -206,28 +206,26 @@ export const Projects = (props: ProjectsProps) => {
   return (
     <div className="flex flex-col gap-8">
       <DataTableToolbar table={table} />
-      <div className="h-[calc(100vh-12rem)] overflow-auto">
-        {Object.entries(resourceTypes).map(([objType, resourceType], index) => (
-          <ProjectGroup
-            key={index}
-            objType={objType}
-            resourceType={resourceType}
-            resources={props.resources}
-            columns={columns}
-            columnFilters={columnFilters}
-            onColumnFiltersChange={setColumnFilters}
-            sorting={sorting}
-            onSortingChange={setSorting}
-          />
-        ))}
-        {emptyTable && (
-          <div className="flex h-16 items-center justify-center">
-            <p className="text-muted-foreground">
-              No resources found for selected filters
-            </p>
-          </div>
-        )}
-      </div>
+      {Object.entries(resourceTypes).map(([objType, resourceType], index) => (
+        <ProjectGroup
+          key={index}
+          objType={objType}
+          resourceType={resourceType}
+          resources={props.resources}
+          columns={columns}
+          columnFilters={columnFilters}
+          onColumnFiltersChange={setColumnFilters}
+          sorting={sorting}
+          onSortingChange={setSorting}
+        />
+      ))}
+      {emptyTable && (
+        <div className="flex h-16 items-center justify-center">
+          <p className="text-muted-foreground">
+            No resources found for selected filters
+          </p>
+        </div>
+      )}
     </div>
   );
 };
