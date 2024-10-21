@@ -7,14 +7,8 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
-import {
-  NamespaceBadge,
-  ResourceActionsMenu,
-  StatusBadge,
-  SystemBadge,
-} from "~/components/resource-row.jsx";
 import { getIconComponent } from "~/lib/hero-icon.jsx";
 import { DataTableColumnHeader } from "~/components/data-table-column-header.jsx";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
@@ -24,6 +18,10 @@ import { LastUpdated } from "./last-updated";
 import { getReadyCondition } from "~/lib/utils";
 import { ResourceDetailsDrawer } from "./resource-details-drawer";
 import { LastLogMessage } from "./last-log-message";
+import { StatusBadge } from "./status-badge";
+import { SystemBadge } from "./system-badge";
+import { NamespaceBadge } from "./namespace-badge";
+import { ResourceActionsMenu } from "./resource-actions-menu";
 
 export interface ProjectsProps {
   resources: Resource[];

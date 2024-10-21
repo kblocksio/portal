@@ -9,12 +9,14 @@ import {
 import { useMemo, useContext, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "~/ResourceContext";
 import { getResourceIconColors } from "~/lib/hero-icon";
-import { ResourceActionsMenu, StatusBadge, SystemBadge } from "./resource-row";
 import Timeline from "./events/timeline";
 import { WorkerEvent } from "@kblocks/api";
 import { X, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "./ui/button.js";
 import { ScrollArea } from "./ui/scroll-area.js";
+import { StatusBadge } from "./status-badge";
+import { SystemBadge } from "./system-badge";
+import { ResourceActionsMenu } from "./resource-actions-menu";
 
 export const ResourceDetailsDrawer = () => {
   const {
