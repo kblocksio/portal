@@ -3,7 +3,7 @@ import { Card, CardContent } from "../../ui/card";
 import { Slider } from "../../ui/slider";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
-import { Field } from "../field-renderer";
+import { Field } from "../form-field";
 
 type InstanceConfig = {
   cpu: number;
@@ -16,7 +16,7 @@ export type InstancePickerConfig = Record<string, InstanceConfig>;
 type InstanceItem = InstanceConfig & { name: string };
 
 export const InstancePicker = ({
-  initialValue, 
+  initialValue,
   defaultInstanceName,
   config,
   onInstanceChange,

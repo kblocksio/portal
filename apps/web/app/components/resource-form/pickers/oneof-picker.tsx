@@ -17,8 +17,9 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { splitAndCapitalizeCamelCase } from "../label-formater";
-import { Field, FieldRenderer, updateDataByPath } from "../field-renderer";
-
+import { FieldRenderer } from "../field-renderer";
+import { Field } from "../form-field";
+import { updateDataByPath } from "../utils";
 export const OneOfPicker = ({
   schema,
   fieldName,

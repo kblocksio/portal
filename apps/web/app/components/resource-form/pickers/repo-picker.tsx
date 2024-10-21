@@ -50,9 +50,11 @@ export const RepoPicker = ({
     if (!repositories || !initialValue) {
       return;
     }
-    setSelectedRepo(repositories?.find(
-      (repo) => repo.full_name === initialValue,
-      ) as Repository);
+    setSelectedRepo(
+      repositories?.find(
+        (repo) => repo.full_name === initialValue,
+      ) as Repository,
+    );
   }, [initialValue, repositories]);
 
   const isLoading = useMemo(() => {
