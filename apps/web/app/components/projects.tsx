@@ -7,7 +7,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import {
   NamespaceBadge,
@@ -169,6 +169,7 @@ export const Projects = (props: ProjectsProps) => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
+        enableSorting: false,
       },
       {
         accessorKey: "actions",
@@ -200,9 +201,7 @@ export const Projects = (props: ProjectsProps) => {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const emptyTable = useMemo(() => {
-    return table.getFilteredRowModel().rows.length === 0;
-  }, [table.getFilteredRowModel().rows]);
+  const emptyTable = table.getFilteredRowModel().rows.length;
 
   return (
     <div className="flex flex-col gap-8">
