@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "~/components/ui/table.jsx";
 import { getResourceIconColors } from "~/lib/hero-icon.jsx";
+import { useNavigate } from "react-router-dom";
 
 export function ProjectGroup(props: {
   objType: string;
@@ -123,16 +124,14 @@ function ResourceTableRow({
   resource: Resource;
   children: React.ReactNode;
 }) {
-  const { setSelectedResourceId } = useContext(ResourceContext);
+  const navigate = useNavigate();
   return (
     <TableRow
       className="cursor-pointer"
-      onClick={() =>
-        setSelectedResourceId({
-          objType: resource.objType,
-          objUri: resource.objUri,
-        })
-      }
+      onClick={() => {
+        const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
+        navigate(`/resource/${resourceDetailsUri}`);
+      }}
     >
       {children}
     </TableRow>
