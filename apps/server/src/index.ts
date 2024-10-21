@@ -11,7 +11,7 @@ import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens, refreshToken } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
-import { getEnv } from "./util";
+import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
 import {
   ApiObject,
@@ -493,48 +493,3 @@ function sanitizeObject(obj: ApiObject) {
 }
 
 export default app;
-
-async function getUserAccessToken(req: express.Request, res: express.Response) {
-  const supabase = createServerSupabase(req, res);
-  const user = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("user_ghtokens")
-    .select("refresh_token")
-    .eq("user_id", user.data.user?.id)
-    .single();
-
-  if (error) {
-    console.error("Error getting access token", error);
-    throw error;
-  }
-
-  const tokens = await refreshToken(data.refresh_token);
-
-  {
-    const { error } = await supabase.from("user_ghtokens").upsert([
-      {
-        user_id: user.data.user?.id,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        expires_in: tokens.expires_in,
-        refresh_token_expires_in: tokens.refresh_token_expires_in,
-        token_type: tokens.token_type,
-        scope: tokens.scope,
-      },
-    ]);
-
-    if (error) {
-      console.error(error);
-    }
-  }
-
-  return {
-    accessToken: tokens.access_token,
-  };
-}
-
-async function getUserOctokit(req: express.Request, res: express.Response) {
-  const { accessToken } = await getUserAccessToken(req, res);
-  const { Octokit } = await import("octokit");
-  return new Octokit({ auth: accessToken });
-}
