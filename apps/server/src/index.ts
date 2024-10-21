@@ -8,10 +8,10 @@ import {
   GetEventsResponse,
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
-import { exchangeCodeForTokens } from "./github.js";
+import { exchangeCodeForTokens, refreshToken } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
-import { getEnv } from "./util";
+import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
 import {
   ApiObject,
@@ -410,25 +410,8 @@ app.get("/api/auth/callback/github", async (req, res) => {
 });
 
 app.get("/api/github/installations", async (req, res) => {
-  const supabase = createServerSupabase(req, res);
-  const user = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("user_ghtokens")
-    .select("access_token")
-    .eq("user_id", user.data.user?.id)
-    .single();
-  if (error) {
-    console.error("error getting access token", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-
-  const { Octokit } = await import("octokit");
-
-  const octokit = new Octokit({
-    auth: data.access_token,
-  });
-
   try {
+    const octokit = await getUserOctokit(req, res);
     const { data: installations } =
       await octokit.rest.apps.listInstallationsForAuthenticatedUser({
         page: 0,
@@ -449,24 +432,7 @@ app.get("/api/github/repositories", async (req, res) => {
   if (!installation_id) {
     return res.status(400).json({ error: "Installation ID is required" });
   }
-  const supabase = createServerSupabase(req, res);
-  const user = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("user_ghtokens")
-    .select("access_token")
-    .eq("user_id", user.data.user?.id)
-    .single();
-  if (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
-  }
-
-  const { Octokit } = await import("octokit");
-
-  const octokit = new Octokit({
-    auth: data.access_token,
-  });
-
+  const octokit = await getUserOctokit(req, res);
   const { data: repositories } =
     await octokit.rest.apps.listInstallationReposForAuthenticatedUser({
       installation_id,
