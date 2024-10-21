@@ -8,24 +8,15 @@
     "format": "prettier . --write"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.7",
     "eslint": "^8.57.1",
-    "jsonwebtoken": "^9.0.2",
-    "octokit": "^4.0.2",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
-    "ts-node": "^10.9.2",
-    "turbo": "^2.1.2",
-    "typescript": "^5.6.2"
+    "turbo": "^2.1.2"
   },
   "name": "with-vite",
   "packageManager": "npm@10.9.0+sha512.65a9c38a8172948f617a53619762cd77e12b9950fe1f9239debcb8d62c652f2081824b986fee7c0af6c0a7df615becebe4bf56e17ec27214a87aa29d9e038b4b",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "@kubernetes/client-node": "^0.22.0",
-    "react-resizable-panels": "^2.1.3"
-  }
+  ]
 }
