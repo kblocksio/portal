@@ -17,7 +17,7 @@ export default function _index() {
   }, [resources]);
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex bg-slate-50">
       <div className="flex h-full w-full flex-col overflow-auto py-12 sm:px-6 lg:px-8">
         <ProjectHeader selectedProject={selectedProject} />
         <div className={"container mx-auto"}>
