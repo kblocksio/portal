@@ -17,12 +17,14 @@ interface DeleteResourceDialogProps {
   resource: Resource;
   isOpen: boolean;
   onClose: () => void;
+  onDeleteClick?: () => void;
 }
 
 export function DeleteResourceDialog({
   resource,
   isOpen,
   onClose,
+  onDeleteClick,
 }: DeleteResourceDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -92,6 +94,7 @@ export function DeleteResourceDialog({
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
+              onDeleteClick?.();
               handleDelete();
             }}
             className="bg-destructive text-destructive-foreground"

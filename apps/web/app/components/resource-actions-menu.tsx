@@ -13,9 +13,11 @@ import { useCreateResourceWizard } from "~/CreateResourceWizardContext";
 export const ResourceActionsMenu = ({
   resource,
   resourceType,
+  onDeleteClick,
 }: {
   resource: Resource;
   resourceType: ResourceType;
+  onDeleteClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { openWizard: openEditWizard } = useCreateResourceWizard();
@@ -52,6 +54,9 @@ export const ResourceActionsMenu = ({
         <DeleteResourceDialog
           resource={resource}
           isOpen={isDeleteOpen}
+          onDeleteClick={() => {
+            onDeleteClick?.();
+          }}
           onClose={() => {
             setIsDeleteOpen(false);
             closeMenu();
