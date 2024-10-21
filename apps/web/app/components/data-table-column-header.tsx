@@ -18,16 +18,14 @@ export interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
-  noSort?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
-  noSort,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  if (!column.getCanSort() || noSort) {
+  if (!column.getCanSort()) {
     return <div className={cn(className, "text-xs")}>{title}</div>;
   }
 
