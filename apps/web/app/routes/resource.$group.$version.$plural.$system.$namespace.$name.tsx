@@ -1,5 +1,5 @@
 import { useParams } from "@remix-run/react";
-import { ChevronDown, ChevronLeft, ChevronUp, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import Timeline from "~/components/events/timeline";
 import { Button } from "~/components/ui/button";
 import {
@@ -84,27 +84,30 @@ export default function Resource() {
 
   return (
     <div className="flex h-screen flex-col bg-slate-50">
-      <div className="flex w-full items-center justify-between border-b bg-slate-50 p-2">
+      <div className="flex w-full items-center justify-between border-b bg-slate-50 p-2 pl-6">
         <div className="flex items-center space-x-4">
           <Button
-            variant="outline"
+            // className="bg-slate-100"
+            variant="ghost"
             onClick={() => {
               setSelectedResourceId(undefined);
               navigate("/");
             }}
           >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            <span className="text-muted-foreground text-sm">Back</span>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {/* <span className="text-muted-foreground text-sm">Back</span> */}
           </Button>
-          {Icon && <Icon className={`${iconColor} h-8 w-8`} />}
-          <div>
-            <h1 className="text-2xl font-bold">
-              {selectedResource.metadata.name}
-            </h1>
-            <p className="text-muted-foreground flex gap-4 text-sm">
-              {selectedResource?.metadata.namespace}
-              <SystemBadge blockUri={selectedResource.objUri} />
-            </p>
+          <div className="flex items-center space-x-4">
+            {Icon && <Icon className={`${iconColor} h-8 w-8`} />}
+            <div>
+              <h1 className="text-2xl font-bold">
+                {selectedResource.metadata.name}
+              </h1>
+              <p className="text-muted-foreground flex gap-4 text-sm">
+                {selectedResource?.metadata.namespace}
+                <SystemBadge blockUri={selectedResource.objUri} />
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -118,7 +121,6 @@ export default function Resource() {
           />
         </div>
       </div>
-
       <ScrollArea className="h-[calc(100vh-8rem)] p-6">
         <ResourceInfo
           selectedResource={selectedResource}
@@ -151,17 +153,17 @@ function ResourceInfo({
 
   return (
     <div className="space-y-6">
-      <section>
+      <section className="border-b pb-2">
         <h3 className="mb-2 text-lg font-semibold">Properties</h3>
         <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
-          <dt className="text-muted-foreground flex items-center justify-end whitespace-nowrap text-sm font-medium">
+          <dt className="text-muted-foreground flex items-center justify-start whitespace-nowrap text-sm font-medium">
             Type
           </dt>
           <dd className="flex items-center">
             {selectedResourceType?.group}/{selectedResourceType?.version}.
             {selectedResourceType?.kind}
           </dd>
-          <dt className="text-muted-foreground flex items-center justify-end whitespace-nowrap text-sm font-medium">
+          <dt className="text-muted-foreground flex items-center justify-start whitespace-nowrap text-sm font-medium">
             Status
           </dt>
           <dd className="flex items-center">
@@ -170,14 +172,14 @@ function ResourceInfo({
         </dl>
       </section>
       {outputsEntries.length > 0 && (
-        <section>
+        <section className="border-b pb-2">
           <h3 className="mb-2 text-lg font-semibold">Outputs</h3>
           <dl className="grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-4 gap-y-2">
             {outputsEntries
               .slice(0, outputsExpanded ? undefined : 3)
               .map(([key, value]) => (
                 <Fragment key={key}>
-                  <dt className="text-muted-foreground flex items-center justify-end text-sm font-medium">
+                  <dt className="text-muted-foreground flex items-center justify-start text-sm font-medium">
                     {key}
                   </dt>
                   <dd key={`${key}-value`} className="flex items-center">
