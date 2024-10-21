@@ -16,7 +16,6 @@ import { DataTableToolbar } from "~/components/data-table-toolbar";
 import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
 import { getReadyCondition } from "~/lib/utils";
-import { ResourceDetailsDrawer } from "./resource-details-drawer";
 import { LastLogMessage } from "./last-log-message";
 import { StatusBadge } from "./status-badge";
 import { SystemBadge } from "./system-badge";
@@ -199,32 +198,36 @@ export const Projects = (props: ProjectsProps) => {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const emptyTable = table.getFilteredRowModel().rows.length;
+  const emptyTable = useMemo(
+    () => table.getFilteredRowModel().rows.length === 0,
+    [table.getFilteredRowModel().rows],
+  );
 
   return (
     <div className="flex flex-col gap-8">
       <DataTableToolbar table={table} />
-      {Object.entries(resourceTypes).map(([objType, resourceType], index) => (
-        <ProjectGroup
-          key={index}
-          objType={objType}
-          resourceType={resourceType}
-          resources={props.resources}
-          columns={columns}
-          columnFilters={columnFilters}
-          onColumnFiltersChange={setColumnFilters}
-          sorting={sorting}
-          onSortingChange={setSorting}
-        />
-      ))}
-      {emptyTable && (
-        <div className="flex h-16 items-center justify-center">
-          <p className="text-muted-foreground">
-            No resources found for selected filters
-          </p>
-        </div>
-      )}
-      <ResourceDetailsDrawer />
+      <div className="h-[calc(100vh-12rem)] overflow-auto">
+        {Object.entries(resourceTypes).map(([objType, resourceType], index) => (
+          <ProjectGroup
+            key={index}
+            objType={objType}
+            resourceType={resourceType}
+            resources={props.resources}
+            columns={columns}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            sorting={sorting}
+            onSortingChange={setSorting}
+          />
+        ))}
+        {emptyTable && (
+          <div className="flex h-16 items-center justify-center">
+            <p className="text-muted-foreground">
+              No resources found for selected filters
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
