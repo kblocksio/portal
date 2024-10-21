@@ -59,7 +59,7 @@ export function ProjectGroup(props: {
     color: undefined,
   });
 
-  return resources.length > 0 ? (
+  return table.getRowModel().rows.length > 0 ? (
     <section>
       <div className="mb-4 flex items-center">
         <Icon className={`${iconColor} mr-2 h-6 w-6`} />
@@ -107,15 +107,6 @@ export function ProjectGroup(props: {
                 ))}
               </ResourceTableRow>
             ))}
-            {table.getRowModel().rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={props.columns.length}>
-                  <div className="flex h-16 items-center justify-center">
-                    <p className="text-muted-foreground">No resources found</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       </div>

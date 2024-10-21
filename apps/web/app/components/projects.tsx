@@ -7,7 +7,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/ResourceContext";
 import {
   NamespaceBadge,
@@ -200,6 +200,10 @@ export const Projects = (props: ProjectsProps) => {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const emptyTable = useMemo(() => {
+    return table.getFilteredRowModel().rows.length === 0;
+  }, [table.getFilteredRowModel().rows]);
+
   return (
     <div className="flex flex-col gap-8">
       <DataTableToolbar table={table} />
@@ -216,6 +220,13 @@ export const Projects = (props: ProjectsProps) => {
           onSortingChange={setSorting}
         />
       ))}
+      {emptyTable && (
+        <div className="flex h-16 items-center justify-center">
+          <p className="text-muted-foreground">
+            No resources found for selected filters
+          </p>
+        </div>
+      )}
       <ResourceDetailsDrawer />
     </div>
   );
