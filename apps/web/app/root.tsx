@@ -50,7 +50,7 @@ export default function App() {
                   <Header />
                   <div className="bg-background flex h-[calc(100vh-theme(height.14))]">
                     <PortalSidebar />
-                    <div className="flex-grow overflow-auto">
+                    <div className="flex-grow overflow-hidden">
                       <Outlet />
                     </div>
                   </div>
