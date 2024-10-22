@@ -3,6 +3,11 @@
     {
       "source": "/api/:path*",
       "destination": "https://api.kblocks.io/api/:path*"
+    },
+
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
