@@ -1,4 +1,3 @@
-import { format } from "date-fns/format";
 import { ChevronRightIcon } from "lucide-react";
 import { useContext } from "react";
 import { ResourceContext } from "~/resource-context";
@@ -26,7 +25,7 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
   }
 
   return (
-    <div className="relative h-6 min-w-0 flex-grow overflow-hidden">
+    <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
         {last && (
           <motion.div
@@ -35,16 +34,13 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
             animate={{ y: "0%", opacity: 1 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex min-w-0 items-center gap-2 space-x-1"
+            className="absolute inset-0 flex min-w-0 items-center gap-0.5 px-1"
           >
             <span className="text-muted-foreground">
-              <ChevronRightIcon className="text-muted-foreground h-4 w-4" />
-            </span>
-            <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap text-xs">
-              {format(new Date(last.timestamp), "yyyy-MM-dd HH:mm:ss")}
+              <ChevronRightIcon className="text-muted-foreground h-3 w-3" />
             </span>
             <span
-              className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-sm"
+              className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-xs"
               title={message}
             >
               {message}

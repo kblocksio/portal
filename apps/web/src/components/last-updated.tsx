@@ -21,7 +21,10 @@ export function LastUpdated({ resource }: { resource: Resource }) {
   const relativeTime = useMemo(
     () =>
       lastUpdated
-        ? formatDistanceToNow(lastUpdated, { addSuffix: true })
+        ? formatDistanceToNow(lastUpdated, { addSuffix: true }).replace(
+            "about ",
+            "",
+          )
         : undefined,
     [lastUpdated],
   );
@@ -32,7 +35,7 @@ export function LastUpdated({ resource }: { resource: Resource }) {
     <div className="text-muted-foreground whitespace-nowrap text-xs">
       <p className="flex items-center">
         <CalendarIcon className="mr-1 h-3 w-3" />
-        Updated {relativeTime}
+        {relativeTime}
       </p>
     </div>
   );
