@@ -106,7 +106,7 @@ export const Projects = (props: ProjectsProps) => {
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
-            <SystemBadge blockUri={props.row.original.objUri} showSystemName />
+            <SystemBadge blockUri={props.row.original.objUri} />
           </div>
         ),
         filterFn: (row, columnId, filterValue) => {
