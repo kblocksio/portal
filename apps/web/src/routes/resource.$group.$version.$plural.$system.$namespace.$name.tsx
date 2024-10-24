@@ -1,14 +1,22 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
-import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ResourceContext, type Resource } from "~/resource-context";
 import { StatusBadge } from "~/components/status-badge";
 import { SystemBadge } from "~/components/system-badge";
-import { ResourceActionsMenu } from "~/components/resource-actions-menu";
 import Timeline from "~/components/events/timeline";
 import { getResourceIconColors } from "~/lib/hero-icon";
+import { Link } from "~/components/ui/link";
+import { useCreateResourceWizard } from "~/create-resource-wizard-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { DeleteResourceDialog } from "~/components/delete-resource";
 
 export const Route = createFileRoute(
   "/resource/$group/$version/$plural/$system/$namespace/$name",
@@ -43,7 +51,7 @@ function Resource() {
       setSelectedResourceId(undefined);
       navigate({ to: "/" });
     }
-  }, [selectedResource, deleteInProgress]);
+  }, [selectedResource, deleteInProgress, setSelectedResourceId, navigate]);
 
   const selectedResourceType = useMemo(
     () =>
@@ -57,6 +65,10 @@ function Resource() {
     () => getResourceIconColors({ color: selectedResource?.color }),
     [selectedResource],
   );
+
+  const { openWizard: openEditWizard } = useCreateResourceWizard();
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
@@ -81,75 +93,127 @@ function Resource() {
   });
 
   return (
-    <div className="flex h-screen flex-col space-y-4 overflow-auto bg-slate-50 p-4">
-      <div className="flex w-full items-center justify-between bg-slate-50 p-2">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSelectedResourceId(undefined);
-              navigate({ to: "/" });
-            }}
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-          </Button>
-          <div className="flex items-center space-x-4">
-            {Icon && <Icon className={`${iconColor} h-10 w-10`} />}
+    <div className="container mx-auto flex flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-2">
+        <div>
+          <Link to="/" variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to all projects
+          </Link>
+        </div>
+
+        <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {Icon && <Icon className={`h-10 w-10 ${iconColor}`} />}
+              {/* <div
+                className={`absolute bottom-0 right-0 h-3 w-3 ${getStatusColor(status)} border-background rounded-full border-2`}
+              ></div> */}
+
+              <div className="absolute bottom-0 right-0">
+                <StatusBadge obj={selectedResource} size="sm" />
+              </div>
+            </div>
             <div>
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl font-bold">
                 {selectedResource.metadata.name}
               </h1>
-              <p className="text-muted-foreground flex gap-4 text-sm">
-                Namespace: {selectedResource?.metadata.namespace}
-                <SystemBadge blockUri={selectedResource.objUri} />
+              <p className="text-muted-foreground flex gap-4 text-sm leading-none">
+                {selectedResourceType?.group}/{selectedResourceType?.version}.
+                {selectedResourceType?.kind}
               </p>
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <StatusBadge obj={selectedResource} />
-          <ResourceActionsMenu
-            resource={selectedResource}
-            resourceType={selectedResourceType}
-            onDeleteClick={() => {
-              setDeleteInProgress(true);
-            }}
-          />
+          <div className="flex space-x-2">
+            <Button
+              variant="default"
+              onClick={() =>
+                openEditWizard({
+                  resource: selectedResource,
+                  resourceType: selectedResourceType,
+                })
+              }
+            >
+              Edit...
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <div className="-mx-2">
+                    <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onSelect={() => {
+                    setIsDeleteOpen(true);
+                  }}
+                >
+                  Delete...
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+
+              <DeleteResourceDialog
+                resource={selectedResource}
+                isOpen={isDeleteOpen}
+                onDeleteClick={() => {
+                  // onDeleteClick?.();
+                }}
+                onClose={() => {
+                  setIsDeleteOpen(false);
+                }}
+              />
+            </DropdownMenu>
+          </div>
         </div>
       </div>
-      <div className="border-b bg-slate-50 p-6">
-        <CardHeader>
-          <CardTitle>Properties</CardTitle>
-        </CardHeader>
+
+      <Card>
         <CardContent>
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-            <div className="text-muted-foreground flex items-center justify-start whitespace-nowrap text-sm font-medium">
-              Type
+          <div className="lg:flex lg:gap-4">
+            <div className="lg:w-1/2">
+              <div className="py-6">
+                <CardTitle>Properties</CardTitle>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                <PropertyKey>Status</PropertyKey>
+                <PropertyValue>
+                  <div>
+                    <StatusBadge obj={selectedResource} showMessage />
+                  </div>
+                </PropertyValue>
+
+                <PropertyKey>Namespace</PropertyKey>
+                <PropertyValue>
+                  {selectedResource.metadata.namespace}
+                </PropertyValue>
+
+                <PropertyKey>System</PropertyKey>
+                <PropertyValue>
+                  <SystemBadge
+                    blockUri={selectedResource.objUri}
+                    showSystemName
+                  />
+                </PropertyValue>
+
+                <KeyValueList data={properties} />
+              </div>
             </div>
-            <div className="flex items-center">
-              {selectedResourceType?.group}/{selectedResourceType?.version}.
-              {selectedResourceType?.kind}
-            </div>
-            <div className="text-muted-foreground flex items-center justify-start whitespace-nowrap text-sm font-medium">
-              Status
-            </div>
-            <div className="flex items-center">
-              <StatusBadge obj={selectedResource} showMessage={true} />
-            </div>
-            <KeyValueList data={properties} />
-          </div>
-          {Object.keys(outputs).length > 0 && (
-            <>
-              <CardTitle className="pb-6 pt-6">Outputs</CardTitle>
+            <div className="lg:w-1/2">
+              <div className="py-6">
+                <CardTitle>Outputs</CardTitle>
+              </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <KeyValueList data={outputs} />
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </CardContent>
-      </div>
+      </Card>
 
-      <div className="bg-slate-50 p-6">
+      <Card>
         <CardHeader>
           <CardTitle>Logs</CardTitle>
         </CardHeader>
@@ -163,10 +227,22 @@ function Resource() {
             />
           )}
         </CardContent>
-      </div>
+      </Card>
     </div>
   );
 }
+
+const PropertyKey = ({ children }: { children: React.ReactNode }) => (
+  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
+    {children}
+  </div>
+);
+
+const PropertyValue = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-center overflow-hidden font-medium">
+    <span className="truncate">{children}</span>
+  </div>
+);
 
 type KeyValueListProps = {
   data: Record<string, string>;
@@ -175,12 +251,8 @@ type KeyValueListProps = {
 const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
   Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
-      <div className="text-muted-foreground flex items-center justify-start whitespace-nowrap text-sm font-medium">
-        {key}
-      </div>
-      <div className="flex items-center justify-start whitespace-nowrap font-medium">
-        {formatValue(value)}
-      </div>
+      <PropertyKey>{key}</PropertyKey>
+      <PropertyValue>{formatValue(value)}</PropertyValue>
     </React.Fragment>
   ));
 

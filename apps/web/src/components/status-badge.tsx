@@ -6,14 +6,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { cva, VariantProps } from "class-variance-authority";
+import { cn } from "~/lib/utils";
 
-export const StatusBadge = ({
-  obj,
-  showMessage,
-}: {
+const variants = cva("", {
+  variants: {
+    size: {
+      default: "h-3 w-3",
+      sm: "h-2 w-2",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
+export interface StatusBadgeProps extends VariantProps<typeof variants> {
   obj?: ApiObject;
   showMessage?: boolean;
-}) => {
+}
+
+export const StatusBadge = ({ obj, showMessage, size }: StatusBadgeProps) => {
   const readyCondition = obj?.status?.conditions?.find(
     (c) => c.type === "Ready",
   );
@@ -22,15 +35,27 @@ export const StatusBadge = ({
   const getStatusContent = (reason: StatusReason) => {
     switch (reason) {
       case StatusReason.Completed:
-        return <div className="h-3 w-3 rounded-full bg-green-500" />;
+        return (
+          <div
+            className={cn(variants({ size }), "rounded-full bg-green-500")}
+          />
+        );
       case StatusReason.ResolvingReferences:
       case StatusReason.InProgress:
-        return <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />;
+        return (
+          <Loader2
+            className={cn(variants({ size }), "animate-spin text-yellow-500")}
+          />
+        );
       case StatusReason.Error:
-        return <div className="h-3 w-3 rounded-full bg-red-500" />;
+        return (
+          <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
+        );
       default:
         console.log("unknown reason", readyCondition);
-        return <div className="h-3 w-3 rounded-full bg-gray-500" />;
+        return (
+          <div className={cn(variants({ size }), "rounded-full bg-gray-500")} />
+        );
     }
   };
 
