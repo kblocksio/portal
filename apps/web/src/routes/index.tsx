@@ -22,20 +22,19 @@ function Index() {
   }, [resources]);
 
   return (
-    <div className="flex pb-8">
-      <div className="flex h-full w-full flex-col overflow-auto py-12 sm:px-6 lg:px-8">
-        <ProjectHeader selectedProject={selectedProject} />
-        <div className={"container mx-auto"}>
-          {isLoading ||
-          !resourceTypes ||
-          Object.keys(resourceTypes).length === 0 ? (
-            <LoadingSkeleton />
-          ) : (
-            <>
-              <Projects resources={allResources} />
-            </>
-          )}
-        </div>
+    <div className="container mx-auto flex flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
+      <ProjectHeader selectedProject={selectedProject} />
+
+      <div>
+        {isLoading ||
+        !resourceTypes ||
+        Object.keys(resourceTypes).length === 0 ? (
+          <LoadingSkeleton />
+        ) : (
+          <>
+            <Projects resources={allResources} />
+          </>
+        )}
       </div>
     </div>
   );
