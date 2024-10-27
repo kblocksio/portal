@@ -130,7 +130,7 @@ function ResourceTableRow({
       className="cursor-pointer"
       onClick={() => {
         const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
-        navigate({ to: `/resource/${resourceDetailsUri}` });
+        navigate({ to: `/resources/${resourceDetailsUri}` });
       }}
     >
       {children}

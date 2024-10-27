@@ -1,4 +1,10 @@
-import React, { useState, useContext, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+  PropsWithChildren,
+} from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -17,9 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "~/components/delete-resource";
+import linkifyHtml from "linkify-html";
 
 export const Route = createFileRoute(
-  "/resource/$group/$version/$plural/$system/$namespace/$name",
+  "/resources/$group/$version/$plural/$system/$namespace/$name",
 )({
   component: Resource,
 });
@@ -93,12 +100,12 @@ function Resource() {
   });
 
   return (
-    <div className="container mx-auto flex flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-2">
+    <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-4">
         <div>
-          <Link to="/" variant="ghost">
+          <Link to="/" variant="ghostAlignLeft">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to all projects
+            Back to projects
           </Link>
         </div>
 
@@ -106,17 +113,13 @@ function Resource() {
           <div className="flex items-center gap-4">
             <div className="relative">
               {Icon && <Icon className={`h-10 w-10 ${iconColor}`} />}
-              {/* <div
-                className={`absolute bottom-0 right-0 h-3 w-3 ${getStatusColor(status)} border-background rounded-full border-2`}
-              ></div> */}
-
-              <div className="absolute bottom-0 right-0">
-                <StatusBadge obj={selectedResource} size="sm" />
-              </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="flex items-center gap-2 text-2xl font-bold">
                 {selectedResource.metadata.name}
+                {/* <div className="align-middle">
+                  <StatusBadge obj={selectedResource} size="sm" />
+                </div> */}
               </h1>
               <p className="text-muted-foreground flex gap-4 text-sm leading-none">
                 {selectedResourceType?.group}/{selectedResourceType?.version}.
@@ -232,17 +235,28 @@ function Resource() {
   );
 }
 
-const PropertyKey = ({ children }: { children: React.ReactNode }) => (
+const PropertyKey = ({ children }: PropsWithChildren) => (
   <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
     {children}
   </div>
 );
 
-const PropertyValue = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center overflow-hidden font-medium">
-    <span className="truncate">{children}</span>
-  </div>
-);
+const PropertyValue = ({ children }: PropsWithChildren) => {
+  if (typeof children === "string" && /<a\s/i.test(children)) {
+    return (
+      <div
+        className="flex items-center overflow-hidden font-medium"
+        dangerouslySetInnerHTML={{ __html: children }}
+      />
+    );
+  }
+
+  return (
+    <div className="flex items-center overflow-hidden font-medium">
+      <span className="truncate">{children}</span>
+    </div>
+  );
+};
 
 type KeyValueListProps = {
   data: Record<string, string>;
@@ -258,7 +272,10 @@ const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
 
 function formatValue(value: any) {
   if (typeof value === "string") {
-    return value;
+    return linkifyHtml(value, {
+      className: "text-blue-500 hover:underline",
+      target: "_blank noreferrer",
+    });
   }
 
   if (
