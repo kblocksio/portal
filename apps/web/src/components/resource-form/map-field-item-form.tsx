@@ -43,7 +43,7 @@ export const MapFieldItemForm = ({
     <div className="w-full">
       <div className="ml-2 mr-2 space-y-6">
         <div className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-2 border-b pb-2">
+          <div className="flex items-center space-x-2 pb-2">
             <Label htmlFor="map-key" className="text-sm font-medium">
               Key
             </Label>
