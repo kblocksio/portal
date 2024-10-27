@@ -1,6 +1,6 @@
 import React from "react";
 
-export const parseDescription = (description: string): React.ReactNode[] => {
+export const linkifyDescription = (description: string): React.ReactNode[] => {
   const regex = /\[([^\]]*)\]\(([^)]+)\)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;

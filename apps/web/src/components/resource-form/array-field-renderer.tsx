@@ -1,6 +1,6 @@
 import { ObjectMetadata } from "@repo/shared";
 import { getDataByPath, updateDataByPath } from "./utils";
-import { parseDescription, sanitizeDescription } from "./description-parser";
+import { linkifyDescription, sanitizeDescription } from "./description-parser";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
 import { Button } from "../ui/button";
 import {
@@ -79,7 +79,7 @@ export const ArrayFieldRenderer = ({
           {required && <span className="text-destructive">*</span>}
           {description && (
             <p className="text-muted-foreground pt-1 text-[0.8rem]">
-              {parseDescription(sanitizeDescription(description))}
+              {linkifyDescription(sanitizeDescription(description))}
             </p>
           )}
         </div>
@@ -140,7 +140,7 @@ export const ArrayFieldRenderer = ({
             </DialogTitle>
             {description && (
               <DialogDescription className="text-muted-foreground text-sm">
-                {parseDescription(sanitizeDescription(description))}
+                {linkifyDescription(sanitizeDescription(description))}
               </DialogDescription>
             )}
           </DialogHeader>

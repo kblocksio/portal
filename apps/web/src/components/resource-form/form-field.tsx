@@ -1,5 +1,5 @@
 import { Label } from "../ui/label";
-import { parseDescription, sanitizeDescription } from "./description-parser";
+import { linkifyDescription, sanitizeDescription } from "./description-parser";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
 
 export const Field = ({
@@ -30,7 +30,7 @@ export const Field = ({
           )}
           {sanitizedDescription && (
             <p className="text-muted-foreground pt-1 text-[0.8rem]">
-              {parseDescription(sanitizedDescription)}
+              {linkifyDescription(sanitizedDescription)}
             </p>
           )}
         </div>

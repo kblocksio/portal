@@ -3,7 +3,7 @@ import { getDataByPath, isObjectPopulated, updateDataByPath } from "./utils";
 import { ObjectFieldForm } from "./object-field-form";
 import { FieldRenderer } from "./field-renderer";
 import { FormFields } from "./form-fields";
-import { parseDescription, sanitizeDescription } from "./description-parser";
+import { linkifyDescription, sanitizeDescription } from "./description-parser";
 import { splitAndCapitalizeCamelCase } from "./label-formater";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
@@ -66,7 +66,7 @@ export const ObjectFieldRenderer = ({
       <div className="flex flex-col">
         {description && (
           <p className="text-muted-foreground pb-6 text-[0.8rem]">
-            {parseDescription(sanitizeDescription(description))}
+            {linkifyDescription(sanitizeDescription(description))}
           </p>
         )}
 
@@ -102,7 +102,7 @@ export const ObjectFieldRenderer = ({
             </div>
             {description && (
               <p className="text-muted-foreground pt-1 text-[0.8rem]">
-                {parseDescription(sanitizeDescription(description))}
+                {linkifyDescription(sanitizeDescription(description))}
               </p>
             )}
           </div>
@@ -145,7 +145,7 @@ export const ObjectFieldRenderer = ({
             </DialogTitle>
             {description && (
               <DialogDescription className="text-muted-foreground text-sm">
-                {parseDescription(sanitizeDescription(description))}
+                {linkifyDescription(sanitizeDescription(description))}
               </DialogDescription>
             )}
           </DialogHeader>

@@ -12,6 +12,7 @@ const linkVariants = cva("", {
     variant: {
       default: "text-primary underline-offset-4 hover:underline",
       ghost: buttonVariants({ variant: "ghost" }),
+      ghostAlignLeft: `${buttonVariants({ variant: "ghost" })} pl-0`,
     },
   },
   defaultVariants: {
