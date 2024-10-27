@@ -25,6 +25,8 @@ import {
 import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
 
+const propetiesBlackList = ["lastStateHash"];
+
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
 )({
@@ -288,11 +290,18 @@ function formatValue(value: any) {
   return JSON.stringify(value);
 }
 
+const containsString = (arr1: string[], arr2: string[]): boolean => {
+  return arr1.some((item) => arr2.includes(item));
+};
+
 function addProperty(
   target: Record<string, string>,
   value: any,
   keyPrefix: string[] = [],
 ) {
+  if (containsString(keyPrefix, propetiesBlackList)) {
+    return;
+  }
   if (value === undefined) {
     return;
   }
