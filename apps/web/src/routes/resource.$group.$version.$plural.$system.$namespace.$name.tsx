@@ -159,7 +159,7 @@ function Resource() {
                 resource={selectedResource}
                 isOpen={isDeleteOpen}
                 onDeleteClick={() => {
-                  // onDeleteClick?.();
+                  setDeleteInProgress(true);
                 }}
                 onClose={() => {
                   setIsDeleteOpen(false);
