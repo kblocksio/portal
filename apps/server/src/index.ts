@@ -8,7 +8,7 @@ import {
   GetEventsResponse,
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
-import { exchangeCodeForTokens, refreshToken } from "./github.js";
+import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv, getUserOctokit } from "./util";
@@ -28,6 +28,7 @@ import {
   loadObject,
   resetStorage,
 } from "./storage";
+import { categories } from "./categories";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 
@@ -131,6 +132,10 @@ app.get("/api/resources", async (_, res) => {
 
 app.get("/api/projects", async (_, res) => {
   return res.status(200).json(projects);
+});
+
+app.get("/api/categories", async (_, res) => {
+  return res.status(200).json(categories);
 });
 
 app.get("/api/types", async (_, res) => {
