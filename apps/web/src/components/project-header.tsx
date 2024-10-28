@@ -27,7 +27,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
         <h1 className="text-3xl font-bold tracking-tight">
           {selectedProject ? selectedProject.label : ""}
         </h1>
-        <p className="text-m text-muted-foreground">
+        <p className="text-md text-muted-foreground">
           {selectedProject ? selectedProject.description : ""}
         </p>
       </div>

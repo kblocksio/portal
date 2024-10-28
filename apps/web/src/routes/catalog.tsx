@@ -88,7 +88,7 @@ function Catalog() {
         </SidebarBody>
       </CatalogSidebar>
       <div className="bg-background flex flex-1 overflow-hidden">
-        <div className="flex flex-1 overflow-hidden bg-slate-50">
+        <div className="flex flex-1 overflow-hidden">
           {/* Parent container wrapping both markdown and metadata */}
           <div className="flex h-full flex-1 flex-row overflow-auto">
             <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl p-2 text-left md:p-8 dark:border-neutral-700">

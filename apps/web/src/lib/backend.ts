@@ -4,6 +4,7 @@ import {
   ResourceQuery,
   CreateResourceResponse,
   ResourceType,
+  Project,
 } from "@repo/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 
@@ -83,4 +84,8 @@ export const deleteResource = async (objUri: string) => {
     `/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
     { force: true },
   );
+};
+
+export const getProjects = async (): Promise<Project[]> => {
+  return (await import("~/mock-data/projects.json")).default;
 };

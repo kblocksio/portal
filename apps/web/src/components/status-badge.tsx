@@ -8,6 +8,7 @@ import {
 } from "./ui/tooltip";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "~/lib/utils";
+import { getResourceReadyCondition } from "./components-utils";
 
 const variants = cva("", {
   variants: {
@@ -27,9 +28,7 @@ export interface StatusBadgeProps extends VariantProps<typeof variants> {
 }
 
 export const StatusBadge = ({ obj, showMessage, size }: StatusBadgeProps) => {
-  const readyCondition = obj?.status?.conditions?.find(
-    (c) => c.type === "Ready",
-  );
+  const readyCondition = getResourceReadyCondition(obj);
   const reason = readyCondition?.reason as StatusReason;
 
   const getStatusContent = (reason: StatusReason) => {

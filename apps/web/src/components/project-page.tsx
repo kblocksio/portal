@@ -22,11 +22,11 @@ import { SystemBadge } from "./system-badge";
 import { NamespaceBadge } from "./namespace-badge";
 import { ResourceActionsMenu } from "./resource-actions-menu";
 
-export interface ProjectsProps {
+export interface ProjectPageProps {
   resources: Resource[];
 }
 
-export const Projects = (props: ProjectsProps) => {
+export const ProjectPage = (props: ProjectPageProps) => {
   const { resourceTypes } = useContext(ResourceContext);
 
   const columns = useMemo<ColumnDef<Resource>[]>(() => {

@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "value": "Backoffice Admin Frontend Project",
+    "label": "Backoffice Admin Frontend Project",
+    "description": "The Acme backoffice UI project 📝. Written in TypeScript/React with shadcn and vite, really awesome stuff 😎. The best team ever! 🎉👨‍💻"
+  },
+  {
+    "value": "Backoffice Backend",
+    "label": "Backoffice Backend",
+    "description": "The REST API backend for the Acme backoffice system."
+  }
+]
