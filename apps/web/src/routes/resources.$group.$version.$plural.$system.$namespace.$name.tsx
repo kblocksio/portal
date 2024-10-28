@@ -177,8 +177,8 @@ function Resource() {
 
       <Card>
         <CardContent>
-          <div className="lg:flex lg:gap-4">
-            <div className="lg:w-1/2">
+          <div className="lg:flex-col lg:gap-4">
+            <div className="w-full">
               <div className="py-6">
                 <CardTitle>Properties</CardTitle>
               </div>
@@ -206,14 +206,16 @@ function Resource() {
                 <KeyValueList data={properties} />
               </div>
             </div>
-            <div className="lg:w-1/2">
-              <div className="py-6">
-                <CardTitle>Outputs</CardTitle>
+            {outputs && Object.keys(outputs).length > 0 && (
+              <div className="w-full">
+                <div className="py-6">
+                  <CardTitle>Outputs</CardTitle>
+                </div>
+                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                  <KeyValueList data={outputs} />
+                </div>
               </div>
-              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                <KeyValueList data={outputs} />
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
