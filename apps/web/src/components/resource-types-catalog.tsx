@@ -69,7 +69,7 @@ const ResourceTypeCategory = ({
   const iconColor = getResourceIconColors({ color: category?.color });
 
   return (
-    <div className="border-input flex flex-col rounded-sm border p-4">
+    <div className="border-input flex flex-col border-b p-4 pb-12">
       <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
           <Icon className={`${iconColor} h-8 w-8`} />
@@ -110,15 +110,15 @@ const ResourceTypeCard = ({
     <Card
       key={`${resource.kind}-${resource.group}-${resource.version}`}
       className="hover:bg-accent flex w-full cursor-pointer justify-between rounded-sm border-none p-0 shadow-none"
-      onClick={() => handleResourceSelect(resource)}
+      // onClick={() => handleResourceSelect(resource)}
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === " ") {
-          e.preventDefault();
-          e.stopPropagation();
-          handleResourceSelect(resource);
-        }
-      }}
+      // onKeyDown={(e) => {
+      //   if (e.key === " ") {
+      //     e.preventDefault();
+      //     e.stopPropagation();
+      //     handleResourceSelect(resource);
+      //   }
+      // }}
     >
       <CardContent className="flex w-full items-center justify-between gap-x-4 p-2">
         <div className="flex items-center gap-x-4">
@@ -128,7 +128,15 @@ const ResourceTypeCard = ({
             {resource.description}
           </CardDescription>
         </div>
-        <Button variant="outline">New</Button>
+        <div className="flex gap-x-2">
+          <Button
+            className="text-sky-500 hover:text-sky-600 hover:underline"
+            variant="ghost"
+          >
+            Docs
+          </Button>
+          <Button variant="outline">New</Button>
+        </div>
       </CardContent>
     </Card>
   );
