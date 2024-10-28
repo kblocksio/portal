@@ -75,30 +75,30 @@ export const Projects = (props: ProjectsProps) => {
           );
         },
       },
-      {
-        accessorKey: "kind",
-        header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Kind" />
-        ),
-        cell: (props) => {
-          const resourceType = resourceTypes[props.row.original.objType];
-          const Icon = getIconComponent({
-            icon: resourceType.icon,
-          });
-          return (
-            <div className="flex items-center gap-1.5">
-              <Icon className="h-4 w-4" />
-              {props.row.original.kind}
-            </div>
-          );
-        },
-        filterFn: (row, columnId, filterValue) => {
-          return filterValue.includes(row.original.kind);
-        },
-        sortingFn: (rowA, rowB) => {
-          return rowA.original.kind.localeCompare(rowB.original.kind);
-        },
-      },
+      // {
+      //   accessorKey: "kind",
+      //   header: (props) => (
+      //     <DataTableColumnHeader column={props.column} title="Kind" />
+      //   ),
+      //   cell: (props) => {
+      //     const resourceType = resourceTypes[props.row.original.objType];
+      //     const Icon = getIconComponent({
+      //       icon: resourceType.icon,
+      //     });
+      //     return (
+      //       <div className="flex items-center gap-1.5">
+      //         <Icon className="h-4 w-4" />
+      //         {props.row.original.kind}
+      //       </div>
+      //     );
+      //   },
+      //   filterFn: (row, columnId, filterValue) => {
+      //     return filterValue.includes(row.original.kind);
+      //   },
+      //   sortingFn: (rowA, rowB) => {
+      //     return rowA.original.kind.localeCompare(rowB.original.kind);
+      //   },
+      // },
       {
         accessorKey: "system",
         header: (props) => (
