@@ -76,12 +76,8 @@ export function ProjectGroup(props: {
                     key={header.id}
                     colSpan={header.colSpan}
                     className={cn(
+                      header.column.id === "logs" ? "w-[50%]" : undefined,
                       header.column.id === "status" ||
-                        header.column.id === "name" ||
-                        header.column.id === "kind" ||
-                        header.column.id === "system" ||
-                        header.column.id === "namespace" ||
-                        header.column.id === "lastUpdated" ||
                         header.column.id === "actions"
                         ? "w-0"
                         : undefined,

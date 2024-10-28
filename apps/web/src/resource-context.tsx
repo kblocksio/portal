@@ -13,6 +13,7 @@ import {
 import { toast } from "react-hot-toast"; // Add this import
 import { request } from "./lib/backend";
 import { getIconComponent } from "./lib/hero-icon";
+import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -255,6 +256,7 @@ export const ResourceProvider = ({
       case "LIFECYCLE":
         toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, {
           duration: 2000,
+          id: urlForResource(blockUri),
           icon: "",
         });
         break;

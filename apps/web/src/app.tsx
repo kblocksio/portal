@@ -6,6 +6,7 @@ import { PortalSidebar } from "./components/portal-sidebar.js";
 import { ResourceProvider } from "./resource-context.js";
 import toast, { ToastBar, Toaster } from "react-hot-toast";
 import { CreateResourceWizardProvider } from "./create-resource-wizard-context.js";
+import { useNavigate } from "@tanstack/react-router";
 
 export function App(props: PropsWithChildren) {
   useEffect(() => {
@@ -21,6 +22,8 @@ export function App(props: PropsWithChildren) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  const navigate = useNavigate();
 
   return (
     <AppProvider>
@@ -47,10 +50,22 @@ export function App(props: PropsWithChildren) {
                     style={{ overflowX: "auto", maxWidth: "700px" }}
                   >
                     {({ icon, message }) => (
-                      <div className="flex items-center justify-between">
-                        <button onClick={() => toast.dismiss(t.id)}>
-                          {icon}
-                        </button>
+                      <div
+                        className="flex items-center justify-between"
+                        onClick={() => {
+                          // navigate to the resource (id is expected to be the url for the resource
+                          navigate({ to: t.id });
+                          toast.dismiss(t.id);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            toast.dismiss(t.id);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {icon}
                         {message}
                       </div>
                     )}

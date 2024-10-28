@@ -24,8 +24,13 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
+import { BlockUriComponents } from "@kblocks/api";
 
 const propetiesBlackList = ["lastStateHash"];
+
+export function urlForResource(blockUri: BlockUriComponents) {
+  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
+}
 
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",

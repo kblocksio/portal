@@ -7,19 +7,26 @@ import {
   ChevronRight,
 } from "lucide-react";
 import {
-  Event,
   EventAction,
   EventReason,
-  LifecycleEvent,
   LogEvent,
   LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
+import { MarkdownWrapper } from "../markdown";
+
+type GroupHeader = {
+  timestamp: Date;
+  reason: EventReason;
+  action: EventAction;
+  message: string;
+  details?: string;
+};
 
 type EventGroup = {
-  lifecycleEvent: LifecycleEvent;
+  header: GroupHeader;
   logs: LogEvent[];
 };
 
@@ -63,16 +70,16 @@ function EventItem({
   eventGroup: EventGroup;
   isLast: boolean;
 }) {
-  const event = eventGroup.lifecycleEvent;
-  const timestamp = event.timestamp.toLocaleString();
-  const ReasonIcon = getReasonIcon(event.event.reason);
-  const reasonColor = getReasonColor(event.event.reason);
-  const action = getActionLabel(event.event.action);
+  const header = eventGroup.header;
+  const timestamp = header.timestamp.toLocaleString();
+  const ReasonIcon = getReasonIcon(header.reason);
+  const reasonColor = getReasonColor(header.reason);
+  const action = getActionLabel(header.action);
   const [isOpen, setIsOpen] = useState(isLast);
 
-  const isClickable = eventGroup.logs.length > 0;
-  const messageColor = getMessageColor(event.event);
-  const message = formatMessage(event.event.message);
+  const isClickable = eventGroup.logs.length > 0 || header.details;
+  const messageColor = getMessageColor(header);
+  const message = formatMessage(header.message);
 
   return (
     <div className="relative pl-10">
@@ -105,6 +112,13 @@ function EventItem({
           />
         )}
       </div>
+
+      {isOpen && header.details && (
+        <div>
+          <MarkdownWrapper content={header.details}/>
+        </div>
+      )}
+
       {isOpen && eventGroup.logs.length > 0 && (
         <div className="mb-10 mr-10 mt-0 space-y-1 rounded-sm bg-slate-800 p-4 pb-4 font-mono text-xs shadow-md">
           {eventGroup.logs.map((log, index) => (
@@ -173,24 +187,19 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
   for (const event of events) {
     if (event.type === "LIFECYCLE") {
       currentGroup = {
-        lifecycleEvent: event,
+        header: {
+          timestamp: event.timestamp,
+          reason: event.event.reason,
+          action: event.event.action,
+          message: event.event.message,
+        },
         logs: [],
       };
 
       const messageLines = event.event.message.split("\n");
       if (messageLines.length > 1) {
-        const renderLogEvent = (line: string): LogEvent => {
-          return {
-            type: "LOG",
-            level: LogLevel.ERROR,
-            message: line,
-            objUri: event.objUri,
-            objType: event.objType,
-            timestamp: event.timestamp,
-          };
-        };
 
-        currentGroup.logs.push(...messageLines.map(renderLogEvent));
+        currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
       }
 
       groups.push(currentGroup);
@@ -200,11 +209,26 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
       } else {
         // ignore
       }
+    } else if (event.type === "ERROR" && event.explanation && currentGroup) {
+      const details = formatExplanation(event.explanation);
+      currentGroup.header.details = details.join("\n\n");
     }
   }
 
   return groups;
 }
+
+const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
+  return {
+    type: "LOG",
+    level: LogLevel.ERROR,
+    message: line,
+    objUri: event.objUri,
+    objType: event.objType,
+    timestamp: event.timestamp,
+  };
+};
+
 
 const getActionLabel = (action: EventAction) => {
   switch (action) {
@@ -221,8 +245,8 @@ const getActionLabel = (action: EventAction) => {
   }
 };
 
-const getMessageColor = (event: Event) => {
-  if (event.reason === EventReason.Failed) {
+const getMessageColor = (header: GroupHeader) => {
+  if (header.reason === EventReason.Failed) {
     return "text-red-700";
   }
   return "text-gray-800";
@@ -232,3 +256,20 @@ const formatMessage = (message: string) => {
   const first = message.split("\n")[0];
   return first.replace("Error: Error: ", "Error: ");
 };
+
+function formatExplanation(explanation: any): string[] {
+  if ("blocks" in explanation) {
+    const lines = [];
+    for (const block of explanation.blocks) {
+      if ("text" in block) {
+        lines.push(block.text.text);
+      }
+      // lines.push(JSON.stringify(block));
+    }
+
+    return lines;
+  }
+
+  return [JSON.stringify(explanation)];
+}
+
