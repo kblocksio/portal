@@ -5,11 +5,8 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import {
-  CreateResourceWizard,
-  EditModeData,
-} from "./components/create-resource-wizard";
-import { ResourceType, ResourceContext } from "./resource-context";
+import { CreateResourceWizard } from "./components/create-resource-wizard";
+import { ResourceType, ResourceContext, Resource } from "./resource-context";
 import { createResource } from "./lib/backend";
 import { Category } from "@repo/shared";
 
@@ -18,9 +15,15 @@ interface CreateResourceWizardContextType {
   isLoading: boolean;
   selectedResourceType: ResourceType | undefined;
   setSelectedResourceType: (resourceType: ResourceType | undefined) => void;
-  openWizard: (editModeData?: EditModeData) => void;
+  openWizard: (
+    currentEditableResource?: Resource,
+    selectedResourceType?: ResourceType,
+    step?: number,
+  ) => void;
   closeWizard: () => void;
   categories: Record<string, Category>;
+  step: number;
+  setStep: (step: number) => void;
 }
 
 const CreateResourceWizardContext = createContext<
@@ -45,10 +48,11 @@ export const CreateResourceWizardProvider: React.FC<
   CreateResourceWizardProviderProps
 > = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [editModeData, setEditModeData] = useState<EditModeData | undefined>(
-    undefined,
-  );
+  const [currentEditableResource, setCurrentEditableResource] = useState<
+    Resource | undefined
+  >(undefined);
   const [selectedResourceType, setSelectedResourceType] = useState<
     ResourceType | undefined
   >(undefined);
@@ -58,14 +62,24 @@ export const CreateResourceWizardProvider: React.FC<
     return Object.values(resourceTypes).filter((r) => !r.kind?.endsWith("Ref"));
   }, [resourceTypes]);
 
-  const openWizard = useCallback((editModeData?: EditModeData) => {
-    setEditModeData(editModeData);
-    setIsOpen(true);
-  }, []);
+  const openWizard = useCallback(
+    (
+      currentEditableResource?: Resource,
+      selectedResourceType?: ResourceType,
+      step?: number,
+    ) => {
+      setCurrentEditableResource(currentEditableResource);
+      setSelectedResourceType(selectedResourceType);
+      setStep(step || currentEditableResource ? 2 : 1);
+      setIsOpen(true);
+    },
+    [],
+  );
 
   const closeWizard = useCallback(() => {
     setIsOpen(false);
-    setEditModeData(undefined);
+    setStep(1);
+    setCurrentEditableResource(undefined);
     setSelectedResourceType(undefined);
   }, []);
 
@@ -78,6 +92,7 @@ export const CreateResourceWizardProvider: React.FC<
     await createResource(system, resourceType, providedValues);
     setIsLoading(false);
     setIsOpen(false);
+    setStep(1);
     setSelectedResourceType(undefined);
   };
 
@@ -85,26 +100,28 @@ export const CreateResourceWizardProvider: React.FC<
     async (system: string, resourceType: ResourceType, providedValues: any) => {
       setIsLoading(true);
       const updatedResource = {
-        ...editModeData?.resource,
+        ...currentEditableResource,
         ...providedValues,
       };
       await createResource(system, resourceType, updatedResource);
       setIsLoading(false);
       setIsOpen(false);
+      setStep(1);
+      setCurrentEditableResource(undefined);
       setSelectedResourceType(undefined);
     },
-    [editModeData],
+    [currentEditableResource],
   );
 
   const handleCreateOrEdit = useCallback(
     async (system: string, resourceType: ResourceType, providedValues: any) => {
-      if (editModeData) {
+      if (currentEditableResource) {
         await handleEditResource(system, resourceType, providedValues);
       } else {
         await handleCreateResource(system, resourceType, providedValues);
       }
     },
-    [editModeData, handleCreateResource, handleEditResource],
+    [currentEditableResource, handleCreateResource, handleEditResource],
   );
 
   const value = {
@@ -115,6 +132,9 @@ export const CreateResourceWizardProvider: React.FC<
     openWizard,
     closeWizard,
     categories,
+    step,
+    setStep,
+    currentEditableResource,
   };
 
   return (
@@ -123,6 +143,8 @@ export const CreateResourceWizardProvider: React.FC<
       <CreateResourceWizard
         isOpen={isOpen}
         isLoading={isLoading}
+        step={step}
+        setStep={setStep}
         handleOnOpenChange={(open: boolean) => {
           if (open) {
             openWizard();
@@ -132,7 +154,7 @@ export const CreateResourceWizardProvider: React.FC<
         }}
         handleOnCreate={handleCreateOrEdit}
         resourceTypes={filteredResourceTypes}
-        editModeData={editModeData}
+        currentEditableResource={currentEditableResource}
       />
     </CreateResourceWizardContext.Provider>
   );

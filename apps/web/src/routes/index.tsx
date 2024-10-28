@@ -7,6 +7,7 @@ import { ResourceContext, ResourceType } from "~/resource-context";
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { ResourceTypesCatalog } from "~/components/resource-types-catalog";
+import { useCreateResourceWizard } from "~/create-resource-wizard-context";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { resourceTypes, categories } = useContext(ResourceContext);
+  const { openWizard } = useCreateResourceWizard();
 
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +29,13 @@ function Index() {
       item.kind.toLowerCase().includes(searchQuery?.toLowerCase()),
     );
   }, [resourceTypes, searchQuery]);
+
+  const handleResourceSelect = useCallback(
+    (resourceType: ResourceType) => {
+      openWizard(undefined, resourceType, 2);
+    },
+    [openWizard],
+  );
 
   return (
     <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -55,7 +64,7 @@ function Index() {
         <ResourceTypesCatalog
           categories={categories}
           filtereResources={filteredResourceTypes}
-          handleResourceSelect={() => {}}
+          handleResourceSelect={handleResourceSelect}
           isLoading={false}
         />
       </div>

@@ -138,10 +138,7 @@ function Resource() {
             <Button
               variant="default"
               onClick={() =>
-                openEditWizard({
-                  resource: selectedResource,
-                  resourceType: selectedResourceType,
-                })
+                openEditWizard(selectedResource, selectedResourceType)
               }
             >
               Edit...

@@ -123,7 +123,7 @@ export const FormGenerator = ({
       </div>
       <div className="flex justify-between border-t border-gray-200 pt-4">
         <Button type="button" variant="outline" onClick={handleBack}>
-          Back
+          {!initialValues ? "Back" : "Cancel"}
         </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
