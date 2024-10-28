@@ -9,9 +9,9 @@ import {
   ColumnSort,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { Resource, ResourceType } from "~/resource-context";
-import { cn } from "~/lib/utils";
+import { cn, getResourceOutputs } from "~/lib/utils";
 import {
   Table,
   TableBody,
@@ -22,12 +22,13 @@ import {
 } from "~/components/ui/table";
 import { getResourceIconColors } from "~/lib/hero-icon";
 import { useNavigate } from "@tanstack/react-router";
+import { useProjectColumns } from "./projects";
+import { DataTableColumnHeader } from "./data-table-column-header";
 
 export function ProjectGroup(props: {
   objType: string;
   resourceType: ResourceType;
   resources: Resource[];
-  columns: ColumnDef<Resource>[];
   columnFilters: ColumnFiltersState;
   onColumnFiltersChange: OnChangeFn<ColumnFiltersState>;
   sorting: ColumnSort[];
@@ -39,9 +40,40 @@ export function ProjectGroup(props: {
     );
   }, [props.resources, props.objType]);
 
+  const outputColumns = useMemo<ColumnDef<Resource>[]>(() => {
+    if (resources.length === 0) {
+      return [];
+    }
+
+    const outputs = Object.keys(getResourceOutputs(resources[0]));
+
+    return outputs.map((output) => ({
+      accessorKey: output,
+      header: (props) => (
+        <TableHead
+          key={props.header.id}
+          colSpan={props.header.colSpan}
+          className="max-w-32"
+        >
+          <DataTableColumnHeader column={props.column} title={output} />
+        </TableHead>
+      ),
+      cell: (props) => (
+        <div
+          className="max-w-32 truncate"
+          title={props.row.original.status?.[output]}
+        >
+          {props.row.original.status?.[output]}
+        </div>
+      ),
+    }));
+  }, [resources]);
+
+  const columns = useProjectColumns(outputColumns);
+
   const table = useReactTable({
     data: resources,
-    columns: props.columns,
+    columns,
     state: {
       columnFilters: props.columnFilters,
       sorting: props.sorting,
@@ -71,26 +103,14 @@ export function ProjectGroup(props: {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className={cn(
-                      header.column.id === "logs" ? "w-[50%]" : undefined,
-                      header.column.id === "status" ||
-                        header.column.id === "actions"
-                        ? "w-0"
-                        : undefined,
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) =>
+                  header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      ),
+                )}
               </TableRow>
             ))}
           </TableHeader>
