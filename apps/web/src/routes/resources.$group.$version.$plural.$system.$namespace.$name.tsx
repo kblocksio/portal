@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
-import { BlockUriComponents } from "@kblocks/api";
+import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "~/lib/utils";
 
 export function urlForResource(blockUri: BlockUriComponents) {
@@ -40,17 +40,17 @@ export const Route = createFileRoute(
 function Resource() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const { resourceTypes, resources, eventsPerObject, setSelectedResourceId } =
+  const { resourceTypes, resources, eventsPerObject, setSelectedResourceId, loadEvents } =
     useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
 
+  const objUri = formatBlockUri({ group, version, plural, system, namespace, name });
+
+  loadEvents(objUri);
+
   const selectedResource = useMemo(() => {
-    return resources
-      .get(`${group}/${version}/${plural}`)
-      ?.get(
-        `kblocks://${group}/${version}/${plural}/${system}/${namespace}/${name}`,
-      );
-  }, [resources, group, version, plural, system, namespace, name]);
+    return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
+  }, [resources, objUri]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -181,7 +181,7 @@ function Resource() {
                 <PropertyValue>
                   <div className="flex gap-2"> 
                     {selectedResource.status?.conditions?.map(condition => (
-                      <StatusBadge obj={selectedResource} showMessage type={condition.type} />
+                      <StatusBadge key={condition.type} obj={selectedResource} showMessage type={condition.type} />
                     ))}
                   </div>
                 </PropertyValue>
