@@ -15,12 +15,13 @@ import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { DataTableToolbar } from "~/components/data-table-toolbar";
 import { ProjectGroup } from "~/components/project-group";
 import { LastUpdated } from "./last-updated";
-import { getReadyCondition } from "~/lib/utils";
+import { cn, getReadyCondition } from "~/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { StatusBadge } from "./status-badge";
 import { SystemBadge } from "./system-badge";
 import { NamespaceBadge } from "./namespace-badge";
 import { ResourceActionsMenu } from "./resource-actions-menu";
+import { TableHead } from "./ui/table";
 
 export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
   const { resourceTypes } = useContext(ResourceContext);
@@ -29,7 +30,9 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
     return [
       {
         accessorKey: "status",
-        header: () => <></>,
+        header: (props) => (
+          <TableHead colSpan={props.header.colSpan} className="w-0"></TableHead>
+        ),
         cell: (props) => <StatusBadge obj={props.row.original} />,
         filterFn: (row, columnId, filterValue) => {
           const readyCondition = getReadyCondition(row.original);
@@ -55,7 +58,9 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "name",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Name" />
+          <TableHead key={props.header.id} colSpan={props.header.colSpan}>
+            <DataTableColumnHeader column={props.column} title="Name" />
+          </TableHead>
         ),
         cell: (props) => (
           <div className="whitespace-nowrap">
@@ -71,34 +76,12 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
           );
         },
       },
-      // {
-      //   accessorKey: "kind",
-      //   header: (props) => (
-      //     <DataTableColumnHeader column={props.column} title="Kind" />
-      //   ),
-      //   cell: (props) => {
-      //     const resourceType = resourceTypes[props.row.original.objType];
-      //     const Icon = getIconComponent({
-      //       icon: resourceType.icon,
-      //     });
-      //     return (
-      //       <div className="flex items-center gap-1.5">
-      //         <Icon className="h-4 w-4" />
-      //         {props.row.original.kind}
-      //       </div>
-      //     );
-      //   },
-      //   filterFn: (row, columnId, filterValue) => {
-      //     return filterValue.includes(row.original.kind);
-      //   },
-      //   sortingFn: (rowA, rowB) => {
-      //     return rowA.original.kind.localeCompare(rowB.original.kind);
-      //   },
-      // },
       {
         accessorKey: "system",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="System" />
+          <TableHead key={props.header.id} colSpan={props.header.colSpan}>
+            <DataTableColumnHeader column={props.column} title="System" />
+          </TableHead>
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
@@ -118,7 +101,9 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "namespace",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Namespace" />
+          <TableHead key={props.header.id} colSpan={props.header.colSpan}>
+            <DataTableColumnHeader column={props.column} title="Namespace" />
+          </TableHead>
         ),
         cell: (props) =>
           props.row.original.metadata.namespace && (
@@ -138,7 +123,9 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "lastUpdated",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Last Updated" />
+          <TableHead key={props.header.id} colSpan={props.header.colSpan}>
+            <DataTableColumnHeader column={props.column} title="Last Updated" />
+          </TableHead>
         ),
         cell: (props) => <LastUpdated resource={props.row.original} />,
         sortingFn: (rowA, rowB) => {
@@ -160,14 +147,22 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "logs",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Logs" />
+          <TableHead
+            key={props.header.id}
+            colSpan={props.header.colSpan}
+            className="w-[50%] min-w-96"
+          >
+            <DataTableColumnHeader column={props.column} title="Logs" />
+          </TableHead>
         ),
         cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
         enableSorting: false,
       },
       {
         accessorKey: "actions",
-        header: () => <></>,
+        header: (props) => (
+          <TableHead colSpan={props.header.colSpan} className="w-0"></TableHead>
+        ),
         cell: (props) => (
           <ResourceActionsMenu
             resource={props.row.original}

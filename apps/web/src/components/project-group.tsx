@@ -50,13 +50,20 @@ export function ProjectGroup(props: {
     return outputs.map((output) => ({
       accessorKey: output,
       header: (props) => (
-        <DataTableColumnHeader column={props.column} title={output} />
+        <TableHead
+          key={props.header.id}
+          colSpan={props.header.colSpan}
+          className="max-w-32"
+        >
+          <DataTableColumnHeader column={props.column} title={output} />
+        </TableHead>
       ),
       cell: (props) => (
-        <div className="min-w-0">
-          <span className="truncate">
-            {props.row.original.status?.[output]}
-          </span>
+        <div
+          className="max-w-32 truncate"
+          title={props.row.original.status?.[output]}
+        >
+          {props.row.original.status?.[output]}
         </div>
       ),
     }));
@@ -96,28 +103,14 @@ export function ProjectGroup(props: {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className={cn(
-                      header.column.id === "logs"
-                        ? "w-[50%] min-w-96"
-                        : undefined,
-                      header.column.id === "status" ||
-                        header.column.id === "actions"
-                        ? "w-0"
-                        : undefined,
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) =>
+                  header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      ),
+                )}
               </TableRow>
             ))}
           </TableHeader>
