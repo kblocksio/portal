@@ -150,7 +150,7 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
           <TableHead
             key={props.header.id}
             colSpan={props.header.colSpan}
-            className="w-[50%] min-w-96"
+            className="w-[100px]"
           >
             <DataTableColumnHeader column={props.column} title="Logs" />
           </TableHead>

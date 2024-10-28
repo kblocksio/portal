@@ -321,7 +321,7 @@ export const ResourceProvider = ({
     Promise.all(requests).catch((e) => {
       console.error(e);
     });
-  };  
+  }; 
 
   const value: ResourceContextValue = {
     resourceTypes,
