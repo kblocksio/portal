@@ -179,8 +179,10 @@ function Resource() {
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <PropertyKey>Status</PropertyKey>
                 <PropertyValue>
-                  <div>
-                    <StatusBadge obj={selectedResource} showMessage />
+                  <div className="flex gap-2"> 
+                    {selectedResource.status?.conditions?.map(condition => (
+                      <StatusBadge obj={selectedResource} showMessage type={condition.type} />
+                    ))}
                   </div>
                 </PropertyValue>
 

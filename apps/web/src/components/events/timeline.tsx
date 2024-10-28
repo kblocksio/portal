@@ -54,11 +54,11 @@ export default function Timeline({
         />
       ))}
 
-      <div
+      {/* <div
         ref={(el) =>
           el && el.scrollIntoView({ behavior: "smooth", block: "end" })
         }
-      />
+      /> */}
     </ScrollArea>
   );
 }

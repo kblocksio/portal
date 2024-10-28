@@ -24,6 +24,7 @@ import { getResourceIconColors } from "~/lib/hero-icon";
 import { useNavigate } from "@tanstack/react-router";
 import { useProjectColumns } from "./projects";
 import { DataTableColumnHeader } from "./data-table-column-header";
+import { StatusBadge } from "./status-badge";
 
 export function ProjectGroup(props: {
   objType: string;
@@ -47,7 +48,31 @@ export function ProjectGroup(props: {
 
     const outputs = Object.keys(getResourceOutputs(resources[0]));
 
-    return outputs.map((output) => ({
+    
+    const result: ColumnDef<Resource>[] = [];
+
+    // see if we have any special status conditions
+    const conditions = new Set<string>();
+    for (const r of resources) {
+      const nonReadyConditions = r.status?.conditions?.filter(c => c.type !== "Ready");
+      for (const c of nonReadyConditions ?? []) {
+        const type = c.type;
+        if (type) {
+          conditions.add(type);
+        }
+      }
+    }
+
+    for (const type of conditions) {
+      result.push({
+        accessorKey: type,
+        header: (props) => <TableHead colSpan={props.header.colSpan}><DataTableColumnHeader column={props.column} title={type} /></TableHead>,
+        cell: (props) => <StatusBadge obj={props.row.original} type={type} />,
+      });
+    }
+    
+    
+    result.push(...outputs.map((output) => ({
       accessorKey: output,
       header: (props) => (
         <TableHead
@@ -66,7 +91,10 @@ export function ProjectGroup(props: {
           {props.row.original.status?.[output]}
         </div>
       ),
-    }));
+    })) as ColumnDef<Resource>[]);
+
+
+    return result;
   }, [resources]);
 
   const columns = useProjectColumns(outputColumns);
