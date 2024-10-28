@@ -197,7 +197,6 @@ export const ResourceProvider = ({
   };
 
   const handlePatchMessage = (message: PatchEvent) => {
-    console.log("handlePatchMessage", message);
     const { objUri, objType, patch } = message;
     setResources((prevResourcesForTypes) => {
       const resoucesForTypeMap = prevResourcesForTypes.get(objType);
@@ -264,7 +263,9 @@ export const ResourceProvider = ({
         handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
       case "ERROR":
-        toast.error(lastJsonMessage.message ?? "Unknown error");
+        toast.error(lastJsonMessage.message ?? "Unknown error", {
+          id: urlForResource(blockUri),
+        });
         break;
       case "LIFECYCLE":
         toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, {
