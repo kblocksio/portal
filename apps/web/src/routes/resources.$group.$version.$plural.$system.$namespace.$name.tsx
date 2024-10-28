@@ -25,8 +25,7 @@ import {
 import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents } from "@kblocks/api";
-
-const propetiesBlackList = ["lastStateHash"];
+import { getResourceProperties, getResourceOutputs } from "~/lib/utils";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -84,27 +83,17 @@ function Resource() {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const properties = useMemo(() => {
+    return selectedResource ? getResourceProperties(selectedResource) : {};
+  }, [selectedResource]);
+
+  const outputs = useMemo(() => {
+    return selectedResource ? getResourceOutputs(selectedResource) : {};
+  }, [selectedResource]);
+
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
-
-  const properties: Record<string, string> = {};
-  const outputs: Record<string, string> = {};
-
-  addProperty(properties, {
-    ...selectedResource,
-    status: undefined,
-    metadata: undefined,
-    apiVersion: undefined,
-    kind: undefined,
-    objType: undefined,
-    objUri: undefined,
-  });
-
-  addProperty(outputs, {
-    ...selectedResource?.status,
-    conditions: undefined,
-  });
 
   return (
     <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
@@ -295,30 +284,4 @@ function formatValue(value: any) {
   }
 
   return JSON.stringify(value);
-}
-
-const containsString = (arr1: string[], arr2: string[]): boolean => {
-  return arr1.some((item) => arr2.includes(item));
-};
-
-function addProperty(
-  target: Record<string, string>,
-  value: any,
-  keyPrefix: string[] = [],
-) {
-  if (containsString(keyPrefix, propetiesBlackList)) {
-    return;
-  }
-  if (value === undefined) {
-    return;
-  }
-  if (Array.isArray(value)) {
-    target[keyPrefix.join(".")] = value.join(", ");
-  } else if (typeof value === "object" && value !== null) {
-    for (const [k, v] of Object.entries(value)) {
-      addProperty(target, v, [...keyPrefix, k]);
-    }
-  } else {
-    target[keyPrefix.join(".")] = value;
-  }
 }

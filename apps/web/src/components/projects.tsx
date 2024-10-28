@@ -22,11 +22,7 @@ import { SystemBadge } from "./system-badge";
 import { NamespaceBadge } from "./namespace-badge";
 import { ResourceActionsMenu } from "./resource-actions-menu";
 
-export interface ProjectsProps {
-  resources: Resource[];
-}
-
-export const Projects = (props: ProjectsProps) => {
+export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
   const { resourceTypes } = useContext(ResourceContext);
 
   const columns = useMemo<ColumnDef<Resource>[]>(() => {
@@ -160,6 +156,7 @@ export const Projects = (props: ProjectsProps) => {
           return lastUpdatedA.localeCompare(lastUpdatedB);
         },
       },
+      ...(outputColumns ?? []),
       {
         accessorKey: "logs",
         header: (props) => (
@@ -180,6 +177,18 @@ export const Projects = (props: ProjectsProps) => {
       },
     ];
   }, [resourceTypes]);
+
+  return columns;
+};
+
+export interface ProjectsProps {
+  resources: Resource[];
+}
+
+export const Projects = (props: ProjectsProps) => {
+  const { resourceTypes } = useContext(ResourceContext);
+
+  const columns = useProjectColumns();
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<ColumnSort[]>([]);
@@ -212,7 +221,6 @@ export const Projects = (props: ProjectsProps) => {
           objType={objType}
           resourceType={resourceType}
           resources={props.resources}
-          columns={columns}
           columnFilters={columnFilters}
           onColumnFiltersChange={setColumnFilters}
           sorting={sorting}
