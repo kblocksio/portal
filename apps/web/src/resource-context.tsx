@@ -126,8 +126,6 @@ export const ResourceProvider = ({
         };
       }
 
-      console.log("resourceTypes", result);
-
       setResourceTypes(result);
     }
   }, [resourceTypesData]);
