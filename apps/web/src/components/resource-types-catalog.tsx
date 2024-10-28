@@ -11,6 +11,7 @@ import { ResourceType } from "~/resource-context";
 import { Category } from "@repo/shared";
 import { useMemo } from "react";
 import { MarkdownWrapper } from "./markdown";
+import { Button } from "./ui/button";
 
 export interface ResourceTypesCatalogProps {
   categories: Record<string, Category>;
@@ -38,7 +39,7 @@ export const ResourceTypesCatalog = ({
       <ResourceCardSkeleton key={index} />
     ))
   ) : (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       {typesForCategories.map(
         ({ category, resources }) =>
           resources &&
@@ -68,7 +69,7 @@ const ResourceTypeCategory = ({
   const iconColor = getResourceIconColors({ color: category?.color });
 
   return (
-    <div className="flex flex-col">
+    <div className="border-input flex flex-col rounded-sm border p-4">
       <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
           <Icon className={`${iconColor} h-8 w-8`} />
@@ -83,7 +84,7 @@ const ResourceTypeCategory = ({
           />
         </p>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="flex flex-col gap-y-4">
         {resources.map((resource) => (
           <ResourceTypeCard
             key={`${resource.kind}-${resource.group}-${resource.version}`}
@@ -108,7 +109,7 @@ const ResourceTypeCard = ({
   return (
     <Card
       key={`${resource.kind}-${resource.group}-${resource.version}`}
-      className="hover:bg-accent flex min-h-[100px] cursor-pointer flex-col justify-between rounded-sm"
+      className="hover:bg-accent flex w-full cursor-pointer justify-between rounded-sm border-none p-0 shadow-none"
       onClick={() => handleResourceSelect(resource)}
       tabIndex={0}
       onKeyDown={(e) => {
@@ -119,16 +120,15 @@ const ResourceTypeCard = ({
         }
       }}
     >
-      <CardContent className="flex min-h-[120px] gap-x-4 p-4">
-        <div className="flex items-center">
-          <Icon className={`${iconColor} h-10 w-10`} />
-        </div>
-        <div className="flex flex-col gap-y-2">
+      <CardContent className="flex w-full items-center justify-between gap-x-4 p-2">
+        <div className="flex items-center gap-x-4">
+          <Icon className={`${iconColor} h-6 w-6`} />
           <CardTitle>{resource.kind}</CardTitle>
-          <CardDescription className="line-clamp-3 overflow-hidden text-ellipsis">
+          <CardDescription className="line-clamp-2 overflow-hidden text-ellipsis">
             {resource.description}
           </CardDescription>
         </div>
+        <Button variant="outline">New</Button>
       </CardContent>
     </Card>
   );

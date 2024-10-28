@@ -1,5 +1,6 @@
 import { Circle } from "lucide-react";
 import { Project } from "@repo/shared";
+import { Button } from "./ui/button";
 
 export interface ProjectCardProps {
   project: Project;
@@ -18,10 +19,12 @@ export const ProjectCard = (props: ProjectCardProps) => {
   } = props;
   return (
     <div className="w-full pb-4">
-      <div className="rounded-md border bg-white p-4 shadow-sm">
-        <h2 className="mb-1 text-lg font-semibold">{project.label}</h2>
-        <div className="text-muted-foreground mb-2 text-sm">
-          {project.description}
+      <div className="flex min-h-48 flex-col justify-between rounded-md border bg-white p-4 shadow-sm">
+        <div className="flex flex-col">
+          <h2 className="mb-1 text-lg font-semibold">{project.label}</h2>
+          <div className="text-muted-foreground text-sm">
+            {project.description}
+          </div>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -38,12 +41,9 @@ export const ProjectCard = (props: ProjectCardProps) => {
               <span className="ml-1 text-sm">{inProgressResourcesNumber}</span>
             </div>
           </div>
-          <button
-            className="rounded bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200"
-            onClick={() => onClick(project)}
-          >
+          <Button variant="outline" onClick={() => onClick(project)}>
             View
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -39,7 +39,7 @@ export function App(props: PropsWithChildren) {
                   <PortalSidebar />
                 </div>
               </div>
-              <div className="mx-auto pl-16 pt-14">{props.children}</div>
+              <div className="pl-16 pt-14">{props.children}</div>
               <Toaster
                 position="bottom-right"
                 toastOptions={{ duration: Infinity }}

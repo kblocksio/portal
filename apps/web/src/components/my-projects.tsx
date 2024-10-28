@@ -52,7 +52,7 @@ export const MyProjects = () => {
           to manage its resources.
         </p>
       </div>
-      <div className="flex flex-col pt-4">
+      <div className="grid grid-cols-2 gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-2">
         {enhancedProjects.map((project) => (
           <ProjectCard
             key={project.value}
