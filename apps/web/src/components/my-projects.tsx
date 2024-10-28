@@ -44,7 +44,7 @@ export const MyProjects = () => {
   }, [projects, resources]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pt-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">My Projects</h1>
         <p className="text-muted-foreground text-sm">

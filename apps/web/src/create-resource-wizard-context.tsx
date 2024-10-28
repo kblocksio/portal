@@ -11,6 +11,7 @@ import {
 } from "./components/create-resource-wizard";
 import { ResourceType, ResourceContext } from "./resource-context";
 import { createResource } from "./lib/backend";
+import { Category } from "@repo/shared";
 
 interface CreateResourceWizardContextType {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface CreateResourceWizardContextType {
   setSelectedResourceType: (resourceType: ResourceType | undefined) => void;
   openWizard: (editModeData?: EditModeData) => void;
   closeWizard: () => void;
+  categories: Record<string, Category>;
 }
 
 const CreateResourceWizardContext = createContext<
@@ -50,7 +52,7 @@ export const CreateResourceWizardProvider: React.FC<
   const [selectedResourceType, setSelectedResourceType] = useState<
     ResourceType | undefined
   >(undefined);
-  const { resourceTypes } = useContext(ResourceContext);
+  const { resourceTypes, categories } = useContext(ResourceContext);
 
   const filteredResourceTypes = useMemo(() => {
     return Object.values(resourceTypes).filter((r) => !r.kind?.endsWith("Ref"));
@@ -112,6 +114,7 @@ export const CreateResourceWizardProvider: React.FC<
     setSelectedResourceType,
     openWizard,
     closeWizard,
+    categories,
   };
 
   return (

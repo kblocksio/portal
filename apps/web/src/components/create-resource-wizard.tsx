@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ResourceTypesCards } from "./resource-types-cards";
+import { ResourceTypesCatalog } from "./resource-types-catalog";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
@@ -50,8 +50,10 @@ export const CreateResourceWizard = ({
     setSearchQuery(e.target.value);
   }, []);
 
-  const { setSelectedResourceType: updateSelectedResourceTypeInContext } =
-    useCreateResourceWizard();
+  const {
+    setSelectedResourceType: updateSelectedResourceTypeInContext,
+    categories,
+  } = useCreateResourceWizard();
 
   useEffect(() => {
     setStep(editModeData ? 2 : 1);
@@ -168,8 +170,9 @@ export const CreateResourceWizard = ({
           </DialogTitle>
         </DialogHeader>
         {step === 1 ? (
-          <div className="grid grid-cols-3 gap-4 overflow-auto">
-            <ResourceTypesCards
+          <div className="w-full gap-4 overflow-auto p-2">
+            <ResourceTypesCatalog
+              categories={categories}
               isLoading={isLoading}
               filtereResources={filtereResources}
               handleResourceSelect={handleResourceSelect}

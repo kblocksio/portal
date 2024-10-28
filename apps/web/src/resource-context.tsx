@@ -1,4 +1,4 @@
-import { GetTypesResponse } from "@repo/shared";
+import { Category, GetTypesResponse } from "@repo/shared";
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { useFetch } from "./hooks/use-fetch";
@@ -50,6 +50,7 @@ export interface ResourceContextValue {
   systems: string[];
   namespaces: string[];
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
+  categories: Record<string, Category>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -63,6 +64,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   systems: [],
   namespaces: [],
   eventsPerObject: {},
+  categories: {},
 });
 
 export const ResourceProvider = ({
@@ -74,6 +76,7 @@ export const ResourceProvider = ({
   const [resourceTypes, setResourceTypes] = useState<
     Record<string, ResourceType>
   >({});
+  const [categories, setCategories] = useState<Record<string, Category>>({});
   const [resources, setResources] = useState<
     Map<string, Map<string, Resource>>
   >(new Map());
@@ -104,6 +107,8 @@ export const ResourceProvider = ({
     useFetch<GetTypesResponse>("/api/types");
   const { data: initialResources, isLoading: isSyncInitialResourcesLoading } =
     useFetch<{ objects: ObjectEvent[] }>("/api/resources");
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
@@ -121,6 +126,8 @@ export const ResourceProvider = ({
         };
       }
 
+      console.log("resourceTypes", result);
+
       setResourceTypes(result);
     }
   }, [resourceTypesData]);
@@ -137,6 +144,12 @@ export const ResourceProvider = ({
       setIsLoading(false);
     }
   }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
+
+  useEffect(() => {
+    if (categoriesData) {
+      setCategories(categoriesData);
+    }
+  }, [categoriesData]);
 
   const handleObjectMessage = (message: ObjectEvent) => {
     const { object, objUri, objType } = message;
@@ -334,6 +347,7 @@ export const ResourceProvider = ({
     isLoading,
     selectedResourceId,
     setSelectedResourceId,
+    categories,
   };
 
   return (
