@@ -25,6 +25,7 @@ import {
   getAllObjects,
   handleEvent,
   loadEvents,
+  loadObject,
   resetStorage,
 } from "./storage";
 
@@ -161,6 +162,24 @@ app.get("/api/types", async (_, res) => {
 
   return res.status(200).json(result);
 });
+
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+
+    const obj = await loadObject(objUri);
+    return res.status(200).json(obj);
+  },
+);
 
 app.get(
   "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
