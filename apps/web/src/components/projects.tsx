@@ -31,7 +31,7 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "status",
         header: (props) => (
-          <TableHead colSpan={props.header.colSpan} className="w-0"></TableHead>
+          <TableHead key={props.header.id} colSpan={props.header.colSpan} className="w-0"></TableHead>
         ),
         cell: (props) => <StatusBadge obj={props.row.original} />,
         filterFn: (row, columnId, filterValue) => {
@@ -161,7 +161,7 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "actions",
         header: (props) => (
-          <TableHead colSpan={props.header.colSpan} className="w-0"></TableHead>
+          <TableHead key={props.header.id} colSpan={props.header.colSpan} className="w-0"></TableHead>
         ),
         cell: (props) => (
           <ResourceActionsMenu
