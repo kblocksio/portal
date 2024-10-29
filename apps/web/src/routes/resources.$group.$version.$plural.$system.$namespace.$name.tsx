@@ -47,7 +47,9 @@ function Resource() {
 
   const objUri = formatBlockUri({ group, version, plural, system, namespace, name });
 
-  loadEvents(objUri);
+  useMemo(() => {
+    loadEvents(objUri);
+  }, [objUri]);
 
   const selectedResource = useMemo(() => {
     return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
