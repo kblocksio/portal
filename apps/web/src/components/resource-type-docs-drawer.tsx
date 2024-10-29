@@ -21,7 +21,7 @@ export const ResourceTypeDocsDrawer = ({
 }: ResourceTypeDocsDrawerProps) => {
   return (
     <Sheet open={!!docs} onOpenChange={(x) => (!x ? onClose() : null)}>
-      <SheetContent className="w-5/6 xl:w-4/6">
+      <SheetContent className="w-5/6 xl:w-5/6">
         <SheetHeader className="flex flex-row justify-end">
           <SheetClose asChild>
             <Button variant="ghost" size="icon">
