@@ -37,13 +37,15 @@ export const MarkdownWrapper = ({
           };
 
           return match ? (
-            <div style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "relative",
+                borderRadius: "6px",
+                margin: "16px 0",
+              }}
+            >
               <CopyToClipboard text={String(children)} onCopy={handleCopy}>
-                <button
-                  className={
-                    "absolute right-0 top-0 bg-transparent p-2 focus:outline-none"
-                  }
-                >
+                <button className="absolute right-2 top-2 bg-transparent p-2 focus:outline-none">
                   {copied ? (
                     <DocumentCheckIcon
                       className={`${getResourceIconColors({ color: "slate" })} h-5 w-5 flex-shrink-0`}
@@ -61,10 +63,19 @@ export const MarkdownWrapper = ({
                 children={String(children).replace(/\n$/, "")}
                 language={match[1]}
                 style={ghcolors}
+                customStyle={{
+                  background: "#f6f8fa", // GitHub-like light gray background
+                  padding: "16px",
+                  overflow: "auto",
+                  borderRadius: "6px",
+                }}
               />
             </div>
           ) : (
-            <code {...rest} className={className}>
+            <code
+              {...rest}
+              className={`${className} inline-block rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-[0.2rem] text-sm`}
+            >
               {children}
             </code>
           );
