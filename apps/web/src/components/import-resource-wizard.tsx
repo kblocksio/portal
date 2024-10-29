@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
 import { ImportGHRepo } from "./gh-repos-selection";
-import { ResourceTypesCards } from "./resource-types-cards";
+import { ResourceTypesCatalog } from "./resource-types-catalog";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { ApiObject } from "@kblocks/api";
@@ -101,7 +101,7 @@ export const ImportResourceWizard = ({
         </DialogHeader>
         {step === 1 ? (
           <div className="grid h-[520px] grid-cols-3 gap-4 overflow-auto">
-            <ResourceTypesCards
+            <ResourceTypesCatalog
               isLoading={isLoading}
               filtereResources={filtereResources}
               handleResourceSelect={handleResourceSelect}

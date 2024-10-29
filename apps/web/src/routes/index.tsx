@@ -1,68 +1,73 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useAppContext } from "~/app-context";
-import { useContext, useMemo } from "react";
-import { Skeleton } from "~/components/ui/skeleton";
-import { ResourceContext } from "~/resource-context";
-import { ProjectHeader } from "~/components/project-header";
-import { Projects } from "~/components/projects";
+import platformMd from "../mock-data/acme.platform.md?raw";
+import { MarkdownWrapper } from "~/components/markdown";
+import { MyProjects } from "~/components/my-projects";
+import { useCallback, useContext, useMemo, useState } from "react";
+import { ResourceContext, ResourceType } from "~/resource-context";
+import { Search } from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { ResourceTypesCatalog } from "~/components/resource-types-catalog";
+import { useCreateResourceWizard } from "~/create-resource-wizard-context";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const { selectedProject } = useAppContext();
+  const { resourceTypes, categories } = useContext(ResourceContext);
+  const { openWizard } = useCreateResourceWizard();
 
-  const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
+  const [searchQuery, setSearchQuery] = useState("");
+  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
-  const allResources = useMemo(() => {
-    return [...resources.values()]
-      .flatMap((resources) => [...resources.values()])
-      .filter((resource) => resource.kind !== "Block");
-  }, [resources]);
+  const filteredResourceTypes = useMemo(() => {
+    if (!resourceTypes) return [];
+    if (!searchQuery) return Object.values(resourceTypes);
+    return Object.values(resourceTypes).filter((item: ResourceType) =>
+      item.kind.toLowerCase().includes(searchQuery?.toLowerCase()),
+    );
+  }, [resourceTypes, searchQuery]);
+
+  const handleResourceSelect = useCallback(
+    (resourceType: ResourceType) => {
+      openWizard(undefined, resourceType, 2);
+    },
+    [openWizard],
+  );
 
   return (
-    <div className="container mx-auto flex flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
-      <ProjectHeader selectedProject={selectedProject} />
-
-      <div>
-        {isLoading ||
-        !resourceTypes ||
-        Object.keys(resourceTypes).length === 0 ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            <Projects resources={allResources} />
-          </>
-        )}
+    <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      {/* organization specific introduction */}
+      <MarkdownWrapper content={platformMd} />
+      {/* My Projects */}
+      <MyProjects />
+      {/* Resource Types Catalog */}
+      <div className="flex flex-col gap-4 pb-8 pt-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold">Resource Catalog</h1>
+          <p className="text-muted-foreground text-sm">
+            These are the resource types available in the platform.
+          </p>
+        </div>
+        <div className="relative mb-6 flex-grow">
+          <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+          <Input
+            type="text"
+            placeholder="Search resource..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
+          />
+        </div>
+        <ResourceTypesCatalog
+          categories={categories}
+          filtereResources={filteredResourceTypes}
+          handleResourceSelect={handleResourceSelect}
+          isLoading={false}
+        />
       </div>
     </div>
   );
 }
-
-const LoadingSkeleton = () => {
-  return [...Array(3)].map((_, index) => (
-    <div key={index} className="w-full space-y-4 p-4">
-      <div className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-6 w-6" />
-          <Skeleton className="h-6 w-16" />
-        </div>
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-4 w-4 rounded-full" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <Skeleton className="h-4 w-32" />
-        </div>
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-4 w-4 rounded-full" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
-    </div>
-  ));
-};

@@ -40,3 +40,11 @@ export interface ObjectMetadata {
   namespace: string;
   system: string;
 }
+
+export type Category = {
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  docslink: string;
+};

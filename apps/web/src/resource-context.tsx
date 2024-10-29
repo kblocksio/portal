@@ -1,4 +1,4 @@
-import { GetTypesResponse } from "@repo/shared";
+import { Category, GetTypesResponse } from "@repo/shared";
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { useFetch } from "./hooks/use-fetch";
@@ -51,6 +51,7 @@ export interface ResourceContextValue {
   namespaces: string[];
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
   loadEvents: (objUri: string) => void;
+  categories: Record<string, Category>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -64,6 +65,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   systems: [],
   namespaces: [],
   eventsPerObject: {},
+  categories: {},
   loadEvents: () => {},
 });
 
@@ -76,6 +78,7 @@ export const ResourceProvider = ({
   const [resourceTypes, setResourceTypes] = useState<
     Record<string, ResourceType>
   >({});
+  const [categories, setCategories] = useState<Record<string, Category>>({});
   const [resources, setResources] = useState<
     Map<string, Map<string, Resource>>
   >(new Map());
@@ -106,6 +109,8 @@ export const ResourceProvider = ({
     useFetch<GetTypesResponse>("/api/types");
   const { data: initialResources, isLoading: isSyncInitialResourcesLoading } =
     useFetch<{ objects: ObjectEvent[] }>("/api/resources");
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
     if (resourceTypesData && resourceTypesData.types) {
@@ -139,6 +144,12 @@ export const ResourceProvider = ({
       setIsLoading(false);
     }
   }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
+
+  useEffect(() => {
+    if (categoriesData) {
+      setCategories(categoriesData);
+    }
+  }, [categoriesData]);
 
   const handleObjectMessage = (message: ObjectEvent) => {
     const { object, objUri, objType } = message;
@@ -304,24 +315,24 @@ export const ResourceProvider = ({
 
   const loadEvents = (objUri: string) => {
     const requests = [];
-  
+
     const uri = parseBlockUri(objUri);
-  
+
     const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
     const fetchEvents = async () => {
       const response = await request("GET", eventsUrl);
-  
+
       for (const event of response.events) {
         addEvent(event);
       }
     };
-  
+
     requests.push(fetchEvents());
-  
+
     Promise.all(requests).catch((e) => {
       console.error(e);
     });
-  }; 
+  };
 
   const value: ResourceContextValue = {
     resourceTypes,
@@ -335,6 +346,7 @@ export const ResourceProvider = ({
     isLoading,
     selectedResourceId,
     setSelectedResourceId,
+    categories,
   };
 
   return (

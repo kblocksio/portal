@@ -1,10 +1,18 @@
 import { useLocation, Link } from "@tanstack/react-router";
 import { Button } from "./ui/button";
-import { Box, LayoutDashboard, Settings } from "lucide-react";
+import {
+  Box,
+  ChartNoAxesGantt,
+  Circle,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react";
 import { cn } from "~/lib/utils";
+import { useAppContext } from "~/app-context";
 
 export function PortalSidebar() {
   const { pathname } = useLocation();
+  const { selectedProject } = useAppContext();
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -26,6 +34,20 @@ export function PortalSidebar() {
       </Button>
       <Button variant="ghost" size="icon" asChild>
         <Link
+          to={`/project/${selectedProject?.value || ""}`}
+          className={cn(
+            isActive(`/project/${selectedProject?.value || ""}`)
+              ? "text-primary rounded-lg bg-gray-200"
+              : "",
+            "hover:bg-gray-200",
+          )}
+        >
+          <ChartNoAxesGantt className="h-6 w-6" />
+          <span className="sr-only">Dashboard</span>
+        </Link>
+      </Button>
+      {/* <Button variant="ghost" size="icon" asChild>
+        <Link
           to="/catalog"
           className={cn(
             isActive("/catalog") ? "text-primary rounded-lg bg-gray-200" : "",
@@ -35,8 +57,8 @@ export function PortalSidebar() {
           <Box className="h-6 w-6" />
           <span className="sr-only">Catalog</span>
         </Link>
-      </Button>
-      <Button variant="ghost" size="icon" asChild>
+      </Button> */}
+      {/* <Button variant="ghost" size="icon" asChild>
         <Link
           to="/admin"
           className={cn(
@@ -47,7 +69,7 @@ export function PortalSidebar() {
           <Settings className="h-6 w-6" />
           <span className="sr-only">Admin</span>
         </Link>
-      </Button>
+      </Button> */}
     </aside>
   );
 }

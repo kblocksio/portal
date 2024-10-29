@@ -148,7 +148,7 @@ export function Header() {
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b px-4 backdrop-blur">
       <div className="flex h-14 items-center">
         <Logo />
-        <div className={"pl-4"}>
+        {/* <div className={"pl-4"}>
           <Combobox
             items={projects}
             fallbackItem={fallbackProject}
@@ -159,7 +159,7 @@ export function Header() {
               setSelectedProject(currentProject[0]);
             }}
           />
-        </div>
+        </div> */}
         <div className="flex flex-1 items-center justify-end space-x-4">
           <NotificationBell />
           <UserProfile

@@ -36,7 +36,7 @@ export const ResourceActionsMenu = ({
       <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem
           onSelect={() => {
-            openEditWizard({ resource, resourceType });
+            openEditWizard(resource, resourceType);
             closeMenu();
           }}
         >

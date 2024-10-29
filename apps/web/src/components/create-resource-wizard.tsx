@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ResourceTypesCards } from "./resource-types-cards";
+import { ResourceTypesCatalog } from "./resource-types-catalog";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
@@ -13,11 +13,6 @@ import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { Resource, ResourceType } from "~/resource-context";
 import { useCreateResourceWizard } from "~/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
-
-export interface EditModeData {
-  resourceType: ResourceType;
-  resource: Resource;
-}
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
@@ -29,7 +24,9 @@ export interface CreateResourceWizardProps {
     obj: ApiObject,
   ) => void;
   resourceTypes: ResourceType[];
-  editModeData?: EditModeData;
+  currentEditableResource?: Resource;
+  step: number;
+  setStep: (step: number) => void;
 }
 
 export const CreateResourceWizard = ({
@@ -38,25 +35,17 @@ export const CreateResourceWizard = ({
   handleOnOpenChange,
   handleOnCreate,
   resourceTypes,
-  editModeData,
+  step,
+  setStep,
+  currentEditableResource,
 }: CreateResourceWizardProps) => {
-  const [step, setStep] = useState(editModeData ? 2 : 1);
-  const [selectedResourceType, setSelectedResourceType] =
-    useState<ResourceType | null>(
-      editModeData ? editModeData.resourceType : null,
-    );
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
-  const { setSelectedResourceType: updateSelectedResourceTypeInContext } =
+  const { selectedResourceType, setSelectedResourceType, categories } =
     useCreateResourceWizard();
-
-  useEffect(() => {
-    setStep(editModeData ? 2 : 1);
-    setSelectedResourceType(editModeData?.resourceType || null);
-  }, [editModeData]);
 
   const filtereResources = useMemo(() => {
     if (!resourceTypes) return [];
@@ -68,24 +57,21 @@ export const CreateResourceWizard = ({
 
   const handleResourceSelect = (resourceType: ResourceType) => {
     setSelectedResourceType(resourceType);
-    updateSelectedResourceTypeInContext(resourceType);
     setStep(2);
   };
 
   const handleBack = useCallback(() => {
-    if (editModeData) {
+    if (currentEditableResource) {
       handleOnOpenChange(false);
     } else {
       setStep(1);
-      setSelectedResourceType(null);
-      updateSelectedResourceTypeInContext(undefined);
+      setSelectedResourceType(undefined);
     }
   }, [
-    editModeData,
+    currentEditableResource,
     handleOnOpenChange,
     setStep,
     setSelectedResourceType,
-    updateSelectedResourceTypeInContext,
   ]);
 
   const handleCreate = useCallback(
@@ -112,10 +98,9 @@ export const CreateResourceWizard = ({
   const handleOpenChange = useCallback(
     (open: boolean) => {
       handleOnOpenChange(open);
-      setStep(editModeData ? 2 : 1);
-      setSelectedResourceType(editModeData?.resourceType || null);
+      setSelectedResourceType(undefined);
     },
-    [editModeData, handleOnOpenChange, setStep, setSelectedResourceType],
+    [currentEditableResource, handleOnOpenChange, setSelectedResourceType],
   );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
@@ -159,7 +144,7 @@ export const CreateResourceWizard = ({
             ) : (
               selectedResourceType && (
                 <WizardSimpleHeader
-                  title={`${editModeData ? "Edit" : "New"} ${selectedResourceType?.kind} resource`}
+                  title={`${currentEditableResource ? "Edit" : "New"} ${selectedResourceType?.kind} resource`}
                   description={selectedResourceType?.description || ""}
                   resourceType={selectedResourceType}
                 />
@@ -168,8 +153,9 @@ export const CreateResourceWizard = ({
           </DialogTitle>
         </DialogHeader>
         {step === 1 ? (
-          <div className="grid grid-cols-3 gap-4 overflow-auto">
-            <ResourceTypesCards
+          <div className="w-full gap-4 overflow-auto p-2">
+            <ResourceTypesCatalog
+              categories={categories}
               isLoading={isLoading}
               filtereResources={filtereResources}
               handleResourceSelect={handleResourceSelect}
@@ -180,8 +166,8 @@ export const CreateResourceWizard = ({
             {selectedResourceType && (
               <CreateNewResourceForm
                 resourceType={selectedResourceType}
-                initialMeta={renderInitialMeta(editModeData?.resource?.objUri)}
-                initialValues={editModeData?.resource}
+                initialMeta={renderInitialMeta(currentEditableResource?.objUri)}
+                initialValues={currentEditableResource}
                 handleCreate={handleCreate}
                 handleBack={handleBack}
                 isLoading={isLoading}

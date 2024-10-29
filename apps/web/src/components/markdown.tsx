@@ -1,4 +1,4 @@
-import Markdown from "react-markdown";
+import Markdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { DocumentCheckIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { getResourceIconColors } from "~/lib/hero-icon";
@@ -11,9 +11,11 @@ import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 export const MarkdownWrapper = ({
   content,
   onCopy,
+  componentsOverrides = {},
 }: {
   content: string;
   onCopy?: () => void;
+  componentsOverrides?: Components | null | undefined;
 }) => {
   return (
     <Markdown
@@ -22,6 +24,7 @@ export const MarkdownWrapper = ({
       children={content}
       components={{
         ...markdownOverrides,
+        ...componentsOverrides,
         code(props) {
           const { children, className, node, ref, ...rest } = props;
           const [copied, setCopied] = useState(false);
