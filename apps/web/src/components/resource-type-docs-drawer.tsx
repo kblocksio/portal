@@ -22,15 +22,13 @@ export const ResourceTypeDocsDrawer = ({
   return (
     <Sheet open={!!docs} onOpenChange={(x) => (!x ? onClose() : null)}>
       <SheetContent className="w-5/6 xl:w-5/6">
-        <SheetHeader className="flex flex-row justify-end">
-          <SheetClose asChild>
-            <Button variant="ghost" size="icon">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </SheetClose>
-        </SheetHeader>
-        <ScrollArea className="h-full pb-6 pl-6 pr-6 pt-0">
+        <SheetClose asChild className="relative z-10">
+          <Button variant="ghost" size="icon" className="absolute right-6">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+        </SheetClose>
+        <ScrollArea className="mt-[-8px] h-full pb-6 pl-6 pr-6 pt-0">
           <MarkdownWrapper content={docs ?? ""} />
         </ScrollArea>
       </SheetContent>
