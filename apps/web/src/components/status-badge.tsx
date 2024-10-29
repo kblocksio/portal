@@ -83,7 +83,7 @@ export const StatusBadge = ({ obj, showMessage, size, type = "Ready" }: StatusBa
           )}
         </TooltipTrigger>
         <TooltipContent>
-          <p>{readyCondition?.reason ?? `${type}?`}</p>
+          <p>{showMessage ? `${type}?` :(readyCondition?.reason ?? `${type}?`)}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

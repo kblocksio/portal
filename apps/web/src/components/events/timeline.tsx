@@ -135,8 +135,8 @@ function LogItem({ log }: { log: LogEvent }) {
   const message = log.message;
   return (
     <div className="text-xs">
-      <div className="grid grid-cols-[7em_1fr]">
-        <span className="text-gray-700">{timestamp}</span>
+      <div className="grid grid-cols-[8em_1fr]">
+        <span className="text-gray-600">{timestamp}</span>
         <span className="text-gray-400">
           <pre className="whitespace-pre pr-4">{message}</pre>
         </span>

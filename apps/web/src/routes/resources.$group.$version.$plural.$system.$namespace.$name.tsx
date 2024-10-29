@@ -26,6 +26,7 @@ import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "~/lib/utils";
+import { splitAndCapitalizeCamelCase } from "~/components/resource-form/label-formater";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -171,10 +172,10 @@ function Resource() {
 
       <Card>
         <CardContent>
-          <div className="lg:flex-col lg:gap-4">
-            <div className="w-full">
-              <div className="py-6">
-                <CardTitle>Properties</CardTitle>
+          <div className="">
+          <div className="w-full">
+              <div className="pt-8 pb-4">
+                <CardTitle>Status</CardTitle>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <PropertyKey>Status</PropertyKey>
@@ -199,12 +200,20 @@ function Resource() {
                   />
                 </PropertyValue>
 
+              </div>
+            </div>
+
+            <div className="w-full">
+              <div className="pt-8 pb-4">
+                <CardTitle>Properties</CardTitle>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <KeyValueList data={properties} />
               </div>
             </div>
             {outputs && Object.keys(outputs).length > 0 && (
               <div className="w-full">
-                <div className="py-6">
+                <div className="pt-8 pb-4">
                   <CardTitle>Outputs</CardTitle>
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -265,7 +274,7 @@ type KeyValueListProps = {
 const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
   Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
-      <PropertyKey>{key}</PropertyKey>
+      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
       <PropertyValue>{formatValue(value)}</PropertyValue>
     </React.Fragment>
   ));
