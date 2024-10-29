@@ -13,7 +13,7 @@ import {
   WorkerEvent,
 } from "@kblocks/api";
 import { useState, useMemo } from "react";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 
 type GroupHeader = {

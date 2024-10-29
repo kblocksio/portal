@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
 import { ApiObject } from "@kblocks/api";
-import { Resource } from "~/resource-context";
+import { Resource } from "@/resource-context";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

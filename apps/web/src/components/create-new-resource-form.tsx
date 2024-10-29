@@ -1,6 +1,5 @@
-import { ResourceType } from "~/resource-context";
+import { ResourceType } from "@/resource-context";
 import { FormGenerator } from "./resource-form/resource-form";
-import { useMemo } from "react";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
 

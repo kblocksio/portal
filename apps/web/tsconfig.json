@@ -17,12 +17,11 @@
     "baseUrl": ".",
     "allowImportingTsExtensions": true,
     "paths": {
-      "~/*": ["./src/*"],
-      "~/components/*": ["./src/components/*"],
-      // "~/utils": ["./app/lib/utils.ts"],
-      "~/ui/*": ["./src/components/ui/*"],
-      "~/lib/*": ["./src/lib/*"],
-      "~/hooks/*": ["./src/hooks/*"]
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/ui/*": ["./src/components/ui/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"]
     },
 
     // Vite takes care of building everything, not tsc.

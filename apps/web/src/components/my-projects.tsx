@@ -1,10 +1,10 @@
-import { getProjects } from "~/lib/backend";
+import { getProjects } from "@/lib/backend";
 import { ProjectCard } from "./project-card";
 import { useContext, useEffect, useMemo } from "react";
-import { ResourceContext } from "~/resource-context";
+import { ResourceContext } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
 import { getResourcesStatuses } from "./components-utils";
-import { useAppContext } from "~/app-context";
+import { useAppContext } from "@/app-context";
 
 export const MyProjects = () => {
   const { projects } = useAppContext();

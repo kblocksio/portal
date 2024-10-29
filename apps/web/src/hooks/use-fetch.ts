@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import useSWR from "swr";
-import { get } from "~/lib/backend";
+import { get } from "@/lib/backend";
 
 export function useFetch<T = unknown>(
   initialUrl: string,

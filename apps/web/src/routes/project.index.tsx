@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Project } from "@repo/shared";
-import { useAppContext } from "~/app-context";
+import { useAppContext } from "@/app-context";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 

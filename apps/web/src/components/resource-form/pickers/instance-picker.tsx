@@ -2,7 +2,7 @@ import { Cpu, Microchip, HardDrive } from "lucide-react";
 import { Card, CardContent } from "../../ui/card";
 import { Slider } from "../../ui/slider";
 import { useEffect, useState } from "react";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 import { Field } from "../form-field";
 
 type InstanceConfig = {

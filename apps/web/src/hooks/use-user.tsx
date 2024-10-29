@@ -7,8 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import { SignIn } from "~/components/sign-in.js";
-import { getUser, rejectUser } from "~/lib/backend";
+import { SignIn } from "@/components/sign-in.js";
+import { getUser, rejectUser } from "@/lib/backend";
 import { isUserWhitelisted } from "./whitelist";
 
 const MockUser = {

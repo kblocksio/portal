@@ -1,10 +1,10 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
 import { useContext } from "react";
-import { ResourceContext } from "~/resource-context";
-import { Input } from "~/components/ui/input";
-import { useCreateResourceWizard } from "~/create-resource-wizard-context";
-import { Button } from "~/components/ui/button";
-import { getIconComponent } from "~/lib/hero-icon.js";
+import { ResourceContext } from "@/resource-context";
+import { Input } from "@/components/ui/input";
+import { useCreateResourceWizard } from "@/create-resource-wizard-context";
+import { Button } from "@/components/ui/button";
+import { getIconComponent } from "@/lib/hero-icon.js";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 

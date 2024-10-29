@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { deleteResource } from "~/lib/backend";
+import { deleteResource } from "@/lib/backend";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource } from "~/resource-context";
+import { Resource } from "@/resource-context";
 
 interface DeleteResourceDialogProps {
   resource: Resource;

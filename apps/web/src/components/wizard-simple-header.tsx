@@ -1,6 +1,6 @@
-import { getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "@/lib/hero-icon";
 import { CardTitle, CardDescription } from "./ui/card";
-import { ResourceType } from "~/resource-context";
+import { ResourceType } from "@/resource-context";
 
 export interface WizardSimpleHeaderProps {
   title: string;

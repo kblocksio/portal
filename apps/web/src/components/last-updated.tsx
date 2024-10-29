@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Resource } from "~/resource-context";
+import { Resource } from "@/resource-context";
 import { CalendarIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 

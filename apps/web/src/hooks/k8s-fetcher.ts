@@ -1,4 +1,4 @@
-import { getResources } from "~/lib/backend";
+import { getResources } from "@/lib/backend";
 import { ResourceQuery } from "@repo/shared";
 
 export const k8sFetcher = async (query: ResourceQuery) => {

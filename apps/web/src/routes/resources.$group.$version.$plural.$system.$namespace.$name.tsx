@@ -5,28 +5,27 @@ import React, {
   useMemo,
   PropsWithChildren,
 } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { ResourceContext, type Resource } from "~/resource-context";
-import { StatusBadge } from "~/components/status-badge";
-import { SystemBadge } from "~/components/system-badge";
-import Timeline from "~/components/events/timeline";
-import { getResourceIconColors } from "~/lib/hero-icon";
-import { Link } from "~/components/ui/link";
-import { useCreateResourceWizard } from "~/create-resource-wizard-context";
+import { ResourceContext, type Resource } from "@/resource-context";
+import { StatusBadge } from "@/components/status-badge";
+import { SystemBadge } from "@/components/system-badge";
+import Timeline from "@/components/events/timeline";
+import { getResourceIconColors } from "@/lib/hero-icon";
+import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { DeleteResourceDialog } from "~/components/delete-resource";
+} from "@/components/ui/dropdown-menu";
+import { DeleteResourceDialog } from "@/components/delete-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
-import { getResourceProperties, getResourceOutputs } from "~/lib/utils";
-import { splitAndCapitalizeCamelCase } from "~/components/resource-form/label-formater";
+import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
+import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;

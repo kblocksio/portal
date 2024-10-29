@@ -3,15 +3,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
+} from "@/components/ui/dialog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ResourceTypesCatalog } from "./resource-types-catalog";
 import { WizardSearchHeader } from "./wizard-search-header";
 import { WizardSimpleHeader } from "./wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
-import { Resource, ResourceType } from "~/resource-context";
-import { useCreateResourceWizard } from "~/create-resource-wizard-context";
+import { Resource, ResourceType } from "@/resource-context";
+import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
 
 export interface CreateResourceWizardProps {

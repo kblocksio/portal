@@ -1,6 +1,6 @@
 import { ChevronRightIcon } from "lucide-react";
 import { useContext } from "react";
-import { ResourceContext } from "~/resource-context";
+import { ResourceContext } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const LastLogMessage = ({ objUri }: { objUri: string }) => {

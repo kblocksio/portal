@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Project, User } from "@repo/shared";
-import { useFetch } from "~/hooks/use-fetch";
-import { getUserInitials } from "~/lib/user-initials";
+import { useFetch } from "@/hooks/use-fetch";
+import { getUserInitials } from "@/lib/user-initials";
 
 export interface ProjectHeaderProps {
   selectedProject: Project | null;

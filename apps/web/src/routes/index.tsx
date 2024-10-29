@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import platformMd from "../mock-data/acme.platform.md?raw";
-import { MarkdownWrapper } from "~/components/markdown";
-import { MyProjects } from "~/components/my-projects";
+import { MarkdownWrapper } from "@/components/markdown";
+import { MyProjects } from "@/components/my-projects";
 import { useCallback, useContext, useMemo, useState } from "react";
-import { ResourceContext, ResourceType } from "~/resource-context";
+import { ResourceContext, ResourceType } from "@/resource-context";
 import { Search } from "lucide-react";
-import { Input } from "~/components/ui/input";
-import { ResourceTypesCatalog } from "~/components/resource-types-catalog";
-import { useCreateResourceWizard } from "~/create-resource-wizard-context";
+import { Input } from "@/components/ui/input";
+import { ResourceTypesCatalog } from "@/components/resource-types-catalog";
+import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 
 export const Route = createFileRoute("/")({
   component: Index,

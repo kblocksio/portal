@@ -10,8 +10,8 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { Resource, ResourceType } from "~/resource-context";
-import { getResourceOutputs } from "~/lib/utils";
+import { Resource, ResourceType } from "@/resource-context";
+import { getResourceOutputs } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -19,8 +19,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "~/components/ui/table";
-import { getResourceIconColors } from "~/lib/hero-icon";
+} from "@/components/ui/table";
+import { getResourceIconColors } from "@/lib/hero-icon";
 import { useNavigate } from "@tanstack/react-router";
 import { useProjectColumns } from "./project-page";
 import { DataTableColumnHeader } from "./data-table-column-header";

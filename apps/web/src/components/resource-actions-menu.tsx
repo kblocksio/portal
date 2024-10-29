@@ -7,8 +7,8 @@ import {
 } from "./ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { DeleteResourceDialog } from "./delete-resource";
-import { Resource, ResourceType } from "~/resource-context";
-import { useCreateResourceWizard } from "~/create-resource-wizard-context";
+import { Resource, ResourceType } from "@/resource-context";
+import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 
 export const ResourceActionsMenu = ({
   resource,

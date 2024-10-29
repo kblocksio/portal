@@ -10,7 +10,7 @@ import {
 } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useEffect, useState } from "react";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 
 export interface ComboboxItem {
   value: string;

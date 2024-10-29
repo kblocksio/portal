@@ -1,13 +1,13 @@
 import { Button } from "./ui/button.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFetch } from "~/hooks/use-fetch.js";
+import { useFetch } from "@/hooks/use-fetch.js";
 import { Installation, Repository } from "@repo/shared";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.js";
 import { Input } from "./ui/input.js";
 import { Skeleton } from "./ui/skeleton.js";
 import { Checkbox } from "./ui/checkbox.js";
 import { Loader, RefreshCw } from "lucide-react";
-import { cn } from "~/lib/utils.js";
+import { cn } from "@/lib/utils.js";
 
 export interface ImportGHRepoProps {
   singleSelection?: boolean;

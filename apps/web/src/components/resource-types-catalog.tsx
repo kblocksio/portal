@@ -1,4 +1,4 @@
-import { getIconComponent, getResourceIconColors } from "~/lib/hero-icon";
+import { getIconComponent, getResourceIconColors } from "@/lib/hero-icon";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import { ResourceType } from "~/resource-context";
+import { ResourceType } from "@/resource-context";
 import { Category } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { MarkdownWrapper } from "./markdown";
@@ -76,10 +76,16 @@ const ResourceTypeCategory = ({
 
   return (
     <div className="border-input flex flex-col border-b p-4 pb-12">
-      <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col">
+        {/* <Icon className={`${iconColor}`} /> */}
+        <h2>{category.title}</h2>
+      </div>
+
+
+      {/* <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
           <Icon className={`${iconColor} h-10 w-10`} />
-          <h3 className="text-2xl font-semibold">{category.title}</h3>
+          <h2>{category.title}</h2>
         </div>
         <div className="text-muted-foreground text-sm">
           <MarkdownWrapper
@@ -89,7 +95,7 @@ const ResourceTypeCategory = ({
             }}
           />
         </div>
-      </div>
+      </div> */}
       <div className="flex flex-col gap-y-4">
         {resources.map((resource) => (
           <ResourceTypeCard

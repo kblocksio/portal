@@ -5,15 +5,15 @@ import {
   CatalogSidebar,
   SidebarBody,
   SidebarLabel,
-} from "~/components/catalog/catalog-sidebar";
-import { loadingStates } from "~/components/catalog/loading-states";
-import { MultiStepLoader } from "~/components/ui/multi-step-loader";
-import { getResourceIconColors } from "~/lib/hero-icon";
-import { cn } from "~/lib/utils";
-import { MarkdownWrapper } from "~/components/markdown";
-import { ResourceContext, ResourceType } from "~/resource-context";
-import { Button } from "~/components/ui/button";
-import { ResourceTypeWizard } from "~/components/catalog/resource-type-wizard";
+} from "@/components/catalog/catalog-sidebar";
+import { loadingStates } from "@/components/catalog/loading-states";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+import { getResourceIconColors } from "@/lib/hero-icon";
+import { cn } from "@/lib/utils";
+import { MarkdownWrapper } from "@/components/markdown";
+import { ResourceContext, ResourceType } from "@/resource-context";
+import { Button } from "@/components/ui/button";
+import { ResourceTypeWizard } from "@/components/catalog/resource-type-wizard";
 
 export const Route = createFileRoute("/catalog")({
   component: Catalog,

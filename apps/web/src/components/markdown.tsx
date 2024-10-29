@@ -1,10 +1,10 @@
 import Markdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { DocumentCheckIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import { getResourceIconColors } from "~/lib/hero-icon";
+import { getResourceIconColors } from "@/lib/hero-icon";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { markdownOverrides } from "~/lib/markdown-overides";
+import { markdownOverrides } from "@/lib/markdown-overides";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 

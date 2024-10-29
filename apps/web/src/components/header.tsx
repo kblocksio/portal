@@ -1,27 +1,27 @@
 import * as React from "react";
 import { Bell, LogOut, Settings, User } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "~/components/ui/popover";
+} from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect } from "react";
-import { useFetch } from "~/hooks/use-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 import { Project } from "@repo/shared";
-import { Combobox } from "~/components/combobox";
-import { useAppContext } from "~/app-context";
-import { useUser } from "~/hooks/use-user";
-import { useSignOut } from "~/hooks/use-sign-out.js";
-import { getUserInitials } from "~/lib/user-initials";
+import { Combobox } from "@/components/combobox";
+import { useAppContext } from "@/app-context";
+import { useUser } from "@/hooks/use-user";
+import { useSignOut } from "@/hooks/use-sign-out.js";
+import { getUserInitials } from "@/lib/user-initials";
 
 function Logo() {
   return (

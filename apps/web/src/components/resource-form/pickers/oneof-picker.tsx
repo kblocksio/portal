@@ -1,6 +1,6 @@
-import { Card } from "~/components/ui/card";
+import { Card } from "@/components/ui/card";
 import * as React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitAndCapitalizeCamelCase } from "../label-formater";
 import { FieldRenderer } from "../field-renderer";
 import { Field } from "../form-field";

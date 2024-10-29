@@ -8,13 +8,13 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
-import { Resource, ResourceContext } from "~/resource-context";
-import { DataTableColumnHeader } from "~/components/data-table-column-header";
+import { Resource, ResourceContext } from "@/resource-context";
+import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
-import { DataTableToolbar } from "~/components/data-table-toolbar";
-import { ProjectGroup } from "~/components/project-group";
+import { DataTableToolbar } from "@/components/data-table-toolbar";
+import { ProjectGroup } from "@/components/project-group";
 import { LastUpdated } from "./last-updated";
-import { cn, getReadyCondition } from "~/lib/utils";
+import { cn, getReadyCondition } from "@/lib/utils";
 import { LastLogMessage } from "./last-log-message";
 import { StatusBadge } from "./status-badge";
 import { SystemBadge } from "./system-badge";

@@ -4,7 +4,7 @@ import {
   ScrollRestoration,
 } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
-import { App } from "~/app";
+import { App } from "@/app";
 
 const TanStackRouterDevtools = import.meta.env.PROD
   ? () => null // Render nothing in production

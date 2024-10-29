@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { Github, Loader2 } from "lucide-react";
-import { useFetch } from "~/hooks/use-fetch";
+import { useFetch } from "@/hooks/use-fetch";
 
 interface RepoPickerProps {
   handleOnSelection: (repository: Repository | null) => void;

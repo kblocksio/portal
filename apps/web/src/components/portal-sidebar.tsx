@@ -1,14 +1,11 @@
 import { useLocation, Link } from "@tanstack/react-router";
 import { Button } from "./ui/button";
 import {
-  Box,
   ChartNoAxesGantt,
-  Circle,
-  LayoutDashboard,
-  Settings,
+  Home,
 } from "lucide-react";
-import { cn } from "~/lib/utils";
-import { useAppContext } from "~/app-context";
+import { cn } from "@/lib/utils";
+import { useAppContext } from "@/app-context";
 
 export function PortalSidebar() {
   const { pathname } = useLocation();
@@ -28,15 +25,15 @@ export function PortalSidebar() {
             "hover:bg-gray-200",
           )}
         >
-          <LayoutDashboard className="h-6 w-6" />
+          <Home className="h-6 w-6" />
           <span className="sr-only">Dashboard</span>
         </Link>
       </Button>
       <Button variant="ghost" size="icon" asChild>
         <Link
-          to={`/project/${selectedProject?.value || ""}`}
+          to={`/project/${selectedProject?.value ?? "all"}`}
           className={cn(
-            isActive(`/project/${selectedProject?.value || ""}`)
+            isActive(`/project/${selectedProject?.value ?? "all"}`)
               ? "text-primary rounded-lg bg-gray-200"
               : "",
             "hover:bg-gray-200",

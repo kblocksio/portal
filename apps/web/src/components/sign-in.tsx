@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "./ui/card.js";
-import { useSignIn } from "~/hooks/use-sign-in.js";
+import { useSignIn } from "@/hooks/use-sign-in.js";
 
 export const SignIn = () => {
   const { signIn, isSigningIn } = useSignIn();

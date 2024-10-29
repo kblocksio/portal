@@ -5,14 +5,14 @@ import {
 } from "@radix-ui/react-icons";
 import { Column } from "@tanstack/react-table";
 
-import { cn } from "~/lib/utils";
-import { Button } from "~/components/ui/button.js";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu.js";
+} from "@/components/ui/dropdown-menu.js";
 import { useMemo } from "react";
 import { splitAndCapitalizeCamelCase } from "./resource-form/label-formater";
 

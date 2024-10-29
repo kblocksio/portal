@@ -87,5 +87,5 @@ export const deleteResource = async (objUri: string) => {
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-  return (await import("~/mock-data/projects.json")).default;
+  return (await import("@/mock-data/projects.json")).default;
 };
