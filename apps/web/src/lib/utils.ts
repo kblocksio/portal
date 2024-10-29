@@ -38,7 +38,7 @@ function addProperty(
     return;
   }
   if (Array.isArray(value)) {
-    target[keyPrefix.join(".")] = value.join(", ");
+    target[keyPrefix.join(".")] = JSON.stringify(value, null, 2);
   } else if (typeof value === "object" && value !== null) {
     for (const [k, v] of Object.entries(value)) {
       addProperty(target, v, [...keyPrefix, k]);
