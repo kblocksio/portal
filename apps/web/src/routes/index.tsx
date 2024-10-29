@@ -41,8 +41,10 @@ function Index() {
     <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
       {/* organization specific introduction */}
       <MarkdownWrapper content={platformMd} />
+
       {/* My Projects */}
       <MyProjects />
+
       {/* Resource Types Catalog */}
       <div className="flex flex-col gap-4 pb-8 pt-8">
         <div className="flex flex-col gap-1">
