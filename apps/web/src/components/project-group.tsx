@@ -9,9 +9,9 @@ import {
   ColumnSort,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { useContext, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Resource, ResourceType } from "~/resource-context";
-import { cn, getResourceOutputs } from "~/lib/utils";
+import { getResourceOutputs } from "~/lib/utils";
 import {
   Table,
   TableBody,
@@ -68,7 +68,7 @@ export function ProjectGroup(props: {
       result.push({
         accessorKey: type,
         header: (props) => (
-          <TableHead colSpan={props.header.colSpan}>
+          <TableHead key={props.header.id} colSpan={props.header.colSpan}>
             <DataTableColumnHeader column={props.column} title={type} />
           </TableHead>
         ),
