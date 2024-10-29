@@ -76,13 +76,9 @@ const ResourceTypeCategory = ({
 
   return (
     <div className="border-input flex flex-col border-b p-4 pb-12">
-      <div className="flex flex-col">
-        {/* <Icon className={`${iconColor}`} /> */}
-        <h2>{category.title}</h2>
-      </div>
 
 
-      {/* <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
           <Icon className={`${iconColor} h-10 w-10`} />
           <h2>{category.title}</h2>
@@ -95,7 +91,7 @@ const ResourceTypeCategory = ({
             }}
           />
         </div>
-      </div> */}
+      </div>
       <div className="flex flex-col gap-y-4">
         {resources.map((resource) => (
           <ResourceTypeCard
