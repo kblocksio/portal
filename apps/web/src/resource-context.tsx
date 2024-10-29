@@ -50,6 +50,7 @@ export interface ResourceContextValue {
   systems: string[];
   namespaces: string[];
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
+  loadEvents: (objUri: string) => void;
   categories: Record<string, Category>;
 }
 
@@ -65,6 +66,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   namespaces: [],
   eventsPerObject: {},
   categories: {},
+  loadEvents: () => {},
 });
 
 export const ResourceProvider = ({
@@ -311,32 +313,31 @@ export const ResourceProvider = ({
     return { systems: Array.from(systems), namespaces: Array.from(namespaces) };
   }, [resources]);
 
-  // initial fetch of events
-  useEffect(() => {
+  const loadEvents = (objUri: string) => {
     const requests = [];
-    for (const obj of Object.values(objects)) {
-      const uri = parseBlockUri(obj.objUri);
 
-      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-      const fetchEvents = async () => {
-        const response = await request("GET", eventsUrl);
+    const uri = parseBlockUri(objUri);
 
-        for (const event of response.events) {
-          addEvent(event);
-        }
-      };
+    const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+    const fetchEvents = async () => {
+      const response = await request("GET", eventsUrl);
 
-      requests.push(fetchEvents());
-    }
+      for (const event of response.events) {
+        addEvent(event);
+      }
+    };
+
+    requests.push(fetchEvents());
 
     Promise.all(requests).catch((e) => {
       console.error(e);
     });
-  }, [Object.values(objects).length]);
+  };
 
   const value: ResourceContextValue = {
     resourceTypes,
     objects,
+    loadEvents,
     systems,
     namespaces,
     resources,
@@ -354,3 +355,4 @@ export const ResourceProvider = ({
     </ResourceContext.Provider>
   );
 };
+

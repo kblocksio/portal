@@ -33,7 +33,8 @@ export const SystemBadge = ({ blockUri, showSystemName }: SystemBadgeProps) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            {showSystemName && <span>{block.system}</span>}
             <Badge
               variant="outline"
               className={`px-1.5 py-0.5 text-xs ${chooseColor(
@@ -43,7 +44,6 @@ export const SystemBadge = ({ blockUri, showSystemName }: SystemBadgeProps) => {
             >
               {acronyms.join("")}
             </Badge>
-            {showSystemName && <span className="ml-1">{block.system}</span>}
           </div>
         </TooltipTrigger>
         <TooltipContent>

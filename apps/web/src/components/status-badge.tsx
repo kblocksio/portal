@@ -25,19 +25,23 @@ const variants = cva("", {
 export interface StatusBadgeProps extends VariantProps<typeof variants> {
   obj?: ApiObject;
   showMessage?: boolean;
+
+  /**
+   * @default "Ready"
+   */
+  type?: string;
 }
 
-export const StatusBadge = ({ obj, showMessage, size }: StatusBadgeProps) => {
+export const StatusBadge = ({ obj, showMessage, size, type = "Ready" }: StatusBadgeProps) => {
   const readyCondition = getResourceReadyCondition(obj);
+
   const reason = readyCondition?.reason as StatusReason;
 
   const getStatusContent = (reason: StatusReason) => {
     switch (reason) {
       case StatusReason.Completed:
         return (
-          <div
-            className={cn(variants({ size }), "rounded-full bg-green-500")}
-          />
+          <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>
         );
       case StatusReason.ResolvingReferences:
       case StatusReason.InProgress:
@@ -51,10 +55,13 @@ export const StatusBadge = ({ obj, showMessage, size }: StatusBadgeProps) => {
           <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
         );
       default:
-        console.log("unknown reason", readyCondition);
-        return (
-          <div className={cn(variants({ size }), "rounded-full bg-gray-500")} />
-        );
+
+        if (readyCondition?.status === "True") {
+          return <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>
+        } else {
+          return <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
+        }
+
     }
   };
 
@@ -76,7 +83,7 @@ export const StatusBadge = ({ obj, showMessage, size }: StatusBadgeProps) => {
           )}
         </TooltipTrigger>
         <TooltipContent>
-          <p>{readyCondition?.message ?? "In Progress"}</p>
+          <p>{showMessage ? `${type}?` :(readyCondition?.reason ?? `${type}?`)}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

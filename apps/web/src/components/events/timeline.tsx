@@ -1,4 +1,3 @@
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Activity,
   XCircle,
@@ -40,10 +39,7 @@ export default function Timeline({
   const eventGroups = groupEventsByLifecycle(events);
 
   return (
-    <ScrollArea
-      contentClassName={cn("h-full pb-30", className)}
-      className="mt-0"
-    >
+    <div className="relative w-full overflow-x-hidden">
       <div className="absolute left-3.5 h-full w-px bg-gray-200"></div>
 
       {eventGroups.map((eventGroup, index) => (
@@ -54,12 +50,13 @@ export default function Timeline({
         />
       ))}
 
-      <div
+
+      {/* <div
         ref={(el) =>
           el && el.scrollIntoView({ behavior: "smooth", block: "end" })
         }
-      />
-    </ScrollArea>
+      /> */}
+    </div>
   );
 }
 
@@ -97,11 +94,13 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <span className="text-gray-500">{timestamp}</span>
-        <span className="text-gray-500">{action}</span>
-        <span className={messageColor}>
-          <pre className="font-sans">{message}</pre>
-        </span>
+        <div className="flex flex-wrap gap-2">
+          <span className="text-gray-500">{timestamp}</span>
+          <span className="text-gray-500">{action}</span>
+          <span className={messageColor}>
+            <pre className="font-sans">{message}</pre>
+          </span>
+        </div>
 
         {isClickable && (
           <ChevronRight
@@ -120,7 +119,7 @@ function EventItem({
       )}
 
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mb-10 mr-10 mt-0 space-y-1 rounded-sm bg-slate-800 p-4 pb-4 font-mono text-xs shadow-md">
+        <div className="mb-10 space-y-1 rounded-sm bg-slate-800 p-4 font-mono shadow-md overflow-x-auto">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
@@ -134,11 +133,11 @@ function LogItem({ log }: { log: LogEvent }) {
   const timestamp = log.timestamp.toLocaleTimeString();
   const message = log.message;
   return (
-    <div className="text-sm">
-      <div className="grid grid-cols-[110px_1fr]">
-        <span className="text-gray-500">{timestamp}</span>
-        <span className="text-gray-200">
-          <pre className="whitespace-pre-wrap">{message}</pre>
+    <div className="text-xs">
+      <div className="grid grid-cols-[8em_1fr]">
+        <span className="text-gray-600">{timestamp}</span>
+        <span className="text-gray-400">
+          <pre className="whitespace-pre pr-4">{message}</pre>
         </span>
       </div>
     </div>
@@ -205,7 +204,8 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
       groups.push(currentGroup);
     } else if (event.type === "LOG") {
       if (currentGroup) {
-        currentGroup.logs.push(event);
+        const messageLines = event.message.split("\n");
+        currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
       } else {
         // ignore
       }

@@ -24,9 +24,9 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "~/components/delete-resource";
 import linkifyHtml from "linkify-html";
-import { BlockUriComponents } from "@kblocks/api";
-
-const propetiesBlackList = ["lastStateHash"];
+import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
+import { getResourceProperties, getResourceOutputs } from "~/lib/utils";
+import { splitAndCapitalizeCamelCase } from "~/components/resource-form/label-formater";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -41,17 +41,19 @@ export const Route = createFileRoute(
 function Resource() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const { resourceTypes, resources, eventsPerObject, setSelectedResourceId } =
+  const { resourceTypes, resources, eventsPerObject, setSelectedResourceId, loadEvents } =
     useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
 
+  const objUri = formatBlockUri({ group, version, plural, system, namespace, name });
+
+  useMemo(() => {
+    loadEvents(objUri);
+  }, [objUri]);
+
   const selectedResource = useMemo(() => {
-    return resources
-      .get(`${group}/${version}/${plural}`)
-      ?.get(
-        `kblocks://${group}/${version}/${plural}/${system}/${namespace}/${name}`,
-      );
-  }, [resources, group, version, plural, system, namespace, name]);
+    return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
+  }, [resources, objUri]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -84,27 +86,17 @@ function Resource() {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const properties = useMemo(() => {
+    return selectedResource ? getResourceProperties(selectedResource) : {};
+  }, [selectedResource]);
+
+  const outputs = useMemo(() => {
+    return selectedResource ? getResourceOutputs(selectedResource) : {};
+  }, [selectedResource]);
+
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
-
-  const properties: Record<string, string> = {};
-  const outputs: Record<string, string> = {};
-
-  addProperty(properties, {
-    ...selectedResource,
-    status: undefined,
-    metadata: undefined,
-    apiVersion: undefined,
-    kind: undefined,
-    objType: undefined,
-    objUri: undefined,
-  });
-
-  addProperty(outputs, {
-    ...selectedResource?.status,
-    conditions: undefined,
-  });
 
   return (
     <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
@@ -179,16 +171,18 @@ function Resource() {
 
       <Card>
         <CardContent>
-          <div className="lg:flex-col lg:gap-4">
-            <div className="w-full">
-              <div className="py-6">
-                <CardTitle>Properties</CardTitle>
+          <div className="">
+          <div className="w-full">
+              <div className="pt-8 pb-4">
+                <CardTitle>Status</CardTitle>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <PropertyKey>Status</PropertyKey>
                 <PropertyValue>
-                  <div>
-                    <StatusBadge obj={selectedResource} showMessage />
+                  <div className="flex gap-2"> 
+                    {selectedResource.status?.conditions?.map(condition => (
+                      <StatusBadge key={condition.type} obj={selectedResource} showMessage type={condition.type} />
+                    ))}
                   </div>
                 </PropertyValue>
 
@@ -205,12 +199,20 @@ function Resource() {
                   />
                 </PropertyValue>
 
+              </div>
+            </div>
+
+            <div className="w-full">
+              <div className="pt-8 pb-4">
+                <CardTitle>Properties</CardTitle>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <KeyValueList data={properties} />
               </div>
             </div>
             {outputs && Object.keys(outputs).length > 0 && (
               <div className="w-full">
-                <div className="py-6">
+                <div className="pt-8 pb-4">
                   <CardTitle>Outputs</CardTitle>
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -271,7 +273,7 @@ type KeyValueListProps = {
 const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
   Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
-      <PropertyKey>{key}</PropertyKey>
+      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
       <PropertyValue>{formatValue(value)}</PropertyValue>
     </React.Fragment>
   ));
@@ -292,30 +294,4 @@ function formatValue(value: any) {
   }
 
   return JSON.stringify(value);
-}
-
-const containsString = (arr1: string[], arr2: string[]): boolean => {
-  return arr1.some((item) => arr2.includes(item));
-};
-
-function addProperty(
-  target: Record<string, string>,
-  value: any,
-  keyPrefix: string[] = [],
-) {
-  if (containsString(keyPrefix, propetiesBlackList)) {
-    return;
-  }
-  if (value === undefined) {
-    return;
-  }
-  if (Array.isArray(value)) {
-    target[keyPrefix.join(".")] = value.join(", ");
-  } else if (typeof value === "object" && value !== null) {
-    for (const [k, v] of Object.entries(value)) {
-      addProperty(target, v, [...keyPrefix, k]);
-    }
-  } else {
-    target[keyPrefix.join(".")] = value;
-  }
 }
