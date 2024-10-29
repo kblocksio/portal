@@ -108,7 +108,7 @@ app.post("/api/events", async (req, res) => {
   console.log("EVENT:", body);
   await pubsub.publishEvent(body);
   handleEvent(req.body as WorkerEvent); // <-- runs in the background
-  return res.status(200);
+  return res.sendStatus(200);
 });
 
 app.get("/api/resources", async (_, res) => {
