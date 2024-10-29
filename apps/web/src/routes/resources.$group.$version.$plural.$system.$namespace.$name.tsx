@@ -110,7 +110,7 @@ function Resource() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
+    <div className="container flex w-[100vw] flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div>
           <Button onClick={() => router.history.back()} variant="ghost">
