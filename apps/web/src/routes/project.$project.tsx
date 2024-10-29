@@ -22,8 +22,6 @@ function Project() {
       return;
     }
     if (!selectedProject) {
-      console.log("project", project);
-      console.log("projects", projects);
       const projectObj = projects.find((p) => p.value === project);
       if (projectObj) {
         setSelectedProject(projectObj);
