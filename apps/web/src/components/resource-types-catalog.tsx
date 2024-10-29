@@ -9,9 +9,10 @@ import {
 import { Skeleton } from "./ui/skeleton";
 import { ResourceType } from "~/resource-context";
 import { Category } from "@repo/shared";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MarkdownWrapper } from "./markdown";
 import { Button } from "./ui/button";
+import { ResourceTypeDocsDrawer } from "./resource-type-docs-drawer";
 
 export interface ResourceTypesCatalogProps {
   categories: Record<string, Category>;
@@ -25,6 +26,7 @@ export const ResourceTypesCatalog = ({
   isLoading,
   categories,
 }: ResourceTypesCatalogProps) => {
+  const [docs, setDocs] = useState<string | undefined>(undefined);
   const typesForCategories = useMemo(() => {
     return Object.keys(categories).map((category) => ({
       category,
@@ -49,9 +51,11 @@ export const ResourceTypesCatalog = ({
               category={categories[category]}
               resources={resources}
               handleResourceSelect={handleResourceSelect}
+              handleDocsOpen={setDocs}
             />
           ),
       )}
+      <ResourceTypeDocsDrawer docs={docs} onClose={() => setDocs(undefined)} />
     </div>
   );
 };
@@ -60,10 +64,12 @@ const ResourceTypeCategory = ({
   category,
   resources,
   handleResourceSelect,
+  handleDocsOpen,
 }: {
   category: Category;
   resources: ResourceType[];
   handleResourceSelect: (resource: ResourceType) => void;
+  handleDocsOpen: (docs: string | undefined) => void;
 }) => {
   const Icon = getIconComponent({ icon: category.icon ?? "CircleDotIcon" });
   const iconColor = getResourceIconColors({ color: category?.color });
@@ -90,6 +96,7 @@ const ResourceTypeCategory = ({
             key={`${resource.kind}-${resource.group}-${resource.version}`}
             resource={resource}
             handleResourceSelect={handleResourceSelect}
+            handleDocsOpen={handleDocsOpen}
           />
         ))}
       </div>
@@ -100,9 +107,11 @@ const ResourceTypeCategory = ({
 const ResourceTypeCard = ({
   resource,
   handleResourceSelect,
+  handleDocsOpen,
 }: {
   resource: ResourceType;
   handleResourceSelect: (resource: ResourceType) => void;
+  handleDocsOpen: (docs: string | undefined) => void;
 }) => {
   const Icon = resource.iconComponent;
   const iconColor = getResourceIconColors({ color: resource?.color });
@@ -110,15 +119,7 @@ const ResourceTypeCard = ({
     <Card
       key={`${resource.kind}-${resource.group}-${resource.version}`}
       className="hover:bg-accent flex w-full cursor-pointer justify-between rounded-sm border-none p-0 shadow-none"
-      // onClick={() => handleResourceSelect(resource)}
       tabIndex={0}
-      // onKeyDown={(e) => {
-      //   if (e.key === " ") {
-      //     e.preventDefault();
-      //     e.stopPropagation();
-      //     handleResourceSelect(resource);
-      //   }
-      // }}
     >
       <CardContent className="flex w-full items-center justify-between gap-x-4 p-2">
         <div className="flex items-center gap-x-4">
@@ -132,6 +133,7 @@ const ResourceTypeCard = ({
           <Button
             className="text-sky-500 hover:text-sky-600 hover:underline"
             variant="ghost"
+            onClick={() => handleDocsOpen(resource.readme)}
           >
             Docs
           </Button>
