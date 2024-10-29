@@ -12,7 +12,7 @@ import {
   LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "~/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 
@@ -36,7 +36,7 @@ export default function Timeline({
   events: WorkerEvent[];
   className?: string;
 }) {
-  const eventGroups = groupEventsByLifecycle(events);
+  const eventGroups = useMemo(() => groupEventsByLifecycle(events), [events]);
 
   return (
     <div className="relative w-full overflow-x-hidden">
@@ -132,12 +132,35 @@ function EventItem({
 function LogItem({ log }: { log: LogEvent }) {
   const timestamp = log.timestamp.toLocaleTimeString();
   const message = log.message;
+
+  const classes = [];
+
+
+  switch (log.level) {
+    case LogLevel.DEBUG:
+      classes.push("text-gray-500");
+      break;
+    case LogLevel.INFO:
+      classes.push("text-gray-400");
+      break;
+    case LogLevel.WARNING:
+      classes.push("text-yellow-500");
+      break;
+    case LogLevel.ERROR:
+      classes.push("text-red-500");
+      break;
+  }
+
+  if (!log.parentLogId) {
+    classes.push("text-white");
+  }
+
   return (
     <div className="text-xs">
       <div className="grid grid-cols-[8em_1fr]">
         <span className="text-gray-600">{timestamp}</span>
-        <span className="text-gray-400">
-          <pre className="whitespace-pre pr-4">{message}</pre>
+        <span className={cn("whitespace-pre pr-4", classes)}>
+          <pre>{message}</pre>
         </span>
       </div>
     </div>
@@ -197,15 +220,22 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
 
       const messageLines = event.event.message.split("\n");
       if (messageLines.length > 1) {
-
         currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
       }
 
       groups.push(currentGroup);
     } else if (event.type === "LOG") {
       if (currentGroup) {
-        const messageLines = event.message.split("\n");
-        currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
+        const messageLines = event.message.trimEnd().split("\n");
+
+        // if (!event.parentLogId) {
+        //   messageLines.unshift("");
+        // }
+
+        currentGroup.logs.push(...messageLines.map(line => ({
+          ...event,
+          message: line,
+        })));
       } else {
         // ignore
       }

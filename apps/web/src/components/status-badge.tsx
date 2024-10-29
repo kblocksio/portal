@@ -33,7 +33,7 @@ export interface StatusBadgeProps extends VariantProps<typeof variants> {
 }
 
 export const StatusBadge = ({ obj, showMessage, size, type = "Ready" }: StatusBadgeProps) => {
-  const readyCondition = getResourceReadyCondition(obj);
+  const readyCondition = getResourceReadyCondition(obj, type);
 
   const reason = readyCondition?.reason as StatusReason;
 

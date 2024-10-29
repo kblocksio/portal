@@ -7,12 +7,12 @@ export const chooseColor = (key: string, palette: string[]): string => {
   return palette[index];
 };
 
-export const getResourceReadyCondition = (obj?: ApiObject) => {
-  return obj?.status?.conditions?.find((c) => c.type === "Ready");
+export const getResourceReadyCondition = (obj?: ApiObject, type: string = "Ready") => {
+  return obj?.status?.conditions?.find((c) => c.type === type);
 };
 
-export const getResourceStatusReason = (obj?: ApiObject) => {
-  const readyCondition = getResourceReadyCondition(obj);
+export const getResourceStatusReason = (obj?: ApiObject, type: string = "Ready") => {
+  const readyCondition = getResourceReadyCondition(obj, type);
   return readyCondition?.reason as StatusReason;
 };
 
