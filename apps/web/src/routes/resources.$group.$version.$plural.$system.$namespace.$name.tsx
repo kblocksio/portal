@@ -120,7 +120,7 @@ function Resource() {
   }
 
   return (
-    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="container flex w-[100vw] flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div>
           <Button onClick={() => router.history.back()} variant="ghost">
