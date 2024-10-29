@@ -78,8 +78,8 @@ const ResourceTypeCategory = ({
     <div className="border-input flex flex-col border-b p-4 pb-12">
       <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
-          <Icon className={`${iconColor} h-8 w-8`} />
-          <h3 className="text-xl font-semibold">{category.title}</h3>
+          <Icon className={`${iconColor} h-10 w-10`} />
+          <h3 className="text-2xl font-semibold">{category.title}</h3>
         </div>
         <p className="text-muted-foreground text-sm">
           <MarkdownWrapper
