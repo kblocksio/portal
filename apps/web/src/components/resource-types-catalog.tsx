@@ -81,14 +81,14 @@ const ResourceTypeCategory = ({
           <Icon className={`${iconColor} h-10 w-10`} />
           <h3 className="text-2xl font-semibold">{category.title}</h3>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <div className="text-muted-foreground text-sm">
           <MarkdownWrapper
             content={category.description}
             componentsOverrides={{
               p: ({ ...props }) => <p className="mb-4" {...props} />,
             }}
           />
-        </p>
+        </div>
       </div>
       <div className="flex flex-col gap-y-4">
         {resources.map((resource) => (
