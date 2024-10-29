@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/table";
 import { getResourceIconColors } from "~/lib/hero-icon";
 import { useNavigate } from "@tanstack/react-router";
-import { useProjectColumns } from "./projects";
+import { useProjectColumns } from "./project-page";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { StatusBadge } from "./status-badge";
 
@@ -48,13 +48,14 @@ export function ProjectGroup(props: {
 
     const outputs = Object.keys(getResourceOutputs(resources[0]));
 
-    
     const result: ColumnDef<Resource>[] = [];
 
     // see if we have any special status conditions
     const conditions = new Set<string>();
     for (const r of resources) {
-      const nonReadyConditions = r.status?.conditions?.filter(c => c.type !== "Ready");
+      const nonReadyConditions = r.status?.conditions?.filter(
+        (c) => c.type !== "Ready",
+      );
       for (const c of nonReadyConditions ?? []) {
         const type = c.type;
         if (type) {
@@ -66,33 +67,37 @@ export function ProjectGroup(props: {
     for (const type of conditions) {
       result.push({
         accessorKey: type,
-        header: (props) => <TableHead colSpan={props.header.colSpan}><DataTableColumnHeader column={props.column} title={type} /></TableHead>,
+        header: (props) => (
+          <TableHead colSpan={props.header.colSpan}>
+            <DataTableColumnHeader column={props.column} title={type} />
+          </TableHead>
+        ),
         cell: (props) => <StatusBadge obj={props.row.original} type={type} />,
       });
     }
-    
-    
-    result.push(...outputs.map((output) => ({
-      accessorKey: output,
-      header: (props) => (
-        <TableHead
-          key={props.header.id}
-          colSpan={props.header.colSpan}
-          className="max-w-32"
-        >
-          <DataTableColumnHeader column={props.column} title={output} />
-        </TableHead>
-      ),
-      cell: (props) => (
-        <div
-          className="max-w-32 truncate"
-          title={props.row.original.status?.[output]}
-        >
-          {props.row.original.status?.[output]}
-        </div>
-      ),
-    })) as ColumnDef<Resource>[]);
 
+    result.push(
+      ...(outputs.map((output) => ({
+        accessorKey: output,
+        header: (props) => (
+          <TableHead
+            key={props.header.id}
+            colSpan={props.header.colSpan}
+            className="max-w-32"
+          >
+            <DataTableColumnHeader column={props.column} title={output} />
+          </TableHead>
+        ),
+        cell: (props) => (
+          <div
+            className="max-w-32 truncate"
+            title={props.row.original.status?.[output]}
+          >
+            {props.row.original.status?.[output]}
+          </div>
+        ),
+      })) as ColumnDef<Resource>[]),
+    );
 
     return result;
   }, [resources]);

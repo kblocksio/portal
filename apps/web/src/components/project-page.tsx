@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "~/resource-context";
-import { getIconComponent } from "~/lib/hero-icon";
 import { DataTableColumnHeader } from "~/components/data-table-column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { DataTableToolbar } from "~/components/data-table-toolbar";
@@ -31,7 +30,11 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "status",
         header: (props) => (
-          <TableHead key={props.header.id} colSpan={props.header.colSpan} className="w-0"></TableHead>
+          <TableHead
+            key={props.header.id}
+            colSpan={props.header.colSpan}
+            className="w-0"
+          ></TableHead>
         ),
         cell: (props) => <StatusBadge obj={props.row.original} />,
         filterFn: (row, columnId, filterValue) => {
@@ -161,7 +164,11 @@ export const useProjectColumns = (outputColumns?: ColumnDef<Resource>[]) => {
       {
         accessorKey: "actions",
         header: (props) => (
-          <TableHead key={props.header.id} colSpan={props.header.colSpan} className="w-0"></TableHead>
+          <TableHead
+            key={props.header.id}
+            colSpan={props.header.colSpan}
+            className="w-0"
+          ></TableHead>
         ),
         cell: (props) => (
           <ResourceActionsMenu
@@ -180,7 +187,7 @@ export interface ProjectsProps {
   resources: Resource[];
 }
 
-export const Projects = (props: ProjectsProps) => {
+export const ProjectPage = (props: ProjectsProps) => {
   const { resourceTypes } = useContext(ResourceContext);
 
   const columns = useProjectColumns();
