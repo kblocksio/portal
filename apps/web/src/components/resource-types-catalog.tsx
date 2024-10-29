@@ -125,7 +125,7 @@ const ResourceTypeCard = ({
         <div className="flex items-center gap-x-4">
           <Icon className={`${iconColor} h-6 w-6`} />
           <CardTitle>{resource.kind}</CardTitle>
-          <CardDescription className="line-clamp-2 overflow-hidden text-ellipsis">
+          <CardDescription className="line-clamp-1 overflow-hidden text-ellipsis">
             {resource.description}
           </CardDescription>
         </div>
