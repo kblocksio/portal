@@ -13,6 +13,7 @@ import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
+import { renderInitialMeta } from "./components-utils";
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
@@ -102,19 +103,6 @@ export const CreateResourceWizard = ({
     },
     [currentEditableResource, handleOnOpenChange, setSelectedResourceType],
   );
-
-  function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
-    if (!objUri) {
-      return {};
-    }
-
-    const uri = parseBlockUri(objUri);
-    return {
-      system: uri.system,
-      namespace: uri.namespace,
-      name: uri.name,
-    };
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

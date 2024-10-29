@@ -1,4 +1,5 @@
-import { ApiObject, StatusReason } from "@kblocks/api";
+import { ApiObject, parseBlockUri, StatusReason } from "@kblocks/api";
+import { ObjectMetadata } from "@repo/shared";
 
 export const chooseColor = (key: string, palette: string[]): string => {
   const index =
@@ -7,11 +8,17 @@ export const chooseColor = (key: string, palette: string[]): string => {
   return palette[index];
 };
 
-export const getResourceReadyCondition = (obj?: ApiObject, type: string = "Ready") => {
+export const getResourceReadyCondition = (
+  obj?: ApiObject,
+  type: string = "Ready",
+) => {
   return obj?.status?.conditions?.find((c) => c.type === type);
 };
 
-export const getResourceStatusReason = (obj?: ApiObject, type: string = "Ready") => {
+export const getResourceStatusReason = (
+  obj?: ApiObject,
+  type: string = "Ready",
+) => {
   const readyCondition = getResourceReadyCondition(obj, type);
   return readyCondition?.reason as StatusReason;
 };
@@ -39,4 +46,17 @@ export const getResourcesStatuses = (
     },
     { failed: 0, inProgress: 0, completed: 0 },
   );
+};
+
+export const renderInitialMeta = (objUri?: string): Partial<ObjectMetadata> => {
+  if (!objUri) {
+    return {};
+  }
+
+  const uri = parseBlockUri(objUri);
+  return {
+    system: uri.system,
+    namespace: uri.namespace,
+    name: uri.name,
+  };
 };

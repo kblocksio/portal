@@ -25,6 +25,7 @@ interface FieldRendererProps {
    * picker.
    */
   inline?: boolean;
+  readonly?: boolean;
 }
 
 export const FieldRenderer = ({
@@ -37,6 +38,7 @@ export const FieldRenderer = ({
   hideField = false,
   required = false,
   inline = false,
+  readonly = false,
 }: FieldRendererProps) => {
   const reorderedSchema = reorderProperties(schema);
   const { type, properties, additionalProperties, description } =
@@ -71,6 +73,7 @@ export const FieldRenderer = ({
       path,
       formData,
       updateFormData,
+      readonly,
     });
 
     if (pickerField) {
@@ -81,6 +84,7 @@ export const FieldRenderer = ({
   if (type === "object" && properties) {
     return (
       <ObjectFieldRenderer
+        readonly={readonly}
         objectMetadata={objectMetadata}
         schema={schema}
         formData={formData}
@@ -113,6 +117,7 @@ export const FieldRenderer = ({
         description={description}
         setEditKey={setEditKey}
         editKey={editKey}
+        readonly={readonly}
       />
     );
   }
@@ -132,6 +137,7 @@ export const FieldRenderer = ({
         editIndex={editIndex}
         objectMetadata={objectMetadata}
         description={description}
+        readonly={readonly}
       />
     );
   }
@@ -148,6 +154,7 @@ export const FieldRenderer = ({
       hideField={hideField}
       schema={schema}
       showLabel={!inline}
+      readonly={readonly}
     />
   );
 };

@@ -17,6 +17,7 @@ export const resolvePickerField = ({
   formData,
   updateFormData,
   path,
+  readonly = false,
 }: {
   pickerType: string;
   pickerConfig: any;
@@ -31,6 +32,7 @@ export const resolvePickerField = ({
   value: any;
   hideField?: boolean;
   description?: string;
+  readonly?: boolean;
 }) => {
   switch (pickerType) {
     case "instance-picker": {
@@ -44,6 +46,7 @@ export const resolvePickerField = ({
           defaultInstanceName={schema.default}
           config={pickerConfig}
           onInstanceChange={handleChange}
+          readonly={readonly}
         />
       );
     }
@@ -56,6 +59,7 @@ export const resolvePickerField = ({
               handleChange(repo?.full_name);
             }
           }}
+          readonly={readonly}
         />
       );
     }
@@ -71,6 +75,7 @@ export const resolvePickerField = ({
           setFormData={updateFormData}
           objectMetadata={objectMetadata}
           path={path}
+          readonly={readonly}
         />
       );
     }

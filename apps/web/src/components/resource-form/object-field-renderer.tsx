@@ -18,6 +18,7 @@ import {
 } from "../ui/dialog";
 
 export const ObjectFieldRenderer = ({
+  readonly,
   properties,
   description,
   formData,
@@ -32,6 +33,7 @@ export const ObjectFieldRenderer = ({
   setShowObjectModal,
   showObjectModal,
 }: {
+  readonly: boolean;
   properties: any;
   description: string;
   formData: any;
@@ -71,6 +73,7 @@ export const ObjectFieldRenderer = ({
         )}
 
         <FormFields
+          readonly={readonly}
           path={path}
           hideField={hideField}
           objectMetadata={objectMetadata}
@@ -113,7 +116,7 @@ export const ObjectFieldRenderer = ({
             className="ml-2 mr-2 h-8 px-3 text-xs"
           >
             <Pencil className="mr-1 h-3 w-3" />
-            Edit
+            {readonly ? "View" : "Edit"}
           </Button>
         </div>
       ) : (
@@ -129,6 +132,7 @@ export const ObjectFieldRenderer = ({
                   updateFormData={updateFormData}
                   fieldName={key}
                   required={schema.required?.includes(key)}
+                  readonly={readonly}
                 />
               ))
             : null}
@@ -156,6 +160,7 @@ export const ObjectFieldRenderer = ({
             initialData={objectData}
             onSave={handleSaveObject}
             onCancel={() => setShowObjectModal(false)}
+            readonly={readonly}
           />
         </DialogContent>
       </Dialog>

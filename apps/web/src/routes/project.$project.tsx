@@ -40,19 +40,15 @@ function Project() {
   }, [resources]);
 
   return (
-    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container flex flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
       <ProjectHeader selectedProject={selectedProject} />
-      <div>
-        {isLoading ||
-        !resourceTypes ||
-        Object.keys(resourceTypes).length === 0 ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            <ProjectPage resources={allResources} />
-          </>
-        )}
-      </div>
+      {isLoading ||
+      !resourceTypes ||
+      Object.keys(resourceTypes).length === 0 ? (
+        <LoadingSkeleton />
+      ) : (
+        <ProjectPage resources={allResources} />
+      )}
     </div>
   );
 }

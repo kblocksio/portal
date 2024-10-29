@@ -16,6 +16,7 @@ interface PrimitiveFieldRendererProps {
   schema: any;
   objectMetadata: ObjectMetadata;
   showLabel?: boolean;
+  readonly?: boolean;
 }
 
 export const PrimitiveFieldRenderer = ({
@@ -29,6 +30,7 @@ export const PrimitiveFieldRenderer = ({
   hideField = false,
   required = false,
   showLabel = true,
+  readonly = false,
 }: PrimitiveFieldRendererProps) => {
   const getPrimitiveWidget = () => {
     switch (type) {
@@ -38,6 +40,7 @@ export const PrimitiveFieldRenderer = ({
             value={value}
             onChange={handleChange}
             required={required}
+            disabled={readonly}
           />
         );
       case "string": {
@@ -48,6 +51,7 @@ export const PrimitiveFieldRenderer = ({
               selectedValue={value || schema.default}
               onChange={handleChange}
               required={required}
+              disabled={readonly}
             />
           );
         }
@@ -59,6 +63,7 @@ export const PrimitiveFieldRenderer = ({
             placeholder={defaultValue}
             required={required}
             type={type}
+            disabled={readonly}
           />
         );
       }
@@ -71,6 +76,7 @@ export const PrimitiveFieldRenderer = ({
             required={required}
             type={type}
             placeholder={defaultValue}
+            disabled={readonly}
           />
         );
     }

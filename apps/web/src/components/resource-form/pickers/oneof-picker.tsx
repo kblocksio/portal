@@ -16,6 +16,7 @@ export const OneOfPicker = ({
   setFormData,
   objectMetadata,
   path,
+  readonly = false,
 }: {
   schema: any;
   fieldName: string;
@@ -26,6 +27,7 @@ export const OneOfPicker = ({
   setFormData: (data: any) => void;
   objectMetadata: any;
   path: string;
+  readonly?: boolean;
 }) => {
   const properties = schema?.properties || {};
 
@@ -87,6 +89,7 @@ export const OneOfPicker = ({
           updateFormData={setFormData}
           inline={true}
           fieldName={fieldName}
+          readonly={readonly}
         />
       </Card>
     );
@@ -99,6 +102,7 @@ export const OneOfPicker = ({
     hideField,
     setFormData,
     value,
+    readonly,
   ]);
 
   return (
@@ -115,6 +119,7 @@ export const OneOfPicker = ({
               key={option.value}
               value={option.value}
               className="flex-1"
+              disabled={readonly}
             >
               {option.label}
             </TabsTrigger>

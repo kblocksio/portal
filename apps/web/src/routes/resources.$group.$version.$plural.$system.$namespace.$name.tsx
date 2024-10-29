@@ -26,6 +26,10 @@ import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreateNewResourceForm } from "@/components/create-new-resource-form";
+import { renderInitialMeta } from "@/components/components-utils";
+import { Label } from "@/components/ui/label";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -36,6 +40,11 @@ export const Route = createFileRoute(
 )({
   component: Resource,
 });
+
+const tabs = [
+  { label: "Details", value: "details" },
+  { label: "Logs", value: "logs" },
+];
 
 function Resource() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
@@ -48,6 +57,7 @@ function Resource() {
     loadEvents,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("details");
 
   const objUri = formatBlockUri({
     group,
@@ -110,7 +120,7 @@ function Resource() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
+    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div>
           <Button onClick={() => router.history.back()} variant="ghost">
@@ -127,9 +137,6 @@ function Resource() {
             <div>
               <h1 className="flex items-center gap-2 text-2xl font-bold">
                 {selectedResource.metadata.name}
-                {/* <div className="align-middle">
-                  <StatusBadge obj={selectedResource} size="sm" />
-                </div> */}
               </h1>
               <p className="text-muted-foreground flex gap-4 text-sm leading-none">
                 {selectedResourceType?.group}/{selectedResourceType?.version}.
@@ -178,82 +185,70 @@ function Resource() {
             </DropdownMenu>
           </div>
         </div>
+        <div className="mt-4 flex gap-2">
+          <Label className="self-center text-sm">Status</Label>
+          <div className="flex gap-2">
+            {selectedResource.status?.conditions?.map((condition) => (
+              <StatusBadge
+                key={condition.type}
+                obj={selectedResource}
+                showMessage
+                type={condition.type}
+              />
+            ))}
+          </div>
+        </div>
       </div>
-
-      <Card>
-        <CardContent>
-          <div className="">
-            <div className="w-full">
-              <div className="pb-4 pt-8">
-                <CardTitle>Status</CardTitle>
-              </div>
-              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                <PropertyKey>Status</PropertyKey>
-                <PropertyValue>
-                  <div className="flex gap-2">
-                    {selectedResource.status?.conditions?.map((condition) => (
-                      <StatusBadge
-                        key={condition.type}
-                        obj={selectedResource}
-                        showMessage
-                        type={condition.type}
-                      />
-                    ))}
+      <Tabs
+        value={selectedTab}
+        onValueChange={setSelectedTab}
+        className="w-full"
+      >
+        <TabsList className="flex w-full gap-2">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="flex-1">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {tabs.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-6">
+            {selectedTab === "details" && (
+              <div className="flex flex-col gap-1">
+                <CreateNewResourceForm
+                  resourceType={selectedResourceType}
+                  initialMeta={renderInitialMeta(selectedResource?.objUri)}
+                  initialValues={selectedResource}
+                  isLoading={false}
+                  readonly={true}
+                />
+                {outputs && Object.keys(outputs).length > 0 && (
+                  <div className="flex flex-col gap-6">
+                    <h2 className="text-md flex items-center whitespace-nowrap border-t pt-6 font-medium">
+                      Outputs
+                    </h2>
+                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                      <KeyValueList data={outputs} />
+                    </div>
                   </div>
-                </PropertyValue>
-
-                <PropertyKey>Namespace</PropertyKey>
-                <PropertyValue>
-                  {selectedResource.metadata.namespace}
-                </PropertyValue>
-
-                <PropertyKey>System</PropertyKey>
-                <PropertyValue>
-                  <SystemBadge
-                    blockUri={selectedResource.objUri}
-                    showSystemName
-                  />
-                </PropertyValue>
-              </div>
-            </div>
-
-            <div className="w-full">
-              <div className="pb-4 pt-8">
-                <CardTitle>Properties</CardTitle>
-              </div>
-              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                <KeyValueList data={properties} />
-              </div>
-            </div>
-            {outputs && Object.keys(outputs).length > 0 && (
-              <div className="w-full">
-                <div className="pb-4 pt-8">
-                  <CardTitle>Outputs</CardTitle>
-                </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                  <KeyValueList data={outputs} />
-                </div>
+                )}
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Logs</CardTitle>
-        </CardHeader>
-        <CardContent className="h-full">
-          {selectedResource && (
-            <Timeline
-              events={Object.values(
-                eventsPerObject[selectedResource.objUri] ?? [],
-              )}
-              className="mt-0"
-            />
-          )}
-        </CardContent>
-      </Card>
+            {selectedTab === "logs" && (
+              <div className="h-full">
+                {selectedResource && (
+                  <Timeline
+                    events={Object.values(
+                      eventsPerObject[selectedResource.objUri] ?? [],
+                    )}
+                    className="mt-0"
+                  />
+                )}
+              </div>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }
@@ -268,14 +263,14 @@ const PropertyValue = ({ children }: PropsWithChildren) => {
   if (typeof children === "string" && /<a\s/i.test(children)) {
     return (
       <div
-        className="flex items-center overflow-hidden font-medium"
+        className="text-muted-foreground flex items-center overflow-hidden font-medium"
         dangerouslySetInnerHTML={{ __html: children }}
       />
     );
   }
 
   return (
-    <div className="flex items-center overflow-hidden font-medium">
+    <div className="text-muted-foreground flex items-center overflow-hidden font-medium">
       <span className="truncate">{children}</span>
     </div>
   );

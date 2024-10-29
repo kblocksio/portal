@@ -10,13 +10,15 @@ export const CreateNewResourceForm = ({
   handleBack,
   isLoading,
   initialMeta,
+  readonly,
 }: {
   resourceType: ResourceType;
   initialValues?: ApiObject;
   initialMeta: Partial<ObjectMetadata>;
-  handleCreate: (meta: ObjectMetadata, fields: any) => void;
-  handleBack: () => void;
+  handleCreate?: (meta: ObjectMetadata, fields: any) => void;
+  handleBack?: () => void;
   isLoading: boolean;
+  readonly?: boolean;
 }) => {
   delete resourceType.schema.properties?.orderedJson;
 
@@ -29,6 +31,7 @@ export const CreateNewResourceForm = ({
         initialMeta={initialMeta}
         handleBack={handleBack}
         handleSubmit={handleCreate}
+        readonly={readonly}
       />
     </div>
   );

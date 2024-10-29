@@ -9,6 +9,7 @@ export const FormFields = ({
   hideField,
   requiredFields,
   path,
+  readonly = false,
 }: {
   properties: any;
   formData: any;
@@ -17,6 +18,7 @@ export const FormFields = ({
   hideField: boolean;
   path?: string;
   requiredFields: string[] | undefined;
+  readonly?: boolean;
 }) => {
   return (
     <div>
@@ -32,6 +34,7 @@ export const FormFields = ({
               objectMetadata={objectMetadata}
               hideField={hideField}
               required={requiredFields?.includes(key)}
+              readonly={readonly}
             />
           ))
         : null}

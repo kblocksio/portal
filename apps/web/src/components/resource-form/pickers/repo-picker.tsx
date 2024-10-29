@@ -13,11 +13,13 @@ import { useFetch } from "@/hooks/use-fetch";
 interface RepoPickerProps {
   handleOnSelection: (repository: Repository | null) => void;
   initialValue?: string | null;
+  readonly?: boolean;
 }
 
 export const RepoPicker = ({
   handleOnSelection,
   initialValue,
+  readonly = false,
 }: RepoPickerProps) => {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
 
@@ -65,7 +67,7 @@ export const RepoPicker = ({
     <div className="ml-2 mr-2 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Select
-          disabled={isLoading || !repositories}
+          disabled={isLoading || !repositories || readonly}
           onValueChange={(value) => {
             const selectedRepo = repositories?.find(
               (repo) => repo.full_name === value,

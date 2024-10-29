@@ -76,8 +76,6 @@ const ResourceTypeCategory = ({
 
   return (
     <div className="border-input flex flex-col border-b p-4 pb-12">
-
-
       <div className="flex flex-col gap-y-4">
         <div className="flex w-full items-center gap-x-2 self-center">
           <Icon className={`${iconColor} h-10 w-10`} />

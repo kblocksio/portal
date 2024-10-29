@@ -11,6 +11,7 @@ interface ObjectFormProps {
   hideField?: boolean;
   requiredFields?: string[];
   objectMetadata: ObjectMetadata;
+  readonly?: boolean;
 }
 
 export const ObjectFieldForm = ({
@@ -21,6 +22,7 @@ export const ObjectFieldForm = ({
   initialData = {},
   hideField = false,
   objectMetadata,
+  readonly = false,
 }: ObjectFormProps) => {
   const [formData, setFormData] = useState<any>(initialData);
 
@@ -45,13 +47,14 @@ export const ObjectFieldForm = ({
               objectMetadata={objectMetadata}
               hideField={hideField}
               requiredFields={requiredFields}
+              readonly={readonly}
             />
           </div>
           <div className="mt-6 flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" variant="default">
+            <Button type="submit" variant="default" disabled={readonly}>
               Save
             </Button>
           </div>

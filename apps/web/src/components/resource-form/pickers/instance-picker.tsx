@@ -24,6 +24,7 @@ export const InstancePicker = ({
   required,
   description,
   fieldName,
+  readonly,
 }: {
   initialValue?: string;
   defaultInstanceName: string;
@@ -33,6 +34,7 @@ export const InstancePicker = ({
   fieldName: string;
   config: InstancePickerConfig;
   onInstanceChange: (instanceName: string) => void;
+  readonly?: boolean;
 }) => {
   // add the "name" property to all instances and organize as an array
   const instanceTypes: InstanceItem[] = Object.entries(config).map(
@@ -72,6 +74,8 @@ export const InstancePicker = ({
           <div className="space-y-4">
             <Slider
               min={0}
+              className={cn(readonly && "pointer-events-none opacity-50")}
+              disabled={readonly}
               max={instanceTypes.length - 1}
               step={1}
               value={[
@@ -94,6 +98,7 @@ export const InstancePicker = ({
                       ? "text-primary font-bold"
                       : "",
                     "cursor-pointer",
+                    readonly && "pointer-events-none opacity-50",
                   )}
                 >
                   {instance.name}
@@ -102,7 +107,12 @@ export const InstancePicker = ({
             </div>
           </div>
 
-          <Card className="bg-primary/5">
+          <Card
+            className={cn(
+              "bg-primary/5",
+              readonly && "pointer-events-none opacity-50",
+            )}
+          >
             <CardContent className="space-y-4 p-6">
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-background flex flex-col items-center justify-center rounded-lg p-3">

@@ -10,10 +10,11 @@ import { ObjectMetadata } from "@repo/shared";
 export interface FormGeneratorProps {
   schema: any;
   isLoading: boolean;
-  handleBack: () => void;
-  handleSubmit: (meta: ObjectMetadata, fields: any) => void;
+  handleBack?: () => void;
+  handleSubmit?: (meta: ObjectMetadata, fields: any) => void;
   initialValues?: ApiObject;
   initialMeta: Partial<ObjectMetadata>;
+  readonly?: boolean;
 }
 
 export const FormGenerator = ({
@@ -23,6 +24,7 @@ export const FormGenerator = ({
   handleSubmit,
   initialValues,
   initialMeta,
+  readonly,
 }: FormGeneratorProps) => {
   const [formData, setFormData] = useState<any>(initialValues || {});
   const [system] = useState<string>(initialMeta?.system ?? "demo");
@@ -54,7 +56,7 @@ export const FormGenerator = ({
       onSubmit={(e) => {
         e.preventDefault();
         const meta: ObjectMetadata = metadataObject;
-        handleSubmit(meta, formData);
+        handleSubmit?.(meta, formData);
       }}
     >
       <div className="ml-2 mr-2 space-y-4 border-b pb-4">
@@ -62,7 +64,7 @@ export const FormGenerator = ({
           <div className="space-y-2">
             <Label
               htmlFor="name"
-              className={`${initialValues ? "opacity-50" : ""}`}
+              className={`${initialValues && !readonly ? "opacity-50" : ""}`}
             >
               Name
               <span className="text-destructive">*</span>
@@ -71,7 +73,7 @@ export const FormGenerator = ({
               required
               id="name"
               placeholder="Resource name"
-              disabled={!!initialValues}
+              disabled={!!initialValues || readonly}
               value={name}
               onChange={(e) => setName(e.target.value)}
               ref={nameInputRef}
@@ -80,7 +82,7 @@ export const FormGenerator = ({
           <div className="space-y-2">
             <Label
               htmlFor="namespace"
-              className={`${initialValues ? "opacity-50" : ""}`}
+              className={`${initialValues && !readonly ? "opacity-50" : ""}`}
             >
               Namespace
               <span className="text-destructive">*</span>
@@ -89,7 +91,7 @@ export const FormGenerator = ({
               required
               id="namespace"
               placeholder="Namespace"
-              disabled={!!initialValues}
+              disabled={!!initialValues || readonly}
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
             />
@@ -118,26 +120,29 @@ export const FormGenerator = ({
             formData={formData}
             updateFormData={setFormData}
             hideField={true}
+            readonly={readonly}
           />
         </div>
       </div>
-      <div className="flex justify-between border-t border-gray-200 pt-4">
-        <Button type="button" variant="outline" onClick={handleBack}>
-          {!initialValues ? "Back" : "Cancel"}
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {initialValues ? "Updating..." : "Creating..."}
-            </>
-          ) : initialValues ? (
-            "Update"
-          ) : (
-            "Create"
-          )}
-        </Button>
-      </div>
+      {!readonly && (
+        <div className="flex justify-between border-t border-gray-200 pt-4">
+          <Button type="button" variant="outline" onClick={handleBack}>
+            {!initialValues ? "Back" : "Cancel"}
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {initialValues ? "Updating..." : "Creating..."}
+              </>
+            ) : initialValues ? (
+              "Update"
+            ) : (
+              "Create"
+            )}
+          </Button>
+        </div>
+      )}
     </form>
   );
 };

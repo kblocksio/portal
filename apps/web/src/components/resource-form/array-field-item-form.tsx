@@ -11,6 +11,7 @@ interface ArrayFieldItemFormProps {
   onCancel: () => void;
   initialData?: any;
   objectMetadata: ObjectMetadata;
+  readonly?: boolean;
 }
 
 export const ArrayFieldItemForm = ({
@@ -20,6 +21,7 @@ export const ArrayFieldItemForm = ({
   onCancel,
   initialData,
   objectMetadata,
+  readonly = false,
 }: ArrayFieldItemFormProps) => {
   const { type } = schema;
 
@@ -49,6 +51,7 @@ export const ArrayFieldItemForm = ({
               fieldName={fieldName}
               hideField={true}
               required={schema.required?.includes(fieldName)}
+              readonly={readonly}
             />
           ) : (
             <PrimitiveFieldRenderer
@@ -60,6 +63,7 @@ export const ArrayFieldItemForm = ({
               required={schema.required?.includes(fieldName)}
               schema={schema}
               objectMetadata={objectMetadata}
+              readonly={readonly}
             />
           )}
         </div>
@@ -67,7 +71,12 @@ export const ArrayFieldItemForm = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="button" variant="default" onClick={handleSave}>
+          <Button
+            type="button"
+            variant="default"
+            onClick={handleSave}
+            disabled={readonly}
+          >
             Save
           </Button>
         </div>

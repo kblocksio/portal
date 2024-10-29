@@ -13,6 +13,7 @@ interface MapFieldItemFormProps {
   initialKey?: string;
   initialData?: any;
   objectMetadata: ObjectMetadata;
+  readonly?: boolean;
 }
 
 export const MapFieldItemForm = ({
@@ -23,6 +24,7 @@ export const MapFieldItemForm = ({
   initialKey,
   initialData,
   objectMetadata,
+  readonly = false,
 }: MapFieldItemFormProps) => {
   const { type } = schema;
 
@@ -53,6 +55,7 @@ export const MapFieldItemForm = ({
               required={true}
               type="string"
               placeholder="Enter key"
+              disabled={readonly}
             />
           </div>
           <div className="flex-1">
@@ -64,6 +67,7 @@ export const MapFieldItemForm = ({
               updateFormData={updateValueData}
               fieldName={fieldName}
               required={schema.required?.includes(fieldName)}
+              readonly={readonly}
             />
           </div>
         </div>
@@ -74,7 +78,7 @@ export const MapFieldItemForm = ({
         </Button>
         <Button
           type="button"
-          disabled={!key}
+          disabled={!key || readonly}
           variant="default"
           onClick={handleSave}
         >

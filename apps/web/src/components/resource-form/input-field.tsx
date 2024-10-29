@@ -6,6 +6,7 @@ export interface InputFieldProps {
   required?: boolean;
   type?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
@@ -16,10 +17,12 @@ export const InputField = ({
   required,
   type,
   placeholder,
+  disabled = false,
 }: InputFieldProps) => {
   return (
     <Input
       required={required}
+      disabled={disabled}
       type={type === "number" ? "number" : "text"}
       value={value}
       placeholder={placeholder}

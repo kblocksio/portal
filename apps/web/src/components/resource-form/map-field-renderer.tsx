@@ -26,6 +26,7 @@ export const MapFieldRenderer = ({
   editKey,
   objectMetadata,
   description,
+  readonly = false,
 }: {
   formData: any;
   path: string;
@@ -39,6 +40,7 @@ export const MapFieldRenderer = ({
   editKey: string | null;
   description: string;
   objectMetadata: ObjectMetadata;
+  readonly?: boolean;
 }) => {
   const items = getDataByPath(formData, path) || {};
 
@@ -88,6 +90,7 @@ export const MapFieldRenderer = ({
           variant="outline"
           onClick={handleAddItem}
           className="ml-2 mr-2 h-8 px-3 text-xs"
+          disabled={readonly}
         >
           <Plus className="mr-1 h-3 w-3" />
           Add
@@ -115,13 +118,16 @@ export const MapFieldRenderer = ({
                     className="h-8 w-8 p-0"
                   >
                     <Pencil className="h-3 w-3" />
-                    <span className="sr-only">Edit item</span>
+                    <span className="sr-only">
+                      {readonly ? "View item" : "Edit item"}
+                    </span>
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => handleRemoveItem(key)}
                     className="h-8 w-8 p-0"
+                    disabled={readonly}
                   >
                     <X className="h-3 w-3" />
                     <span className="sr-only">Remove item</span>
@@ -155,6 +161,7 @@ export const MapFieldRenderer = ({
             initialData={editKey !== null ? items[editKey] : undefined}
             onSave={handleSaveItem}
             onCancel={() => setShowMapModal(false)}
+            readonly={readonly}
           />
         </DialogContent>
       </Dialog>
