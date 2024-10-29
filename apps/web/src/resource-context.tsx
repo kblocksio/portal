@@ -314,7 +314,6 @@ export const ResourceProvider = ({
   // initial fetch of events
   useEffect(() => {
     const requests = [];
-
     for (const obj of Object.values(objects)) {
       const uri = parseBlockUri(obj.objUri);
 
@@ -333,7 +332,7 @@ export const ResourceProvider = ({
     Promise.all(requests).catch((e) => {
       console.error(e);
     });
-  }, [objects]);
+  }, [Object.values(objects).length]);
 
   const value: ResourceContextValue = {
     resourceTypes,

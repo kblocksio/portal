@@ -135,7 +135,12 @@ const ResourceTypeCard = ({
           >
             Docs
           </Button>
-          <Button variant="outline">New</Button>
+          <Button
+            variant="outline"
+            onClick={() => handleResourceSelect(resource)}
+          >
+            New
+          </Button>
         </div>
       </CardContent>
     </Card>
