@@ -40,7 +40,6 @@ export const MarkdownWrapper = ({
             <div
               style={{
                 position: "relative",
-                borderRadius: "6px",
                 margin: "16px 0",
               }}
             >
@@ -67,14 +66,14 @@ export const MarkdownWrapper = ({
                   background: "#f6f8fa", // GitHub-like light gray background
                   padding: "16px",
                   overflow: "auto",
-                  borderRadius: "6px",
+                  border: "none",
                 }}
               />
             </div>
           ) : (
             <code
               {...rest}
-              className={`${className} inline-block rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-[0.2rem] text-sm`}
+              className={`${className} inline-block bg-[#f6f8fa] p-[0.2rem] text-sm`}
             >
               {children}
             </code>
