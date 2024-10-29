@@ -1,23 +1,16 @@
 import { getProjects } from "~/lib/backend";
 import { ProjectCard } from "./project-card";
 import { useContext, useEffect, useMemo } from "react";
-import { Project } from "@repo/shared";
-import { useState } from "react";
 import { ResourceContext } from "~/resource-context";
 import { useNavigate } from "@tanstack/react-router";
 import { getResourcesStatuses } from "./components-utils";
 import { useAppContext } from "~/app-context";
 
 export const MyProjects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects } = useAppContext();
   const { resources } = useContext(ResourceContext);
   const { setSelectedProject } = useAppContext();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // get all projects from the api, currently hardcoded in mock-data/projects.json
-    getProjects().then(setProjects);
-  }, []);
 
   const enhancedProjects = useMemo(() => {
     if (!projects || projects.length === 0) {

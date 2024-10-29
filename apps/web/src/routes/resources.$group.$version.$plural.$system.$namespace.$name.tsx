@@ -8,7 +8,7 @@ import React, {
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext, type Resource } from "~/resource-context";
 import { StatusBadge } from "~/components/status-badge";
 import { SystemBadge } from "~/components/system-badge";
@@ -40,12 +40,24 @@ export const Route = createFileRoute(
 
 function Resource() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
-  const navigate = useNavigate();
-  const { resourceTypes, resources, eventsPerObject, setSelectedResourceId, loadEvents } =
-    useContext(ResourceContext);
+  const router = useRouter();
+  const {
+    resourceTypes,
+    resources,
+    eventsPerObject,
+    setSelectedResourceId,
+    loadEvents,
+  } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
 
-  const objUri = formatBlockUri({ group, version, plural, system, namespace, name });
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
 
   useMemo(() => {
     loadEvents(objUri);
@@ -65,9 +77,9 @@ function Resource() {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
       setSelectedResourceId(undefined);
-      navigate({ to: "/" });
+      router.history.back();
     }
-  }, [selectedResource, deleteInProgress, setSelectedResourceId, navigate]);
+  }, [selectedResource, deleteInProgress, setSelectedResourceId, router]);
 
   const selectedResourceType = useMemo(
     () =>
@@ -102,10 +114,10 @@ function Resource() {
     <div className="container mx-auto flex flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div>
-          <Link to="/" variant="ghostAlignLeft">
+          <Button onClick={() => router.history.back()} variant="ghost">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to projects
-          </Link>
+          </Button>
         </div>
 
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
@@ -172,16 +184,21 @@ function Resource() {
       <Card>
         <CardContent>
           <div className="">
-          <div className="w-full">
-              <div className="pt-8 pb-4">
+            <div className="w-full">
+              <div className="pb-4 pt-8">
                 <CardTitle>Status</CardTitle>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
                 <PropertyKey>Status</PropertyKey>
                 <PropertyValue>
-                  <div className="flex gap-2"> 
-                    {selectedResource.status?.conditions?.map(condition => (
-                      <StatusBadge key={condition.type} obj={selectedResource} showMessage type={condition.type} />
+                  <div className="flex gap-2">
+                    {selectedResource.status?.conditions?.map((condition) => (
+                      <StatusBadge
+                        key={condition.type}
+                        obj={selectedResource}
+                        showMessage
+                        type={condition.type}
+                      />
                     ))}
                   </div>
                 </PropertyValue>
@@ -198,12 +215,11 @@ function Resource() {
                     showSystemName
                   />
                 </PropertyValue>
-
               </div>
             </div>
 
             <div className="w-full">
-              <div className="pt-8 pb-4">
+              <div className="pb-4 pt-8">
                 <CardTitle>Properties</CardTitle>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -212,7 +228,7 @@ function Resource() {
             </div>
             {outputs && Object.keys(outputs).length > 0 && (
               <div className="w-full">
-                <div className="pt-8 pb-4">
+                <div className="pb-4 pt-8">
                   <CardTitle>Outputs</CardTitle>
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">

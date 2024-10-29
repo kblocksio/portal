@@ -1,19 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { useAppContext } from "~/app-context";
 import { ProjectHeader } from "~/components/project-header";
 import { ProjectPage } from "~/components/project-page";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ResourceContext } from "~/resource-context";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/project/$project")({
   component: Project,
 });
 
 function Project() {
-  const { selectedProject } = useAppContext();
-
+  const { selectedProject, setSelectedProject, projects } = useAppContext();
+  const { project } = Route.useParams();
   const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!projects || projects.length === 0) {
+      return;
+    }
+    if (!selectedProject) {
+      console.log("project", project);
+      console.log("projects", projects);
+      const projectObj = projects.find((p) => p.value === project);
+      if (projectObj) {
+        setSelectedProject(projectObj);
+      } else {
+        navigate({
+          to: "/",
+        });
+      }
+    }
+  }, [selectedProject, projects, project]);
 
   const allResources = useMemo(() => {
     return [...resources.values()]
