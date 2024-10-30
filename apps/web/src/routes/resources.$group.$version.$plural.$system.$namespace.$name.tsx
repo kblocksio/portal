@@ -355,7 +355,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
           <PopoverTrigger asChild>
             <Button variant="outline">View</Button>
           </PopoverTrigger>
-          <PopoverContent side="right">
+          <PopoverContent side="right" className="ml-2">
             <JsonView value={value} />
           </PopoverContent>
         </Popover>
