@@ -5,9 +5,14 @@ import React, {
   useMemo,
   PropsWithChildren,
 } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, MoreVertical } from "lucide-react";
+import {
+  ArrowLeft,
+  ClipboardCheckIcon,
+  ClipboardIcon,
+  MoreVertical,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -32,6 +37,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import JsonView from "@uiw/react-json-view";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -318,48 +324,76 @@ type KeyValueListProps = {
   data: Record<string, any>;
 };
 
-export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
-  Object.entries(data).map(([key, value]) => (
-    <React.Fragment key={key}>
-      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
-      <PropertyValue>{renderValue(value)}</PropertyValue>
-    </React.Fragment>
-  ));
-
-function renderValue(value: any) {
-  if (typeof value === "string") {
-    return linkifyHtml(value, {
-      className: "text-blue-500 hover:underline",
-      target: "_blank noreferrer",
-    });
-  }
-
-  if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
-    return (
-      <Popover>
-        <PopoverTrigger>
-          <button className="text-blue-500 hover:underline">View</button>
-        </PopoverTrigger>
-        <PopoverContent>
-          <pre
-            className="rounded bg-gray-100 p-4 text-sm"
+export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
+  function renderValue(value: any) {
+    if (typeof value === "string") {
+      return (
+        <div className="group flex items-center space-x-2 truncate">
+          <span
+            className="truncate"
             dangerouslySetInnerHTML={{
-              __html: linkifyHtml(JSON.stringify(value, null, 2), {
+              __html: linkifyHtml(value, {
                 className: "text-blue-500 hover:underline",
                 target: "_blank noreferrer",
               }),
             }}
           />
-        </PopoverContent>
-      </Popover>
-    );
+          <CopyToClipboard
+            className="opacity-0 group-hover:opacity-100"
+            text={value}
+          />
+        </div>
+      );
+    }
+
+    if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">View</Button>
+          </PopoverTrigger>
+          <PopoverContent side="right">
+            <JsonView value={value} />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (typeof value === "undefined" || value === null) {
+      return "(n/a)";
+    }
+
+    return value;
   }
 
-  if (typeof value === "undefined" || value === null) {
-    return "(n/a)";
-  }
+  return Object.entries(data).map(([key, value]) => (
+    <React.Fragment key={key}>
+      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
+      <PropertyValue>{renderValue(value)}</PropertyValue>
+    </React.Fragment>
+  ));
+};
 
-  return value;
-}
+const CopyToClipboard = ({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    setCopied(true);
+    navigator.clipboard.writeText(text);
+    setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
+  };
+
+  return (
+    <Button variant="ghost" onClick={handleCopy} className={className}>
+      {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
+    </Button>
+  );
+};
 
 export default Resource;
