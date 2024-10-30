@@ -13,6 +13,11 @@ export function getEnv(key: string): string {
 export async function getUserAccessToken(req: Request, res: Response) {
   const supabase = createServerSupabase(req, res);
   const user = await supabase.auth.getUser();
+  if (!user.data.user) {
+    console.error("User is not signed in to Supabase", user.error?.message);
+    throw new Error("User is not signed in to Supabase");
+  }
+
   const { data, error } = await supabase
     .from("user_ghtokens")
     .select("refresh_token")
@@ -24,7 +29,9 @@ export async function getUserAccessToken(req: Request, res: Response) {
     throw error;
   }
 
-  const tokens = await refreshToken(data.refresh_token);
+  const tokens = await refreshToken({
+    refreshToken: data.refresh_token,
+  });
 
   {
     const { error } = await supabase.from("user_ghtokens").upsert([
