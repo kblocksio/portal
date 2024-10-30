@@ -20,7 +20,7 @@ export async function getUserAccessToken(req: Request, res: Response) {
     .single();
 
   if (error) {
-    console.error("Error getting access token", error);
+    console.error("Error getting access token from Supabase", error);
     throw error;
   }
 
@@ -40,7 +40,7 @@ export async function getUserAccessToken(req: Request, res: Response) {
     ]);
 
     if (error) {
-      console.error(error);
+      console.error("Error upserting access token to Supabase", error);
     }
   }
 

@@ -1,3 +1,5 @@
+import { getEnv } from "./util";
+
 export interface GithubTokens {
   access_token: string;
   expires_in: number;
@@ -16,8 +18,8 @@ export const exchangeCodeForTokens = async (code: string) => {
     },
     body: JSON.stringify({
       code,
-      client_id: process.env.GITHUB_CLIENT_ID,
-      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      client_id: getEnv("GITHUB_CLIENT_ID"),
+      client_secret: getEnv("GITHUB_CLIENT_SECRET"),
     }),
   });
   if (!response.ok) {
@@ -51,12 +53,23 @@ export const refreshToken = async (options: RefreshTokenOptions) => {
     body: JSON.stringify({
       grant_type: "refresh_token",
       refresh_token: options.refreshToken,
-      client_id: process.env.GITHUB_CLIENT_ID,
-      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      client_id: getEnv("GITHUB_CLIENT_ID"),
+      client_secret: getEnv("GITHUB_CLIENT_SECRET"),
     }),
   });
   if (!response.ok) {
-    console.error(response.status, response.statusText, await response.text());
+    console.error(
+      "Error refreshing the token on GitHub",
+      response.status,
+      response.statusText,
+      await response.text(),
+    );
+    console.error({
+      grant_type: "refresh_token",
+      refresh_token: `${options.refreshToken.slice(0, 6)}...`,
+      client_id: `${getEnv("GITHUB_CLIENT_ID").slice(0, 6)}...`,
+      client_secret: `${getEnv("GITHUB_CLIENT_SECRET").slice(0, 6)}...`,
+    });
     throw new Error("Failed to refresh token");
   }
   const data = await response.json();
