@@ -130,6 +130,7 @@ const fallbackProject: Project = {
   value: "all",
   description:
     "Below is a comprehensive list of all Kubernetes resources associated with the current account, spanning across all projects added to the application.",
+  icon: "Frame",
 };
 
 export function Header() {

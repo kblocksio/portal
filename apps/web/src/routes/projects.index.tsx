@@ -9,9 +9,10 @@ const fallbackProject: Project = {
   value: "all",
   description:
     "Below is a comprehensive list of all Kubernetes resources associated with the current account, spanning across all projects added to the application.",
+  icon: "Frame",
 };
 
-export const Route = createFileRoute("/project/")({
+export const Route = createFileRoute("/projects/")({
   component: ProjectRoute,
 });
 
@@ -22,7 +23,7 @@ function ProjectRoute() {
   useEffect(() => {
     setSelectedProject(fallbackProject);
     navigate({
-      to: "/project/$project",
+      to: "/projects/$project",
       params: { project: fallbackProject.value },
     });
   }, []);

@@ -24,7 +24,7 @@ export interface LinkProps
   extends RouterLinkProps,
     VariantProps<typeof linkVariants> {}
 
-const Link = ({ variant, ...props }: LinkProps) => {
+const Link = ({ variant, ...props }: LinkProps & { className?: string }) => {
   return <RouterLink className={cn(linkVariants({ variant }))} {...props} />;
 };
 Link.displayName = "Link";

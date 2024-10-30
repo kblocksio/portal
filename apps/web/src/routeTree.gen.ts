@@ -14,7 +14,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as CatalogImport } from './routes/catalog'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
-import { Route as ProjectIndexImport } from './routes/project.index'
+import { Route as ProjectsIndexImport } from './routes/projects.index'
+import { Route as ProjectsProjectImport } from './routes/projects.$project'
 import { Route as ProjectProjectImport } from './routes/project.$project'
 import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from './routes/resources.$group.$version.$plural.$system.$namespace.$name'
 
@@ -38,9 +39,15 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProjectIndexRoute = ProjectIndexImport.update({
-  id: '/project/',
-  path: '/project/',
+const ProjectsIndexRoute = ProjectsIndexImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProjectsProjectRoute = ProjectsProjectImport.update({
+  id: '/projects/$project',
+  path: '/projects/$project',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -89,11 +96,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectProjectImport
       parentRoute: typeof rootRoute
     }
-    '/project/': {
-      id: '/project/'
-      path: '/project'
-      fullPath: '/project'
-      preLoaderRoute: typeof ProjectIndexImport
+    '/projects/$project': {
+      id: '/projects/$project'
+      path: '/projects/$project'
+      fullPath: '/projects/$project'
+      preLoaderRoute: typeof ProjectsProjectImport
+      parentRoute: typeof rootRoute
+    }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsIndexImport
       parentRoute: typeof rootRoute
     }
     '/resources/$group/$version/$plural/$system/$namespace/$name': {
@@ -113,7 +127,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
   '/project/$project': typeof ProjectProjectRoute
-  '/project': typeof ProjectIndexRoute
+  '/projects/$project': typeof ProjectsProjectRoute
+  '/projects': typeof ProjectsIndexRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
 
@@ -122,7 +137,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
   '/project/$project': typeof ProjectProjectRoute
-  '/project': typeof ProjectIndexRoute
+  '/projects/$project': typeof ProjectsProjectRoute
+  '/projects': typeof ProjectsIndexRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
 
@@ -132,7 +148,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/catalog': typeof CatalogRoute
   '/project/$project': typeof ProjectProjectRoute
-  '/project/': typeof ProjectIndexRoute
+  '/projects/$project': typeof ProjectsProjectRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
 
@@ -143,7 +160,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalog'
     | '/project/$project'
-    | '/project'
+    | '/projects/$project'
+    | '/projects'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,7 +169,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalog'
     | '/project/$project'
-    | '/project'
+    | '/projects/$project'
+    | '/projects'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   id:
     | '__root__'
@@ -159,7 +178,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalog'
     | '/project/$project'
-    | '/project/'
+    | '/projects/$project'
+    | '/projects/'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   fileRoutesById: FileRoutesById
 }
@@ -169,7 +189,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CatalogRoute: typeof CatalogRoute
   ProjectProjectRoute: typeof ProjectProjectRoute
-  ProjectIndexRoute: typeof ProjectIndexRoute
+  ProjectsProjectRoute: typeof ProjectsProjectRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
   ResourcesGroupVersionPluralSystemNamespaceNameRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
 
@@ -178,7 +199,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CatalogRoute: CatalogRoute,
   ProjectProjectRoute: ProjectProjectRoute,
-  ProjectIndexRoute: ProjectIndexRoute,
+  ProjectsProjectRoute: ProjectsProjectRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
   ResourcesGroupVersionPluralSystemNamespaceNameRoute:
     ResourcesGroupVersionPluralSystemNamespaceNameRoute,
 }
@@ -199,7 +221,8 @@ export const routeTree = rootRoute
         "/admin",
         "/catalog",
         "/project/$project",
-        "/project/",
+        "/projects/$project",
+        "/projects/",
         "/resources/$group/$version/$plural/$system/$namespace/$name"
       ]
     },
@@ -215,8 +238,11 @@ export const routeTree = rootRoute
     "/project/$project": {
       "filePath": "project.$project.tsx"
     },
-    "/project/": {
-      "filePath": "project.index.tsx"
+    "/projects/$project": {
+      "filePath": "projects.$project.tsx"
+    },
+    "/projects/": {
+      "filePath": "projects.index.tsx"
     },
     "/resources/$group/$version/$plural/$system/$namespace/$name": {
       "filePath": "resources.$group.$version.$plural.$system.$namespace.$name.tsx"

@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import { useMemo } from "react";
 
 import {
   Sidebar,
@@ -13,247 +13,98 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-  SidebarMenuAction,
   SidebarFooter,
 } from "@/components/ui/sidebar.js";
-import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuShortcut,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu.js";
-import {
-  GalleryVerticalEnd,
-  AudioWaveform,
-  Command,
-  BookOpen,
-  Frame,
-  PieChart,
-  Map,
-  Plus,
-  ChevronRight,
-  ChevronsUpDown,
-  MoreHorizontal,
-  Folder,
-  Forward,
-  Trash2,
-  Sparkles,
-  BadgeCheck,
-  CreditCard,
-  Bell,
-  LogOut,
-  Home,
-  BarChart,
-  Blocks,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible.js";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.js";
-import { useUser } from "@/hooks/use-user";
-import { getUserInitials } from "@/lib/user-initials";
 import { AppSidebarFooter } from "./app-sidebar-footer";
+import { AppSidebarHeader } from "./app-sidebar-header";
+import { useAppContext } from "@/app-context";
+import { getLucideIcon } from "@/lib/lucide-icon";
+import { Link } from "./ui/link";
+import { useLocation } from "@tanstack/react-router";
+
+const platformSidebarNavData = [
+  {
+    title: "Home",
+    url: "/",
+    icon: "Home",
+    isActive: true,
+  },
+  {
+    title: "Catalog",
+    url: "#",
+    icon: "Blocks",
+    items: [],
+  },
+  {
+    title: "Documentation",
+    url: "#",
+    icon: "BookOpen",
+    items: [
+      {
+        title: "Introduction",
+        url: "#",
+      },
+      {
+        title: "Get Started",
+        url: "#",
+      },
+      {
+        title: "Tutorials",
+        url: "#",
+      },
+      {
+        title: "Changelog",
+        url: "#",
+      },
+    ],
+  },
+];
 
 export const AppSidebar = () => {
-  const data = {
-    teams: [
-      {
-        name: "Acme Inc",
-        logo: GalleryVerticalEnd,
-        plan: "Enterprise",
-      },
-      {
-        name: "Acme Corp.",
-        logo: AudioWaveform,
-        plan: "Startup",
-      },
-      {
-        name: "Evil Corp.",
-        logo: Command,
-        plan: "Free",
-      },
-    ],
-    navMain: [
-      {
-        title: "Home",
-        url: "/",
-        icon: Home,
-        isActive: true,
-      },
-      {
-        title: "Catalog",
-        url: "#",
-        icon: Blocks,
-        items: [],
-      },
-      {
-        title: "Documentation",
-        url: "#",
-        icon: BookOpen,
-        items: [
-          {
-            title: "Introduction",
-            url: "#",
-          },
-          {
-            title: "Get Started",
-            url: "#",
-          },
-          {
-            title: "Tutorials",
-            url: "#",
-          },
-          {
-            title: "Changelog",
-            url: "#",
-          },
-        ],
-      },
-    ],
-    projects: [
-      {
-        name: "Shipping",
-        url: "/projects/shipping",
-        icon: Frame,
-      },
-      {
-        name: "Admin",
-        url: "/projects/admin",
-        icon: PieChart,
-      },
-      {
-        name: "Authorization",
-        url: "/projects/authorization",
-        icon: Map,
-      },
-      {
-        name: "Payments",
-        url: "/projects/payments",
-        icon: CreditCard,
-      },
-      {
-        name: "Reporting",
-        url: "/projects/reporting",
-        icon: BarChart,
-      },
-    ],
-  };
+  const { projects } = useAppContext();
+  const location = useLocation();
 
-  const [activeTeam, setActiveTeam] = React.useState(data.teams[0]);
+  const sidebarProjects = useMemo(() => {
+    return projects.map((project) => ({
+      title: project.label,
+      url: `/projects/${project.value}`,
+      icon: project.icon,
+    }));
+  }, [projects]);
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <activeTeam.logo className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {activeTeam.name}
-                    </span>
-                    <span className="truncate text-xs">{activeTeam.plan}</span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                align="start"
-                side="bottom"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="text-muted-foreground text-xs">
-                  Teams
-                </DropdownMenuLabel>
-                {data.teams.map((team, index) => (
-                  <DropdownMenuItem
-                    key={team.name}
-                    onClick={() => setActiveTeam(team)}
-                    className="gap-2 p-2"
-                  >
-                    <div className="flex size-6 items-center justify-center rounded-sm border">
-                      <team.logo className="size-4 shrink-0" />
-                    </div>
-                    {team.name}
-                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 p-2">
-                  <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                    <Plus className="size-4" />
-                  </div>
-                  <div className="text-muted-foreground font-medium">
-                    Add team
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <AppSidebarHeader />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
-            {data.navMain.map((item) => (
-              <SidebarItem key={item.title} item={item} />
+            {platformSidebarNavData.map((item) => (
+              <SidebarItem
+                key={item.title}
+                item={item}
+                isActive={location.pathname === item.url}
+              />
             ))}
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>My Projects</SidebarGroupLabel>
           <SidebarMenu>
-            {data.projects.map((item) => (
-              <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild>
-                  <a href={item.url}>
-                    <item.icon />
-                    <span>{item.name}</span>
-                  </a>
-                </SidebarMenuButton>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction showOnHover>
-                      <MoreHorizontal />
-                      <span className="sr-only">More</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-48 rounded-lg"
-                    side="bottom"
-                    align="end"
-                  >
-                    <DropdownMenuItem>
-                      <Folder className="text-muted-foreground" />
-                      <span>View Project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Forward className="text-muted-foreground" />
-                      <span>Share Project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Trash2 className="text-muted-foreground" />
-                      <span>Delete Project</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
+            {sidebarProjects.map((item) => (
+              <SidebarItem
+                key={item.title}
+                item={item}
+                isActive={location.pathname === item.url}
+              />
             ))}
           </SidebarMenu>
         </SidebarGroup>
@@ -266,15 +117,18 @@ export const AppSidebar = () => {
   );
 };
 
-const SidebarItem = ({ item }: { item: (typeof data.navMain)[0] }) => {
+const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   if (!item.items) {
     return (
       <SidebarMenuItem key={item.title}>
         <SidebarMenuButton asChild>
-          <a href={item.url}>
-            <item.icon />
+          <Link
+            to={item.url as any}
+            className={isActive ? "bg-sidebar-accent" : ""}
+          >
+            {item.icon && getLucideIcon(item.icon)({})}
             <span>{item.title}</span>
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -289,23 +143,32 @@ const SidebarItem = ({ item }: { item: (typeof data.navMain)[0] }) => {
     >
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title}>
-            {item.icon && <item.icon />}
+          <SidebarMenuButton
+            tooltip={item.title}
+            className={isActive ? "active" : ""}
+          >
+            {item.icon && getLucideIcon(item.icon)({})}
             <span>{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {item.items?.map((subItem) => (
-              <SidebarMenuSubItem key={subItem.title}>
-                <SidebarMenuSubButton asChild>
-                  <a href={subItem.url}>
-                    <span>{subItem.title}</span>
-                  </a>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
+            {item.items?.map((subItem: any) => {
+              const isSubItemActive = location.pathname === subItem.url;
+              return (
+                <SidebarMenuSubItem key={subItem.title}>
+                  <SidebarMenuSubButton asChild>
+                    <a
+                      href={subItem.url}
+                      className={isSubItemActive ? "active" : ""}
+                    >
+                      <span>{subItem.title}</span>
+                    </a>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              );
+            })}
           </SidebarMenuSub>
         </CollapsibleContent>
       </SidebarMenuItem>

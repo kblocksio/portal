@@ -1,9 +1,6 @@
-import { useLocation, Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "./ui/button";
-import {
-  ChartNoAxesGantt,
-  Home,
-} from "lucide-react";
+import { ChartNoAxesGantt, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/app-context";
 
@@ -31,9 +28,9 @@ export function PortalSidebar() {
       </Button>
       <Button variant="ghost" size="icon" asChild>
         <Link
-          to={`/project/${selectedProject?.value ?? "all"}`}
+          to={`/projects/${selectedProject?.value ?? "all"}`}
           className={cn(
-            isActive(`/project/${selectedProject?.value ?? "all"}`)
+            isActive(`/projects/${selectedProject?.value ?? "all"}`)
               ? "text-primary rounded-lg bg-gray-200"
               : "",
             "hover:bg-gray-200",
