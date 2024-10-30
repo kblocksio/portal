@@ -26,82 +26,71 @@ import { cn } from "@/lib/utils";
 import "@xyflow/react/dist/style.css";
 
 export type OwnerNodeData = {
-  // id: string;
   name: string;
   description: string;
   icon: React.ReactNode;
-  size: "big" | "small";
+  root?: boolean;
 };
 
 export type OwnerNode = ReactFlowNode<OwnerNodeData, "node">;
 
 const OwnerNode = (props: NodeProps<OwnerNode>) => {
   return (
-    <div
-      className={cn(
-        "relative rounded-full bg-blue-200 shadow-md",
-        props.data.size === "big" && "size-16",
-        props.data.size === "small" && "size-8",
-      )}
-    >
-      <div className="absolute inset-0 flex items-center justify-around">
+    <div className="flex flex-col items-center justify-around gap-2">
+      <div className="bg-background relative rounded border p-3 shadow-md">
         {props.data.icon}
-      </div>
 
-      <div className="absolute inset-x-0 bottom-0">
-        <div className="relative">
-          <div className="absolute inset-x-0 top-0 flex flex-col items-center">
-            <div className="whitespace-nowrap text-sm">{props.data.name}</div>
-            <div className="text-muted-foreground whitespace-nowrap text-xs">
-              {props.data.description}
-            </div>
+        <div className="absolute inset-0 flex items-center justify-around">
+          <div className="relative">
+            <Handle
+              type="target"
+              position={Position.Top}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="target"
+              position={Position.Bottom}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="target"
+              position={Position.Right}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="target"
+              position={Position.Left}
+              style={{ visibility: "hidden" }}
+            />
+
+            <Handle
+              type="source"
+              position={Position.Top}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="source"
+              position={Position.Bottom}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="source"
+              position={Position.Right}
+              style={{ visibility: "hidden" }}
+            />
+            <Handle
+              type="source"
+              position={Position.Left}
+              style={{ visibility: "hidden" }}
+            />
           </div>
         </div>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-around">
-        <div className="relative">
-          <Handle
-            type="target"
-            position={Position.Top}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="target"
-            position={Position.Bottom}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="target"
-            position={Position.Right}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="target"
-            position={Position.Left}
-            style={{ visibility: "hidden" }}
-          />
-
-          <Handle
-            type="source"
-            position={Position.Top}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="source"
-            position={Position.Right}
-            style={{ visibility: "hidden" }}
-          />
-          <Handle
-            type="source"
-            position={Position.Left}
-            style={{ visibility: "hidden" }}
-          />
+      <div className="hover:bg-background flex flex-col items-center">
+        <div className="max-w-64 truncate text-sm">{props.data.name}</div>
+        <div className="text-muted-foreground max-w-xs truncate text-xs">
+          {props.data.description}
         </div>
       </div>
     </div>
@@ -145,29 +134,30 @@ const OwnerFlow = (props: { nodes: OwnerNode[]; edges: ReactFlowEdge[] }) => {
     if (!initialized || nodeDatums.length === 0) return;
 
     const simulation = d3
-      .forceSimulation<NodeDatum>()
-      .force("charge", d3.forceManyBody().strength(-2000))
+      .forceSimulation(nodeDatums)
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force(
+        "link",
+        d3
+          .forceLink<NodeDatum, EdgeDatum>(edgeDatums)
+          .id((d) => d.id)
+          .distance(256),
+      )
       .force(
         "collide",
-        d3.forceCollide<NodeDatum>().radius((d) => {
-          return Math.max(
-            d.reactFlowNode.measured?.width ?? 0,
-            d.reactFlowNode.measured?.height ?? 0,
-          );
-        }),
+        d3
+          .forceCollide<NodeDatum>()
+          .radius((d) => {
+            return (
+              Math.max(
+                d.reactFlowNode.measured?.width ?? 32,
+                d.reactFlowNode.measured?.height ?? 32,
+              ) * 0.8
+            );
+          })
+          .strength(0.5),
       )
       .stop();
-
-    simulation.nodes(nodeDatums).force(
-      "link",
-      d3
-        .forceLink<NodeDatum, EdgeDatum>(edgeDatums)
-        .id((d) => d.id)
-        .strength((d) => {
-          // console.log(d);
-          return d.source.id === "1" ? 0.295 : 0.5;
-        }),
-    );
 
     simulation.tick(
       Math.ceil(
