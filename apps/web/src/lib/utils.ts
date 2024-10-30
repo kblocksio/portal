@@ -27,7 +27,7 @@ const containsString = (arr1: string[], arr2: string[]): boolean => {
 };
 
 function addProperty(
-  target: Record<string, string>,
+  target: Record<string, any>,
   value: any,
   keyPrefix: string[] = [],
 ) {
@@ -37,9 +37,8 @@ function addProperty(
   if (value === undefined) {
     return;
   }
-  if (Array.isArray(value)) {
-    target[keyPrefix.join(".")] = JSON.stringify(value, null, 2);
-  } else if (typeof value === "object" && value !== null) {
+
+  if (typeof value === "object" && value !== null && keyPrefix.length === 0) {
     for (const [k, v] of Object.entries(value)) {
       addProperty(target, v, [...keyPrefix, k]);
     }
@@ -49,7 +48,7 @@ function addProperty(
 }
 
 export function getResourceProperties(resource: Resource) {
-  const properties: Record<string, string> = {};
+  const properties: Record<string, any> = {};
   addProperty(properties, {
     ...resource,
     status: undefined,
@@ -63,9 +62,12 @@ export function getResourceProperties(resource: Resource) {
 }
 
 export function getResourceOutputs(resource: Resource) {
-  const outputs: Record<string, string> = {};
+  const outputs: Record<string, any> = {};
+  const conditions = resource.status?.conditions;
+  delete resource.status?.conditions;
   addProperty(outputs, {
     ...resource.status,
+    ...conditions,
     conditions: undefined,
   });
   return outputs;
