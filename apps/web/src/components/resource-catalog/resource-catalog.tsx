@@ -5,13 +5,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
+} from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
 import { ResourceType } from "@/resource-context";
 import { Category } from "@repo/shared";
 import { useMemo, useState } from "react";
-import { MarkdownWrapper } from "./markdown";
-import { Button } from "./ui/button";
+import { MarkdownWrapper } from "../markdown";
+import { Button } from "../ui/button";
 import { ResourceTypeDocsDrawer } from "./resource-type-docs-drawer";
 
 export interface ResourceTypesCatalogProps {

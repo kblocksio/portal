@@ -8,10 +8,10 @@ import {
 import { Button } from "@/components/ui/button";
 import React, { useCallback, useMemo, useState } from "react";
 import { ResourceType } from "@repo/shared";
-import { ImportGHRepo } from "./gh-repos-selection";
-import { ResourceTypesCatalog } from "./resource-types-catalog";
-import { WizardSearchHeader } from "./wizard-search-header";
-import { WizardSimpleHeader } from "./wizard-simple-header";
+import { ImportGHRepo } from "../gh-repos-selection";
+import { ResourceTypesCatalog } from "../resource-catalog/resource-catalog";
+import { WizardSearchHeader } from "../wizard-search-header";
+import { WizardSimpleHeader } from "../wizard-simple-header";
 import { ApiObject } from "@kblocks/api";
 
 export interface ImportResourceWizardProps {

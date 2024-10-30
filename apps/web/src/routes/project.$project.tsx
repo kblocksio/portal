@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect, useMemo } from "react";
 import { useAppContext } from "@/app-context";
-import { ProjectHeader } from "@/components/project-header";
-import { ProjectPage } from "@/components/project-page";
+import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResourceContext } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
+import { ProjectHeader } from "@/components/project-header";
 
 export const Route = createFileRoute("/project/$project")({
   component: Project,
@@ -49,7 +49,7 @@ function Project() {
           <LoadingSkeleton />
         ) : (
           <>
-            <ProjectPage resources={allResources} />
+            <ResourceTable resources={allResources} />
           </>
         )}
       </div>
