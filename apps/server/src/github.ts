@@ -48,7 +48,12 @@ export const refreshToken = async (options: RefreshTokenOptions) => {
       "content-type": "application/json",
       accept: "application/json",
     },
-    body: JSON.stringify(options),
+    body: JSON.stringify({
+      grant_type: "refresh_token",
+      refresh_token: options.refreshToken,
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+    }),
   });
   if (!response.ok) {
     console.error(response.status, response.statusText, await response.text());
