@@ -300,14 +300,10 @@ const PropertyKey = ({ children }: PropsWithChildren) => (
 
 const PropertyValue = ({ children }: PropsWithChildren) => {
   const isLink = typeof children === "string" && /<a\s/i.test(children);
-  
+
   return (
-    <div className="">
-      {isLink && (
-        <span
-          dangerouslySetInnerHTML={{ __html: children }}
-        />
-      )}
+    <div className="truncate">
+      {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
       {!isLink && <span className="truncate">{children}</span>}
     </div>
   );
