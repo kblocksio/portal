@@ -23,16 +23,25 @@ const variants = cva("", {
 });
 
 export interface StatusBadgeProps extends VariantProps<typeof variants> {
-  obj?: ApiObject;
+  obj: ApiObject;
   showMessage?: boolean;
 
   /**
-   * @default "Ready"
+   * @default false
+   */
+  merge?: boolean;
+
+  /**
+   * @default - merge all statuses
    */
   type?: string;
 }
 
-export const StatusBadge = ({ obj, showMessage, size, type = "Ready" }: StatusBadgeProps) => {
+export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadgeProps) => {
+  if (merge && type) {
+    throw new Error("merge and type cannot be used together");
+  }
+
   const readyCondition = getResourceReadyCondition(obj, type);
 
   const reason = readyCondition?.reason as StatusReason;
@@ -55,13 +64,11 @@ export const StatusBadge = ({ obj, showMessage, size, type = "Ready" }: StatusBa
           <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
         );
       default:
-
         if (readyCondition?.status === "True") {
           return <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>
         } else {
           return <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
         }
-
     }
   };
 

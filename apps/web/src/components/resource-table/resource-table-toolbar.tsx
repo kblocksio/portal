@@ -6,18 +6,18 @@ import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
 import { getIconComponent } from "@/lib/hero-icon.js";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
+import { DataTableFacetedFilter } from "../data-table-faceted-filter";
 
-export interface DataTableToolbarProps<TData> {
+export interface ResourceTableToolbarProps<TData> {
   table: TanstackTable<TData>;
 }
 
-export function DataTableToolbar<TData>({
+export function ResourceTableToolbar<TData>({
   table,
-}: DataTableToolbarProps<TData>) {
+}: ResourceTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
-  const { systems, namespaces } = useContext(ResourceContext);
+  const { systems, namespaces, kinds } = useContext(ResourceContext);
   const { openWizard: openCreateWizard } = useCreateResourceWizard();
 
   return (
@@ -31,6 +31,18 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
+
+        {table.getColumn("kind") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("kind")}
+            title="Kind"
+            options={kinds.map((kind) => ({
+              label: kind,
+              value: kind,
+            }))}
+          />
+        )}
+
         {table.getColumn("status") && (
           <DataTableFacetedFilter
             column={table.getColumn("status")}

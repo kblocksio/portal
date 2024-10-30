@@ -49,6 +49,7 @@ export interface ResourceContextValue {
   objects: Record<string, Resource>;
   systems: string[];
   namespaces: string[];
+  kinds: string[];
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
   loadEvents: (objUri: string) => void;
   categories: Record<string, Category>;
@@ -64,6 +65,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   objects: {},
   systems: [],
   namespaces: [],
+  kinds: [],
   eventsPerObject: {},
   categories: {},
   loadEvents: () => {},
@@ -298,19 +300,21 @@ export const ResourceProvider = ({
     return result;
   }, [resources]);
 
-  const { systems, namespaces } = useMemo(() => {
+  const { systems, namespaces, kinds } = useMemo(() => {
     const systems = new Set<string>();
     const namespaces = new Set<string>();
+    const kinds = new Set<string>();
 
     for (const resourcesForType of resources.values()) {
       for (const resource of resourcesForType.values()) {
         const { system, namespace } = parseBlockUri(resource.objUri);
         systems.add(system);
         namespaces.add(namespace);
+        kinds.add(resource.kind);
       }
     }
 
-    return { systems: Array.from(systems), namespaces: Array.from(namespaces) };
+    return { systems: Array.from(systems), namespaces: Array.from(namespaces), kinds: Array.from(kinds) };
   }, [resources]);
 
   const loadEvents = (objUri: string) => {
@@ -340,6 +344,7 @@ export const ResourceProvider = ({
     loadEvents,
     systems,
     namespaces,
+    kinds,
     resources,
     eventsPerObject,
     handleObjectMessages,
