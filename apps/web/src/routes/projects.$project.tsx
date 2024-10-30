@@ -12,7 +12,8 @@ export const Route = createFileRoute("/projects/$project")({
 });
 
 function Project() {
-  const { selectedProject, setSelectedProject, projects } = useAppContext();
+  const { selectedProject, setSelectedProject, projects, setBreadcrumbs } =
+    useAppContext();
   const { project } = Route.useParams();
   const { resourceTypes, resources } = useContext(ResourceContext);
   const navigate = useNavigate();
@@ -36,6 +37,12 @@ function Project() {
       .flatMap((resources) => [...resources.values()])
       .filter((resource) => resource.kind !== "Block");
   }, [resources]);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { name: selectedProject?.label || "", url: `/projects/${project}` },
+    ]);
+  }, [selectedProject]);
 
   return (
     <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">

@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren } from "react";
 import { AppProvider } from "./app-context";
 import { UserProvider } from "./hooks/use-user";
 import { ResourceProvider } from "./resource-context.js";

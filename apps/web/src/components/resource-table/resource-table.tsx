@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { useAppContext } from "@/app-context";
 
 const useColumns = () => {
   const { resourceTypes } = useContext(ResourceContext);
@@ -299,6 +300,7 @@ function ResourceTableRow({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const { setBreadcrumbs, selectedProject } = useAppContext();
   return (
     <TableRow
       key={resource.objUri}
@@ -306,6 +308,15 @@ function ResourceTableRow({
       onClick={() => {
         const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
         navigate({ to: `/resources/${resourceDetailsUri}` });
+        setBreadcrumbs([
+          {
+            name: selectedProject?.label || "",
+            url: `/projects/${selectedProject?.value}`,
+          },
+          {
+            name: resource.metadata.name,
+          },
+        ]);
       }}
     >
       {children}

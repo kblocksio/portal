@@ -1,3 +1,4 @@
+import { useAppContext } from "@/app-context";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,16 +9,27 @@ import {
 } from "./ui/breadcrumb";
 
 export const AppBreadcrumbs = () => {
+  const { breadcrumbs } = useAppContext();
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink href="#">Building Your Application</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator className="hidden md:block" />
-        <BreadcrumbItem>
-          <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-        </BreadcrumbItem>
+        {breadcrumbs.map((breadcrumb, index) => {
+          const isLast = index === breadcrumbs.length - 1;
+          return isLast ? (
+            <BreadcrumbItem>
+              <BreadcrumbPage>{breadcrumb.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          ) : (
+            <>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href={breadcrumb.url} asLink>
+                  {breadcrumb.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+            </>
+          );
+        })}
       </BreadcrumbList>
     </Breadcrumb>
   );

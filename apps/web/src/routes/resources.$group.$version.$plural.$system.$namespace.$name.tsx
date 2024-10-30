@@ -139,15 +139,8 @@ function Resource() {
   }
 
   return (
-    <div className="container flex w-[100vw] flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
+    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
-        <div>
-          <Button onClick={() => router.history.back()} variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to projects
-          </Button>
-        </div>
-
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
             <div className="relative">
