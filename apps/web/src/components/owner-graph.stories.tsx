@@ -119,7 +119,13 @@ export const Default: Story = {
       },
     ],
     edges: [
-      { type: "straight", id: "e12", source: "1", target: "2", animated: true },
+      {
+        type: "straight", // required
+        id: "e12", // unique identifier for the edge
+        source: "1", // id of the source node
+        target: "2", // id of the target node
+        animated: true, // optional, changes the edge appearance
+      },
       { type: "straight", id: "e13", source: "1", target: "3", animated: true },
       {
         type: "straight",
