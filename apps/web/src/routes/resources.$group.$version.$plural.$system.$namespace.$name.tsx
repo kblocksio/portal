@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArrowLeft,
-  ClipboardCheckIcon,
-  ClipboardIcon,
-  MoreVertical,
-} from "lucide-react";
+import { ClipboardCheckIcon, ClipboardIcon, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -38,6 +33,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import JsonView from "@uiw/react-json-view";
+import { useAppContext } from "@/app-context";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -64,6 +60,7 @@ function Resource() {
   const [logUpdateTimer, setLogUpdateTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const { selectedProject, setBreadcrumbs } = useAppContext();
 
   const objUri = formatBlockUri({
     group,
@@ -133,6 +130,19 @@ function Resource() {
   const outputs = useMemo(() => {
     return selectedResource ? getResourceOutputs(selectedResource) : {};
   }, [selectedResource]);
+
+  useEffect(() => {
+    if (!selectedResource) return;
+    setBreadcrumbs([
+      {
+        name: selectedProject?.label || "Home",
+        url: selectedProject ? `/projects/${selectedProject?.value}` : "/",
+      },
+      {
+        name: selectedResource.metadata.name,
+      },
+    ]);
+  }, [selectedProject, selectedResource]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;

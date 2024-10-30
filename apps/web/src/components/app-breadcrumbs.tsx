@@ -7,29 +7,29 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
+import React from "react";
 
 export const AppBreadcrumbs = () => {
   const { breadcrumbs } = useAppContext();
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {breadcrumbs.map((breadcrumb, index) => {
-          const isLast = index === breadcrumbs.length - 1;
-          return isLast ? (
+        {breadcrumbs.map((breadcrumb, index) => (
+          <React.Fragment key={breadcrumb.name}>
             <BreadcrumbItem>
-              <BreadcrumbPage>{breadcrumb.name}</BreadcrumbPage>
-            </BreadcrumbItem>
-          ) : (
-            <>
-              <BreadcrumbItem className="hidden md:block">
+              {index === breadcrumbs.length - 1 ? (
+                <BreadcrumbPage key={index}>{breadcrumb.name}</BreadcrumbPage>
+              ) : (
                 <BreadcrumbLink href={breadcrumb.url} asLink>
                   {breadcrumb.name}
                 </BreadcrumbLink>
-              </BreadcrumbItem>
+              )}
+            </BreadcrumbItem>
+            {index !== breadcrumbs.length - 1 && (
               <BreadcrumbSeparator className="hidden md:block" />
-            </>
-          );
-        })}
+            )}
+          </React.Fragment>
+        ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
