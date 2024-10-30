@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "@/resource-context";
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
+import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
 import { getReadyCondition, getResourceOutputs } from "@/lib/utils";
@@ -31,7 +31,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { KeyValueList } from "@/routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
-import { ResourceTableToolbar } from "./resource-table-toolbar";
+import { ResourceTableToolbar } from "./table-toolbar";
 import { CircleEllipsis } from "lucide-react";
 import {
   Tooltip,

@@ -6,7 +6,7 @@ import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
 import { getIconComponent } from "@/lib/hero-icon.js";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { DataTableFacetedFilter } from "../data-table-faceted-filter";
+import { DataTableFacetedFilter } from "./faceted-filter";
 
 export interface ResourceTableToolbarProps<TData> {
   table: TanstackTable<TData>;

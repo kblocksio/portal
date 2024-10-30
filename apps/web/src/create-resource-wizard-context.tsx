@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { CreateResourceWizard } from "./components/create-resource-wizard";
+import { CreateResourceWizard } from "./components/resource-form/create-resource-wizard";
 import { ResourceType, ResourceContext, Resource } from "./resource-context";
 import { createResource } from "./lib/backend";
 import { Category } from "@repo/shared";

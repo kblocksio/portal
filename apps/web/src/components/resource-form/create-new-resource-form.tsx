@@ -1,5 +1,5 @@
 import { ResourceType } from "@/resource-context";
-import { FormGenerator } from "./resource-form/resource-form";
+import { FormGenerator } from "./resource-form";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
 
