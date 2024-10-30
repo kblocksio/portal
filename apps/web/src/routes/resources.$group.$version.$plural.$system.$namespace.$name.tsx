@@ -299,18 +299,16 @@ const PropertyKey = ({ children }: PropsWithChildren) => (
 );
 
 const PropertyValue = ({ children }: PropsWithChildren) => {
-  if (typeof children === "string" && /<a\s/i.test(children)) {
-    return (
-      <div
-        className="flex items-center overflow-hidden font-medium"
-        dangerouslySetInnerHTML={{ __html: children }}
-      />
-    );
-  }
-
+  const isLink = typeof children === "string" && /<a\s/i.test(children);
+  
   return (
-    <div className="flex items-center overflow-hidden font-medium">
-      <span className="truncate">{children}</span>
+    <div className="">
+      {isLink && (
+        <span
+          dangerouslySetInnerHTML={{ __html: children }}
+        />
+      )}
+      {!isLink && <span className="truncate">{children}</span>}
     </div>
   );
 };
@@ -319,7 +317,7 @@ type KeyValueListProps = {
   data: Record<string, string>;
 };
 
-const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
+export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
   Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
       <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>

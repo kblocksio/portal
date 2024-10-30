@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect } from "react";
 import { useFetch } from "@/hooks/use-fetch";
 import { Project } from "@repo/shared";
-import { Combobox } from "@/components/combobox";
 import { useAppContext } from "@/app-context";
 import { useUser } from "@/hooks/use-user";
 import { useSignOut } from "@/hooks/use-sign-out.js";

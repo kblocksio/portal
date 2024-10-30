@@ -14,22 +14,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.js";
 import { useMemo } from "react";
-import { splitAndCapitalizeCamelCase } from "./resource-form/label-formater";
+import { splitAndCapitalizeCamelCase } from "../resource-form/label-formater";
 
 export interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  capitalize?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  capitalize = true,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const capitalizedTitle = useMemo(() => {
-    return splitAndCapitalizeCamelCase(title);
-  }, [title]);
+    return capitalize ? splitAndCapitalizeCamelCase(title) : title;
+  }, [title, capitalize]);
 
   if (!column.getCanSort()) {
     return <div className={cn(className, "text-xs")}>{capitalizedTitle}</div>;
