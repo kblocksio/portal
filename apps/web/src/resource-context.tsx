@@ -1,4 +1,4 @@
-import { Category, GetTypesResponse } from "@repo/shared";
+import { Category } from "@repo/shared";
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { useFetch } from "./hooks/use-fetch";
@@ -34,7 +34,12 @@ type Definition = Manifest["definition"];
 
 export interface ResourceType extends Definition {
   iconComponent: React.ComponentType<{ className?: string }>;
+  engine: string;
 }
+
+type BlockApiObject = ApiObject & {
+  spec: Manifest;
+};
 
 export interface ResourceContextValue {
   // objType -> ResourceType
@@ -43,7 +48,6 @@ export interface ResourceContextValue {
   resources: Map<string, Map<string, Resource>>;
   // objUri -> Record<timestamp, LogEvent>
   handleObjectMessages: (messages: ObjectEvent[]) => void;
-  isLoading: boolean;
   selectedResourceId: SelectedResourceId | undefined;
   setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
   objects: Record<string, Resource>;
@@ -59,7 +63,6 @@ export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
   resources: new Map<string, Map<string, Resource>>(),
   handleObjectMessages: () => {},
-  isLoading: true,
   selectedResourceId: undefined,
   setSelectedResourceId: () => {},
   objects: {},
@@ -76,7 +79,6 @@ export const ResourceProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [resourceTypes, setResourceTypes] = useState<
     Record<string, ResourceType>
   >({});
@@ -107,32 +109,8 @@ export const ResourceProvider = ({
     },
   });
 
-  const { data: resourceTypesData, isLoading: isResourceTypesLoading } =
-    useFetch<GetTypesResponse>("/api/types");
-  const { data: initialResources, isLoading: isSyncInitialResourcesLoading } =
-    useFetch<{ objects: ObjectEvent[] }>("/api/resources");
-  const { data: categoriesData, isLoading: isCategoriesLoading } =
-    useFetch<Record<string, Category>>("/api/categories");
-
-  useEffect(() => {
-    if (resourceTypesData && resourceTypesData.types) {
-      const result: Record<string, ResourceType> = {};
-      for (const [k, v] of Object.entries(resourceTypesData.types).sort(
-        ([l], [r]) => l.localeCompare(r),
-      )) {
-        if (k.startsWith("kblocks.io/v1")) {
-          continue;
-        }
-
-        result[k] = {
-          ...v,
-          iconComponent: getIconComponent({ icon: v.icon ?? "CircleDotIcon" }),
-        };
-      }
-
-      setResourceTypes(result);
-    }
-  }, [resourceTypesData]);
+  const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
+  const { data: categoriesData } = useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
     if (!initialResources || !initialResources.objects) {
@@ -141,11 +119,6 @@ export const ResourceProvider = ({
     handleObjectMessages(initialResources.objects);
   }, [initialResources]);
 
-  useEffect(() => {
-    if (!isResourceTypesLoading && !isSyncInitialResourcesLoading) {
-      setIsLoading(false);
-    }
-  }, [isResourceTypesLoading, isSyncInitialResourcesLoading]);
 
   useEffect(() => {
     if (categoriesData) {
@@ -153,8 +126,28 @@ export const ResourceProvider = ({
     }
   }, [categoriesData]);
 
+  const addType = (block: BlockApiObject) => {
+    const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
+    console.log("addType", key);
+
+    setResourceTypes((prev) => {
+      return {
+        ...prev,
+        [key]: {
+          ...block.spec.definition,
+          engine: block.spec.engine,
+          iconComponent: getIconComponent({ icon: block.spec.definition.icon }),
+        },
+      };
+    });
+  };
+
   const handleObjectMessage = (message: ObjectEvent) => {
     const { object, objUri, objType } = message;
+
+    if (objType === "kblocks.io/v1/blocks") {
+      addType(object as BlockApiObject);
+    }
 
     if (Object.keys(object).length > 0) {
       setResources((prevResourcesForTypes) => {
@@ -348,7 +341,6 @@ export const ResourceProvider = ({
     resources,
     eventsPerObject,
     handleObjectMessages,
-    isLoading,
     selectedResourceId,
     setSelectedResourceId,
     categories,

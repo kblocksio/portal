@@ -6,7 +6,7 @@ import { useCallback, useContext, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { ResourceTypesCatalog } from "@/components/resource-catalog/resource-catalog";
+import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 
 export const Route = createFileRoute("/")({
@@ -63,7 +63,7 @@ function Index() {
             className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
           />
         </div>
-        <ResourceTypesCatalog
+        <ResourceCatalog
           categories={categories}
           filtereResources={filteredResourceTypes}
           handleResourceSelect={handleResourceSelect}

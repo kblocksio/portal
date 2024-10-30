@@ -26,7 +26,7 @@ export const getIconComponent = ({
   if (iconComponent) {
     return iconComponent;
   } else {
-    return iconSet.CodeBracketIcon;
+    return iconSet.CogIcon;
   }
 };
 

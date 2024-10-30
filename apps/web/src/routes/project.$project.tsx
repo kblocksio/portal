@@ -17,6 +17,8 @@ function Project() {
   const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
   const navigate = useNavigate();
 
+  console.log("resourceTypes", resourceTypes);
+
   useEffect(() => {
     if (!projects || projects.length === 0) {
       return;

@@ -12,7 +12,7 @@ export type GetUserResponse = {
 export type GetTypesResponse = {
   /**
    * A map of resource type names to their definitions..
-   * TYpe is: `group/version/plural`
+   * Type is: `group/version/plural`
    */
   types: Record<string, kblocks.Manifest["definition"]>;
 };
