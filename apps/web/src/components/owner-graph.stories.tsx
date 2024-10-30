@@ -18,14 +18,14 @@ export const Default: Story = {
   args: {
     nodes: [
       {
-        id: "1",
-        type: "node",
+        id: "1", // unique identifier
+        type: "node", // must be "node" so it renders correctly
         data: {
-          name: "root",
-          description: "root node",
-          icon: <div className="text-sm">🌲</div>,
+          name: "root", // name of the node
+          description: "root node", // description of the node
+          icon: <div className="text-sm">🌲</div>, // icon of the node
         },
-        position: { x: 0, y: 0 },
+        position: { x: 0, y: 0 }, // must be present
       },
       {
         id: "10-1",
