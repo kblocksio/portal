@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArrowLeft,
-  ClipboardCheckIcon,
-  ClipboardIcon,
-  MoreVertical,
-} from "lucide-react";
+import { ClipboardCheckIcon, ClipboardIcon, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -38,6 +33,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import JsonView from "@uiw/react-json-view";
+import { useAppContext } from "@/app-context";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -64,6 +60,7 @@ function Resource() {
   const [logUpdateTimer, setLogUpdateTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const { selectedProject, setBreadcrumbs } = useAppContext();
 
   const objUri = formatBlockUri({
     group,
@@ -134,20 +131,26 @@ function Resource() {
     return selectedResource ? getResourceOutputs(selectedResource) : {};
   }, [selectedResource]);
 
+  useEffect(() => {
+    if (!selectedResource) return;
+    setBreadcrumbs([
+      {
+        name: selectedProject?.label || "Home",
+        url: selectedProject ? `/projects/${selectedProject?.value}` : "/",
+      },
+      {
+        name: selectedResource.metadata.name,
+      },
+    ]);
+  }, [selectedProject, selectedResource]);
+
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
 
   return (
-    <div className="container flex w-[100vw] flex-col gap-12 p-12 px-4 sm:px-6 lg:px-8">
+    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
-        <div>
-          <Button onClick={() => router.history.back()} variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to projects
-          </Button>
-        </div>
-
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -352,7 +355,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
           <PopoverTrigger asChild>
             <Button variant="outline">View</Button>
           </PopoverTrigger>
-          <PopoverContent side="right">
+          <PopoverContent side="right" className="ml-2">
             <JsonView value={value} />
           </PopoverContent>
         </Popover>

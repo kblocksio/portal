@@ -28,7 +28,7 @@ export const MyProjects = () => {
         onClick: () => {
           setSelectedProject(project);
           navigate({
-            to: "/project/$project",
+            to: "/projects/$project",
             params: { project: project.value },
           });
         },
