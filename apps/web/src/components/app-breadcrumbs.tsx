@@ -20,7 +20,11 @@ export const AppBreadcrumbs = () => {
               {index === breadcrumbs.length - 1 ? (
                 <BreadcrumbPage key={index}>{breadcrumb.name}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={breadcrumb.url} asLink>
+                <BreadcrumbLink
+                  href={breadcrumb.url}
+                  asLink
+                  className={breadcrumb.url ? "" : "pointer-events-none"}
+                >
                   {breadcrumb.name}
                 </BreadcrumbLink>
               )}

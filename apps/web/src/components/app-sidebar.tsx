@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import {
   Sidebar,
@@ -27,6 +27,7 @@ import { useAppContext } from "@/app-context";
 import { getLucideIcon } from "@/lib/lucide-icon";
 import { Link } from "./ui/link";
 import { useLocation } from "@tanstack/react-router";
+import { ResourceContext } from "@/resource-context";
 
 const platformSidebarNavData = [
   {
@@ -68,6 +69,8 @@ const platformSidebarNavData = [
 
 export const AppSidebar = () => {
   const { projects } = useAppContext();
+  const { resourceTypes } = useContext(ResourceContext);
+
   const location = useLocation();
 
   const sidebarProjects = useMemo(() => {
@@ -78,6 +81,50 @@ export const AppSidebar = () => {
     }));
   }, [projects]);
 
+  const platformSideBarItems = useMemo(() => {
+    return [
+      {
+        title: "Home",
+        url: "/",
+        icon: "Home",
+        isActive: true,
+      },
+      {
+        title: "Catalog",
+        url: "#",
+        icon: "Blocks",
+        items: Object.keys(resourceTypes).map((resourceType) => ({
+          title: resourceTypes[resourceType].kind,
+          url: `/catalog/${resourceType}`,
+          icon: resourceTypes[resourceType].icon,
+        })),
+      },
+      {
+        title: "Documentation",
+        url: "#",
+        icon: "BookOpen",
+        items: [
+          {
+            title: "Introduction",
+            url: "#",
+          },
+          {
+            title: "Get Started",
+            url: "#",
+          },
+          {
+            title: "Tutorials",
+            url: "#",
+          },
+          {
+            title: "Changelog",
+            url: "#",
+          },
+        ],
+      },
+    ];
+  }, [resourceTypes]);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -87,7 +134,7 @@ export const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
-            {platformSidebarNavData.map((item) => (
+            {platformSideBarItems.map((item) => (
               <SidebarItem
                 key={item.title}
                 item={item}
@@ -118,6 +165,19 @@ export const AppSidebar = () => {
 };
 
 const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
+  const location = useLocation();
+  // Add state to control the open status
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isAnySubItemActive = useMemo(
+    () => item.items?.some((subItem: any) => location.pathname === subItem.url),
+    [item.items, location.pathname],
+  );
+
+  useEffect(() => {
+    setIsOpen(isAnySubItemActive);
+  }, [isAnySubItemActive]);
+
   if (!item.items) {
     return (
       <SidebarMenuItem key={item.title}>
@@ -137,34 +197,38 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   return (
     <Collapsible
       key={item.title}
-      asChild
-      defaultOpen={item.isActive}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       className="group/collapsible"
     >
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
             tooltip={item.title}
-            className={isActive ? "active" : ""}
+            className={isActive ? "bg-sidebar-accent" : ""}
+            onClick={(e) => {
+              e.preventDefault();
+              setIsOpen(!isOpen);
+            }}
           >
             {item.icon && getLucideIcon(item.icon)({})}
             <span>{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent asChild>
           <SidebarMenuSub>
             {item.items?.map((subItem: any) => {
               const isSubItemActive = location.pathname === subItem.url;
               return (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton asChild>
-                    <a
-                      href={subItem.url}
-                      className={isSubItemActive ? "active" : ""}
+                    <Link
+                      to={subItem.url as any}
+                      className={isSubItemActive ? "bg-sidebar-accent" : ""}
                     >
                       <span>{subItem.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               );

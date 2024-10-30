@@ -109,8 +109,11 @@ export const ResourceProvider = ({
     },
   });
 
-  const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>("/api/resources");
-  const { data: categoriesData } = useFetch<Record<string, Category>>("/api/categories");
+  const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
+    "/api/resources",
+  );
+  const { data: categoriesData } =
+    useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
     if (!initialResources || !initialResources.objects) {
@@ -118,7 +121,6 @@ export const ResourceProvider = ({
     }
     handleObjectMessages(initialResources.objects);
   }, [initialResources]);
-
 
   useEffect(() => {
     if (categoriesData) {
@@ -307,7 +309,11 @@ export const ResourceProvider = ({
       }
     }
 
-    return { systems: Array.from(systems), namespaces: Array.from(namespaces), kinds: Array.from(kinds) };
+    return {
+      systems: Array.from(systems),
+      namespaces: Array.from(namespaces),
+      kinds: Array.from(kinds),
+    };
   }, [resources]);
 
   const loadEvents = (objUri: string) => {
@@ -352,4 +358,3 @@ export const ResourceProvider = ({
     </ResourceContext.Provider>
   );
 };
-
