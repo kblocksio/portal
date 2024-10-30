@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import * as d3 from "d3-force";
 import {
   ReactFlow,
@@ -10,9 +10,6 @@ import {
   NodeProps,
   Handle,
   Position,
-  EdgeProps,
-  // BaseEdge,
-  // getStraightPath,
   StraightEdge,
   Background,
   Controls,
@@ -29,7 +26,6 @@ export type OwnerNodeData = {
   name: string;
   description: string;
   icon: React.ReactNode;
-  root?: boolean;
 };
 
 export type OwnerNode = ReactFlowNode<OwnerNodeData, "node">;
@@ -205,7 +201,7 @@ const OwnerFlow = (props: { nodes: OwnerNode[]; edges: ReactFlowEdge[] }) => {
   );
 };
 
-export const StoryComponent = (props: {
+export const OwnerGraph = (props: {
   nodes: OwnerNode[];
   edges: ReactFlowEdge[];
 }) => (

@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Edge } from "@xyflow/react";
-import { OwnerNodeData, StoryComponent } from "./force-graph";
+import { OwnerGraph } from "./owner-graph";
 
 const meta = {
   title: "Components/ForceGraph",
-  component: StoryComponent,
+  component: OwnerGraph,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof StoryComponent>;
+} satisfies Meta<typeof OwnerGraph>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -25,7 +24,6 @@ export const Default: Story = {
           name: "root",
           description: "root node",
           icon: <div className="text-sm">🌲</div>,
-          root: true,
         },
         position: { x: 0, y: 0 },
       },
