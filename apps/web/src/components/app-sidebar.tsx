@@ -58,13 +58,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.js";
 
 export const AppSidebar = () => {
-
-  const {} = useContext<ResourceContext>();
-
-  const catalogItems = useMemo(() => {
-
-  });
-
   const data = {
     user: {
       name: "shadcn",
@@ -99,7 +92,7 @@ export const AppSidebar = () => {
         title: "Catalog",
         url: "#",
         icon: Blocks,
-        items: catalogItems,
+        items: [],
       },
       {
         title: "Documentation",
