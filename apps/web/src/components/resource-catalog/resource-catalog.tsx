@@ -1,4 +1,3 @@
-import { getIconComponent, getResourceIconColors } from "@/lib/hero-icon";
 import {
   Card,
   CardContent,
@@ -11,7 +10,6 @@ import { ResourceType } from "@/resource-context";
 import { Category } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { MarkdownWrapper } from "../markdown";
-import { Button } from "../ui/button";
 import { ResourceTypeDocsDrawer } from "./resource-type-docs-drawer";
 import { ResourceTypeCard } from "./resource-card";
 
@@ -85,7 +83,7 @@ const ResourceTypeCategory = ({
           />
         </div>
       </div>
-      <div className="flex gap-4 flex-wrap">
+      <div className="flex flex-wrap gap-4">
         {resources.map((resource) => (
           <ResourceTypeCard
             key={`${resource.kind}-${resource.group}-${resource.version}`}
@@ -98,7 +96,6 @@ const ResourceTypeCategory = ({
     </div>
   );
 };
-
 
 const ResourceCardSkeleton = () => (
   <Card className="flex max-h-[160px] cursor-pointer flex-col justify-center">
