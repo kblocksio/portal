@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ResourceTypesCatalog } from "../resource-catalog/resource-catalog";
+import { ResourceCatalog } from "../resource-catalog/resource-catalog";
 import { WizardSearchHeader } from "../wizard-search-header";
 import { WizardSimpleHeader } from "../wizard-simple-header";
 import { CreateNewResourceForm } from "./create-new-resource-form";
@@ -154,7 +154,7 @@ export const CreateResourceWizard = ({
         </DialogHeader>
         {step === 1 ? (
           <div className="w-full gap-4 overflow-auto p-2">
-            <ResourceTypesCatalog
+            <ResourceCatalog
               categories={categories}
               isLoading={isLoading}
               filtereResources={filtereResources}

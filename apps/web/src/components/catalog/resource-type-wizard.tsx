@@ -43,7 +43,7 @@ const engines = [
     name: "AWS CDK",
     description:
       "AWS Cloud Development Kit (AWS CDK) is an open-source software development framework that enables you to define cloud infrastructure in code and provision it through AWS CloudFormation.",
-    src: "/aws_cdk.svg",
+    src: "/awscdk.svg",
   },
   {
     name: "Helm",
@@ -55,13 +55,13 @@ const engines = [
     name: "OpenTofu",
     description:
       "OpenTofu is an open-source infrastructure as code software tool that enables you to manage your infrastructure as code.",
-    src: "/opentofu.svg",
+    src: "/tofu.svg",
   },
   {
     name: "Winglang",
     description:
       "Winglang is an open-source programming language that enables you to build cloud applications.",
-    src: "/winglang.svg",
+    src: "/wing.svg",
   },
 ];
 
