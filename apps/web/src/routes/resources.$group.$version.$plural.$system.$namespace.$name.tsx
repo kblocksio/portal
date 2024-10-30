@@ -27,6 +27,11 @@ import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -310,18 +315,18 @@ const PropertyValue = ({ children }: PropsWithChildren) => {
 };
 
 type KeyValueListProps = {
-  data: Record<string, string>;
+  data: Record<string, any>;
 };
 
 export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) =>
   Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
       <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
-      <PropertyValue>{formatValue(value)}</PropertyValue>
+      <PropertyValue>{renderValue(value)}</PropertyValue>
     </React.Fragment>
   ));
 
-function formatValue(value: any) {
+function renderValue(value: any) {
   if (typeof value === "string") {
     return linkifyHtml(value, {
       className: "text-blue-500 hover:underline",
@@ -329,14 +334,32 @@ function formatValue(value: any) {
     });
   }
 
-  if (
-    typeof value === "undefined" ||
-    (typeof value === "object" && value === null)
-  ) {
+  if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+    return (
+      <Popover>
+        <PopoverTrigger>
+          <button className="text-blue-500 hover:underline">View</button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <pre
+            className="rounded bg-gray-100 p-4 text-sm"
+            dangerouslySetInnerHTML={{
+              __html: linkifyHtml(JSON.stringify(value, null, 2), {
+                className: "text-blue-500 hover:underline",
+                target: "_blank noreferrer",
+              }),
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  if (typeof value === "undefined" || value === null) {
     return "(n/a)";
   }
 
-  return JSON.stringify(value);
+  return value;
 }
 
 export default Resource;
