@@ -1,4 +1,3 @@
-import { getIconComponent, getResourceIconColors } from "@/lib/hero-icon";
 import {
   Card,
   CardContent,
@@ -11,21 +10,21 @@ import { ResourceType } from "@/resource-context";
 import { Category } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { MarkdownWrapper } from "../markdown";
-import { Button } from "../ui/button";
 import { ResourceTypeDocsDrawer } from "./resource-type-docs-drawer";
+import { ResourceTypeCard } from "./resource-card";
 
-export interface ResourceTypesCatalogProps {
+export interface ResourceCatalogProps {
   categories: Record<string, Category>;
   filtereResources: ResourceType[];
   handleResourceSelect: (resource: any) => void;
   isLoading: boolean;
 }
-export const ResourceTypesCatalog = ({
+export const ResourceCatalog = ({
   filtereResources,
   handleResourceSelect,
   isLoading,
   categories,
-}: ResourceTypesCatalogProps) => {
+}: ResourceCatalogProps) => {
   const [docs, setDocs] = useState<string | undefined>(undefined);
   const typesForCategories = useMemo(() => {
     return Object.keys(categories).map((category) => ({
@@ -41,7 +40,7 @@ export const ResourceTypesCatalog = ({
       <ResourceCardSkeleton key={index} />
     ))
   ) : (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-12">
       {typesForCategories.map(
         ({ category, resources }) =>
           resources &&
@@ -71,18 +70,10 @@ const ResourceTypeCategory = ({
   handleResourceSelect: (resource: ResourceType) => void;
   handleDocsOpen: (docs: string | undefined) => void;
 }) => {
-  const Icon = getIconComponent({ icon: category.icon ?? "CircleDotIcon" });
-  const iconColor = getResourceIconColors({ color: category?.color });
-
   return (
-    <div className="border-input flex flex-col border-b p-4 pb-12">
-
-
-      <div className="flex flex-col gap-y-4">
-        <div className="flex w-full items-center gap-x-2 self-center">
-          <Icon className={`${iconColor} h-10 w-10`} />
-          <h2>{category.title}</h2>
-        </div>
+    <div className="border-input flex flex-col">
+      <div className="flex flex-col gap-y-2">
+        <h2 className="text-lg font-semibold">{category.title}</h2>
         <div className="text-muted-foreground text-sm">
           <MarkdownWrapper
             content={category.description}
@@ -92,7 +83,7 @@ const ResourceTypeCategory = ({
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-4">
+      <div className="flex flex-wrap gap-4">
         {resources.map((resource) => (
           <ResourceTypeCard
             key={`${resource.kind}-${resource.group}-${resource.version}`}
@@ -103,51 +94,6 @@ const ResourceTypeCategory = ({
         ))}
       </div>
     </div>
-  );
-};
-
-const ResourceTypeCard = ({
-  resource,
-  handleResourceSelect,
-  handleDocsOpen,
-}: {
-  resource: ResourceType;
-  handleResourceSelect: (resource: ResourceType) => void;
-  handleDocsOpen: (docs: string | undefined) => void;
-}) => {
-  const Icon = resource.iconComponent;
-  const iconColor = getResourceIconColors({ color: resource?.color });
-  return (
-    <Card
-      key={`${resource.kind}-${resource.group}-${resource.version}`}
-      className="hover:bg-accent flex w-full cursor-pointer justify-between rounded-sm border-none p-0 shadow-none"
-      tabIndex={0}
-    >
-      <CardContent className="flex w-full items-center justify-between gap-x-4 p-2">
-        <div className="flex items-center gap-x-4">
-          <Icon className={`${iconColor} h-6 w-6`} />
-          <CardTitle>{resource.kind}</CardTitle>
-          <CardDescription className="line-clamp-1 overflow-hidden text-ellipsis">
-            {resource.description}
-          </CardDescription>
-        </div>
-        <div className="flex gap-x-2">
-          <Button
-            className="text-sky-500 hover:text-sky-600 hover:underline"
-            variant="ghost"
-            onClick={() => handleDocsOpen(resource.readme)}
-          >
-            Docs
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleResourceSelect(resource)}
-          >
-            New
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 

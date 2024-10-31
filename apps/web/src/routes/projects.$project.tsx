@@ -7,31 +7,28 @@ import { ResourceContext } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
 import { ProjectHeader } from "@/components/project-header";
 
-export const Route = createFileRoute("/project/$project")({
+export const Route = createFileRoute("/projects/$project")({
   component: Project,
 });
 
 function Project() {
-  const { selectedProject, setSelectedProject, projects } = useAppContext();
+  const { selectedProject, setSelectedProject, projects, setBreadcrumbs } =
+    useAppContext();
   const { project } = Route.useParams();
-  const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
+  const { resourceTypes, resources } = useContext(ResourceContext);
   const navigate = useNavigate();
-
-  console.log("resourceTypes", resourceTypes);
 
   useEffect(() => {
     if (!projects || projects.length === 0) {
       return;
     }
-    if (!selectedProject) {
-      const projectObj = projects.find((p) => p.value === project);
-      if (projectObj) {
-        setSelectedProject(projectObj);
-      } else {
-        navigate({
-          to: "/",
-        });
-      }
+    const projectObj = projects.find((p) => p.value === project);
+    if (projectObj) {
+      setSelectedProject(projectObj);
+    } else {
+      navigate({
+        to: "/",
+      });
     }
   }, [selectedProject, projects, project]);
 
@@ -41,13 +38,17 @@ function Project() {
       .filter((resource) => resource.kind !== "Block");
   }, [resources]);
 
+  useEffect(() => {
+    setBreadcrumbs([
+      { name: selectedProject?.label || "", url: `/projects/${project}` },
+    ]);
+  }, [selectedProject]);
+
   return (
     <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <ProjectHeader selectedProject={selectedProject} />
       <div>
-        {isLoading ||
-        !resourceTypes ||
-        Object.keys(resourceTypes).length === 0 ? (
+        {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />
         ) : (
           <>

@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import platformMd from "../mock-data/acme.platform.md?raw";
 import { MarkdownWrapper } from "@/components/markdown";
 import { MyProjects } from "@/components/my-projects";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { ResourceTypesCatalog } from "@/components/resource-catalog/resource-catalog";
+import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
+import { useAppContext } from "@/app-context";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { resourceTypes, categories } = useContext(ResourceContext);
+  const { setBreadcrumbs } = useAppContext();
   const { openWizard } = useCreateResourceWizard();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,8 +39,12 @@ function Index() {
     [openWizard],
   );
 
+  useEffect(() => {
+    setBreadcrumbs([{ name: "Home", url: "/" }]);
+  }, []);
+
   return (
-    <div className="container flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <div className="container flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
       {/* organization specific introduction */}
       <MarkdownWrapper content={platformMd} />
 
@@ -63,7 +69,7 @@ function Index() {
             className="bg-color-wite h-10 w-full py-2 pl-8 pr-4"
           />
         </div>
-        <ResourceTypesCatalog
+        <ResourceCatalog
           categories={categories}
           filtereResources={filteredResourceTypes}
           handleResourceSelect={handleResourceSelect}

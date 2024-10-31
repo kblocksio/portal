@@ -12,6 +12,7 @@ export type Project = {
   label: string;
   value: string;
   description: string;
+  icon: string;
 };
 
 export type Repository = {
