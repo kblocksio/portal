@@ -1,5 +1,11 @@
 import { Category } from "@repo/shared";
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import useWebSocket from "react-use-websocket";
 import { useFetch } from "./hooks/use-fetch";
 import {
@@ -10,10 +16,10 @@ import {
   parseBlockUri,
   Manifest,
 } from "@kblocks/api";
-import { toast } from "react-hot-toast"; // Add this import
 import { request } from "./lib/backend";
 import { getIconComponent } from "./lib/hero-icon";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
+import { NotificationsContext } from "./notifications-context";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
@@ -79,6 +85,7 @@ export const ResourceProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { addNotifications } = useContext(NotificationsContext);
   const [resourceTypes, setResourceTypes] = useState<
     Record<string, ResourceType>
   >({});
@@ -260,16 +267,22 @@ export const ResourceProvider = ({
         handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
       case "ERROR":
-        toast.error(lastJsonMessage.message ?? "Unknown error", {
-          id: urlForResource(blockUri),
-        });
+        addNotifications([
+          {
+            id: urlForResource(blockUri),
+            message: lastJsonMessage.message ?? "Unknown error",
+            type: "error",
+          },
+        ]);
         break;
       case "LIFECYCLE":
-        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, {
-          duration: 2000,
-          id: urlForResource(blockUri),
-          icon: "",
-        });
+        addNotifications([
+          {
+            id: urlForResource(blockUri),
+            message: `${blockUri.name}: ${lastJsonMessage.event.message}`,
+            type: "success",
+          },
+        ]);
         break;
     }
   }, [lastJsonMessage]);
