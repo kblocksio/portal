@@ -14,7 +14,7 @@ export const Route = createFileRoute("/project/$project")({
 function Project() {
   const { selectedProject, setSelectedProject, projects } = useAppContext();
   const { project } = Route.useParams();
-  const { isLoading, resourceTypes, resources } = useContext(ResourceContext);
+  const { resourceTypes, resources } = useContext(ResourceContext);
   const navigate = useNavigate();
 
   console.log("resourceTypes", resourceTypes);
@@ -45,9 +45,7 @@ function Project() {
     <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <ProjectHeader selectedProject={selectedProject} />
       <div>
-        {isLoading ||
-        !resourceTypes ||
-        Object.keys(resourceTypes).length === 0 ? (
+        {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />
         ) : (
           <>
