@@ -40,13 +40,14 @@ export const RepoPicker = memo(function RepoPicker({
     undefined,
     false,
   );
-  const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>();
+  const [selectedRepositoryFullName, setSelectedRepositoryFullName] =
+    useState<string>();
   useEffect(() => {
     console.log("repositories", repositories);
     console.log("first repository", repositories?.[0]);
-    setSelectedRepositoryId(
+    setSelectedRepositoryFullName(
       repositories && repositories.length > 0
-        ? repositories[0].id.toString()
+        ? repositories[0].full_name
         : undefined,
     );
   }, [repositories]);
@@ -62,22 +63,14 @@ export const RepoPicker = memo(function RepoPicker({
 
   useEffect(() => {
     const selectedRepository = repositories?.find(
-      (repo) => repo.id.toString() === selectedRepositoryId,
+      (repo) => repo.full_name === selectedRepositoryFullName,
     );
-    console.log("selectedRepository", selectedRepository);
     handleOnSelection?.(selectedRepository ?? null);
-  }, [repositories, selectedRepositoryId, handleOnSelection]);
+  }, [repositories, selectedRepositoryFullName, handleOnSelection]);
 
   const isLoading = useMemo(() => {
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
-
-  useEffect(() => {
-    console.log("selectedInstallationId", selectedInstallationId);
-  }, [selectedInstallationId]);
-  useEffect(() => {
-    console.log("selectedRepositoryId", selectedRepositoryId);
-  }, [selectedRepositoryId]);
 
   return (
     <div className="ml-2 mr-2 flex flex-col gap-4">
@@ -116,9 +109,9 @@ export const RepoPicker = memo(function RepoPicker({
 
         <Select
           disabled={isLoading}
-          value={selectedRepositoryId}
-          onValueChange={(repositoryId) =>
-            setSelectedRepositoryId(repositoryId)
+          value={selectedRepositoryFullName}
+          onValueChange={(repositoryFullName) =>
+            setSelectedRepositoryFullName(repositoryFullName)
           }
         >
           <SelectTrigger className="w-full">
@@ -133,7 +126,7 @@ export const RepoPicker = memo(function RepoPicker({
           </SelectTrigger>
           <SelectContent>
             {repositories?.map((repo) => (
-              <SelectItem key={repo.id.toString()} value={repo.id.toString()}>
+              <SelectItem key={repo.full_name} value={repo.full_name}>
                 <div className="flex items-center">
                   <Github className="mr-2 h-4 w-4" />
                   {repo.full_name}
