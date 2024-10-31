@@ -334,6 +334,41 @@ app.delete(
   },
 );
 
+app.post(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/read",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+
+    if (!system) {
+      return res
+        .status(400)
+        .json({ error: "'system' is required as a query param" });
+    }
+
+    console.log("reading object:", objUri);
+
+    pubsub.publishControlRequest(
+      { system, group, version, plural },
+      {
+        type: "READ",
+        objUri,
+      },
+    );
+
+    return res.status(200).json({
+      message: "Read request accepted",
+    });
+  },
+);
+
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const { data, error } = await supabase.auth.signInWithOAuth({
