@@ -62,7 +62,7 @@ export const NotificationMenu = ({ className }: NotificationMenuProps) => {
                 >
                   <Link
                     to={notification.id as any}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 truncate"
                   >
                     {getIcon(notification.type)}
                     <span className="flex-1 truncate">
