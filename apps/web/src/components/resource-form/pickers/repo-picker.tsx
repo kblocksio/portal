@@ -40,6 +40,8 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
   );
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>();
   useEffect(() => {
+    console.log("repositories", repositories);
+    console.log("first repository", repositories?.[0]);
     setSelectedRepositoryId(
       repositories && repositories.length > 0
         ? repositories[0].id.toString()
@@ -60,12 +62,20 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     const selectedRepository = repositories?.find(
       (repo) => repo.id.toString() === selectedRepositoryId,
     );
+    console.log("selectedRepository", selectedRepository);
     handleOnSelection?.(selectedRepository ?? null);
   }, [repositories, selectedRepositoryId, handleOnSelection]);
 
   const isLoading = useMemo(() => {
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
+
+  useEffect(() => {
+    console.log("selectedInstallationId", selectedInstallationId);
+  }, [selectedInstallationId]);
+  useEffect(() => {
+    console.log("selectedRepositoryId", selectedRepositoryId);
+  }, [selectedRepositoryId]);
 
   return (
     <div className="ml-2 mr-2 flex flex-col gap-4">
