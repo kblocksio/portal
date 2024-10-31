@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "@/components/delete-resource";
+import { ReapplyResourceDialog } from "@/components/reapply-resource";
+import { ReadResourceDialog } from "@/components/read-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
@@ -122,6 +124,8 @@ function Resource() {
   const { openWizard: openEditWizard } = useCreateResourceWizard();
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isReapplyOpen, setIsReapplyOpen] = useState(false);
+  const [isReadOpen, setIsReadOpen] = useState(false);
 
   const properties = useMemo(() => {
     return selectedResource ? getResourceProperties(selectedResource) : {};
@@ -184,6 +188,16 @@ function Resource() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem
+                  onSelect={() => setIsReapplyOpen(true)}
+                >
+                  Reapply
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setIsReadOpen(true)}
+                >
+                  Refresh
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive"
                   onSelect={() => setIsDeleteOpen(true)}
@@ -300,6 +314,23 @@ function Resource() {
         }}
         onClose={() => {
           setIsDeleteOpen(false);
+        }}
+      />
+      <ReapplyResourceDialog
+        resource={selectedResource}
+        isOpen={isReapplyOpen}
+        onReapplyClick={() => {
+          setIsReapplyOpen(true);
+        }}
+        onClose={() => {
+          setIsReapplyOpen(false);
+        }}
+      />
+      <ReadResourceDialog
+        resource={selectedResource}
+        isOpen={isReadOpen}
+        onClose={() => {
+          setIsReadOpen(false);
         }}
       />
     </div>

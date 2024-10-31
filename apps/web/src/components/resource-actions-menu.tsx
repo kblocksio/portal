@@ -7,6 +7,8 @@ import {
 } from "./ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { DeleteResourceDialog } from "./delete-resource";
+import { ReapplyResourceDialog } from "./reapply-resource";
+import { ReadResourceDialog } from "./read-resource";
 import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 
@@ -22,6 +24,8 @@ export const ResourceActionsMenu = ({
   const [isOpen, setIsOpen] = useState(false);
   const { openWizard: openEditWizard } = useCreateResourceWizard();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isReapplyOpen, setIsReapplyOpen] = useState(false);
+  const [isReadOpen, setIsReadOpen] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
 
@@ -43,6 +47,22 @@ export const ResourceActionsMenu = ({
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            setIsReapplyOpen(true);
+          }}
+        >
+          Reapply
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            setIsReadOpen(true);
+          }}
+        >
+          Refresh
+        </DropdownMenuItem>
+        <DropdownMenuItem
           className="text-destructive"
           onSelect={(e) => {
             e.preventDefault();
@@ -59,6 +79,22 @@ export const ResourceActionsMenu = ({
           }}
           onClose={() => {
             setIsDeleteOpen(false);
+            closeMenu();
+          }}
+        />
+        <ReapplyResourceDialog
+          resource={resource}
+          isOpen={isReapplyOpen}
+          onClose={() => {
+            setIsReapplyOpen(false);
+            closeMenu();
+          }}
+        />
+        <ReadResourceDialog
+          resource={resource}
+          isOpen={isReadOpen}
+          onClose={() => {
+            setIsReadOpen(false);
             closeMenu();
           }}
         />
