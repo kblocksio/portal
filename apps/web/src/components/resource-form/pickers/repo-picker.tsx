@@ -12,41 +12,49 @@ import { useFetch } from "@/hooks/use-fetch";
 import { linkVariants } from "@/components/ui/link";
 
 interface RepoPickerProps {
+  initialValue?: string;
   handleOnSelection?: (repository: Repository | null) => void;
 }
 
 export const RepoPicker = memo(function RepoPicker({
+  initialValue,
   handleOnSelection,
 }: RepoPickerProps) {
   const { data: installations, isLoading: isLoadingInstallations } = useFetch<
     Installation[]
   >("/api/github/installations");
-  const [selectedInstallationId, setSelectedInstallationId] =
-    useState<string>();
+  const [selectedInstallationLogin, setSelectedInstallationLogin] = useState(
+    () => initialValue?.split("/")?.[0],
+  );
   useEffect(() => {
-    setSelectedInstallationId(
-      installations && installations.length > 0
-        ? installations[0].id.toString()
-        : undefined,
+    setSelectedInstallationLogin(
+      (installationLogin) =>
+        installationLogin ?? installations?.[0].account.login,
     );
   }, [installations]);
+  const selectedInstallationId = useMemo(() => {
+    return installations?.find(
+      (installation) =>
+        installation.account.login === selectedInstallationLogin,
+    )?.id;
+  }, [installations, selectedInstallationLogin]);
 
   const {
     data: repositories,
     refetch: refetchRepositories,
     isLoading: isLoadingRepositories,
   } = useFetch<Repository[]>(
-    `/api/github/repositories?installation_id=${installations?.[0]?.id}`,
+    `/api/github/repositories?installation_id=${selectedInstallationId}`,
     undefined,
     false,
   );
-  const [selectedRepositoryFullName, setSelectedRepositoryFullName] =
-    useState<string>();
+  const [selectedRepositoryFullName, setSelectedRepositoryFullName] = useState(
+    () => initialValue,
+  );
   useEffect(() => {
     setSelectedRepositoryFullName(
-      repositories && repositories.length > 0
-        ? repositories[0].full_name
-        : undefined,
+      (repositoryFullName) =>
+        repositoryFullName ?? repositories?.[0]?.full_name,
     );
   }, [repositories]);
 
@@ -75,9 +83,9 @@ export const RepoPicker = memo(function RepoPicker({
       <div className="flex items-center justify-between gap-2">
         <Select
           disabled={isLoadingInstallations}
-          value={selectedInstallationId}
-          onValueChange={(installationId) =>
-            setSelectedInstallationId(installationId)
+          value={selectedInstallationLogin}
+          onValueChange={(installationLogin) =>
+            setSelectedInstallationLogin(installationLogin)
           }
         >
           <SelectTrigger className="w-full">
@@ -93,8 +101,8 @@ export const RepoPicker = memo(function RepoPicker({
           <SelectContent>
             {installations?.map((installation) => (
               <SelectItem
-                key={installation.id}
-                value={installation.id.toString()}
+                key={installation.account.login}
+                value={installation.account.login}
               >
                 <div className="flex items-center">
                   <Github className="mr-2 h-4 w-4" />
