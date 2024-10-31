@@ -16,12 +16,11 @@ interface RepoPickerProps {
 }
 
 export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
-  const [selectedInstallationId, setSelectedInstallationId] =
-    useState<string>();
   const { data: installations, isLoading: isLoadingInstallations } = useFetch<
     Installation[]
   >("/api/github/installations");
-
+  const [selectedInstallationId, setSelectedInstallationId] =
+    useState<string>();
   useEffect(() => {
     setSelectedInstallationId(
       installations && installations.length > 0
@@ -30,7 +29,6 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     );
   }, [installations]);
 
-  const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>();
   const {
     data: repositories,
     refetch: refetchRepositories,
@@ -40,6 +38,7 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     undefined,
     false,
   );
+  const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>();
   useEffect(() => {
     setSelectedRepositoryId(
       repositories && repositories.length > 0
@@ -57,15 +56,12 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     );
   }, [selectedInstallationId, refetchRepositories]);
 
-  const selectedRepository = useMemo(() => {
-    return repositories?.find(
+  useEffect(() => {
+    const selectedRepository = repositories?.find(
       (repo) => repo.id.toString() === selectedRepositoryId,
     );
-  }, [selectedRepositoryId, repositories]);
-
-  useEffect(() => {
     handleOnSelection?.(selectedRepository ?? null);
-  }, [selectedRepository, handleOnSelection]);
+  }, [repositories, selectedRepositoryId, handleOnSelection]);
 
   const isLoading = useMemo(() => {
     return isLoadingInstallations || isLoadingRepositories;
@@ -77,7 +73,9 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
         <Select
           disabled={isLoadingInstallations}
           value={selectedInstallationId}
-          onValueChange={setSelectedInstallationId}
+          onValueChange={(installationId) =>
+            setSelectedInstallationId(installationId)
+          }
         >
           <SelectTrigger className="w-full">
             {isLoadingInstallations ? (
@@ -90,25 +88,26 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
             )}
           </SelectTrigger>
           <SelectContent>
-            {installations &&
-              installations.map((installation) => (
-                <SelectItem
-                  key={installation.id}
-                  value={installation.id.toString()}
-                >
-                  <div className="flex items-center">
-                    <Github className="mr-2 h-4 w-4" />
-                    {installation.account.login}
-                  </div>
-                </SelectItem>
-              ))}
+            {installations?.map((installation) => (
+              <SelectItem
+                key={installation.id}
+                value={installation.id.toString()}
+              >
+                <div className="flex items-center">
+                  <Github className="mr-2 h-4 w-4" />
+                  {installation.account.login}
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select
           disabled={isLoading}
           value={selectedRepositoryId}
-          onValueChange={setSelectedRepositoryId}
+          onValueChange={(repositoryId) =>
+            setSelectedRepositoryId(repositoryId)
+          }
         >
           <SelectTrigger className="w-full">
             {isLoading ? (
@@ -121,18 +120,17 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
             )}
           </SelectTrigger>
           <SelectContent>
-            {repositories &&
-              repositories.map((repo) => (
-                <SelectItem
-                  key={repo.id.toString()}
-                  value={repo.full_name.toString()}
-                >
-                  <div className="flex items-center">
-                    <Github className="mr-2 h-4 w-4" />
-                    {repo.full_name}
-                  </div>
-                </SelectItem>
-              ))}
+            {repositories?.map((repo) => (
+              <SelectItem
+                key={repo.id.toString()}
+                value={repo.full_name.toString()}
+              >
+                <div className="flex items-center">
+                  <Github className="mr-2 h-4 w-4" />
+                  {repo.full_name}
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
