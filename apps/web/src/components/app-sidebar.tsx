@@ -14,13 +14,13 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarFooter,
-} from "@/components/ui/sidebar.js";
+} from "@/components/ui/sidebar";
 import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible.js";
+} from "@/components/ui/collapsible";
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
 import { useAppContext } from "@/app-context";
@@ -28,44 +28,6 @@ import { getLucideIcon } from "@/lib/lucide-icon";
 import { Link } from "./ui/link";
 import { useLocation } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
-
-const platformSidebarNavData = [
-  {
-    title: "Home",
-    url: "/",
-    icon: "Home",
-    isActive: true,
-  },
-  {
-    title: "Catalog",
-    url: "#",
-    icon: "Blocks",
-    items: [],
-  },
-  {
-    title: "Documentation",
-    url: "#",
-    icon: "BookOpen",
-    items: [
-      {
-        title: "Introduction",
-        url: "#",
-      },
-      {
-        title: "Get Started",
-        url: "#",
-      },
-      {
-        title: "Tutorials",
-        url: "#",
-      },
-      {
-        title: "Changelog",
-        url: "#",
-      },
-    ],
-  },
-];
 
 export const AppSidebar = () => {
   const { projects } = useAppContext();

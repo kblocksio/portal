@@ -205,9 +205,7 @@ export const OwnerGraph = (props: {
   nodes: OwnerNode[];
   edges: ReactFlowEdge[];
 }) => (
-  <div className="size-[48rem]">
-    <ReactFlowProvider>
-      <OwnerFlow nodes={props.nodes} edges={props.edges} />
-    </ReactFlowProvider>
-  </div>
+  <ReactFlowProvider>
+    <OwnerFlow nodes={props.nodes} edges={props.edges} />
+  </ReactFlowProvider>
 );

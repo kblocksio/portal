@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/popover";
 import JsonView from "@uiw/react-json-view";
 import { useAppContext } from "@/app-context";
+import { RelationshipGraph } from "@/components/relationships/graph";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -42,10 +43,10 @@ export function urlForResource(blockUri: BlockUriComponents) {
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
 )({
-  component: Resource,
+  component: ResourcePage,
 });
 
-function Resource() {
+function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const router = useRouter();
   const {
@@ -73,11 +74,11 @@ function Resource() {
 
   useMemo(() => {
     loadEvents(objUri);
-  }, [objUri]);
+  }, [objUri, loadEvents]);
 
   const selectedResource = useMemo(() => {
     return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
-  }, [resources, objUri]);
+  }, [resources, objUri, group, version, plural]);
 
   useEffect(() => {
     const currentEvents = eventsPerObject[objUri];
@@ -90,7 +91,7 @@ function Resource() {
     return () => {
       if (logUpdateTimer) clearTimeout(logUpdateTimer);
     };
-  }, [eventsPerObject[objUri], objUri]);
+  }, [objUri, eventsPerObject, logUpdateTimer]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -142,7 +143,7 @@ function Resource() {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedProject, selectedResource]);
+  }, [selectedProject, selectedResource, setBreadcrumbs]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
@@ -212,6 +213,13 @@ function Resource() {
             {isNewLogs && (
               <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
             )}
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="graph"
+            className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Relationships
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
@@ -288,6 +296,11 @@ function Resource() {
                 />
               )}
             </CardContent>
+          </div>
+        </TabsContent>
+        <TabsContent value="graph">
+          <div className="w-[900px] h-[900px]">
+            <RelationshipGraph selectedResource={selectedResource} />
           </div>
         </TabsContent>
       </Tabs>
@@ -399,4 +412,4 @@ const CopyToClipboard = ({
   );
 };
 
-export default Resource;
+export default ResourcePage;
