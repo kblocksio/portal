@@ -40,17 +40,6 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     undefined,
     false,
   );
-
-  useEffect(() => {
-    if (!selectedInstallationId) {
-      return;
-    }
-    setSelectedRepositoryId(undefined);
-    refetchRepositories(
-      `/api/github/repositories?installation_id=${selectedInstallationId}`,
-    );
-  }, [selectedInstallationId, refetchRepositories]);
-
   useEffect(() => {
     setSelectedRepositoryId(
       repositories && repositories.length > 0
@@ -58,6 +47,15 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
         : undefined,
     );
   }, [repositories]);
+
+  useEffect(() => {
+    if (!selectedInstallationId) {
+      return;
+    }
+    refetchRepositories(
+      `/api/github/repositories?installation_id=${selectedInstallationId}`,
+    );
+  }, [selectedInstallationId, refetchRepositories]);
 
   const selectedRepository = useMemo(() => {
     return repositories?.find(
@@ -107,7 +105,6 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
           </SelectContent>
         </Select>
 
-        <span>{selectedRepositoryId}</span>
         <Select
           disabled={isLoading}
           value={selectedRepositoryId}
