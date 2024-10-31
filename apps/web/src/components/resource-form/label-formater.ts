@@ -1,4 +1,8 @@
-export const splitAndCapitalizeCamelCase = (str: string): string => {
+export const splitAndCapitalizeCamelCase = (str?: string): string => {
+  if (!str) {
+    return "";
+  }
+
   return (
     str
       // Insert a space between lowercase and uppercase letters
