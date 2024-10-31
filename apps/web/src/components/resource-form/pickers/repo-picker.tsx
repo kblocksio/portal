@@ -1,5 +1,5 @@
 import { Installation, Repository } from "@repo/shared";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,9 @@ interface RepoPickerProps {
   handleOnSelection?: (repository: Repository | null) => void;
 }
 
-export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
+export const RepoPicker = memo(function RepoPicker({
+  handleOnSelection,
+}: RepoPickerProps) {
   const { data: installations, isLoading: isLoadingInstallations } = useFetch<
     Installation[]
   >("/api/github/installations");
@@ -160,4 +162,4 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
       </div>
     </div>
   );
-};
+});
