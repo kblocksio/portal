@@ -43,8 +43,6 @@ export const RepoPicker = memo(function RepoPicker({
   const [selectedRepositoryFullName, setSelectedRepositoryFullName] =
     useState<string>();
   useEffect(() => {
-    console.log("repositories", repositories);
-    console.log("first repository", repositories?.[0]);
     setSelectedRepositoryFullName(
       repositories && repositories.length > 0
         ? repositories[0].full_name
