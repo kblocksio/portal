@@ -133,10 +133,7 @@ export const RepoPicker = memo(function RepoPicker({
           </SelectTrigger>
           <SelectContent>
             {repositories?.map((repo) => (
-              <SelectItem
-                key={repo.id.toString()}
-                value={repo.full_name.toString()}
-              >
+              <SelectItem key={repo.id.toString()} value={repo.id.toString()}>
                 <div className="flex items-center">
                   <Github className="mr-2 h-4 w-4" />
                   {repo.full_name}
