@@ -23,9 +23,7 @@ export const Route = createRootRoute({
       <App>
         <Outlet />
         <ScrollRestoration />
-        <Suspense>
-          <TanStackRouterDevtools />
-        </Suspense>
+        <Suspense>{/* <TanStackRouterDevtools /> */}</Suspense>
       </App>
     </>
   ),
