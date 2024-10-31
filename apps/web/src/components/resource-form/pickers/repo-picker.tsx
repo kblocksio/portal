@@ -18,11 +18,9 @@ interface RepoPickerProps {
 export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
   const [selectedInstallationId, setSelectedInstallationId] =
     useState<string>();
-  const {
-    data: installations,
-    isLoading: isLoadingInstallations,
-    // refetch: refetchInstallations,
-  } = useFetch<Installation[]>("/api/github/installations");
+  const { data: installations, isLoading: isLoadingInstallations } = useFetch<
+    Installation[]
+  >("/api/github/installations");
 
   useEffect(() => {
     setSelectedInstallationId(
@@ -42,45 +40,6 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
     undefined,
     false,
   );
-  // const [installations, setInstallations] = useState<Installation[]>(() => [
-  //   {
-  //     id: 1,
-  //     account: { login: "test" },
-  //   },
-  //   {
-  //     id: 2,
-  //     account: { login: "skyrpex" },
-  //   },
-  // ]);
-  // const [isLoadingInstallations, setIsLoadingInstallations] = useState(true);
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setIsLoadingInstallations(false);
-  //   }, 1000);
-  // }, []);
-
-  // const [selectedRepositoryId, setSelectedRepositoryId] = useState<string>();
-  // const [repositories, setRepositories] = useState<Repository[]>(() => []);
-  // const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
-  // const refetchRepositories = useCallback(
-  //   (_: string) => {
-  //     setIsLoadingRepositories(true);
-  //     setSelectedRepositoryId(undefined);
-  //     setTimeout(() => {
-  //       setIsLoadingRepositories(false);
-  //       setRepositories([
-  //         {
-  //           id: Number(selectedInstallationId),
-  //           full_name: `${selectedInstallationId}`,
-  //           // description: "test",
-  //           // owner: { login: "test", avatar_url: "https://test.com/test.png" },
-  //           // html_url: "https://test.com/test",
-  //         },
-  //       ]);
-  //     }, 1000);
-  //   },
-  //   [selectedInstallationId],
-  // );
 
   useEffect(() => {
     if (!selectedInstallationId) {
@@ -107,9 +66,7 @@ export const RepoPicker = ({ handleOnSelection }: RepoPickerProps) => {
   }, [selectedRepositoryId, repositories]);
 
   useEffect(() => {
-    if (selectedRepository) {
-      handleOnSelection(selectedRepository);
-    }
+    handleOnSelection?.(selectedRepository ?? null);
   }, [selectedRepository, handleOnSelection]);
 
   const isLoading = useMemo(() => {
