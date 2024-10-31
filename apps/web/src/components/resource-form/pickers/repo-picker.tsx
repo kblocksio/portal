@@ -52,11 +52,15 @@ export const RepoPicker = memo(function RepoPicker({
     () => initialValue,
   );
   useEffect(() => {
-    setSelectedRepositoryFullName(
-      (repositoryFullName) =>
-        repositoryFullName ?? repositories?.[0]?.full_name,
+    const repositoryExists = repositories?.find(
+      (repo) => repo.full_name === selectedRepositoryFullName,
     );
-  }, [repositories]);
+    setSelectedRepositoryFullName((repositoryFullName) =>
+      repositoryFullName && repositoryExists
+        ? repositoryFullName
+        : repositories?.[0]?.full_name,
+    );
+  }, [repositories, selectedRepositoryFullName]);
 
   useEffect(() => {
     if (!selectedInstallationId) {
