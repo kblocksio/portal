@@ -119,7 +119,7 @@ export const CreateResourceWizard = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="flex h-[90vh] min-w-[90vh] flex-col"
+        className="flex h-[90vh] max-w-[90vh] flex-col"
         aria-describedby="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {

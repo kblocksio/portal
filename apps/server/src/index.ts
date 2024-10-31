@@ -41,7 +41,7 @@ app.use(
   cors({
     origin: "*",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   }),
 );
 
@@ -334,6 +334,41 @@ app.delete(
   },
 );
 
+app.post(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/read",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+
+    if (!system) {
+      return res
+        .status(400)
+        .json({ error: "'system' is required as a query param" });
+    }
+
+    console.log("reading object:", objUri);
+
+    pubsub.publishControlRequest(
+      { system, group, version, plural },
+      {
+        type: "READ",
+        objUri,
+      },
+    );
+
+    return res.status(200).json({
+      message: "Read request accepted",
+    });
+  },
+);
+
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -409,18 +444,26 @@ app.get("/api/auth/callback/github", async (req, res) => {
   const supabase = createServerSupabase(req, res);
 
   const user = await supabase.auth.getUser();
+  if (user.error) {
+    return res.redirect(
+      `${WEBSITE_ORIGIN}/auth-error?error=${user.error.name}`,
+    );
+  }
 
   const tokens = await exchangeCodeForTokens(code.toString());
 
   const { error } = await supabase.from("user_ghtokens").upsert([
     {
-      user_id: user.data.user?.id,
+      user_id: user.data.user.id,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_in: tokens.expires_in,
       refresh_token_expires_in: tokens.refresh_token_expires_in,
       token_type: tokens.token_type,
       scope: tokens.scope,
+      expires_at: new Date(
+        new Date().getTime() + tokens.expires_in * 1000,
+      ).toISOString(),
     },
   ]);
 

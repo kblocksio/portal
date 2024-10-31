@@ -1,0 +1,25 @@
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.star-field {
+  position: relative;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 9999px; /* Makes each star round */
+  width: 0.25rem; /* Adjust size for stars */
+  height: 0.25rem;
+  opacity: 0.5;
+  animation: twinkle 2s infinite ease-in-out;
+  animation-delay: calc(2s * var(--twinkling-delay));
+}

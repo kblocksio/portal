@@ -56,4 +56,4 @@ jobs:
 
       - name: Publish the backend
         run: |
-          curl -X PATCH -H "content-type: application/json" "https://kblocks.io/api/resources/acme.com/v1/workloads/portal-backend.quickube.sh/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'
+          curl -X PATCH -H "content-type: application/json" "https://kblocks.io/api/resources/acme.com/v1/workloads/prod/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'

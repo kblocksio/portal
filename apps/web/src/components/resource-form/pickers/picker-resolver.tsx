@@ -50,6 +50,10 @@ export const resolvePickerField = ({
     case "repo-picker": {
       return (
         <RepoPicker
+          fieldName={fieldName}
+          required={required}
+          description={description}
+          hideField={hideField}
           initialValue={value}
           handleOnSelection={(repo) => {
             if (repo?.full_name) {

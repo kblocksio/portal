@@ -16,6 +16,7 @@ export type Project = {
 };
 
 export type Repository = {
+  id: number;
   full_name: string;
   name: string;
   description: string;

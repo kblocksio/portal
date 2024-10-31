@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "@/components/delete-resource";
+import { ReapplyResourceDialog } from "@/components/reapply-resource";
+import { ReadResourceDialog } from "@/components/read-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
@@ -123,6 +125,8 @@ function ResourcePage() {
   const { openWizard: openEditWizard } = useCreateResourceWizard();
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isReapplyOpen, setIsReapplyOpen] = useState(false);
+  const [isReadOpen, setIsReadOpen] = useState(false);
 
   const properties = useMemo(() => {
     return selectedResource ? getResourceProperties(selectedResource) : {};
@@ -150,7 +154,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -185,6 +189,16 @@ function ResourcePage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem
+                  onSelect={() => setIsReapplyOpen(true)}
+                >
+                  Reapply
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setIsReadOpen(true)}
+                >
+                  Refresh
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive"
                   onSelect={() => setIsDeleteOpen(true)}
@@ -313,6 +327,23 @@ function ResourcePage() {
         }}
         onClose={() => {
           setIsDeleteOpen(false);
+        }}
+      />
+      <ReapplyResourceDialog
+        resource={selectedResource}
+        isOpen={isReapplyOpen}
+        onReapplyClick={() => {
+          setIsReapplyOpen(true);
+        }}
+        onClose={() => {
+          setIsReapplyOpen(false);
+        }}
+      />
+      <ReadResourceDialog
+        resource={selectedResource}
+        isOpen={isReadOpen}
+        onClose={() => {
+          setIsReadOpen(false);
         }}
       />
     </div>

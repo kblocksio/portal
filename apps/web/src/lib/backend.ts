@@ -86,6 +86,29 @@ export const deleteResource = async (objUri: string) => {
   );
 };
 
+export const reapplyResource = async (objUri: string) => {
+  const { group, version, plural, name, system, namespace } =
+    parseBlockUri(objUri);
+  return request(
+    "PATCH",
+    `/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
+    {
+      metadata: {
+        labels: { "kblocks.io/requested-apply": Date.now().toString() },
+      },
+    },
+  );
+};
+
+export const readResource = async (objUri: string) => {
+  const { group, version, plural, name, system, namespace } =
+    parseBlockUri(objUri);
+  return request(
+    "POST",
+    `/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}/read`,
+  );
+};
+
 export const getProjects = async (): Promise<Project[]> => {
   return (await import("@/mock-data/projects.json")).default;
 };

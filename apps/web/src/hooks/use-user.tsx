@@ -10,6 +10,7 @@ import {
 import { SignIn } from "@/components/sign-in.js";
 import { getUser, rejectUser } from "@/lib/backend";
 import { isUserWhitelisted } from "./whitelist";
+import { ComingSoon } from "@/components/coming-soon";
 
 const MockUser = {
   id: "1",
@@ -93,17 +94,5 @@ export const UserProvider = (props: PropsWithChildren) => {
 };
 
 const ErrorPage = () => {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <img src="/wing.svg" alt="Wing Logo" width={251} height={153} />
-        <h1 className="mt-8 text-4xl font-bold text-gray-900">
-          Coming Soon...
-        </h1>
-        <p className="mt-4 text-xl text-gray-600">
-          We're working on something exciting. Please check back later.
-        </p>
-      </div>
-    </div>
-  );
+  return <ComingSoon />;
 };

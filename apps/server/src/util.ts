@@ -20,35 +20,44 @@ export async function getUserAccessToken(req: Request, res: Response) {
 
   const { data, error } = await supabase
     .from("user_ghtokens")
-    .select("refresh_token")
-    .eq("user_id", user.data.user?.id)
+    .select("access_token, refresh_token, expires_at")
+    .eq("user_id", user.data.user.id)
     .single();
 
-  if (error) {
+  if (error || !data.refresh_token || !data.access_token) {
     console.error("Error getting access token from Supabase", error);
     throw error;
   }
 
+  // If the access token is not expired, return it.
+  if (data.expires_at && new Date(data.expires_at) > new Date()) {
+    return {
+      accessToken: data.access_token,
+    };
+  }
+
+  // Otherwise, refresh the token.
   const tokens = await refreshToken({
     refreshToken: data.refresh_token,
   });
 
-  {
-    const { error } = await supabase.from("user_ghtokens").upsert([
-      {
-        user_id: user.data.user?.id,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        expires_in: tokens.expires_in,
-        refresh_token_expires_in: tokens.refresh_token_expires_in,
-        token_type: tokens.token_type,
-        scope: tokens.scope,
-      },
-    ]);
+  const { error: upsertError } = await supabase.from("user_ghtokens").upsert([
+    {
+      user_id: user.data.user.id,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_in: tokens.expires_in,
+      refresh_token_expires_in: tokens.refresh_token_expires_in,
+      token_type: tokens.token_type,
+      scope: tokens.scope,
+      expires_at: new Date(
+        new Date().getTime() + tokens.expires_in * 1000,
+      ).toISOString(),
+    },
+  ]);
 
-    if (error) {
-      console.error("Error upserting access token to Supabase", error);
-    }
+  if (upsertError) {
+    console.error("Error upserting access token to Supabase", upsertError);
   }
 
   return {
