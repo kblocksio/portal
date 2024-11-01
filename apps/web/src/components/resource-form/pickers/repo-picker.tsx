@@ -14,6 +14,7 @@ import { Field } from "../form-field";
 
 interface RepoPickerProps {
   initialValue?: string;
+  defaultValue?: string;
   fieldName: string;
   required?: boolean;
   description?: string;
@@ -23,6 +24,7 @@ interface RepoPickerProps {
 
 export const RepoPicker = memo(function RepoPicker({
   initialValue,
+  defaultValue,
   fieldName,
   required,
   description,
@@ -33,7 +35,9 @@ export const RepoPicker = memo(function RepoPicker({
     Installation[]
   >("/api/github/installations");
   const [selectedInstallationLogin, setSelectedInstallationLogin] = useState(
-    () => initialValue?.split("/")?.[0],
+    () => {
+      return initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0];
+    },
   );
   useEffect(() => {
     setSelectedInstallationLogin(
