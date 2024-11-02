@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useNavigate, createFileRoute } from "@tanstack/react-router";
 import { useContext, useEffect, useMemo } from "react";
 import { useAppContext } from "@/app-context";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResourceContext } from "@/resource-context";
-import { useNavigate } from "@tanstack/react-router";
 import { ProjectHeader } from "@/components/project-header";
 
 export const Route = createFileRoute("/projects/$project")({
@@ -15,7 +14,7 @@ function Project() {
   const { selectedProject, setSelectedProject, projects, setBreadcrumbs } =
     useAppContext();
   const { project } = Route.useParams();
-  const { resourceTypes, resources } = useContext(ResourceContext);
+  const { resourceTypes, objects } = useContext(ResourceContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,19 +29,17 @@ function Project() {
         to: "/",
       });
     }
-  }, [selectedProject, projects, project]);
+  }, [selectedProject, projects, project, navigate, setSelectedProject]);
 
   const allResources = useMemo(() => {
-    return [...resources.values()]
-      .flatMap((resources) => [...resources.values()])
-      .filter((resource) => resource.kind !== "Block");
-  }, [resources]);
+    return Object.values(objects).filter((r) => r.kind !== "Block");
+  }, [objects]);
 
   useEffect(() => {
     setBreadcrumbs([
       { name: selectedProject?.label || "", url: `/projects/${project}` },
     ]);
-  }, [selectedProject]);
+  }, [selectedProject, project, setBreadcrumbs]);
 
   return (
     <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">

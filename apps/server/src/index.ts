@@ -16,6 +16,7 @@ import * as pubsub from "./pubsub";
 import {
   ApiObject,
   blockTypeFromUri,
+  Condition,
   formatBlockUri,
   Manifest,
   ObjectEvent,
@@ -66,7 +67,7 @@ app.ws("/api/events", (ws) => {
   });
 });
 
-app.ws("/api/control/:group/:version/:plural", (ws, req) => {
+app.ws("/api/control/:group/:version/:plural", async (ws, req) => {
   const { group, version, plural } = req.params;
   const { system: sys, system_id } = req.query as unknown as {
     system?: string;
@@ -86,7 +87,7 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const resourceType = `${group}/${version}/${plural}`;
   console.log(`control connection: ${resourceType} for ${system}`);
 
-  const { unsubscribe } = pubsub.subscribeToControlRequests(
+  const { unsubscribe } = await pubsub.subscribeToControlRequests(
     { system, group, version, plural },
     (message) => {
       console.log(`sending control message to ${resourceType}:`, message);
@@ -104,10 +105,7 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
 
 // publish an event to the events stream (called by workers)
 app.post("/api/events", async (req, res) => {
-  const body = JSON.stringify(req.body);
-  console.log("EVENT:", body);
-  await pubsub.publishEvent(body);
-  handleEvent(req.body as WorkerEvent); // <-- runs in the background
+  await pubsub.publishEvent(req.body);
   return res.sendStatus(200);
 });
 
@@ -123,6 +121,7 @@ app.get("/api/resources", async (_, res) => {
       objUri,
       objType: blockTypeFromUri(objUri),
       reason: "SYNC",
+      timestamp: new Date(),
     });
   }
 
@@ -168,57 +167,48 @@ app.get("/api/types", async (_, res) => {
   return res.status(200).json(result);
 });
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
 
-    const obj = await loadObject(objUri);
-    return res.status(200).json(obj);
-  },
-);
+  const obj = await loadObject(objUri);
+  return res.status(200).json(obj);
+});
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
-    const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
-    return res.status(200).json({ objUri, logs } as GetLogsResponse);
-  },
-);
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
+  return res.status(200).json({ objUri, logs } as GetLogsResponse);
+});
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name/events",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
-    const events = await loadEvents(objUri);
-    return res.status(200).json({ objUri, events } as GetEventsResponse);
-  },
-);
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const events = await loadEvents(objUri);
+  return res.status(200).json({ objUri, events } as GetEventsResponse);
+});
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
@@ -232,8 +222,47 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   }
 
   const obj = req.body as ApiObject;
+  
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace: obj.metadata?.namespace ?? "default",
+    name: obj.metadata?.name,
+  });
+
+  const objType = blockTypeFromUri(objUri);
 
   console.log("creating object:", JSON.stringify(obj));
+
+  // patch the status and add a "Ready" condition indicating that the object is pending
+  obj.status = {
+    ...obj.status,
+
+    conditions: [
+      ...(obj.status?.conditions ?? []).filter((c) => c.type !== "Ready"),
+      {
+        type: "Ready",
+        status: "False",
+        reason: "Pending",
+        message: "Pending",
+        lastTransitionTime: new Date().toISOString(),
+      }
+    ],
+  };
+
+  // we are going to publish a synthetic OBJECT event to the event stream which will serve
+  // as a placeholder for the object until it is actually created and the real OBJECT
+  // event is published by the worker.
+  await pubsub.publishEvent({
+    type: "OBJECT",
+    object: obj,
+    objUri,
+    objType,
+    reason: "CREATE",
+    timestamp: new Date(),
+  });
 
   sanitizeObject(obj);
 
@@ -251,7 +280,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
       .json({ error: `Object is missing "metadata.name" field` });
   }
 
-  pubsub.publishControlRequest(
+  await pubsub.publishControlRequest(
     { system, group, version, plural },
     {
       type: "APPLY",

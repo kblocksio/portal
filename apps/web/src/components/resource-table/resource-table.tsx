@@ -6,6 +6,7 @@ import {
   ColumnSort,
   getFilteredRowModel,
   getSortedRowModel,
+  flexRender
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "@/resource-context";
@@ -17,11 +18,9 @@ import { LastLogMessage } from "../last-log-message";
 import { StatusBadge } from "../status-badge";
 import { SystemBadge } from "../system-badge";
 import { NamespaceBadge } from "../namespace-badge";
-import { ResourceActionsMenu } from "../resource-actions-menu";
-import { TableHead } from "../ui/table";
-import { flexRender } from "@tanstack/react-table";
 import {
   Table,
+  TableHead,
   TableBody,
   TableCell,
   TableHeader,
@@ -39,6 +38,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { ResourceActionsMenu } from "../resource-actions-menu";
 
 const useColumns = () => {
   const { resourceTypes } = useContext(ResourceContext);
@@ -330,7 +330,7 @@ const ResourceOutputs = ({ resource }: { resource: Resource }) => {
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  className="h-0"
                   onClick={(e) => {
                     setIsOpen(true);
                     e.stopPropagation();

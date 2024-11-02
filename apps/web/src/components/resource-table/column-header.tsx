@@ -6,13 +6,13 @@ import {
 import { Column } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button.js";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.js";
+} from "@/components/ui/dropdown-menu";
 import { useMemo } from "react";
 import { splitAndCapitalizeCamelCase } from "../resource-form/label-formater";
 

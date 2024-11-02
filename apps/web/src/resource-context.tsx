@@ -1,6 +1,7 @@
 import { Category } from "@repo/shared";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -50,8 +51,6 @@ type BlockApiObject = ApiObject & {
 export interface ResourceContextValue {
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
-  // objType -> objUri -> Resource
-  resources: Map<string, Map<string, Resource>>;
   // objUri -> Record<timestamp, LogEvent>
   handleObjectMessages: (messages: ObjectEvent[]) => void;
   selectedResourceId: SelectedResourceId | undefined;
@@ -67,7 +66,6 @@ export interface ResourceContextValue {
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
-  resources: new Map<string, Map<string, Resource>>(),
   handleObjectMessages: () => {},
   selectedResourceId: undefined,
   setSelectedResourceId: () => {},
@@ -90,9 +88,8 @@ export const ResourceProvider = ({
     Record<string, ResourceType>
   >({});
   const [categories, setCategories] = useState<Record<string, Category>>({});
-  const [resources, setResources] = useState<
-    Map<string, Map<string, Resource>>
-  >(new Map());
+  const [objects, setObjects] = useState<Record<string, Resource>>({});
+
   const [selectedResourceId, setSelectedResourceId] = useState<
     SelectedResourceId | undefined
   >(undefined);
@@ -123,106 +120,85 @@ export const ResourceProvider = ({
     useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
-    if (!initialResources || !initialResources.objects) {
-      return;
-    }
-    handleObjectMessages(initialResources.objects);
-  }, [initialResources]);
-
-  useEffect(() => {
     if (categoriesData) {
       setCategories(categoriesData);
     }
   }, [categoriesData]);
 
-  const addType = (block: BlockApiObject) => {
-    const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
-    console.log("addType", key);
-
-    setResourceTypes((prev) => {
-      return {
-        ...prev,
-        [key]: {
-          ...block.spec.definition,
-          engine: block.spec.engine,
-          iconComponent: getIconComponent({ icon: block.spec.definition.icon }),
-        },
-      };
-    });
-  };
-
-  const handleObjectMessage = (message: ObjectEvent) => {
+  const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
 
+    console.log("handleObjectMessage", objUri, object);
+    if ((object as any).kind === "Topic") {
+      console.log("TOPIC!", object);
+    }
+
     if (objType === "kblocks.io/v1/blocks") {
-      addType(object as BlockApiObject);
+      const block = object as BlockApiObject;
+      const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
+      setResourceTypes((prev) => {
+        return {
+          ...prev,
+          [key]: {
+            ...block.spec.definition,
+            engine: block.spec.engine,
+            iconComponent: getIconComponent({ icon: block.spec.definition.icon }),
+          },
+        };
+      });
     }
 
     if (Object.keys(object).length > 0) {
-      setResources((prevResourcesForTypes) => {
-        const resoucesForTypeMap =
-          prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
-        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-        newResourcesForTypeMap.set(objUri, {
-          ...object,
+      setObjects((prev) => {
+        const r: Resource = {
+          ...(object as ApiObject),
           objUri,
           objType,
-        } as Resource);
-        const newResources = new Map(prevResourcesForTypes);
-        newResources.set(objType, newResourcesForTypeMap);
-        return newResources;
+        };
+        
+        return {
+          ...prev,
+          [objUri]: r,
+        };
       });
     } else {
-      setResources((prevResourcesForTypes) => {
-        const resoucesForTypeMap = prevResourcesForTypes.get(objType);
-        if (!resoucesForTypeMap) {
-          console.error(
-            "WebSocket Object Message unknown object type:",
-            objType,
-            object,
-            prevResourcesForTypes,
-          );
-          return prevResourcesForTypes;
-        }
-
-        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-        newResourcesForTypeMap.delete(objUri);
-        const newResources = new Map(prevResourcesForTypes);
-        newResources.set(objType, newResourcesForTypeMap);
-        return newResources;
+      setObjects((prev) => {
+        const newObjects = { ...prev };
+        delete newObjects[objUri];
+        return newObjects;
       });
     }
-  };
+  }, []);
 
-  const handleObjectMessages = (messages: ObjectEvent[]) => {
-    messages.forEach((message) => {
-      handleObjectMessage(message);
-    });
-  };
+  const handleObjectMessages = useCallback(
+    (messages: ObjectEvent[]) => {
+      messages.forEach((message) => {
+        handleObjectMessage(message);
+      });
+    },
+    [handleObjectMessage],
+  );
+
+  useEffect(() => {
+    if (!initialResources || !initialResources.objects) {
+      return;
+    }
+    handleObjectMessages(initialResources.objects);
+  }, [initialResources, handleObjectMessages]);
 
   const handlePatchMessage = (message: PatchEvent) => {
-    const { objUri, objType, patch } = message;
-    setResources((prevResourcesForTypes) => {
-      const resoucesForTypeMap = prevResourcesForTypes.get(objType);
-      if (!resoucesForTypeMap) {
-        console.error(
-          "WebSocket Patch Message unknown object type:",
-          objType,
-          patch,
-        );
-        return prevResourcesForTypes;
+    const { objUri, patch } = message;
+
+    setObjects((prev) => {
+      if (!prev[objUri]) {
+        return prev;
       }
-      const oldObject = resoucesForTypeMap.get(objUri);
-      if (!oldObject) {
-        console.error("No existing object to patch", objType, objUri);
-        return prevResourcesForTypes;
-      }
-      const newObject = { ...oldObject, ...patch };
-      const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-      newResourcesForTypeMap.set(objUri, newObject);
-      const newResources = new Map(prevResourcesForTypes);
-      newResources.set(objType, newResourcesForTypeMap);
-      return newResources;
+
+      const newObject = { ...prev[objUri], ...patch };
+      return {
+        ...prev,
+        [objUri]: newObject,
+      };
     });
   };
 
@@ -285,7 +261,7 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-  }, [lastJsonMessage]);
+  }, [lastJsonMessage, addNotifications, handleObjectMessage]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
@@ -298,28 +274,16 @@ export const ResourceProvider = ({
     };
   }, [getWebSocket]);
 
-  const objects = useMemo(() => {
-    const result: Record<string, Resource> = {};
-    for (const resourcesForType of resources.values()) {
-      for (const [objUri, resource] of resourcesForType.entries()) {
-        result[objUri] = resource;
-      }
-    }
-    return result;
-  }, [resources]);
-
   const { systems, namespaces, kinds } = useMemo(() => {
     const systems = new Set<string>();
     const namespaces = new Set<string>();
     const kinds = new Set<string>();
 
-    for (const resourcesForType of resources.values()) {
-      for (const resource of resourcesForType.values()) {
-        const { system, namespace } = parseBlockUri(resource.objUri);
-        systems.add(system);
-        namespaces.add(namespace);
-        kinds.add(resource.kind);
-      }
+    for (const obj of Object.values(objects)) {
+      const { system, namespace } = parseBlockUri(obj.objUri);
+      systems.add(system);
+      namespaces.add(namespace);
+      kinds.add(obj.kind);
     }
 
     return {
@@ -327,7 +291,7 @@ export const ResourceProvider = ({
       namespaces: Array.from(namespaces),
       kinds: Array.from(kinds),
     };
-  }, [resources]);
+  }, [objects]);
 
   const loadEvents = (objUri: string) => {
     const requests = [];
@@ -357,7 +321,6 @@ export const ResourceProvider = ({
     systems,
     namespaces,
     kinds,
-    resources,
     eventsPerObject,
     handleObjectMessages,
     selectedResourceId,

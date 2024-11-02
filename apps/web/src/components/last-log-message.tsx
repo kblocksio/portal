@@ -32,7 +32,7 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
     <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
         <motion.div
-          key={last.timestamp.toString()}
+          key={last.timestamp?.toString()}
           initial={{ y: "100%", opacity: 0 }}
           animate={{ y: "0%", opacity: 1 }}
           exit={{ y: "-100%", opacity: 0 }}

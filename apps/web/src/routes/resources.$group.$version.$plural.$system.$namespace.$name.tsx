@@ -27,8 +27,9 @@ import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
 import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
-import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
+import { getResourceProperties, getResourceOutputs, cn } from "@/lib/utils";
 import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
+import { NamespaceBadge } from "@/components/namespace-badge";
 import {
   Popover,
   PopoverContent,
@@ -52,16 +53,12 @@ function Resource() {
   const router = useRouter();
   const {
     resourceTypes,
-    resources,
+    objects,
     eventsPerObject,
     setSelectedResourceId,
     loadEvents,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const [isNewLogs, setIsNewLogs] = useState(false);
-  const [logUpdateTimer, setLogUpdateTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
   const { selectedProject, setBreadcrumbs } = useAppContext();
 
   const objUri = formatBlockUri({
@@ -73,26 +70,15 @@ function Resource() {
     name,
   });
 
-  useMemo(() => {
-    loadEvents(objUri);
-  }, [objUri]);
-
-  const selectedResource = useMemo(() => {
-    return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
-  }, [resources, objUri]);
-
   useEffect(() => {
-    const currentEvents = eventsPerObject[objUri];
-    if (currentEvents && Object.keys(currentEvents).length > 0) {
-      setIsNewLogs(true);
-      if (logUpdateTimer) clearTimeout(logUpdateTimer);
-      const timer = setTimeout(() => setIsNewLogs(false), 3500);
-      setLogUpdateTimer(timer);
-    }
-    return () => {
-      if (logUpdateTimer) clearTimeout(logUpdateTimer);
-    };
-  }, [eventsPerObject[objUri], objUri]);
+    loadEvents(objUri);
+  }, [objUri, loadEvents]);
+
+  const [lastEventCount, setLastEventCount] = useState(0);
+  const events = useMemo(() => Object.values(eventsPerObject[objUri] ?? {}), [eventsPerObject, objUri]);
+  const showLogsBadge = useMemo(() => events.length > lastEventCount, [events, lastEventCount]);
+
+  const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -101,6 +87,9 @@ function Resource() {
         objUri: selectedResource?.objUri,
       });
     }
+  }, [selectedResource, setSelectedResourceId]);
+
+  useEffect(() => {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
       setSelectedResourceId(undefined);
@@ -146,7 +135,7 @@ function Resource() {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedProject, selectedResource]);
+  }, [selectedProject, selectedResource, setBreadcrumbs]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
@@ -220,12 +209,11 @@ function Resource() {
           </TabsTrigger>
           <TabsTrigger
             value="logs"
+            onClick={() => setLastEventCount(events.length)}
             className="data-[state=active]:border-primary relative flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Logs
-            {isNewLogs && (
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-            )}
+            {showLogsBadge && <div className="bg-blue-500 rounded-full w-2 h-2 animate-pulse" />}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
@@ -255,19 +243,17 @@ function Resource() {
 
                     <PropertyKey>Namespace</PropertyKey>
                     <PropertyValue>
-                      {selectedResource.metadata.namespace}
+                      {selectedResource.metadata.namespace && <NamespaceBadge namespace={selectedResource.metadata.namespace} />}
                     </PropertyValue>
 
                     <PropertyKey>System</PropertyKey>
                     <PropertyValue>
-                      <SystemBadge
-                        blockUri={selectedResource.objUri}
-                        showSystemName
-                      />
+                      <SystemBadge blockUri={selectedResource.objUri} />
                     </PropertyValue>
                   </div>
                 </div>
 
+                {/* Properties */}
                 <div className="w-full">
                   <div className="pb-4 pt-8">
                     <CardTitle>Properties</CardTitle>
@@ -276,6 +262,7 @@ function Resource() {
                     <KeyValueList data={properties} />
                   </div>
                 </div>
+
                 {outputs && Object.keys(outputs).length > 0 && (
                   <div className="w-full">
                     <div className="pb-4 pt-8">
@@ -295,9 +282,7 @@ function Resource() {
             <CardContent className="h-full pt-6">
               {selectedResource && (
                 <Timeline
-                  events={Object.values(
-                    eventsPerObject[selectedResource.objUri] ?? [],
-                  )}
+                  events={events}
                   className="mt-0"
                 />
               )}
@@ -320,7 +305,8 @@ function Resource() {
         resource={selectedResource}
         isOpen={isReapplyOpen}
         onReapplyClick={() => {
-          setIsReapplyOpen(true);
+          // Remove this line as it's causing the infinite loop
+          // setIsReapplyOpen(true);
         }}
         onClose={() => {
           setIsReapplyOpen(false);
@@ -384,7 +370,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
       return (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">View</Button>
+            <Button variant="outline" className="h-0">View</Button>
           </PopoverTrigger>
           <PopoverContent side="right" className="ml-2">
             <JsonView value={value} />
@@ -424,7 +410,7 @@ const CopyToClipboard = ({
   };
 
   return (
-    <Button variant="ghost" onClick={handleCopy} className={className}>
+    <Button variant="ghost" onClick={handleCopy} className={cn(className, "w-4 h-4")}>
       {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
     </Button>
   );

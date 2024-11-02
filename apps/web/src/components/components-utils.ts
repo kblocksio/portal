@@ -12,6 +12,11 @@ export const getResourceReadyCondition = (obj: ApiObject, type: string | undefin
 
   // if no type is provided, merge all statuses - the logic is simple - if all statuses are True, the resource is ready
   if (!type) {
+    // if we have only one condition, just return it, right?
+    if (conditions.length === 1) {
+      return conditions[0];
+    }
+
     const notReady = conditions.filter(s => s.status !== "True");
     if (notReady.length > 0) {
       return {
