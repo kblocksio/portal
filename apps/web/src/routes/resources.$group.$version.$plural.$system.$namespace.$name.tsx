@@ -1,13 +1,7 @@
-import React, {
-  useState,
-  useContext,
-  useEffect,
-  useMemo,
-  PropsWithChildren,
-} from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardCheckIcon, ClipboardIcon, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -25,19 +19,15 @@ import {
 import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
-import linkifyHtml from "linkify-html";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
-import { getResourceProperties, getResourceOutputs, cn } from "@/lib/utils";
-import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
+import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import JsonView from "@uiw/react-json-view";
 import { useAppContext } from "@/app-context";
-import { Badge } from "@/components/ui/badge";
+import {
+  KeyValueList,
+  PropertyKey,
+  PropertyValue,
+} from "@/components/resource-key-value-list";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -328,108 +318,5 @@ function Resource() {
     </div>
   );
 }
-
-const PropertyKey = ({ children }: PropsWithChildren) => (
-  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
-    {children}
-  </div>
-);
-
-const PropertyValue = ({ children }: PropsWithChildren) => {
-  const isLink = typeof children === "string" && /<a\s/i.test(children);
-
-  return (
-    <div className="truncate">
-      {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
-      {!isLink && <span className="truncate">{children}</span>}
-    </div>
-  );
-};
-
-type KeyValueListProps = {
-  data: Record<string, any>;
-};
-
-export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
-  function renderValue(value: any) {
-    if (typeof value === "string") {
-      return (
-        <div className="group flex items-center space-x-2 truncate">
-          <span
-            className="truncate"
-            dangerouslySetInnerHTML={{
-              __html: linkifyHtml(value, {
-                className: "text-blue-500 hover:underline",
-                target: "_blank noreferrer",
-              }),
-            }}
-          />
-          <CopyToClipboard
-            className="opacity-0 group-hover:opacity-100"
-            text={value}
-          />
-        </div>
-      );
-    }
-
-    if (typeof value === "boolean") {
-      return <Badge>{value.toString()}</Badge>;
-    }
-
-    if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="h-0">
-              View
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent side="right" className="ml-2">
-            <JsonView value={value} />
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
-    if (typeof value === "undefined" || value === null) {
-      return "(n/a)";
-    }
-
-    return value;
-  }
-
-  return Object.entries(data).map(([key, value]) => (
-    <React.Fragment key={key}>
-      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
-      <PropertyValue>{renderValue(value)}</PropertyValue>
-    </React.Fragment>
-  ));
-};
-
-const CopyToClipboard = ({
-  text,
-  className,
-}: {
-  text: string;
-  className?: string;
-}) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    setCopied(true);
-    navigator.clipboard.writeText(text);
-    setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      onClick={handleCopy}
-      className={cn(className, "h-4 w-4")}
-    >
-      {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
-    </Button>
-  );
-};
 
 export default Resource;

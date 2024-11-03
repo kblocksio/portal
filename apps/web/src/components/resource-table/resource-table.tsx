@@ -6,7 +6,7 @@ import {
   ColumnSort,
   getFilteredRowModel,
   getSortedRowModel,
-  flexRender
+  flexRender,
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext } from "@/resource-context";
@@ -27,7 +27,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "@tanstack/react-router";
-import { KeyValueList } from "@/routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./table-toolbar";
@@ -39,6 +38,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
+import { KeyValueList } from "../resource-key-value-list";
 
 const useColumns = () => {
   const { resourceTypes } = useContext(ResourceContext);
