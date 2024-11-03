@@ -1,12 +1,21 @@
 import { ChevronRightIcon } from "lucide-react";
-import { useContext } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { ResourceContext } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const LastLogMessage = ({ objUri }: { objUri: string }) => {
-  const { eventsPerObject } = useContext(ResourceContext);
-  const events = Object.values(eventsPerObject[objUri] ?? {});
-  const last = events.pop();
+  const { eventsPerObject, loadEvents } = useContext(ResourceContext);
+
+  useEffect(() => {
+    loadEvents(objUri);
+  }, [objUri, loadEvents]);
+
+  const events = useMemo(
+    () => Object.values(eventsPerObject[objUri] ?? {}),
+    [eventsPerObject, objUri],
+  );
+
+  const last = useMemo(() => events.pop(), [events]);
 
   let message;
   switch (last?.type) {
