@@ -31,16 +31,26 @@ export const RepoPicker = memo(function RepoPicker({
   hideField,
   handleOnSelection,
 }: RepoPickerProps) {
-  const { data: installations, isLoading: isLoadingInstallations } = useFetch<
-    Installation[]
-  >("/api/github/installations");
+  const [selectedRepositoryFullName, setSelectedRepositoryFullName] = useState(
+    () => {
+      console.log("selected repo full name initial state", initialValue);
+      return initialValue;
+    },
+  );
+
   const [selectedInstallationLogin, setSelectedInstallationLogin] = useState(
     () => {
+      console.log(
+        "selected installation login initial state",
+        initialValue?.split("/")?.[0],
+      );
       return initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0];
     },
   );
 
-  console.log("picker initial values:", initialValue);
+  const { data: installations, isLoading: isLoadingInstallations } = useFetch<
+    Installation[]
+  >("/api/github/installations");
 
   useEffect(() => {
     setSelectedInstallationLogin((currentInstallationLogin) => {
@@ -48,6 +58,10 @@ export const RepoPicker = memo(function RepoPicker({
       return currentInstallationLogin ?? installations?.[0].account.login;
     });
   }, [installations]);
+
+  useEffect(() => {
+    console.log("repo picker initial value", initialValue);
+  }, []);
 
   const selectedInstallationId = useMemo(() => {
     return installations?.find(
@@ -65,10 +79,10 @@ export const RepoPicker = memo(function RepoPicker({
     undefined,
     false,
   );
-  const [selectedRepositoryFullName, setSelectedRepositoryFullName] = useState(
-    () => initialValue,
-  );
+
   useEffect(() => {
+    if (!repositories) return;
+
     const repositoryExists = repositories?.find(
       (repo) => repo.full_name === selectedRepositoryFullName,
     );
