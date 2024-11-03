@@ -15,7 +15,6 @@ import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProjectsIndexImport } from './routes/projects.index'
 import { Route as ProjectsProjectImport } from './routes/projects.$project'
-import { Route as ProjectProjectImport } from './routes/project.$project'
 import { Route as CatalogGroupVersionKindImport } from './routes/catalog.$group.$version.$kind'
 import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from './routes/resources.$group.$version.$plural.$system.$namespace.$name'
 
@@ -42,12 +41,6 @@ const ProjectsIndexRoute = ProjectsIndexImport.update({
 const ProjectsProjectRoute = ProjectsProjectImport.update({
   id: '/projects/$project',
   path: '/projects/$project',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ProjectProjectRoute = ProjectProjectImport.update({
-  id: '/project/$project',
-  path: '/project/$project',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -80,13 +73,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminImport
-      parentRoute: typeof rootRoute
-    }
-    '/project/$project': {
-      id: '/project/$project'
-      path: '/project/$project'
-      fullPath: '/project/$project'
-      preLoaderRoute: typeof ProjectProjectImport
       parentRoute: typeof rootRoute
     }
     '/projects/$project': {
@@ -125,7 +111,6 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/project/$project': typeof ProjectProjectRoute
   '/projects/$project': typeof ProjectsProjectRoute
   '/projects': typeof ProjectsIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
@@ -135,7 +120,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/project/$project': typeof ProjectProjectRoute
   '/projects/$project': typeof ProjectsProjectRoute
   '/projects': typeof ProjectsIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
@@ -146,7 +130,6 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/project/$project': typeof ProjectProjectRoute
   '/projects/$project': typeof ProjectsProjectRoute
   '/projects/': typeof ProjectsIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
@@ -158,7 +141,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/project/$project'
     | '/projects/$project'
     | '/projects'
     | '/catalog/$group/$version/$kind'
@@ -167,7 +149,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/project/$project'
     | '/projects/$project'
     | '/projects'
     | '/catalog/$group/$version/$kind'
@@ -176,7 +157,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/project/$project'
     | '/projects/$project'
     | '/projects/'
     | '/catalog/$group/$version/$kind'
@@ -187,7 +167,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  ProjectProjectRoute: typeof ProjectProjectRoute
   ProjectsProjectRoute: typeof ProjectsProjectRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   CatalogGroupVersionKindRoute: typeof CatalogGroupVersionKindRoute
@@ -197,7 +176,6 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  ProjectProjectRoute: ProjectProjectRoute,
   ProjectsProjectRoute: ProjectsProjectRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
   CatalogGroupVersionKindRoute: CatalogGroupVersionKindRoute,
@@ -219,7 +197,6 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/admin",
-        "/project/$project",
         "/projects/$project",
         "/projects/",
         "/catalog/$group/$version/$kind",
@@ -231,9 +208,6 @@ export const routeTree = rootRoute
     },
     "/admin": {
       "filePath": "admin.tsx"
-    },
-    "/project/$project": {
-      "filePath": "project.$project.tsx"
     },
     "/projects/$project": {
       "filePath": "projects.$project.tsx"
