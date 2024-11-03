@@ -1,5 +1,5 @@
 import React from "react";
-import { KeyValueList } from "@/components/ui/key-value-list";
+import { KeyValueList } from "@/components/resource-key-value-list";
 import { ResourceType } from "@/resource-context";
 import { resolveOutputField } from "./resource-outputs/output-resolver";
 

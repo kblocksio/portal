@@ -1,10 +1,4 @@
-import {
-  useState,
-  useContext,
-  useEffect,
-  useMemo,
-  PropsWithChildren,
-} from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
@@ -25,12 +19,16 @@ import {
 import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
-import { KeyValueList } from "@/components/ui/key-value-list";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
-import { useAppContext } from "@/app-context";
-import Outputs from "@/components/outputs";
 import { NamespaceBadge } from "@/components/namespace-badge";
+import { useAppContext } from "@/app-context";
+import {
+  KeyValueList,
+  PropertyKey,
+  PropertyValue,
+} from "@/components/resource-key-value-list";
+import Outputs from "@/components/outputs";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -324,22 +322,5 @@ function Resource() {
     </div>
   );
 }
-
-const PropertyKey = ({ children }: PropsWithChildren) => (
-  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
-    {children}
-  </div>
-);
-
-const PropertyValue = ({ children }: PropsWithChildren) => {
-  const isLink = typeof children === "string" && /<a\s/i.test(children);
-
-  return (
-    <div className="truncate">
-      {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
-      {!isLink && <span className="truncate">{children}</span>}
-    </div>
-  );
-};
 
 export default Resource;

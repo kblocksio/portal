@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
-import { ApiObject } from "@kblocks/api";
+import { ApiObject, formatBlockUri } from "@kblocks/api";
 import { Resource } from "@/resource-context";
 
 export function cn(...inputs: ClassValue[]) {
@@ -87,3 +87,19 @@ export const splitAndCapitalizeCamelCase = (str: string): string => {
       .join(" ")
   );
 };
+
+export function getObjectURIFromRef(ref: string) {
+  const sanitizedRef = ref.replace("${ref://", "").replace("}", "");
+  // ignoring property key (last value of split)
+  const [pluralAndGroup, name] = sanitizedRef.split("/");
+  const [plural, group] = pluralAndGroup.split(/\.(.+)/);
+  const objUri = formatBlockUri({
+    group,
+    version: "v1",
+    plural,
+    system: "demo",
+    namespace: "default",
+    name,
+  });
+  return objUri;
+}

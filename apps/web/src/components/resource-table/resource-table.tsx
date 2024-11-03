@@ -6,10 +6,10 @@ import {
   ColumnSort,
   getFilteredRowModel,
   getSortedRowModel,
-  flexRender
+  flexRender,
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
-import { Resource, ResourceContext } from "@/resource-context";
+import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
@@ -27,7 +27,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "@tanstack/react-router";
-import { KeyValueList } from "@/components/ui/key-value-list";
+import { KeyValueList } from "@/components/resource-key-value-list";
+import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./table-toolbar";
@@ -195,7 +196,10 @@ const useColumns = () => {
         size: 0,
         header: () => <></>,
         cell: (props) => {
-          return <ResourceOutputs resource={props.row.original} />;
+          return <ResourceOutputs
+              resource={props.row.original}
+              resourceType={resourceTypes[props.row.original.objType]}
+          />;
         },
       },
       {
@@ -313,7 +317,13 @@ function ResourceTableRow({
   );
 }
 
-const ResourceOutputs = ({ resource }: { resource: Resource }) => {
+const ResourceOutputs = ({
+  resource,
+  resourceType,
+}: {
+  resource: Resource;
+  resourceType: ResourceType;
+}) => {
   const outputs = getResourceOutputs(resource);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -349,7 +359,10 @@ const ResourceOutputs = ({ resource }: { resource: Resource }) => {
         <PopoverContent onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-col space-y-8">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <KeyValueList data={outputs} />
+              <Outputs
+                outputs={outputs}
+                resourceType={resourceType}
+              />
             </div>
           </div>
         </PopoverContent>
