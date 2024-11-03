@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/popover";
 import JsonView from "@uiw/react-json-view";
 import { useAppContext } from "@/app-context";
+import { Badge } from "@/components/ui/badge";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -75,8 +76,14 @@ function Resource() {
   }, [objUri, loadEvents]);
 
   const [lastEventCount, setLastEventCount] = useState(0);
-  const events = useMemo(() => Object.values(eventsPerObject[objUri] ?? {}), [eventsPerObject, objUri]);
-  const showLogsBadge = useMemo(() => events.length > lastEventCount, [events, lastEventCount]);
+  const events = useMemo(
+    () => Object.values(eventsPerObject[objUri] ?? {}),
+    [eventsPerObject, objUri],
+  );
+  const showLogsBadge = useMemo(
+    () => events.length > lastEventCount,
+    [events, lastEventCount],
+  );
 
   const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
 
@@ -177,14 +184,10 @@ function Resource() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  onSelect={() => setIsReapplyOpen(true)}
-                >
+                <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
                   Reapply
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => setIsReadOpen(true)}
-                >
+                <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
                   Refresh
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -213,7 +216,9 @@ function Resource() {
             className="data-[state=active]:border-primary relative flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Logs
-            {showLogsBadge && <div className="bg-blue-500 rounded-full w-2 h-2 animate-pulse" />}
+            {showLogsBadge && (
+              <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
@@ -243,7 +248,11 @@ function Resource() {
 
                     <PropertyKey>Namespace</PropertyKey>
                     <PropertyValue>
-                      {selectedResource.metadata.namespace && <NamespaceBadge namespace={selectedResource.metadata.namespace} />}
+                      {selectedResource.metadata.namespace && (
+                        <NamespaceBadge
+                          namespace={selectedResource.metadata.namespace}
+                        />
+                      )}
                     </PropertyValue>
 
                     <PropertyKey>System</PropertyKey>
@@ -281,10 +290,7 @@ function Resource() {
           <div className="flex flex-col gap-8">
             <CardContent className="h-full pt-6">
               {selectedResource && (
-                <Timeline
-                  events={events}
-                  className="mt-0"
-                />
+                <Timeline events={events} className="mt-0" />
               )}
             </CardContent>
           </div>
@@ -366,11 +372,17 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
       );
     }
 
+    if (typeof value === "boolean") {
+      return <Badge>{value.toString()}</Badge>;
+    }
+
     if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
       return (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="h-0">View</Button>
+            <Button variant="outline" className="h-0">
+              View
+            </Button>
           </PopoverTrigger>
           <PopoverContent side="right" className="ml-2">
             <JsonView value={value} />
@@ -410,7 +422,11 @@ const CopyToClipboard = ({
   };
 
   return (
-    <Button variant="ghost" onClick={handleCopy} className={cn(className, "w-4 h-4")}>
+    <Button
+      variant="ghost"
+      onClick={handleCopy}
+      className={cn(className, "h-4 w-4")}
+    >
       {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
     </Button>
   );
