@@ -13,8 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
-import { Route as ProjectsIndexImport } from './routes/projects.index'
-import { Route as ProjectsProjectImport } from './routes/projects.$project'
+import { Route as ResourcesIndexImport } from './routes/resources.index'
 import { Route as CatalogGroupVersionKindImport } from './routes/catalog.$group.$version.$kind'
 import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from './routes/resources.$group.$version.$plural.$system.$namespace.$name'
 
@@ -32,15 +31,9 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProjectsIndexRoute = ProjectsIndexImport.update({
-  id: '/projects/',
-  path: '/projects/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ProjectsProjectRoute = ProjectsProjectImport.update({
-  id: '/projects/$project',
-  path: '/projects/$project',
+const ResourcesIndexRoute = ResourcesIndexImport.update({
+  id: '/resources/',
+  path: '/resources/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -75,18 +68,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
-    '/projects/$project': {
-      id: '/projects/$project'
-      path: '/projects/$project'
-      fullPath: '/projects/$project'
-      preLoaderRoute: typeof ProjectsProjectImport
-      parentRoute: typeof rootRoute
-    }
-    '/projects/': {
-      id: '/projects/'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsIndexImport
+    '/resources/': {
+      id: '/resources/'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesIndexImport
       parentRoute: typeof rootRoute
     }
     '/catalog/$group/$version/$kind': {
@@ -111,8 +97,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/projects/$project': typeof ProjectsProjectRoute
-  '/projects': typeof ProjectsIndexRoute
+  '/resources': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
@@ -120,8 +105,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/projects/$project': typeof ProjectsProjectRoute
-  '/projects': typeof ProjectsIndexRoute
+  '/resources': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
@@ -130,8 +114,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/projects/$project': typeof ProjectsProjectRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/resources/': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
@@ -141,24 +124,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/projects/$project'
-    | '/projects'
+    | '/resources'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
-    | '/projects/$project'
-    | '/projects'
+    | '/resources'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/projects/$project'
-    | '/projects/'
+    | '/resources/'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
   fileRoutesById: FileRoutesById
@@ -167,8 +147,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  ProjectsProjectRoute: typeof ProjectsProjectRoute
-  ProjectsIndexRoute: typeof ProjectsIndexRoute
+  ResourcesIndexRoute: typeof ResourcesIndexRoute
   CatalogGroupVersionKindRoute: typeof CatalogGroupVersionKindRoute
   ResourcesGroupVersionPluralSystemNamespaceNameRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
 }
@@ -176,8 +155,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  ProjectsProjectRoute: ProjectsProjectRoute,
-  ProjectsIndexRoute: ProjectsIndexRoute,
+  ResourcesIndexRoute: ResourcesIndexRoute,
   CatalogGroupVersionKindRoute: CatalogGroupVersionKindRoute,
   ResourcesGroupVersionPluralSystemNamespaceNameRoute:
     ResourcesGroupVersionPluralSystemNamespaceNameRoute,
@@ -197,8 +175,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/admin",
-        "/projects/$project",
-        "/projects/",
+        "/resources/",
         "/catalog/$group/$version/$kind",
         "/resources/$group/$version/$plural/$system/$namespace/$name"
       ]
@@ -209,11 +186,8 @@ export const routeTree = rootRoute
     "/admin": {
       "filePath": "admin.tsx"
     },
-    "/projects/$project": {
-      "filePath": "projects.$project.tsx"
-    },
-    "/projects/": {
-      "filePath": "projects.index.tsx"
+    "/resources/": {
+      "filePath": "resources.index.tsx"
     },
     "/catalog/$group/$version/$kind": {
       "filePath": "catalog.$group.$version.$kind.tsx"

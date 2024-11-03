@@ -51,7 +51,7 @@ function Resource() {
     loadEvents,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const { selectedProject, setBreadcrumbs } = useAppContext();
+  const { setBreadcrumbs } = useAppContext();
 
   const objUri = formatBlockUri({
     group,
@@ -126,14 +126,14 @@ function Resource() {
     if (!selectedResource) return;
     setBreadcrumbs([
       {
-        name: selectedProject?.label || "Home",
-        url: selectedProject ? `/projects/${selectedProject?.value}` : "/",
+        name: "Resources",
+        url: `/resources/`,
       },
       {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedProject, selectedResource, setBreadcrumbs]);
+  }, [selectedResource, setBreadcrumbs]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
@@ -308,10 +308,7 @@ function Resource() {
       <ReapplyResourceDialog
         resource={selectedResource}
         isOpen={isReapplyOpen}
-        onReapplyClick={() => {
-          // Remove this line as it's causing the infinite loop
-          // setIsReapplyOpen(true);
-        }}
+        onReapplyClick={() => {}}
         onClose={() => {
           setIsReapplyOpen(false);
         }}
