@@ -32,20 +32,11 @@ export const RepoPicker = memo(function RepoPicker({
   handleOnSelection,
 }: RepoPickerProps) {
   const [selectedRepositoryFullName, setSelectedRepositoryFullName] = useState(
-    () => {
-      console.log("selected repo full name initial state", initialValue);
-      return initialValue;
-    },
+    () => initialValue,
   );
 
   const [selectedInstallationLogin, setSelectedInstallationLogin] = useState(
-    () => {
-      console.log(
-        "selected installation login initial state",
-        initialValue?.split("/")?.[0],
-      );
-      return initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0];
-    },
+    () => initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0],
   );
 
   const { data: installations, isLoading: isLoadingInstallations } = useFetch<
@@ -53,15 +44,11 @@ export const RepoPicker = memo(function RepoPicker({
   >("/api/github/installations");
 
   useEffect(() => {
-    setSelectedInstallationLogin((currentInstallationLogin) => {
-      console.log("current installation login:", currentInstallationLogin);
-      return currentInstallationLogin ?? installations?.[0].account.login;
-    });
+    setSelectedInstallationLogin(
+      (currentInstallationLogin) =>
+        currentInstallationLogin ?? installations?.[0].account.login,
+    );
   }, [installations]);
-
-  useEffect(() => {
-    console.log("repo picker initial value", initialValue);
-  }, []);
 
   const selectedInstallationId = useMemo(() => {
     return installations?.find(
@@ -86,14 +73,11 @@ export const RepoPicker = memo(function RepoPicker({
     const repositoryExists = repositories?.find(
       (repo) => repo.full_name === selectedRepositoryFullName,
     );
-    setSelectedRepositoryFullName((currentRepositoryFullName) => {
-      console.log("current repository full name:", currentRepositoryFullName);
-      console.log("repository exists:", repositoryExists);
-      console.log("repositories:", repositories);
-      return currentRepositoryFullName && repositoryExists
+    setSelectedRepositoryFullName((currentRepositoryFullName) =>
+      currentRepositoryFullName && repositoryExists
         ? currentRepositoryFullName
-        : repositories?.[0]?.full_name;
-    });
+        : repositories?.[0]?.full_name,
+    );
   }, [repositories, selectedRepositoryFullName]);
 
   useEffect(() => {
