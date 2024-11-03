@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import platformMd from "../mock-data/acme.platform.md?raw";
 import { MarkdownWrapper } from "@/components/markdown";
-import { MyProjects } from "@/components/my-projects";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { Search } from "lucide-react";
@@ -9,15 +8,21 @@ import { Input } from "@/components/ui/input";
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { useAppContext } from "@/app-context";
+import { ProjectCard } from "@/components/project-card";
+import { ResourcePageProject } from "./resources.index";
+import { useNavigate } from "@tanstack/react-router";
+import { getResourcesStatuses } from "@/components/components-utils";
+import MyResources from "@/components/my-resources";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const { resourceTypes, categories } = useContext(ResourceContext);
+  const { resourceTypes, categories, objects } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
   const { openWizard } = useCreateResourceWizard();
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +44,14 @@ function Index() {
     [openWizard],
   );
 
+  const resourcesProject = useMemo(() => {
+    return {
+      ...ResourcePageProject,
+      // get all resources statuses
+      ...getResourcesStatuses(Object.values(objects)),
+    };
+  }, [objects]);
+
   useEffect(() => {
     setBreadcrumbs([{ name: "Home", url: "/" }]);
   }, []);
@@ -47,9 +60,6 @@ function Index() {
     <div className="container flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
       {/* organization specific introduction */}
       <MarkdownWrapper content={platformMd} />
-
-      {/* My Projects */}
-      <MyProjects />
 
       {/* Resource Types Catalog */}
       <div className="flex flex-col gap-4 pb-8 pt-8">

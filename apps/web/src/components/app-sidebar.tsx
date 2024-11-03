@@ -29,57 +29,11 @@ import { Link } from "./ui/link";
 import { useLocation } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
 
-const platformSidebarNavData = [
-  {
-    title: "Home",
-    url: "/",
-    icon: "Home",
-    isActive: true,
-  },
-  {
-    title: "Catalog",
-    url: "#",
-    icon: "Blocks",
-    items: [],
-  },
-  {
-    title: "Documentation",
-    url: "#",
-    icon: "BookOpen",
-    items: [
-      {
-        title: "Introduction",
-        url: "#",
-      },
-      {
-        title: "Get Started",
-        url: "#",
-      },
-      {
-        title: "Tutorials",
-        url: "#",
-      },
-      {
-        title: "Changelog",
-        url: "#",
-      },
-    ],
-  },
-];
-
 export const AppSidebar = () => {
   const { projects } = useAppContext();
   const { resourceTypes } = useContext(ResourceContext);
 
   const location = useLocation();
-
-  const sidebarProjects = useMemo(() => {
-    return projects.map((project) => ({
-      title: project.label,
-      url: `/projects/${project.value}`,
-      icon: project.icon,
-    }));
-  }, [projects]);
 
   const platformSideBarItems = useMemo(() => {
     return [
@@ -90,6 +44,11 @@ export const AppSidebar = () => {
         isActive: true,
       },
       {
+        title: "Resources",
+        url: "/resources",
+        icon: "LayoutDashboard",
+      },
+      {
         title: "Catalog",
         url: "#",
         icon: "Blocks",
@@ -98,29 +57,6 @@ export const AppSidebar = () => {
           url: `/catalog/${resourceType}`,
           icon: resourceTypes[resourceType].icon,
         })),
-      },
-      {
-        title: "Documentation",
-        url: "#",
-        icon: "BookOpen",
-        items: [
-          {
-            title: "Introduction",
-            url: "#",
-          },
-          {
-            title: "Get Started",
-            url: "#",
-          },
-          {
-            title: "Tutorials",
-            url: "#",
-          },
-          {
-            title: "Changelog",
-            url: "#",
-          },
-        ],
       },
     ];
   }, [resourceTypes]);
@@ -135,18 +71,6 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
             {platformSideBarItems.map((item) => (
-              <SidebarItem
-                key={item.title}
-                item={item}
-                isActive={location.pathname === item.url}
-              />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>My Projects</SidebarGroupLabel>
-          <SidebarMenu>
-            {sidebarProjects.map((item) => (
               <SidebarItem
                 key={item.title}
                 item={item}

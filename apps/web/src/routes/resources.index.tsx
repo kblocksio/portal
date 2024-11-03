@@ -1,49 +1,39 @@
-import { useNavigate, createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect, useMemo } from "react";
-import { useAppContext } from "@/app-context";
-import { ResourceTable } from "@/components/resource-table/resource-table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ResourceContext } from "@/resource-context";
-import { ProjectHeader } from "@/components/project-header";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useContext, useMemo } from "react";
+import { useAppContext } from "@/app-context";
 
-export const Route = createFileRoute("/projects/$project")({
-  component: Project,
+import { ProjectHeader } from "@/components/project-header";
+import { ResourceTable } from "@/components/resource-table/resource-table";
+import { Project } from "@repo/shared";
+import { Skeleton } from "@/components/ui/skeleton";
+export const Route = createFileRoute("/resources/")({
+  component: Resources,
 });
 
-function Project() {
-  const { selectedProject, setSelectedProject, projects, setBreadcrumbs } =
-    useAppContext();
-  const { project } = Route.useParams();
-  const { resourceTypes, objects } = useContext(ResourceContext);
-  const navigate = useNavigate();
+export const ResourcePageProject: Project = {
+  label: "Resources",
+  value: "Resources",
+  description:
+    "Here is a comprehensive list of Kubernetes resources associated with your account. You can manage these resources, view their status, edit, update, delete, check logs, and access detailed information, relationships, and other useful insight",
+  icon: "LayoutDashboard",
+};
 
-  useEffect(() => {
-    if (!projects || projects.length === 0) {
-      return;
-    }
-    const projectObj = projects.find((p) => p.value === project);
-    if (projectObj) {
-      setSelectedProject(projectObj);
-    } else {
-      navigate({
-        to: "/",
-      });
-    }
-  }, [selectedProject, projects, project, navigate, setSelectedProject]);
+function Resources() {
+  const { resourceTypes, objects } = useContext(ResourceContext);
+  const { setBreadcrumbs } = useAppContext();
 
   const allResources = useMemo(() => {
     return Object.values(objects).filter((r) => r.kind !== "Block");
   }, [objects]);
 
   useEffect(() => {
-    setBreadcrumbs([
-      { name: selectedProject?.label || "", url: `/projects/${project}` },
-    ]);
-  }, [selectedProject, project, setBreadcrumbs]);
+    setBreadcrumbs([{ name: "Resources" }]);
+  }, [setBreadcrumbs]);
 
   return (
     <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
-      <ProjectHeader selectedProject={selectedProject} />
+      <ProjectHeader selectedProject={ResourcePageProject} />
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />
