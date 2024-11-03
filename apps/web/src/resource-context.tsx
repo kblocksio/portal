@@ -137,7 +137,9 @@ export const ResourceProvider = ({
           [key]: {
             ...block.spec.definition,
             engine: block.spec.engine,
-            iconComponent: getIconComponent({ icon: block.spec.definition.icon }),
+            iconComponent: getIconComponent({
+              icon: block.spec.definition.icon,
+            }),
           },
         };
       });
@@ -150,7 +152,7 @@ export const ResourceProvider = ({
           objUri,
           objType,
         };
-        
+
         return {
           ...prev,
           [objUri]: r,
@@ -197,7 +199,7 @@ export const ResourceProvider = ({
     });
   };
 
-  const addEvent = (event: WorkerEvent) => {
+  const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
       timestamp = new Date(timestamp);
@@ -220,7 +222,7 @@ export const ResourceProvider = ({
         },
       };
     });
-  };
+  }, []);
 
   useEffect(() => {
     if (!lastJsonMessage) {
@@ -290,26 +292,29 @@ export const ResourceProvider = ({
     };
   }, [objects]);
 
-  const loadEvents = (objUri: string) => {
-    const requests = [];
+  const loadEvents = useCallback(
+    (objUri: string) => {
+      const requests = [];
 
-    const uri = parseBlockUri(objUri);
+      const uri = parseBlockUri(objUri);
 
-    const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-    const fetchEvents = async () => {
-      const response = await request("GET", eventsUrl);
+      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+      const fetchEvents = async () => {
+        const response = await request("GET", eventsUrl);
 
-      for (const event of response.events) {
-        addEvent(event);
-      }
-    };
+        for (const event of response.events) {
+          addEvent(event);
+        }
+      };
 
-    requests.push(fetchEvents());
+      requests.push(fetchEvents());
 
-    Promise.all(requests).catch((e) => {
-      console.warn(`unable to fetch events for ${objUri}: ${e.message}`);
-    });
-  };
+      Promise.all(requests).catch((e) => {
+        console.warn(`unable to fetch events for ${objUri}: ${e.message}`);
+      });
+    },
+    [addEvent],
+  );
 
   const value: ResourceContextValue = {
     resourceTypes,
