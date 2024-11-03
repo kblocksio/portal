@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
-import { ApiObject, formatBlockUri } from "@kblocks/api";
+import { ApiObject, formatBlockUri, parseBlockUri } from "@kblocks/api";
 import { Resource } from "@/resource-context";
 
 export function cn(...inputs: ClassValue[]) {
@@ -68,17 +68,18 @@ export function getResourceOutputs(resource: Resource) {
   return outputs;
 }
 
-export function getObjectURIFromRef(ref: string) {
+export function getObjectURIFromRef(ref: string, referencingObjectUri: string) {
   const sanitizedRef = ref.replace("${ref://", "").replace("}", "");
+  const { version, system, namespace } = parseBlockUri(referencingObjectUri);
   // ignoring property key (last value of split)
   const [pluralAndGroup, name] = sanitizedRef.split("/");
   const [plural, group] = pluralAndGroup.split(/\.(.+)/);
   const objUri = formatBlockUri({
     group,
-    version: "v1",
+    version,
     plural,
-    system: "demo",
-    namespace: "default",
+    system,
+    namespace,
     name,
   });
   return objUri;
