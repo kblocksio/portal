@@ -5,9 +5,11 @@ import { resolveOutputField } from "./resource-outputs/output-resolver";
 
 export default function Outputs({
   outputs,
+  resourceObjUri,
   resourceType,
 }: {
   outputs: Record<string, any>;
+  resourceObjUri: string;
   resourceType: ResourceType;
 }) {
   const keys = Object.keys(outputs);
@@ -34,7 +36,7 @@ export default function Outputs({
 
   return (
     <>
-      <KeyValueList data={nonUiComponents} />
+      <KeyValueList data={nonUiComponents} resourceObjUri={resourceObjUri} />
       {uiComponents.map((component, index) => (
         <React.Fragment key={index}>{component}</React.Fragment>
       ))}
