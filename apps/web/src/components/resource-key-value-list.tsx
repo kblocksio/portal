@@ -9,12 +9,11 @@ import {
   Badge,
   ClipboardCheckIcon,
   ClipboardIcon,
-  SquareArrowOutUpRight,
 } from "lucide-react";
 import { cn, getResourceOutputs } from "@/lib/utils";
 import { getObjectURIFromRef } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { splitAndCapitalizeCamelCase } from "./resource-form/label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
 import { ResourceContext } from "@/resource-context";

@@ -1,6 +1,7 @@
+import { ApiObject } from "@kblocks/api";
+import cloneDeep from "lodash.clonedeep";
 import { ResourceType } from "@/resource-context";
 import { FormGenerator } from "./resource-form";
-import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
 
 export const CreateNewResourceForm = ({
@@ -18,12 +19,14 @@ export const CreateNewResourceForm = ({
   handleBack: () => void;
   isLoading: boolean;
 }) => {
-  delete resourceType.schema.properties?.orderedJson;
+  const schema = cloneDeep(resourceType.schema);
+  delete schema.properties?.orderedJson;
+  delete schema.properties?.status;
 
   return (
     <div className="flex h-full flex-col">
       <FormGenerator
-        schema={resourceType.schema}
+        schema={schema}
         isLoading={isLoading}
         initialValues={initialValues}
         initialMeta={initialMeta}

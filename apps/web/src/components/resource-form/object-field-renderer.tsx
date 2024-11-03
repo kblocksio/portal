@@ -4,7 +4,7 @@ import { ObjectFieldForm } from "./object-field-form";
 import { FieldRenderer } from "./field-renderer";
 import { FormFields } from "./form-fields";
 import { linkifyDescription, sanitizeDescription } from "./description-parser";
-import { splitAndCapitalizeCamelCase } from "./label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Check, Pencil } from "lucide-react";

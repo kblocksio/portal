@@ -28,6 +28,7 @@ import {
   PropertyKey,
   PropertyValue,
 } from "@/components/resource-key-value-list";
+import Outputs from "@/components/outputs";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -268,7 +269,10 @@ function Resource() {
                       <CardTitle>Outputs</CardTitle>
                     </div>
                     <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                      <KeyValueList data={outputs} />
+                      <Outputs
+                        outputs={outputs}
+                        resourceType={selectedResourceType}
+                      />
                     </div>
                   </div>
                 )}
