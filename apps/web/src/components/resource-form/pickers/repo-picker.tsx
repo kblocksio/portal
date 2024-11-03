@@ -39,12 +39,16 @@ export const RepoPicker = memo(function RepoPicker({
       return initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0];
     },
   );
+
+  console.log("picker initial values:", initialValue);
+
   useEffect(() => {
-    setSelectedInstallationLogin(
-      (installationLogin) =>
-        installationLogin ?? installations?.[0].account.login,
-    );
+    setSelectedInstallationLogin((currentInstallationLogin) => {
+      console.log("current installation login:", currentInstallationLogin);
+      return currentInstallationLogin ?? installations?.[0].account.login;
+    });
   }, [installations]);
+
   const selectedInstallationId = useMemo(() => {
     return installations?.find(
       (installation) =>
@@ -68,11 +72,14 @@ export const RepoPicker = memo(function RepoPicker({
     const repositoryExists = repositories?.find(
       (repo) => repo.full_name === selectedRepositoryFullName,
     );
-    setSelectedRepositoryFullName((repositoryFullName) =>
-      repositoryFullName && repositoryExists
-        ? repositoryFullName
-        : repositories?.[0]?.full_name,
-    );
+    setSelectedRepositoryFullName((currentRepositoryFullName) => {
+      console.log("current repository full name:", currentRepositoryFullName);
+      console.log("repository exists:", repositoryExists);
+      console.log("repositories:", repositories);
+      return currentRepositoryFullName && repositoryExists
+        ? currentRepositoryFullName
+        : repositories?.[0]?.full_name;
+    });
   }, [repositories, selectedRepositoryFullName]);
 
   useEffect(() => {
