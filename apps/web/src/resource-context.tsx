@@ -42,6 +42,9 @@ type Definition = Manifest["definition"];
 export interface ResourceType extends Definition {
   iconComponent: React.ComponentType<{ className?: string }>;
   engine: string;
+
+  // which systems support this resource type
+  systems: Set<string>;
 }
 
 type BlockApiObject = ApiObject & {
@@ -127,11 +130,18 @@ export const ResourceProvider = ({
 
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
+    const { system } = parseBlockUri(objUri);
 
     if (objType === "kblocks.io/v1/blocks") {
       const block = object as BlockApiObject;
       const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
+
       setResourceTypes((prev) => {
+        const systems = prev[key]?.systems ?? new Set();
+        systems.add(system);
+
+        console.log("systems for ", key, ":", systems);
+
         return {
           ...prev,
           [key]: {
@@ -140,6 +150,7 @@ export const ResourceProvider = ({
             iconComponent: getIconComponent({
               icon: block.spec.definition.icon,
             }),
+            systems,
           },
         };
       });

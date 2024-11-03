@@ -26,7 +26,7 @@ export const CreateNewResourceForm = ({
   return (
     <div className="flex h-full flex-col">
       <FormGenerator
-        schema={schema}
+        resourceType={resourceType}
         isLoading={isLoading}
         initialValues={initialValues}
         initialMeta={initialMeta}

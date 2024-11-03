@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "../ui/button";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+} from "lucide-react";
 import { FieldRenderer } from "./field-renderer";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
+import { ResourceType } from "@/resource-context";
+import { SystemSelector } from "./system-selector";
 
 export interface FormGeneratorProps {
-  schema: any;
+  resourceType: ResourceType;
   isLoading: boolean;
   handleBack: () => void;
   handleSubmit: (meta: ObjectMetadata, fields: any) => void;
@@ -17,16 +21,17 @@ export interface FormGeneratorProps {
 }
 
 export const FormGenerator = ({
-  schema,
+  resourceType,
   isLoading,
   handleBack,
   handleSubmit,
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
-  const [formData, setFormData] = useState<any>(initialValues || {});
-  const [system] = useState<string>(initialMeta?.system ?? "demo");
-  const [namespace, setNamespace] = useState<string>(
+  const schema = resourceType.schema;
+  const [formData, setFormData] = useState<any>(initialValues ?? {});
+  const [system, setSystem] = useState(initialMeta?.system ?? "demo");
+  const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
   );
   const [name, setName] = useState<string>(initialMeta?.name ?? "");
@@ -97,13 +102,13 @@ export const FormGenerator = ({
           <div className="space-y-2">
             <Label htmlFor="system" className={"opacity-50"}>
               System
+              <span className="text-destructive">*</span>
             </Label>
-            <Input
-              required
-              id="system"
-              placeholder="System"
-              disabled={true}
+            <SystemSelector
+              resourceType={resourceType}
+              disabled={!!initialValues}
               value={system}
+              onChange={(value) => setSystem(value)}
             />
           </div>
         </div>
