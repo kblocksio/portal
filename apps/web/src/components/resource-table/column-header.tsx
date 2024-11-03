@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMemo } from "react";
-import { splitAndCapitalizeCamelCase } from "../resource-form/label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 
 export interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { splitAndCapitalizeCamelCase } from "../label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import { FieldRenderer } from "../field-renderer";
 import { Field } from "../form-field";
 import { updateDataByPath } from "../utils";

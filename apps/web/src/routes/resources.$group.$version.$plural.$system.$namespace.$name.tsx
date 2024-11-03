@@ -28,6 +28,7 @@ import {
   PropertyKey,
   PropertyValue,
 } from "@/components/resource-key-value-list";
+import Outputs from "@/components/outputs";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;

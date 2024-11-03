@@ -1,6 +1,6 @@
 import { Label } from "../ui/label";
 import { linkifyDescription, sanitizeDescription } from "./description-parser";
-import { splitAndCapitalizeCamelCase } from "./label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 
 export const Field = ({
   hideField = false,

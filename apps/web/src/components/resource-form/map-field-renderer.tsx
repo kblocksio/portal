@@ -1,6 +1,6 @@
 import { ObjectMetadata } from "@repo/shared";
 import { linkifyDescription, sanitizeDescription } from "./description-parser";
-import { splitAndCapitalizeCamelCase } from "./label-formater";
+import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import { Button } from "../ui/button";
 import {
   Dialog,
