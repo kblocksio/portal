@@ -1,17 +1,8 @@
 import { getResourceIconColors } from "@/lib/hero-icon";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResourceType } from "@/resource-context";
-import { CircleIcon, StarIcon } from "@radix-ui/react-icons";
 import { MarkdownWrapper } from "../markdown";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { EngineLabel } from "./engine-label";
-import { Button } from "../ui/button";
-import { BookOpen } from "lucide-react";
 
 export const ResourceTypeCard = ({
   resource,

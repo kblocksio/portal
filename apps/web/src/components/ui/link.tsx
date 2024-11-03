@@ -22,10 +22,22 @@ export const linkVariants = cva("", {
 
 export interface LinkProps
   extends RouterLinkProps,
-    VariantProps<typeof linkVariants> {}
+    VariantProps<typeof linkVariants> {
+  onMouseEnter?: (e: React.MouseEvent) => void;
+}
 
-const Link = ({ variant, ...props }: LinkProps & { className?: string }) => {
-  return <RouterLink className={cn(linkVariants({ variant }))} {...props} />;
+const Link = ({
+  variant,
+  onMouseEnter,
+  ...props
+}: LinkProps & { className?: string }) => {
+  return (
+    <RouterLink
+      className={cn(linkVariants({ variant }))}
+      onMouseEnter={onMouseEnter}
+      {...props}
+    />
+  );
 };
 Link.displayName = "Link";
 

@@ -359,10 +359,7 @@ const ResourceOutputs = ({
         <PopoverContent onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-col space-y-8">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <Outputs
-                outputs={outputs}
-                resourceType={resourceType}
-              />
+              <KeyValueList data={outputs} resourceObjUri={resource.objUri} />
             </div>
           </div>
         </PopoverContent>

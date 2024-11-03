@@ -259,7 +259,10 @@ function Resource() {
                     <CardTitle>Properties</CardTitle>
                   </div>
                   <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <KeyValueList data={properties} />
+                    <KeyValueList
+                      data={properties}
+                      resourceObjUri={selectedResource.objUri}
+                    />
                   </div>
                 </div>
 
@@ -269,9 +272,9 @@ function Resource() {
                       <CardTitle>Outputs</CardTitle>
                     </div>
                     <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                      <Outputs
-                        outputs={outputs}
-                        resourceType={selectedResourceType}
+                      <KeyValueList
+                        data={outputs}
+                        resourceObjUri={selectedResource.objUri}
                       />
                     </div>
                   </div>
