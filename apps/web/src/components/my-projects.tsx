@@ -1,6 +1,5 @@
-import { getProjects } from "@/lib/backend";
 import { ProjectCard } from "./project-card";
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { ResourceContext } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
 import { getResourcesStatuses } from "./components-utils";
@@ -8,7 +7,7 @@ import { useAppContext } from "@/app-context";
 
 export const MyProjects = () => {
   const { projects } = useAppContext();
-  const { resources } = useContext(ResourceContext);
+  const { objects } = useContext(ResourceContext);
   const { setSelectedProject } = useAppContext();
   const navigate = useNavigate();
 
@@ -21,9 +20,7 @@ export const MyProjects = () => {
         ...project,
         // get the resources statuses for the project, currently loading all resources for all projects
         ...getResourcesStatuses(
-          Array.from(resources?.values() ?? []).flatMap((resourceMap) =>
-            Array.from(resourceMap.values()),
-          ),
+          Object.values(objects).filter((obj) => obj.project === project.value),
         ),
         onClick: () => {
           setSelectedProject(project);
@@ -34,7 +31,7 @@ export const MyProjects = () => {
         },
       };
     });
-  }, [projects, resources]);
+  }, [projects, objects, setSelectedProject, navigate]);
 
   return (
     <div className="flex flex-col pt-6">

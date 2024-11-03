@@ -177,14 +177,16 @@ async function storeEvent(event: kblocks.WorkerEvent) {
   return store(event.objUri, event);
 }
 
-export function handleEvent(event: kblocks.WorkerEvent) {
-  storeEvent(event).catch((e) => {
-    console.error(
-      `Error storing event: ${JSON.stringify(event)}: ${e.message}`,
-    );
-  });
+export async function handleEvent(event: kblocks.WorkerEvent) {
+  try {
+    await storeEvent(event);
+  } catch (e) {
+    console.error(`Error storing event: ${JSON.stringify(event)}: ${e}`);
+  }
 
-  slackNotify(event).catch((e) => {
-    console.error(`Error sending slack notification: ${e.message}`);
-  });
+  try {
+    await slackNotify(event);
+  } catch (e) {
+    console.error(`Error sending slack notification: ${e}`);
+  }
 }

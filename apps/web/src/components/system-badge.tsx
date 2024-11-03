@@ -19,22 +19,20 @@ const systemColors = [
 
 export interface SystemBadgeProps {
   blockUri: string;
-  showSystemName?: boolean;
 }
 
-export const SystemBadge = ({ blockUri, showSystemName }: SystemBadgeProps) => {
+export const SystemBadge = ({ blockUri }: SystemBadgeProps) => {
   const block = parseBlockUri(blockUri);
 
-  const acronyms = block.system
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase());
+  // const acronyms = block.system
+  //   .split("-")
+  //   .map((word) => word.charAt(0).toUpperCase());
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
           <div className="flex items-center gap-2">
-            {showSystemName && <span>{block.system}</span>}
             <Badge
               variant="outline"
               className={`px-1.5 py-0.5 text-xs ${chooseColor(
@@ -42,12 +40,12 @@ export const SystemBadge = ({ blockUri, showSystemName }: SystemBadgeProps) => {
                 systemColors,
               )}`}
             >
-              {acronyms.join("")}
+              {block.system}
             </Badge>
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{block.system}</p>
+          <p>System: <span className="font-bold">{block.system}</span></p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

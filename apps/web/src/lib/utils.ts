@@ -7,13 +7,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type Schema = {
-  type?: string;
-  properties?: { [key: string]: Schema };
-  items?: Schema;
-  additionalProperties?: boolean | Schema;
-};
-
 export function getReadyCondition(obj: ApiObject) {
   return obj.status?.conditions?.find(
     (condition: any) => condition.type === "Ready",
@@ -63,17 +56,23 @@ export function getResourceProperties(resource: Resource) {
 
 export function getResourceOutputs(resource: Resource) {
   const outputs: Record<string, any> = {};
-  const conditions = resource.status?.conditions;
-  delete resource.status?.conditions;
-  addProperty(outputs, {
-    ...resource.status,
-    ...conditions,
-    conditions: undefined,
-  });
+
+  for (const [key, value] of Object.entries(resource.status ?? {})) {
+    if (key === "conditions") {
+      continue;
+    }
+
+    addProperty(outputs, value, [key]);
+  }
+
   return outputs;
 }
 
 export const splitAndCapitalizeCamelCase = (str: string): string => {
+  if (!str) {
+    return "";
+  }
+
   return (
     str
       // Insert a space between lowercase and uppercase letters

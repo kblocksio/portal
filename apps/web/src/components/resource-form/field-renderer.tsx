@@ -46,7 +46,6 @@ export const FieldRenderer = ({
   const [showObjectModal, setShowObjectModal] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [showMapModal, setShowMapModal] = useState(false);
   const [editKey, setEditKey] = useState<string | null>(null);
 
   const value = getDataByPath(formData, path);
@@ -71,6 +70,7 @@ export const FieldRenderer = ({
       path,
       formData,
       updateFormData,
+      defaultValue: schema.default,
     });
 
     if (pickerField) {
@@ -148,6 +148,7 @@ export const FieldRenderer = ({
       hideField={hideField}
       schema={schema}
       showLabel={!inline}
+      defaultValue={schema.default}
     />
   );
 };

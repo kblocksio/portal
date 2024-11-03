@@ -7,7 +7,8 @@ import JsonView from "@uiw/react-json-view";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
-import { splitAndCapitalizeCamelCase } from "@/lib/utils";
+import { splitAndCapitalizeCamelCase, cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type KeyValueListProps = {
   data: Record<string, any>;
@@ -35,11 +36,17 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
       );
     }
 
+    if (typeof value === "boolean") {
+      return <Badge>{value.toString()}</Badge>;
+    }
+
     if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
       return (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline">View</Button>
+            <Button variant="outline" className="h-0">
+              View
+            </Button>
           </PopoverTrigger>
           <PopoverContent side="right" className="ml-2">
             <JsonView value={value} />
@@ -79,7 +86,11 @@ const CopyToClipboard = ({
   };
 
   return (
-    <Button variant="ghost" onClick={handleCopy} className={className}>
+    <Button
+      variant="ghost"
+      onClick={handleCopy}
+      className={cn(className, "h-4 w-4")}
+    >
       {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
     </Button>
   );

@@ -63,6 +63,12 @@ export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadge
         return (
           <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
         );
+
+      case StatusReason.Pending:
+        return (
+          <div className={cn(variants({ size }), "rounded-full border-2 border-gray-300 animate-pulse")} />
+      );
+
       default:
         if (readyCondition?.status === "True") {
           return <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>

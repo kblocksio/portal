@@ -30,6 +30,7 @@ import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { useAppContext } from "@/app-context";
 import Outputs from "@/components/outputs";
+import { NamespaceBadge } from "@/components/namespace-badge";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -46,16 +47,12 @@ function Resource() {
   const router = useRouter();
   const {
     resourceTypes,
-    resources,
+    objects,
     eventsPerObject,
     setSelectedResourceId,
     loadEvents,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const [isNewLogs, setIsNewLogs] = useState(false);
-  const [logUpdateTimer, setLogUpdateTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
   const { selectedProject, setBreadcrumbs } = useAppContext();
 
   const objUri = formatBlockUri({
@@ -67,26 +64,21 @@ function Resource() {
     name,
   });
 
-  useMemo(() => {
-    loadEvents(objUri);
-  }, [objUri]);
-
-  const selectedResource = useMemo(() => {
-    return resources.get(`${group}/${version}/${plural}`)?.get(objUri);
-  }, [resources, objUri]);
-
   useEffect(() => {
-    const currentEvents = eventsPerObject[objUri];
-    if (currentEvents && Object.keys(currentEvents).length > 0) {
-      setIsNewLogs(true);
-      if (logUpdateTimer) clearTimeout(logUpdateTimer);
-      const timer = setTimeout(() => setIsNewLogs(false), 3500);
-      setLogUpdateTimer(timer);
-    }
-    return () => {
-      if (logUpdateTimer) clearTimeout(logUpdateTimer);
-    };
-  }, [eventsPerObject[objUri], objUri]);
+    loadEvents(objUri);
+  }, [objUri, loadEvents]);
+
+  const [lastEventCount, setLastEventCount] = useState(0);
+  const events = useMemo(
+    () => Object.values(eventsPerObject[objUri] ?? {}),
+    [eventsPerObject, objUri],
+  );
+  const showLogsBadge = useMemo(
+    () => events.length > lastEventCount,
+    [events, lastEventCount],
+  );
+
+  const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -95,6 +87,9 @@ function Resource() {
         objUri: selectedResource?.objUri,
       });
     }
+  }, [selectedResource, setSelectedResourceId]);
+
+  useEffect(() => {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
       setSelectedResourceId(undefined);
@@ -140,14 +135,14 @@ function Resource() {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedProject, selectedResource]);
+  }, [selectedProject, selectedResource, setBreadcrumbs]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
 
   return (
-    <div className="container flex w-[100vw] flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -182,14 +177,10 @@ function Resource() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  onSelect={() => setIsReapplyOpen(true)}
-                >
+                <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
                   Reapply
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => setIsReadOpen(true)}
-                >
+                <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
                   Refresh
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -214,11 +205,12 @@ function Resource() {
           </TabsTrigger>
           <TabsTrigger
             value="logs"
+            onClick={() => setLastEventCount(events.length)}
             className="data-[state=active]:border-primary relative flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Logs
-            {isNewLogs && (
-              <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+            {showLogsBadge && (
+              <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
             )}
           </TabsTrigger>
         </TabsList>
@@ -249,19 +241,21 @@ function Resource() {
 
                     <PropertyKey>Namespace</PropertyKey>
                     <PropertyValue>
-                      {selectedResource.metadata.namespace}
+                      {selectedResource.metadata.namespace && (
+                        <NamespaceBadge
+                          namespace={selectedResource.metadata.namespace}
+                        />
+                      )}
                     </PropertyValue>
 
                     <PropertyKey>System</PropertyKey>
                     <PropertyValue>
-                      <SystemBadge
-                        blockUri={selectedResource.objUri}
-                        showSystemName
-                      />
+                      <SystemBadge blockUri={selectedResource.objUri} />
                     </PropertyValue>
                   </div>
                 </div>
 
+                {/* Properties */}
                 <div className="w-full">
                   <div className="pb-4 pt-8">
                     <CardTitle>Properties</CardTitle>
@@ -270,6 +264,7 @@ function Resource() {
                     <KeyValueList data={properties} />
                   </div>
                 </div>
+
                 {outputs && Object.keys(outputs).length > 0 && (
                   <div className="w-full">
                     <div className="pb-4 pt-8">
@@ -291,12 +286,7 @@ function Resource() {
           <div className="flex flex-col gap-8">
             <CardContent className="h-full pt-6">
               {selectedResource && (
-                <Timeline
-                  events={Object.values(
-                    eventsPerObject[selectedResource.objUri] ?? [],
-                  )}
-                  className="mt-0"
-                />
+                <Timeline events={events} className="mt-0" />
               )}
             </CardContent>
           </div>
@@ -317,7 +307,8 @@ function Resource() {
         resource={selectedResource}
         isOpen={isReapplyOpen}
         onReapplyClick={() => {
-          setIsReapplyOpen(true);
+          // Remove this line as it's causing the infinite loop
+          // setIsReapplyOpen(true);
         }}
         onClose={() => {
           setIsReapplyOpen(false);

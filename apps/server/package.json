@@ -19,7 +19,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@kblocks/api": "^0.4.21",
+    "@kblocks/api": "^0.4.26",
     "@kubernetes/client-node": "^0.22.1",
     "@octokit/core": "^6.1.2",
     "@supabase/ssr": "^0.5.1",
