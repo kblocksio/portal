@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "@tanstack/react-router";
-import { KeyValueList } from "@/routes/resources.$group.$version.$plural.$system.$namespace.$name";
+import { KeyValueList } from "@/components/ui/key-value-list";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./table-toolbar";

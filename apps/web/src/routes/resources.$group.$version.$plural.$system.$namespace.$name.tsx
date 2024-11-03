@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useContext,
   useEffect,
@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardCheckIcon, ClipboardIcon, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -25,17 +25,11 @@ import {
 import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
-import linkifyHtml from "linkify-html";
+import { KeyValueList } from "@/components/ui/key-value-list";
 import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
-import { splitAndCapitalizeCamelCase } from "@/components/resource-form/label-formater";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import JsonView from "@uiw/react-json-view";
 import { useAppContext } from "@/app-context";
+import Outputs from "@/components/outputs";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -282,7 +276,10 @@ function Resource() {
                       <CardTitle>Outputs</CardTitle>
                     </div>
                     <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                      <KeyValueList data={outputs} />
+                      <Outputs
+                        outputs={outputs}
+                        resourceType={selectedResourceType}
+                      />
                     </div>
                   </div>
                 )}
@@ -351,82 +348,6 @@ const PropertyValue = ({ children }: PropsWithChildren) => {
       {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
       {!isLink && <span className="truncate">{children}</span>}
     </div>
-  );
-};
-
-type KeyValueListProps = {
-  data: Record<string, any>;
-};
-
-export const KeyValueList: React.FC<KeyValueListProps> = ({ data }) => {
-  function renderValue(value: any) {
-    if (typeof value === "string") {
-      return (
-        <div className="group flex items-center space-x-2 truncate">
-          <span
-            className="truncate"
-            dangerouslySetInnerHTML={{
-              __html: linkifyHtml(value, {
-                className: "text-blue-500 hover:underline",
-                target: "_blank noreferrer",
-              }),
-            }}
-          />
-          <CopyToClipboard
-            className="opacity-0 group-hover:opacity-100"
-            text={value}
-          />
-        </div>
-      );
-    }
-
-    if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline">View</Button>
-          </PopoverTrigger>
-          <PopoverContent side="right" className="ml-2">
-            <JsonView value={value} />
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
-    if (typeof value === "undefined" || value === null) {
-      return "(n/a)";
-    }
-
-    return value;
-  }
-
-  return Object.entries(data).map(([key, value]) => (
-    <React.Fragment key={key}>
-      <PropertyKey>{splitAndCapitalizeCamelCase(key)}</PropertyKey>
-      <PropertyValue>{renderValue(value)}</PropertyValue>
-    </React.Fragment>
-  ));
-};
-
-const CopyToClipboard = ({
-  text,
-  className,
-}: {
-  text: string;
-  className?: string;
-}) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    setCopied(true);
-    navigator.clipboard.writeText(text);
-    setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
-  };
-
-  return (
-    <Button variant="ghost" onClick={handleCopy} className={className}>
-      {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
-    </Button>
   );
 };
 
