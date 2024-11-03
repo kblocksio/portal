@@ -91,7 +91,6 @@ export const splitAndCapitalizeCamelCase = (str: string): string => {
 export function parseRef(ref: string, referencingObjectUri: string) {
   const sanitizedRef = ref.replace("${ref://", "").replace("}", "");
   const { version, system, namespace } = parseBlockUri(referencingObjectUri);
-  // ignoring property key (last value of split)
   const [pluralAndGroup, name, attribute] = sanitizedRef.split("/");
   const [plural, group] = pluralAndGroup.split(/\.(.+)/);
   const uri = formatBlockUri({
@@ -102,5 +101,5 @@ export function parseRef(ref: string, referencingObjectUri: string) {
     namespace,
     name,
   });
-  return { objUri: uri, attribute };
+  return { objUri: uri, attribute: attribute.split("?")[0] };
 }
