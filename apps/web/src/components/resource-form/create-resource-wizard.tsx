@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ResourceCatalog } from "../resource-catalog/resource-catalog";
 import { WizardSearchHeader } from "../wizard-search-header";
 import { WizardSimpleHeader } from "../wizard-simple-header";
@@ -13,6 +13,7 @@ import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
+import { Description } from "@radix-ui/react-dialog";
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export const CreateResourceWizard = ({
       handleOnOpenChange(open);
       setSelectedResourceType(undefined);
     },
-    [currentEditableResource, handleOnOpenChange, setSelectedResourceType],
+    [handleOnOpenChange, setSelectedResourceType],
   );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
@@ -120,7 +121,6 @@ export const CreateResourceWizard = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className="flex h-[90vh] max-w-[90vh] flex-col"
-        aria-describedby="Create a new resource"
         onPointerDownOutside={(event) => {
           if (isLoading) {
             event.preventDefault();
@@ -132,6 +132,12 @@ export const CreateResourceWizard = ({
           }
         }}
       >
+        <Description className="sr-only">
+          {step === 1 
+            ? "Dialog for creating a new resource. Choose from available resource types."
+            : `Dialog for ${currentEditableResource ? 'editing' : 'creating'} a ${selectedResourceType?.kind} resource.`
+          }
+        </Description>
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? (

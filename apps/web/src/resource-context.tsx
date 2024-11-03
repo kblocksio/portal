@@ -128,11 +128,6 @@ export const ResourceProvider = ({
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
 
-    console.log("handleObjectMessage", objUri, object);
-    if ((object as any).kind === "Topic") {
-      console.log("TOPIC!", object);
-    }
-
     if (objType === "kblocks.io/v1/blocks") {
       const block = object as BlockApiObject;
       const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
@@ -232,6 +227,8 @@ export const ResourceProvider = ({
       return;
     }
 
+    console.log("event:", lastJsonMessage);
+
     addEvent(lastJsonMessage);
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
@@ -261,7 +258,7 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-  }, [lastJsonMessage, addNotifications, handleObjectMessage]);
+  }, [lastJsonMessage]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
@@ -310,7 +307,7 @@ export const ResourceProvider = ({
     requests.push(fetchEvents());
 
     Promise.all(requests).catch((e) => {
-      console.error(e);
+      console.warn(`unable to fetch events for ${objUri}: ${e.message}`);
     });
   };
 
