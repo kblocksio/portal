@@ -143,27 +143,30 @@ export const ResourceProvider = ({
     }
   }, [categoriesData]);
 
-  const resolvePluralFromKind = useCallback((kind: string) => {
-    for (const def of Object.values(resourceTypes)) {
-      if (def.kind === kind) {
-        return def.plural;
+  const resolvePluralFromKind = useCallback(
+    (kind: string) => {
+      for (const def of Object.values(resourceTypes)) {
+        if (def.kind === kind) {
+          return def.plural;
+        }
       }
-    }
 
-    return kind.toLowerCase();
-  }, [resourceTypes]);
+      return kind.toLowerCase();
+    },
+    [resourceTypes],
+  );
 
-
-  const resolveOwnerUri = useCallback((ref: OwnerReference, system: string, namespace: string) => {
-    const [group, version] = ref.apiVersion.split("/");
-    const plural = resolvePluralFromKind(ref.kind);
-    return formatBlockUri({
-      group,
-      version,
-      system,
-      namespace,
-      plural,
-      name: ref.name,
+  const resolveOwnerUri = useCallback(
+    (ref: OwnerReference, system: string, namespace: string) => {
+      const [group, version] = ref.apiVersion.split("/");
+      const plural = resolvePluralFromKind(ref.kind);
+      return formatBlockUri({
+        group,
+        version,
+        system,
+        namespace,
+        plural,
+        name: ref.name,
       });
     },
     [resolvePluralFromKind],
@@ -197,7 +200,10 @@ export const ResourceProvider = ({
       });
     }
 
+    // add the object to the list of objects
     if (Object.keys(object).length > 0) {
+      // load the events for the object
+      loadEvents(objUri);
       setObjects((prev) => {
         const r: Resource = {
           ...(object as ApiObject),
@@ -210,6 +216,7 @@ export const ResourceProvider = ({
           [objUri]: r,
         };
       });
+      // delete the object from the list of objects
     } else {
       setObjects((prev) => {
         const newObjects = { ...prev };
@@ -235,8 +242,6 @@ export const ResourceProvider = ({
     handleObjectMessages(initialResources.objects);
   }, [initialResources, handleObjectMessages]);
 
-
-
   useEffect(() => {
     setRelationships((prev) => {
       for (const r of Object.values(objects)) {
@@ -247,17 +252,17 @@ export const ResourceProvider = ({
 
         const childUri = r.objUri;
         const { system, namespace } = parseBlockUri(childUri);
-  
+
         for (const ref of refs) {
           const parentUri = resolveOwnerUri(ref, system, namespace);
-  
+
           prev[childUri] = {
             ...(prev[childUri] ?? {}),
-            [parentUri]: {  
+            [parentUri]: {
               type: RelationshipType.PARENT,
             },
           };
-  
+
           prev[parentUri] = {
             ...(prev[parentUri] ?? {}),
             [childUri]: {
@@ -270,7 +275,6 @@ export const ResourceProvider = ({
       return prev;
     });
   }, [resolvePluralFromKind, objects, resolveOwnerUri]);
-
 
   const handlePatchMessage = useCallback((message: PatchEvent) => {
     const { objUri, patch } = message;
@@ -287,7 +291,6 @@ export const ResourceProvider = ({
       };
     });
   }, []);
-
 
   const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
@@ -350,7 +353,13 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-  }, [lastJsonMessage, handleObjectMessage, handlePatchMessage, addNotifications, addEvent]);
+  }, [
+    lastJsonMessage,
+    handleObjectMessage,
+    handlePatchMessage,
+    addNotifications,
+    addEvent,
+  ]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
@@ -397,11 +406,7 @@ export const ResourceProvider = ({
         }
       };
 
-      requests.push(fetchEvents());
-
-      Promise.all(requests).catch((e) => {
-        console.warn(`unable to fetch events for ${objUri}: ${e.message}`);
-      });
+      fetchEvents();
     },
     [addEvent],
   );

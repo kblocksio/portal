@@ -53,7 +53,6 @@ function ResourcePage() {
     objects,
     eventsPerObject,
     setSelectedResourceId,
-    loadEvents,
     relationships,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
@@ -67,10 +66,6 @@ function ResourcePage() {
     namespace,
     name,
   });
-
-  useEffect(() => {
-    loadEvents(objUri);
-  }, [objUri, loadEvents]);
 
   const [lastEventCount, setLastEventCount] = useState(0);
   const events = useMemo(

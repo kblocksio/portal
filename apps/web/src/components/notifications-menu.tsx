@@ -61,7 +61,10 @@ export const NotificationMenu = ({ className }: NotificationMenuProps) => {
             <span className="sr-only">Toggle notifications</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[300px]">
+        <DropdownMenuContent
+          align="end"
+          className="max-h-[500px] w-[300px] overflow-y-auto"
+        >
           {notifications.length > 0 ? (
             <>
               {notifications.map((notification, index) => (

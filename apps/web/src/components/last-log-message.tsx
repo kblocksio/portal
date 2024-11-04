@@ -4,11 +4,7 @@ import { ResourceContext } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const LastLogMessage = ({ objUri }: { objUri: string }) => {
-  const { eventsPerObject, loadEvents } = useContext(ResourceContext);
-
-  useEffect(() => {
-    loadEvents(objUri);
-  }, [objUri, loadEvents]);
+  const { eventsPerObject } = useContext(ResourceContext);
 
   const events = useMemo(
     () => Object.values(eventsPerObject[objUri] ?? {}),
