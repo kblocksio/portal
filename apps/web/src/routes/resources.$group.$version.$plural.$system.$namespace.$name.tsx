@@ -230,84 +230,83 @@ function ResourcePage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
-          <div className="flex flex-col gap-8">
-            <CardContent>
-              <div className="">
-                <div className="w-full">
-                  <div className="pb-4 pt-4 sm:pt-6">
-                    <CardTitle>Status</CardTitle>
-                  </div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <PropertyKey>Status</PropertyKey>
-                    <PropertyValue>
-                      <div className="flex gap-2">
-                        {selectedResource.status?.conditions?.map(
-                          (condition) => (
-                            <StatusBadge
-                              key={condition.type}
-                              obj={selectedResource}
-                              showMessage
-                              type={condition.type}
-                            />
-                          ),
-                        )}
-                      </div>
-                    </PropertyValue>
-
-                    <PropertyKey>Namespace</PropertyKey>
-                    <PropertyValue>
-                      {selectedResource.metadata.namespace && (
-                        <NamespaceBadge
-                          namespace={selectedResource.metadata.namespace}
-                        />
-                      )}
-                    </PropertyValue>
-
-                    <PropertyKey>System</PropertyKey>
-                    <PropertyValue>
-                      <SystemBadge blockUri={selectedResource.objUri} />
-                    </PropertyValue>
-                  </div>
-                </div>
-
-                {/* Properties */}
-                <div className="w-full">
-                  <div className="pb-4 pt-4 sm:pt-6">
-                    <CardTitle>Properties</CardTitle>
-                  </div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <KeyValueList
-                      data={properties}
-                      resourceObjUri={selectedResource.objUri}
-                    />
-                  </div>
-                </div>
-
-                {outputs && Object.keys(outputs).length > 0 && (
-                  <div className="w-full">
-                    <div className="pb-4 pt-4 sm:pt-6">
-                      <CardTitle>Outputs</CardTitle>
-                    </div>
-                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                      <Outputs
-                        outputs={outputs}
-                        resourceObjUri={selectedResource.objUri}
-                        resourceType={selectedResourceType}
-                      />
-                    </div>
-                  </div>
-                )}
-                {children.length > 0 && (
-                  <div className="w-full">
-                    <div className="pb-4 pt-4 sm:pt-6">
-                      <CardTitle>Children</CardTitle>
-                    </div>
-                    <ResourceTable resources={children} className="w-full" />
-                  </div>
-                )}
+          <CardContent className="flex flex-col gap-8">
+            {/* Status */}
+            <div className="w-full">
+              <div className="pb-4 pt-4 sm:pt-6">
+                <CardTitle>Status</CardTitle>
               </div>
-            </CardContent>
-          </div>
+
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                <PropertyKey>Status</PropertyKey>
+                <PropertyValue>
+                  <div className="flex gap-2">
+                    {selectedResource.status?.conditions?.map((condition) => (
+                      <StatusBadge
+                        key={condition.type}
+                        obj={selectedResource}
+                        showMessage
+                        type={condition.type}
+                      />
+                    ))}
+                  </div>
+                </PropertyValue>
+
+                <PropertyKey>Namespace</PropertyKey>
+                <PropertyValue>
+                  {selectedResource.metadata.namespace && (
+                    <NamespaceBadge
+                      namespace={selectedResource.metadata.namespace}
+                    />
+                  )}
+                </PropertyValue>
+
+                <PropertyKey>System</PropertyKey>
+                <PropertyValue>
+                  <SystemBadge blockUri={selectedResource.objUri} />
+                </PropertyValue>
+              </div>
+            </div>
+
+            {/* Properties */}
+            <div className="w-full">
+              <div className="pb-4 sm:pt-6">
+                <CardTitle>Properties</CardTitle>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                <KeyValueList
+                  data={properties}
+                  resourceObjUri={selectedResource.objUri}
+                />
+              </div>
+            </div>
+
+            {/* Outputs */}
+            {outputs && Object.keys(outputs).length > 0 && (
+              <div className="w-full">
+                <div className="pb-4 sm:pt-6">
+                  <CardTitle>Outputs</CardTitle>
+                </div>
+                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                  <Outputs
+                    outputs={outputs}
+                    resourceObjUri={selectedResource.objUri}
+                    resourceType={selectedResourceType}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Children */}
+            {children.length > 0 && (
+              <div className="w-full">
+                <div className="pb-4 sm:pt-6">
+                  <CardTitle>Children</CardTitle>
+                </div>
+                <ResourceTable resources={children} className="w-full" />
+              </div>
+            )}
+          </CardContent>
         </TabsContent>
         <TabsContent value="logs">
           <div className="flex flex-col gap-8">
