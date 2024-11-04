@@ -176,6 +176,13 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
                       to={subItem.url as any}
                       className={isSubItemActive ? "bg-sidebar-accent" : ""}
                     >
+                      {subItem.icon &&
+                        (() => {
+                          const Icon = getIconComponent({ icon: subItem.icon });
+                          return (
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          );
+                        })()}
                       <span title={subItem.title}>{subItem.title}</span>
                     </Link>
                   </SidebarMenuSubButton>
