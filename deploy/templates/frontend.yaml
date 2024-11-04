@@ -1,0 +1,20 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-frontend
+image: {{ .Values.frontend.image }}
+port: 80
+replicas: 2
+ingress:
+  path: /
+  host: {{ .Values.frontend.ingress.host }}
+  tls:
+    hosts:
+      - {{ .Values.frontend.ingress.host }}
+    secret: {{ .Values.frontend.ingress.tls.secret }}
+allowCluster:
+  - apiGroup: "*"
+    resource: "*"
+    verbs: ["*"]
+{{- end }}

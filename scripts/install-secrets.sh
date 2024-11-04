@@ -3,6 +3,7 @@ set -euo pipefail
 dir=$(cd $(dirname "$0") && pwd)
 
 envfile=${1:-}
+qkube_name=${2:-portal-backend.quickube.sh}
 
 if [ -z "$envfile" ]; then
   echo "Usage: $0 <envfile>"
@@ -12,7 +13,7 @@ if [ -z "$envfile" ]; then
 fi
 
 current_context=$(kubectl config current-context)
-qkube use portal-backend.quickube.sh
+qkube use "$qkube_name"
 
 secret="kblocks-api-secrets"
 kubectl delete secret "$secret" || true

@@ -48,6 +48,9 @@ jobs:
           chmod +x skaffold
           sudo mv skaffold /usr/local/bin
 
+      - name: Build
+        run: npm run build
+
       - name: Skaffold build
         id: build
         run: |

@@ -1,0 +1,20 @@
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-backend
+image: {{ .Values.backend.image }}
+port: 3001
+replicas: 2
+ingress:
+  path: /
+  host: {{ .Values.backend.ingress.host }}
+  tls:
+    hosts:
+      - {{ .Values.backend.ingress.host }}
+    secret: {{ .Values.backend.ingress.tls.secret }}
+envFrom:
+  - secretName: {{ .Values.backend.secretName }}
+allowCluster:
+  - apiGroup: "*"
+    resource: "*"
+    verbs: ["*"]
