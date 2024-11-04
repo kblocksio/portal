@@ -64,7 +64,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           OWNER: "winglang"
           REPO: "kblocks-gallery"
-          WORKFLOW: "deploy.yml"
+          WORKFLOW: "deploy.yaml"
         run: |
           QKUBE_NAME=${{ steps.qkube.outputs.qbube-name }}
 
@@ -75,10 +75,17 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches" \
-            -d '{"ref":"main","inputs":{"qbube_cluster":"${QKUBE_NAME}"}}')
+            -d '{"ref":"main","inputs":{"qkube_cluster":"${QKUBE_NAME}"}}')
+
+          # check if the response is successful
+          echo "RESPONSE: $RESPONSE"
+          if [ "$(echo $RESPONSE | jq -r '.message')" != "null" ]; then
+            echo "Failed to trigger workflow: $RESPONSE"
+            exit 1
+          fi
 
           # Get run ID of the triggered workflow
-          sleep 5  # Wait for workflow to start
+          sleep 10  # Wait for workflow to start
           RUN_ID=$(curl -L \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${GH_TOKEN}" \
@@ -86,6 +93,8 @@ jobs:
             "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs" \
             | jq '.workflow_runs[0].id')
           
+          echo "RUN_ID: $RUN_ID"
+
           # Poll until workflow completes
           while true; do
             STATUS=$(curl -L \
@@ -95,6 +104,7 @@ jobs:
               "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${RUN_ID}" \
               | jq -r '.status')
             
+            echo "STATUS: $STATUS"
             if [ "$STATUS" = "completed" ]; then
               break
             fi
@@ -111,6 +121,7 @@ jobs:
             "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${RUN_ID}" \
             | jq -r '.conclusion')
           
+          echo "CONCLUSION: $CONCLUSION"
           if [ "$CONCLUSION" != "success" ]; then
             echo "Workflow failed with conclusion: $CONCLUSION"
             exit 1
