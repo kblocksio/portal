@@ -4,6 +4,7 @@ import {
   CheckCircle,
   RefreshCw,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import {
   EventAction,
@@ -15,13 +16,6 @@ import {
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import { TimestampDetails } from "../timestamp-details";
 import { Timestamp } from "../timestamp";
 
 type GroupHeader = {
@@ -39,7 +33,6 @@ type EventGroup = {
 
 export default function Timeline({
   events,
-  className,
 }: {
   events: WorkerEvent[];
   className?: string;
@@ -82,7 +75,7 @@ function EventItem({
   const action = getActionLabel(header.action);
   const [isOpen, setIsOpen] = useState(isLast);
 
-  const isClickable = eventGroup.logs.length > 0 || header.details;
+  const isClickable = eventGroup.logs.length > 0 ?? header.details;
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
@@ -134,18 +127,23 @@ function EventItem({
           </div>
         </div>
       </div>
-
-      {isOpen && header.details && (
-        <div>
-          <MarkdownWrapper content={header.details} />
-        </div>
-      )}
-
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mb-10 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+        <div className="mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
+        </div>
+      )}
+
+      {isOpen && header.details && (
+        <div className="flex flex-col pt-6">
+          <MarkdownWrapper content={header.details} />
+          <div className="flex items-center gap-2 py-4">
+            <Sparkles className="size-4 text-yellow-500" />
+            <span className="text-xs italic text-gray-700">
+              This content is AI-generated and may contain errors
+            </span>
+          </div>
         </div>
       )}
     </div>
