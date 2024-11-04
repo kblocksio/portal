@@ -377,7 +377,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["OBJECT", "PATCH", "ERROR", "LIFECYCLE", "LOG"]
+            "enum": [
+              "OBJECT",
+              "PATCH",
+              "ERROR",
+              "LIFECYCLE",
+              "LOG"
+            ]
           },
           "objUri": {
             "type": "string"
