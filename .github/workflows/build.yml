@@ -51,6 +51,11 @@ jobs:
           chmod +x skaffold
           sudo mv skaffold /usr/local/bin
 
+      - name: Create empty kube config
+        run: |
+          mkdir -p /home/runner/.kube
+          echo "apiVersion: v1" > /home/runner/.kube/config
+
       - name: Setup a new qkube
         id: qkube
         run: |
@@ -77,9 +82,8 @@ jobs:
             "https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches" \
             -d '{"ref":"main","inputs":{"qkube_cluster":"${QKUBE_NAME}"}}')
 
-          # check if the response is successful
-          echo "RESPONSE: $RESPONSE"
-          if [ "$(echo $RESPONSE | jq -r '.message')" != "null" ]; then
+          # check if the response is not empty
+          if [ -n "$RESPONSE" ]; then
             echo "Failed to trigger workflow: $RESPONSE"
             exit 1
           fi
