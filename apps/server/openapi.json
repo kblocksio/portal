@@ -120,7 +120,8 @@
                 "$ref": "#/components/schemas/WorkerEvent"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -224,7 +225,8 @@
                 "$ref": "#/components/schemas/ApiObject"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -326,6 +328,172 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "Get projects",
+        "operationId": "getProjects",
+        "responses": {
+          "200": {
+            "description": "List of projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/github/installations": {
+      "get": {
+        "summary": "List GitHub installations",
+        "operationId": "getGithubInstallations",
+        "responses": {
+          "200": {
+            "description": "List of GitHub installations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "303": {
+            "description": "Redirect to sign out"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/github/repositories": {
+      "get": {
+        "summary": "List GitHub repositories",
+        "operationId": "getGithubRepositories",
+        "parameters": [
+          {
+            "name": "installation_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of GitHub repositories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Installation ID is required"
+          }
+        }
+      }
+    },
+    "/api/user": {
+      "get": {
+        "summary": "Get current user",
+        "operationId": "getUser",
+        "responses": {
+          "200": {
+            "description": "Current user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "List all users",
+        "operationId": "getUsers",
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching users"
+          }
+        }
+      }
+    },
+    "/api/reset": {
+      "post": {
+        "summary": "Reset storage",
+        "operationId": "resetStorage",
+        "parameters": [
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage reset successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid password"
           }
         }
       }
