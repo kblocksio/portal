@@ -16,6 +16,7 @@ import {
   WorkerEvent,
   parseBlockUri,
   Manifest,
+  formatBlockUri,
 } from "@kblocks/api";
 import { request } from "./lib/backend";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
@@ -50,6 +51,16 @@ type BlockApiObject = ApiObject & {
   spec: Manifest;
 };
 
+export type Relationship = {
+  type: RelationshipType;
+};
+
+export enum RelationshipType {
+  PARENT = "parent",
+  CHILD = "child",
+  REF = "ref",
+}
+
 export interface ResourceContextValue {
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
@@ -64,6 +75,7 @@ export interface ResourceContextValue {
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
   loadEvents: (objUri: string) => void;
   categories: Record<string, Category>;
+  relationships: Record<string, Record<string, Relationship>>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -78,6 +90,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   eventsPerObject: {},
   categories: {},
   loadEvents: () => {},
+  relationships: {},
 });
 
 export const ResourceProvider = ({
@@ -97,6 +110,9 @@ export const ResourceProvider = ({
   >(undefined);
   const [eventsPerObject, setEventsPerObject] = useState<
     Record<string, Record<string, WorkerEvent>>
+  >({});
+  const [relationships, setRelationships] = useState<
+    Record<string, Record<string, Relationship>>
   >({});
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
@@ -126,6 +142,32 @@ export const ResourceProvider = ({
       setCategories(categoriesData);
     }
   }, [categoriesData]);
+
+  const resolvePluralFromKind = useCallback((kind: string) => {
+    for (const def of Object.values(resourceTypes)) {
+      if (def.kind === kind) {
+        return def.plural;
+      }
+    }
+
+    return kind.toLowerCase();
+  }, [resourceTypes]);
+
+
+  const resolveOwnerUri = useCallback((ref: OwnerReference, system: string, namespace: string) => {
+    const [group, version] = ref.apiVersion.split("/");
+    const plural = resolvePluralFromKind(ref.kind);
+    return formatBlockUri({
+      group,
+      version,
+      system,
+      namespace,
+      plural,
+      name: ref.name,
+      });
+    },
+    [resolvePluralFromKind],
+  );
 
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
@@ -193,7 +235,44 @@ export const ResourceProvider = ({
     handleObjectMessages(initialResources.objects);
   }, [initialResources, handleObjectMessages]);
 
-  const handlePatchMessage = (message: PatchEvent) => {
+
+
+  useEffect(() => {
+    setRelationships((prev) => {
+      for (const r of Object.values(objects)) {
+        const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
+        if (refs.length === 0) {
+          continue;
+        }
+
+        const childUri = r.objUri;
+        const { system, namespace } = parseBlockUri(childUri);
+  
+        for (const ref of refs) {
+          const parentUri = resolveOwnerUri(ref, system, namespace);
+  
+          prev[childUri] = {
+            ...(prev[childUri] ?? {}),
+            [parentUri]: {  
+              type: RelationshipType.PARENT,
+            },
+          };
+  
+          prev[parentUri] = {
+            ...(prev[parentUri] ?? {}),
+            [childUri]: {
+              type: RelationshipType.CHILD,
+            },
+          };
+        }
+      }
+
+      return prev;
+    });
+  }, [resolvePluralFromKind, objects, resolveOwnerUri]);
+
+
+  const handlePatchMessage = useCallback((message: PatchEvent) => {
     const { objUri, patch } = message;
 
     setObjects((prev) => {
@@ -207,7 +286,8 @@ export const ResourceProvider = ({
         [objUri]: newObject,
       };
     });
-  };
+  }, []);
+
 
   const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
@@ -270,7 +350,7 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-  }, [lastJsonMessage]);
+  }, [lastJsonMessage, handleObjectMessage, handlePatchMessage, addNotifications, addEvent]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
@@ -338,6 +418,7 @@ export const ResourceProvider = ({
     selectedResourceId,
     setSelectedResourceId,
     categories,
+    relationships,
   };
 
   return (
@@ -345,4 +426,13 @@ export const ResourceProvider = ({
       {children}
     </ResourceContext.Provider>
   );
+};
+
+export type OwnerReference = {
+  apiVersion: string;
+  kind: string;
+  name: string;
+  uid?: string;
+  blockOwnerDeletion?: boolean;
+  controller?: boolean;
 };

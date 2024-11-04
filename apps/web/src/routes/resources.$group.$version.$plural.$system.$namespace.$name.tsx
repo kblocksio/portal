@@ -4,7 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { ResourceContext } from "@/resource-context";
+import {
+  RelationshipType,
+  Resource,
+  ResourceContext,
+} from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -29,6 +33,7 @@ import {
   PropertyValue,
 } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
+import { ResourceTable } from "@/components/resource-table/resource-table";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -37,10 +42,10 @@ export function urlForResource(blockUri: BlockUriComponents) {
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
 )({
-  component: Resource,
+  component: ResourcePage,
 });
 
-function Resource() {
+function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const router = useRouter();
   const {
@@ -49,6 +54,7 @@ function Resource() {
     eventsPerObject,
     setSelectedResourceId,
     loadEvents,
+    relationships,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
@@ -121,6 +127,22 @@ function Resource() {
   const outputs = useMemo(() => {
     return selectedResource ? getResourceOutputs(selectedResource) : {};
   }, [selectedResource]);
+
+  const children = useMemo(() => {
+    if (!selectedResource) {
+      return [];
+    }
+
+    const children: Resource[] = [];
+    const rels = relationships[selectedResource.objUri] ?? {};
+    for (const [relUri, rel] of Object.entries(rels)) {
+      if (rel.type === RelationshipType.CHILD) {
+        children.push(objects[relUri]);
+      }
+    }
+
+    return children;
+  }, [selectedResource, relationships, objects  ]);
 
   useEffect(() => {
     if (!selectedResource) return;
@@ -280,6 +302,14 @@ function Resource() {
                     </div>
                   </div>
                 )}
+                {children.length > 0 && (
+                  <div className="w-full">
+                    <div className="pb-4 pt-8">
+                      <CardTitle>Children</CardTitle>
+                    </div>
+                    <ResourceTable resources={children} className="w-full" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </div>
@@ -324,4 +354,4 @@ function Resource() {
   );
 }
 
-export default Resource;
+export default ResourcePage;
