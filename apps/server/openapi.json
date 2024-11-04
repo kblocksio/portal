@@ -56,6 +56,29 @@
         }
       }
     },
+    "/api/auth/reject": {
+      "get": {
+        "summary": "Sign out non-whitelisted users",
+        "operationId": "signOutNonWhitelisted",
+        "responses": {
+          "200": {
+            "description": "User is not whitelisted and was signed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/categories": {
       "get": {
         "summary": "Get categories",
@@ -248,6 +271,64 @@
           }
         }
       }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/logs}": {
+      "get": {
+        "summary": "Get logs of specific resource",
+        "operationId": "getResourceLogs",
+        "responses": {
+          "200": {
+            "description": "Logs of the resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "objUri": {
+                      "type": "string"
+                    },
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkerEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/events}": {
+      "get": {
+        "summary": "Get events of specific resource",
+        "operationId": "getResourceEvents",
+        "responses": {
+          "200": {
+            "description": "Events of the resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "objUri": {
+                      "type": "string"
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkerEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -277,7 +358,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["OBJECT", "PATCH", "ERROR", "LIFECYCLE", "LOG"]
+            "enum": [
+              "OBJECT",
+              "PATCH",
+              "ERROR",
+              "LIFECYCLE",
+              "LOG"
+            ]
           },
           "objUri": {
             "type": "string"
