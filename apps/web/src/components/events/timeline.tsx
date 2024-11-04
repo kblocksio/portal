@@ -15,6 +15,12 @@ import {
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 type GroupHeader = {
   timestamp: Date;
@@ -50,7 +56,6 @@ export default function Timeline({
         />
       ))}
 
-
       {/* <div
         ref={(el) =>
           el && el.scrollIntoView({ behavior: "smooth", block: "end" })
@@ -60,6 +65,86 @@ export default function Timeline({
   );
 }
 
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const localLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+  fractionalSecondDigits: 3,
+  hour12: true,
+  timeZone: timezone,
+});
+const utcLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+  fractionalSecondDigits: 3,
+  hour12: true,
+  timeZone: "UTC",
+});
+
+export const TimestampDetails = (props: { timestamp: Date }) => {
+  const localTime = useMemo(() => {
+    return localLongDateTimeFormat.format(props.timestamp);
+  }, [props.timestamp]);
+
+  const utcTime = useMemo(() => {
+    return utcLongDateTimeFormat.format(props.timestamp);
+  }, [props.timestamp]);
+
+  const timestamp = useMemo(() => {
+    return props.timestamp.getTime();
+  }, [props.timestamp]);
+
+  return (
+    <div className="grid grid-cols-[8em_1fr] gap-1 py-1 text-xs">
+      <span className="text-muted-foreground">{timezone}</span>
+      <span className="text-foreground">{localTime}</span>
+      <span className="text-muted-foreground">UTC</span>
+      <span className="text-foreground">{utcTime}</span>
+      <span className="text-muted-foreground">Timestamp</span>
+      <span className="text-foreground">{timestamp}</span>
+    </div>
+  );
+};
+
+const shortDateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  fractionalSecondDigits: 2,
+  hour12: false,
+});
+
+export const Timestamp = (props: { timestamp: Date }) => {
+  const timestamp = useMemo(() => {
+    return shortDateTimeFormat.format(props.timestamp);
+  }, [props.timestamp]);
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <span className="text-foreground rounded-sm px-1 py-0.5 font-mono text-xs uppercase hover:bg-gray-100">
+            {timestamp}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <TimestampDetails timestamp={props.timestamp} />
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 function EventItem({
   eventGroup,
   isLast,
@@ -68,7 +153,6 @@ function EventItem({
   isLast: boolean;
 }) {
   const header = eventGroup.header;
-  const timestamp = header.timestamp.toLocaleString();
   const ReasonIcon = getReasonIcon(header.reason);
   const reasonColor = getReasonColor(header.reason);
   const action = getActionLabel(header.action);
@@ -94,9 +178,11 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <div className="flex flex-wrap gap-2">
-          <span className="text-gray-500">{timestamp}</span>
-          <span className="text-gray-500">{action}</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <Timestamp timestamp={header.timestamp} />
+          <span className="text-muted-foreground font-mono text-xs uppercase">
+            {action}
+          </span>
           <span className={messageColor}>
             <pre className="font-sans">{message}</pre>
           </span>
@@ -114,12 +200,12 @@ function EventItem({
 
       {isOpen && header.details && (
         <div>
-          <MarkdownWrapper content={header.details}/>
+          <MarkdownWrapper content={header.details} />
         </div>
       )}
 
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mb-10 space-y-1 rounded-sm bg-slate-800 p-4 font-mono shadow-md overflow-x-auto">
+        <div className="mb-10 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
@@ -134,7 +220,6 @@ function LogItem({ log }: { log: LogEvent }) {
   const message = log.message;
 
   const classes = [];
-
 
   switch (log.level) {
     case LogLevel.DEBUG:
@@ -220,7 +305,9 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
 
       const messageLines = event.event.message.split("\n");
       if (messageLines.length > 1) {
-        currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
+        currentGroup.logs.push(
+          ...messageLines.map((line) => renderLogEvent(event, line)),
+        );
       }
 
       groups.push(currentGroup);
@@ -232,10 +319,12 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
         //   messageLines.unshift("");
         // }
 
-        currentGroup.logs.push(...messageLines.map(line => ({
-          ...event,
-          message: line,
-        })));
+        currentGroup.logs.push(
+          ...messageLines.map((line) => ({
+            ...event,
+            message: line,
+          })),
+        );
       } else {
         // ignore
       }
@@ -258,7 +347,6 @@ const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
     timestamp: event.timestamp,
   };
 };
-
 
 const getActionLabel = (action: EventAction) => {
   switch (action) {
@@ -302,4 +390,3 @@ function formatExplanation(explanation: any): string[] {
 
   return [JSON.stringify(explanation)];
 }
-
