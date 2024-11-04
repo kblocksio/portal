@@ -1,0 +1,10 @@
+{
+  "name": "autobuild-static-site",
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": "Builds and publishes a static website into an S3 bucket.",
+  "dependencies": {
+    "cdktf": "^0.20.9",
+    "@cdktf/provider-github": "^14.3.1"
+  }
+}

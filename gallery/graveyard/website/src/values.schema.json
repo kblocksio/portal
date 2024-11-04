@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": [
+    "image",
+    "backend",
+    "route"
+  ],
+  "properties": {
+    "backend": {
+      "type": "string",
+      "description": "The backend URL that the frontend web application will communicate with. This field is required."
+    },
+    "image": {
+      "type": "string",
+      "description": "The Docker image to deploy. This field is required."
+    },
+    "route": {
+      "type": "string",
+      "description": "The route at which the website will be accessible. This field is required."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+apiVersion: acme.com/v1
+kind: Cron
+metadata:
+  name: eladb-cron
+schedule: "* * * * *"
+image: busybox:1.28
+command:
+  - /bin/sh
+  - -c
+  - date; echo World

@@ -1,0 +1,7 @@
+apiVersion: acme.com/v1
+kind: Service
+metadata:
+  name: eladb-hello
+repo:
+  owner: monadaco
+  name: eladb-hello

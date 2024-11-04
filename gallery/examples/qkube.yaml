@@ -1,0 +1,6 @@
+apiVersion: acme.com/v1
+kind: Qkube
+metadata:
+  name: minimal-cluster
+name: minimal-cluster
+size: small

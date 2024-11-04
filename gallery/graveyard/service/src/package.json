@@ -1,0 +1,7 @@
+{
+  "name": "service",
+  "dependencies": {
+    "cdk8s-plus-30": "^2.0.6",
+    "@winglibs/k8s": "^0.0.8"
+  }
+}

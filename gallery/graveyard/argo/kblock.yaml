@@ -1,0 +1,33 @@
+apiVersion: kblocks.io/v1
+kind: Block
+metadata:
+  name: argos.acme.com
+  namespace: kblocks
+spec:
+  engine: helm
+  definition:
+    group: acme.com
+    version: v1
+    kind: Argo
+    plural: argos
+    readme: README.md
+    schema: src/values.schema.json
+    icon: heroicon://cube
+    color: orange
+    description: A Kubernetes custom resource for managing ingress configurations
+      for ArgoCD using Helm charts.
+  operator:
+    envConfigMaps:
+      SLACK_CHANNEL: slack-config
+      AWS_DEFAULT_REGION: tf-backend-config
+      TF_BACKEND_BUCKET: tf-backend-config
+      TF_BACKEND_REGION: tf-backend-config
+      TF_BACKEND_KEY: tf-backend-config
+      TF_BACKEND_DYNAMODB: tf-backend-config
+      KBLOCKS_SYSTEM_ID: system-config
+    envSecrets:
+      SLACK_API_TOKEN: slack-token
+      OPENAI_API_KEY: openai-token
+      AWS_ACCESS_KEY_ID: aws-credentials
+      AWS_SECRET_ACCESS_KEY: aws-credentials
+      GITHUB_TOKEN: github-token

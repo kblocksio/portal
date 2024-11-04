@@ -1,0 +1,32 @@
+apiVersion: kblocks.io/v1
+kind: Block
+metadata:
+  name: repositories.acme.com
+  namespace: kblocks
+spec:
+  engine: wing/tf-aws
+  definition:
+    group: acme.com
+    version: v1
+    kind: Repository
+    plural: repositories
+    readme: README.md
+    icon: heroicon://archive-box
+    color: violet
+    schema: ./src/repository.w
+    description: Manage and configure GitHub repositories as native Kubernetes objects.
+  operator:
+    envConfigMaps:
+      SLACK_CHANNEL: slack-config
+      AWS_DEFAULT_REGION: tf-backend-config
+      TF_BACKEND_BUCKET: tf-backend-config
+      TF_BACKEND_REGION: tf-backend-config
+      TF_BACKEND_KEY: tf-backend-config
+      TF_BACKEND_DYNAMODB: tf-backend-config
+      KBLOCKS_SYSTEM_ID: system-config
+    envSecrets:
+      SLACK_API_TOKEN: slack-token
+      OPENAI_API_KEY: openai-token
+      AWS_ACCESS_KEY_ID: aws-credentials
+      AWS_SECRET_ACCESS_KEY: aws-credentials
+      GITHUB_TOKEN: github-token

@@ -1,0 +1,6 @@
+apiVersion: acme.com/v1
+kind: AwsAccount
+metadata:
+  name: aws-account-test
+name: "A test account"
+email: "testaccount@wing.cloud"
