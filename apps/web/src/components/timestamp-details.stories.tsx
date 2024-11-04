@@ -1,20 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Timestamp } from "./timeline";
+import { TimestampDetails } from "./timestamp-details";
 
 const meta = {
-  title: "Components/Events/Timeline/Timestamp",
-  component: Timestamp,
+  title: "Components/TimestampDetails",
+  component: TimestampDetails,
   parameters: {
     layout: "centered",
   },
-  decorators: [
-    (Story) => (
-      <div className="p-24">
-        <Story />
-      </div>
-    ),
-  ],
   tags: ["autodocs"],
   argTypes: {
     timestamp: {
@@ -22,7 +15,7 @@ const meta = {
     },
   },
   args: { timestamp: new Date() },
-} satisfies Meta<typeof Timestamp>;
+} satisfies Meta<typeof TimestampDetails>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

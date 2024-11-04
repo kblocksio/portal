@@ -21,6 +21,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { TimestampDetails } from "../timestamp-details";
+import { Timestamp } from "../timestamp";
 
 type GroupHeader = {
   timestamp: Date;
@@ -64,86 +66,6 @@ export default function Timeline({
     </div>
   );
 }
-
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const localLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
-  fractionalSecondDigits: 3,
-  hour12: true,
-  timeZone: timezone,
-});
-const utcLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
-  fractionalSecondDigits: 3,
-  hour12: true,
-  timeZone: "UTC",
-});
-
-export const TimestampDetails = (props: { timestamp: Date }) => {
-  const localTime = useMemo(() => {
-    return localLongDateTimeFormat.format(props.timestamp);
-  }, [props.timestamp]);
-
-  const utcTime = useMemo(() => {
-    return utcLongDateTimeFormat.format(props.timestamp);
-  }, [props.timestamp]);
-
-  const timestamp = useMemo(() => {
-    return props.timestamp.getTime();
-  }, [props.timestamp]);
-
-  return (
-    <div className="grid grid-cols-[8em_1fr] gap-1 py-1 text-xs">
-      <span className="text-muted-foreground">{timezone}</span>
-      <span className="text-foreground">{localTime}</span>
-      <span className="text-muted-foreground">UTC</span>
-      <span className="text-foreground">{utcTime}</span>
-      <span className="text-muted-foreground">Timestamp</span>
-      <span className="text-foreground">{timestamp}</span>
-    </div>
-  );
-};
-
-const shortDateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  fractionalSecondDigits: 2,
-  hour12: false,
-});
-
-export const Timestamp = (props: { timestamp: Date }) => {
-  const timestamp = useMemo(() => {
-    return shortDateTimeFormat.format(props.timestamp);
-  }, [props.timestamp]);
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>
-          <span className="text-foreground rounded-sm px-1 py-0.5 font-mono text-xs uppercase hover:bg-gray-100">
-            {timestamp}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <TimestampDetails timestamp={props.timestamp} />
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
 
 function EventItem({
   eventGroup,
