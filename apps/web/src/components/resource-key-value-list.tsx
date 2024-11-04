@@ -25,7 +25,7 @@ import {
 } from "./ui/tooltip";
 import { ResourceLink } from "./resource-link";
 
-const CopyToClipboard = ({
+const CopyToClipboardButton = ({
   text,
   className,
   children,
@@ -44,19 +44,17 @@ const CopyToClipboard = ({
   const Icon = copied ? ClipboardCheckIcon : ClipboardIcon;
 
   return (
-    <Button
-      variant="ghost"
+    <button
       onClick={handleCopy}
       className={cn(
         className,
-        "group/copy inline-flex w-full items-center px-2 text-left",
+        "group/copy hover:bg-muted inline-flex items-center gap-2 truncate rounded-md px-2 py-1 text-left",
       )}
-      size="icon"
     >
       {children}
       <Icon className="size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
       <div className="grow"></div>
-    </Button>
+    </button>
   );
 };
 
@@ -83,7 +81,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
             if (referencedPropValue) {
               return (
                 <div className="flex items-center space-x-2 truncate">
-                  <div className="text-muted-foreground flex gap-2 truncate italic">
+                  <div className="text-foreground flex gap-1 truncate italic">
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger>
@@ -107,17 +105,26 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
         }
 
         return (
-          <CopyToClipboard text={value}>
-            <span
-              className="truncate"
-              dangerouslySetInnerHTML={{
-                __html: linkifyHtml(value, {
-                  className: "text-blue-500 hover:underline",
-                  target: "_blank noreferrer",
-                }),
-              }}
-            />
-          </CopyToClipboard>
+          <div className="inline-flex w-full">
+            <CopyToClipboardButton text={value}>
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              <span
+                className="min-w-0 truncate"
+                onClick={(event) => {
+                  // If target is a link, prevent the click event from bubbling up
+                  if ((event.target as HTMLElement).tagName === "A") {
+                    event.stopPropagation();
+                  }
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: linkifyHtml(value, {
+                    className: "text-blue-500 hover:underline",
+                    target: "_blank noreferrer",
+                  }),
+                }}
+              />
+            </CopyToClipboardButton>
+          </div>
         );
       }
 
