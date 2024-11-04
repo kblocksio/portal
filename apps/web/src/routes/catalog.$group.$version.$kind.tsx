@@ -31,7 +31,7 @@ function Catalog() {
   }, [resourceTypes, group, version, kind]);
 
   return (
-    <div className={cn("container flex flex-col gap-4 px-4 sm:px-6 lg:px-8")}>
+    <div className={cn("container mx-auto flex flex-col gap-4")}>
       {currentResourceType && (
         <MarkdownWrapper content={currentResourceType.readme || ""} />
       )}

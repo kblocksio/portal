@@ -24,7 +24,9 @@ export const Route = createRootRoute({
         <Outlet />
         <ScrollRestoration />
         <Suspense>
-          <TanStackRouterDevtools />
+          <div className="hidden lg:visible">
+            <TanStackRouterDevtools />
+          </div>
         </Suspense>
       </App>
     </>
