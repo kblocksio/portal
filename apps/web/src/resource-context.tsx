@@ -129,6 +129,9 @@ export const ResourceProvider = ({
     onError: (error) => {
       console.error("WebSocket error:", error);
     },
+    onMessage: (message) => {
+      console.log("WebSocket message:", message);
+    },
   });
 
   const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
@@ -393,10 +396,7 @@ export const ResourceProvider = ({
 
   const loadEvents = useCallback(
     (objUri: string) => {
-      const requests = [];
-
       const uri = parseBlockUri(objUri);
-
       const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
       const fetchEvents = async () => {
         const response = await request("GET", eventsUrl);
@@ -405,7 +405,6 @@ export const ResourceProvider = ({
           addEvent(event);
         }
       };
-
       fetchEvents();
     },
     [addEvent],
