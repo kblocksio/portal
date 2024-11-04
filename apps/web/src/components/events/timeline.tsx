@@ -50,13 +50,15 @@ export default function Timeline({
     <div className="relative w-full overflow-x-hidden">
       <div className="absolute left-3.5 h-full w-px bg-gray-200"></div>
 
-      {eventGroups.map((eventGroup, index) => (
-        <EventItem
-          key={index}
-          eventGroup={eventGroup}
-          isLast={index === eventGroups.length - 1}
-        />
-      ))}
+      <div className="flex flex-col gap-2">
+        {eventGroups.map((eventGroup, index) => (
+          <EventItem
+            key={index}
+            eventGroup={eventGroup}
+            isLast={index === eventGroups.length - 1}
+          />
+        ))}
+      </div>
 
       {/* <div
         ref={(el) =>
@@ -90,7 +92,7 @@ function EventItem({
         <ReasonIcon className={`h-5 w-5 ${reasonColor}`} />
       </div>
       <div
-        className={cn("flex gap-2 rounded-md pb-4 pl-0 pr-2 pt-0")}
+        className={cn("group flex gap-2 pl-0 pr-2 pt-0")}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -100,24 +102,27 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <div className="flex flex-wrap items-center gap-3">
-          <Timestamp timestamp={header.timestamp} />
-          <span className="text-muted-foreground font-mono text-xs uppercase">
+        <div className="group-hover:bg-muted flex w-full flex-wrap items-center gap-3 rounded-md px-2 py-1">
+          <div className="flex items-center gap-1">
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 transition-transform duration-300",
+                isOpen ? "rotate-90" : "rotate-0",
+                isClickable ? "visible" : "invisible",
+              )}
+            />
+
+            <Timestamp timestamp={header.timestamp} />
+          </div>
+
+          <span className="text-muted-foreground min-w-12 font-mono text-xs uppercase">
             {action}
           </span>
+
           <span className={messageColor}>
             <pre className="font-sans">{message}</pre>
           </span>
         </div>
-
-        {isClickable && (
-          <ChevronRight
-            className={cn(
-              "mt-1 h-4 w-4 transition-transform duration-300",
-              isOpen ? "rotate-90" : "rotate-0",
-            )}
-          />
-        )}
       </div>
 
       {isOpen && header.details && (
@@ -127,7 +132,7 @@ function EventItem({
       )}
 
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mb-10 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+        <div className="mb-10 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
