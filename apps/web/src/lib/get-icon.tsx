@@ -23,7 +23,7 @@ export const getIconComponent = ({
     return (props: { className?: string }) => <HeroIcon {...props} />;
   }
   // handle SVG strings
-  if (icon.startsWith("<svg")) {
+  if (icon.startsWith("<svg") || icon.startsWith("<?xml")) {
     const SvgIcon = (props: { className?: string }) => (
       <div
         {...props}
