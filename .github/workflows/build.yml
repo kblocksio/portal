@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm ci
+          npm install
           npm i -g @quickube/cli @winglang/cli
 
       - name: Install helm
