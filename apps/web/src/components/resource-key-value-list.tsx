@@ -29,10 +29,11 @@ import {
 const CopyToClipboard = ({
   text,
   className,
-}: {
+  children,
+}: PropsWithChildren<{
   text: string;
   className?: string;
-}) => {
+}>) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -41,13 +42,21 @@ const CopyToClipboard = ({
     setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
   };
 
+  const Icon = copied ? ClipboardCheckIcon : ClipboardIcon;
+
   return (
     <Button
       variant="ghost"
       onClick={handleCopy}
-      className={cn(className, "h-4 w-4")}
+      className={cn(
+        className,
+        "group/copy inline-flex w-full items-center px-2 text-left",
+      )}
+      size="icon"
     >
-      {copied ? <ClipboardCheckIcon /> : <ClipboardIcon />}
+      {children}
+      <Icon className="size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
+      <div className="grow"></div>
     </Button>
   );
 };
@@ -113,9 +122,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
                                 {referencedObject.metadata.name}
                               </div>
                             </Link>
-                            <span className="font-bold">
-                                  {attribute}
-                                </span>
+                            <span className="font-bold">{attribute}</span>
                           </div>
                           {/* <div className="truncate p-2 font-mono">{value}</div> */}
                         </TooltipContent>
@@ -131,7 +138,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
         }
 
         return (
-          <div className="group flex items-center space-x-2 truncate">
+          <CopyToClipboard text={value}>
             <span
               className="truncate"
               dangerouslySetInnerHTML={{
@@ -141,11 +148,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
                 }),
               }}
             />
-            <CopyToClipboard
-              className="opacity-0 group-hover:opacity-100"
-              text={value}
-            />
-          </div>
+          </CopyToClipboard>
         );
       }
 
