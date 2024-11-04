@@ -48,11 +48,11 @@ const CopyToClipboardButton = ({
       onClick={handleCopy}
       className={cn(
         className,
-        "group/copy hover:bg-muted inline-flex items-center gap-2 truncate rounded-md px-2 py-1 text-left",
+        "group/copy hover:bg-muted inline-flex items-center gap-1 truncate rounded-md px-1 py-0.5 text-left",
       )}
     >
       {children}
-      <Icon className="size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
+      <Icon className="-mr-1 size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
       <div className="grow"></div>
     </button>
   );
@@ -185,7 +185,7 @@ export const PropertyValue = ({ children }: PropsWithChildren) => {
   const isLink = typeof children === "string" && /<a\s/i.test(children);
 
   return (
-    <div className="truncate">
+    <div className="flex items-center truncate">
       {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
       {!isLink && <span className="truncate">{children}</span>}
     </div>
