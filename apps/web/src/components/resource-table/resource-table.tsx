@@ -9,11 +9,16 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useContext, useMemo, useState } from "react";
-import { Resource, ResourceContext, ResourceType } from "@/resource-context";
+import {
+  RelationshipType,
+  Resource,
+  ResourceContext,
+  ResourceType,
+} from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
-import { getReadyCondition, getResourceOutputs } from "@/lib/utils";
+import { cn, getReadyCondition, getResourceOutputs } from "@/lib/utils";
 import { LastLogMessage } from "../last-log-message";
 import { StatusBadge } from "../status-badge";
 import { SystemBadge } from "../system-badge";
@@ -27,7 +32,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "@tanstack/react-router";
-import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
@@ -40,9 +44,11 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
+import { ResourceLink } from "../resource-link";
 
 const useColumns = () => {
-  const { resourceTypes } = useContext(ResourceContext);
+  const { resourceTypes, relationships, objects } = useContext(ResourceContext);
+
   return useMemo<ColumnDef<Resource>[]>(() => {
     return [
       {
@@ -162,6 +168,46 @@ const useColumns = () => {
       },
 
       {
+        accessorKey: "children",
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Children" />
+        ),
+        cell: (props) => {
+          const rels = Object.entries(
+            relationships[props.row.original.objUri] ?? {},
+          )
+            .filter(([_, rel]) => rel.type === RelationshipType.CHILD)
+            .map(([relUri]) => objects[relUri]);
+
+          if (rels.length === 0) {
+            return null;
+          }
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    <div>{rels.length} Children</div>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-2">
+                    {rels.map((r) => {
+                      return (
+                        <div key={r.objUri}>
+                          <ResourceLink resource={r} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+      },
+
+      {
         accessorKey: "lastUpdated",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
@@ -196,10 +242,12 @@ const useColumns = () => {
         size: 0,
         header: () => <></>,
         cell: (props) => {
-          return <ResourceOutputs
+          return (
+            <ResourceOutputs
               resource={props.row.original}
               resourceType={resourceTypes[props.row.original.objType]}
-          />;
+            />
+          );
         },
       },
       {
@@ -214,10 +262,13 @@ const useColumns = () => {
         ),
       },
     ];
-  }, [resourceTypes]);
+  }, [resourceTypes, objects, relationships]);
 };
 
-export const ResourceTable = (props: { resources: Resource[] }) => {
+export const ResourceTable = (props: {
+  resources: Resource[];
+  className?: string;
+}) => {
   const columns = useColumns();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<ColumnSort[]>([]);
@@ -236,17 +287,20 @@ export const ResourceTable = (props: { resources: Resource[] }) => {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const emptyTable = useMemo(
-    () => table.getFilteredRowModel().rows.length === 0,
-    [table.getFilteredRowModel().rows],
-  );
+  const rows = useMemo(() => table.getFilteredRowModel().rows, [table]);
+  const emptyTable = useMemo(() => rows.length === 0, [rows]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} />
       <section>
-        <div className="overflow-x-auto rounded-md border bg-white">
-          <Table>
+        <div
+          className={cn(
+            "overflow-x-auto rounded-md border bg-white",
+            props.className,
+          )}
+        >
+          <Table className="w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>

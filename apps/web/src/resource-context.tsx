@@ -143,6 +143,32 @@ export const ResourceProvider = ({
     }
   }, [categoriesData]);
 
+  const resolvePluralFromKind = useCallback((kind: string) => {
+    for (const def of Object.values(resourceTypes)) {
+      if (def.kind === kind) {
+        return def.plural;
+      }
+    }
+
+    return kind.toLowerCase();
+  }, [resourceTypes]);
+
+
+  const resolveOwnerUri = useCallback((ref: OwnerReference, system: string, namespace: string) => {
+    const [group, version] = ref.apiVersion.split("/");
+    const plural = resolvePluralFromKind(ref.kind);
+    return formatBlockUri({
+      group,
+      version,
+      system,
+      namespace,
+      plural,
+      name: ref.name,
+      });
+    },
+    [resolvePluralFromKind],
+  );
+
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
     const { system } = parseBlockUri(objUri);
@@ -209,51 +235,30 @@ export const ResourceProvider = ({
     handleObjectMessages(initialResources.objects);
   }, [initialResources, handleObjectMessages]);
 
-  const resolvePluralFromKind = useCallback((kind: string) => {
-    for (const def of Object.values(resourceTypes)) {
-      if (def.kind === kind) {
-        return def.plural;
-      }
-    }
 
-    return kind.toLowerCase();
-  }, [resourceTypes]);
 
   useEffect(() => {
     setRelationships((prev) => {
-      const updates: Record<string, Record<string, Relationship>> = {};
-
       for (const r of Object.values(objects)) {
-        const refs: OwnerReference[] = (r.metadata as any)?.ownerReferences ?? [];
+        const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
         if (refs.length === 0) {
           continue;
         }
 
         const childUri = r.objUri;
         const { system, namespace } = parseBlockUri(childUri);
-
   
         for (const ref of refs) {
-          const [group, version] = ref.apiVersion.split("/");
+          const parentUri = resolveOwnerUri(ref, system, namespace);
   
-          const plural = resolvePluralFromKind(ref.kind);
-          const parentUri = formatBlockUri({
-            group,
-            version,
-            system,
-            namespace,
-            plural,
-            name: ref.name,
-          });
-  
-          updates[childUri] = {
+          prev[childUri] = {
             ...(prev[childUri] ?? {}),
             [parentUri]: {  
               type: RelationshipType.PARENT,
             },
           };
   
-          updates[parentUri] = {
+          prev[parentUri] = {
             ...(prev[parentUri] ?? {}),
             [childUri]: {
               type: RelationshipType.CHILD,
@@ -262,15 +267,12 @@ export const ResourceProvider = ({
         }
       }
 
-      return {
-        ...prev,
-        ...updates,
-      };
+      return prev;
     });
-  }, [resolvePluralFromKind, objects]);
+  }, [resolvePluralFromKind, objects, resolveOwnerUri]);
 
 
-  const handlePatchMessage = (message: PatchEvent) => {
+  const handlePatchMessage = useCallback((message: PatchEvent) => {
     const { objUri, patch } = message;
 
     setObjects((prev) => {
@@ -284,7 +286,7 @@ export const ResourceProvider = ({
         [objUri]: newObject,
       };
     });
-  };
+  }, []);
 
 
   const addEvent = useCallback((event: WorkerEvent) => {
@@ -348,7 +350,7 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-  }, [lastJsonMessage, handleObjectMessage, handlePatchMessage, addNotifications]);
+  }, [lastJsonMessage, handleObjectMessage, handlePatchMessage, addNotifications, addEvent]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
