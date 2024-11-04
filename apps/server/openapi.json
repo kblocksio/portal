@@ -1,0 +1,455 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "KBlocks API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "getRoot",
+        "responses": {
+          "200": {
+            "description": "Hello message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "summary": "WebSocket for events",
+        "operationId": "subscribeToEvents",
+        "responses": {
+          "101": {
+            "description": "Switching protocols"
+          }
+        }
+      },
+      "post": {
+        "summary": "Publish an event",
+        "operationId": "postEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkerEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event published"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "Get categories",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resources": {
+      "get": {
+        "summary": "Get resources",
+        "operationId": "getResources",
+        "responses": {
+          "200": {
+            "description": "Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetResourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}": {
+      "get": {
+        "summary": "Get specific resource",
+        "operationId": "getResource",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plural",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specific resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a resource",
+        "operationId": "patchResource",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plural",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Patch request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "objType": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ApiObject"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a resource",
+        "operationId": "deleteResource",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plural",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/sign-in": {
+      "get": {
+        "summary": "GitHub sign-in",
+        "operationId": "signInWithGitHub",
+        "responses": {
+          "303": {
+            "description": "Redirect to GitHub for authentication"
+          }
+        }
+      }
+    },
+    "/api/auth/sign-out": {
+      "get": {
+        "summary": "Sign out",
+        "operationId": "signOut",
+        "responses": {
+          "303": {
+            "description": "Redirect to home"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "docslink": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkerEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["OBJECT", "PATCH", "ERROR", "LIFECYCLE", "LOG"]
+          },
+          "objUri": {
+            "type": "string"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "GetResourceResponse": {
+        "type": "object",
+        "properties": {
+          "objects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObjectEvent"
+            }
+          }
+        }
+      },
+      "ObjectEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "object": {
+            "$ref": "#/components/schemas/ApiObject"
+          },
+          "objUri": {
+            "type": "string"
+          },
+          "objType": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiObject": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "spec": {
+            "type": "object"
+          },
+          "status": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
