@@ -44,6 +44,9 @@ jobs:
         run: |
           npm install
 
+      - name: Build
+        run: npm run build
+
       - name: Install helm
         run: |
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
