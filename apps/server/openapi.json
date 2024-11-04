@@ -34,6 +34,49 @@
         }
       }
     },
+    "/api/auth/sign-in": {
+      "get": {
+        "summary": "GitHub sign-in",
+        "operationId": "signInWithGitHub",
+        "responses": {
+          "303": {
+            "description": "Redirect to GitHub for authentication"
+          }
+        }
+      }
+    },
+    "/api/auth/sign-out": {
+      "get": {
+        "summary": "Sign out",
+        "operationId": "signOut",
+        "responses": {
+          "303": {
+            "description": "Redirect to home"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "Get categories",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/events": {
       "get": {
         "summary": "WebSocket for events",
@@ -59,27 +102,6 @@
         "responses": {
           "200": {
             "description": "Event published"
-          }
-        }
-      }
-    },
-    "/api/categories": {
-      "get": {
-        "summary": "Get categories",
-        "operationId": "getCategories",
-        "responses": {
-          "200": {
-            "description": "List of categories",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/Category"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -223,28 +245,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/auth/sign-in": {
-      "get": {
-        "summary": "GitHub sign-in",
-        "operationId": "signInWithGitHub",
-        "responses": {
-          "303": {
-            "description": "Redirect to GitHub for authentication"
-          }
-        }
-      }
-    },
-    "/api/auth/sign-out": {
-      "get": {
-        "summary": "Sign out",
-        "operationId": "signOut",
-        "responses": {
-          "303": {
-            "description": "Redirect to home"
           }
         }
       }
