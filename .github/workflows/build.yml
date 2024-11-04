@@ -1,0 +1,136 @@
+name: Build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.17.0"
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm i -g @quickube/cli
+
+      - name: Install Skaffold
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          chmod +x skaffold
+          sudo mv skaffold /usr/local/bin
+
+      - name: Setup a new qkube
+        id: qkube
+        run: |
+          QKUBE_NAME=$(qkube new --size small | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
+          echo "Using qkube $QKUBE_NAME"
+          # save the qkube name to the workspace
+          echo "qbube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Trigger and wait for workflow
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          OWNER: "winglang"
+          REPO: "kblocks-gallery"
+          WORKFLOW: "deploy.yml"
+        run: |
+          QKUBE_NAME=${{ steps.qkube.outputs.qbube-name }}
+
+          # Trigger workflow
+          RESPONSE=$(curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches" \
+            -d '{"ref":"main","inputs":{"qbube_cluster":"${QKUBE_NAME}"}}')
+
+          # Get run ID of the triggered workflow
+          sleep 5  # Wait for workflow to start
+          RUN_ID=$(curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs" \
+            | jq '.workflow_runs[0].id')
+          
+          # Poll until workflow completes
+          while true; do
+            STATUS=$(curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${RUN_ID}" \
+              | jq -r '.status')
+            
+            if [ "$STATUS" = "completed" ]; then
+              break
+            fi
+            
+            echo "Waiting for workflow to complete..."
+            sleep 10
+          done
+          
+          # Check conclusion
+          CONCLUSION=$(curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${RUN_ID}" \
+            | jq -r '.conclusion')
+          
+          if [ "$CONCLUSION" != "success" ]; then
+            echo "Workflow failed with conclusion: $CONCLUSION"
+            exit 1
+          fi
+
+      # - name: Skaffold build
+      #   id: build
+      #   run: |
+      #     skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
+      #     echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
+
+      # - name: Publish the backend
+      #   run: |
+      #     curl -X PATCH -H "content-type: application/json" "https://kblocks.io/api/resources/acme.com/v1/workloads/prod/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'
+
+      # - name: Delete the qkube on exit
+      #   if: always()
+      #   run: |
+      #     QKUBE_NAME=${{ steps.qkube.outputs.qbube-name }}
+      #     if [ -n "$QKUBE_NAME" ]; then
+      #       echo "Deleting qkube $QKUBE_NAME"
+      #       qkube rm $QKUBE_NAME
+      #     fi
