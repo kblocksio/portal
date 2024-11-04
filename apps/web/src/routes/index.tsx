@@ -47,7 +47,7 @@ function Index() {
   }, []);
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto flex flex-col gap-4">
       {/* organization specific introduction */}
       <MarkdownWrapper content={platformMd} />
 

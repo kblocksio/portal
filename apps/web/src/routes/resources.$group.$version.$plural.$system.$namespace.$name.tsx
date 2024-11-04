@@ -162,18 +162,18 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-12 py-8">
+    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
             <div className="relative">
               {Icon && <Icon className={`h-10 w-10 ${iconColor}`} />}
             </div>
-            <div>
-              <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <div className="flex min-w-0 flex-col">
+              <h1 className="truncate text-2xl font-bold">
                 {selectedResource.metadata.name}
               </h1>
-              <p className="text-muted-foreground flex gap-4 text-sm leading-none">
+              <p className="text-muted-foreground truncate text-sm leading-none">
                 {selectedResourceType?.group}/{selectedResourceType?.version}.
                 {selectedResourceType?.kind}
               </p>
@@ -316,7 +316,7 @@ function ResourcePage() {
         </TabsContent>
         <TabsContent value="logs">
           <div className="flex flex-col gap-8">
-            <CardContent className="h-full pt-6">
+            <CardContent className="h-full pt-2 sm:pt-6">
               {selectedResource && (
                 <Timeline events={events} className="mt-0" />
               )}
