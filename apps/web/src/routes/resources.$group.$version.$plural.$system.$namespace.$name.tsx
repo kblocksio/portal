@@ -140,7 +140,7 @@ function Resource() {
   }
 
   return (
-    <div className="flex flex-col gap-8 py-4 sm:py-8">
+    <div className="flex flex-col gap-4 py-4 sm:gap-8 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -216,7 +216,7 @@ function Resource() {
           <div className="flex flex-col gap-8">
             <div className="">
               <div className="w-full">
-                <div className="pb-4 pt-8">
+                <div className="pb-4 pt-4 sm:pt-6">
                   <CardTitle>Status</CardTitle>
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -252,7 +252,7 @@ function Resource() {
 
               {/* Properties */}
               <div className="w-full">
-                <div className="pb-4 pt-8">
+                <div className="pb-4 pt-4 sm:pt-6">
                   <CardTitle>Properties</CardTitle>
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -265,7 +265,7 @@ function Resource() {
 
               {outputs && Object.keys(outputs).length > 0 && (
                 <div className="w-full">
-                  <div className="pb-4 pt-8">
+                  <div className="pb-4 pt-4 sm:pt-6">
                     <CardTitle>Outputs</CardTitle>
                   </div>
                   <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -282,7 +282,7 @@ function Resource() {
         </TabsContent>
         <TabsContent value="logs">
           <div className="flex flex-col gap-8">
-            <div className="h-full pt-6">
+            <div className="h-full pt-4 sm:pt-6">
               {selectedResource && (
                 <Timeline events={events} className="mt-0" />
               )}

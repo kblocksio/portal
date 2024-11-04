@@ -102,7 +102,7 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <div className="group-hover:bg-muted flex w-full flex-wrap items-center gap-3 rounded-md px-2 py-1">
+        <div className="group-hover:bg-muted flex w-full flex-wrap items-center gap-x-3 rounded-md px-2 py-1">
           <div className="flex items-center gap-1">
             <ChevronRight
               className={cn(
