@@ -112,16 +112,21 @@ function EventItem({
               )}
             />
 
-            <Timestamp timestamp={header.timestamp} />
+            <div className="-mx-1.5 sm:mx-0">
+              <Timestamp timestamp={header.timestamp} />
+            </div>
           </div>
 
           <span className="text-muted-foreground min-w-12 font-mono text-xs uppercase">
             {action}
           </span>
 
-          <span className={messageColor}>
-            <pre className="font-sans">{message}</pre>
-          </span>
+          <div className="flex items-center gap-1 truncate">
+            <div className="size-4 sm:hidden"></div>
+            <span className={cn(messageColor, "grow truncate sm:grow-0")}>
+              <pre className="truncate font-sans">{message}</pre>
+            </span>
+          </div>
         </div>
       </div>
 
