@@ -90,7 +90,6 @@ function EventItem({
     <div className="relative pl-8 sm:pl-10">
       <div className="absolute left-0 top-0">
         <div className="flex items-center justify-around pl-0.5 pt-1.5 sm:pt-0">
-          {/* <div className="size-6 bg-red-100"></div> */}
           <div className="flex size-6 items-center justify-center rounded-full border-2 border-gray-200 bg-white sm:size-7">
             <ReasonIcon className={`size-4 sm:size-5 ${reasonColor}`} />
           </div>
