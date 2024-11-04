@@ -187,8 +187,6 @@ export const ResourceProvider = ({
         const systems = prev[key]?.systems ?? new Set();
         systems.add(system);
 
-        console.log("systems for ", key, ":", systems);
-
         return {
           ...prev,
           [key]: {

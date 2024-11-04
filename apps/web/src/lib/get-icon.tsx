@@ -3,6 +3,7 @@ import { BoxesIcon, LucideProps } from "lucide-react"; // Import props type
 import * as OutlineHeroIcons from "@heroicons/react/24/outline";
 import * as SolidHeroIcons from "@heroicons/react/24/solid";
 import type { Colors } from "./colors.ts";
+import React from "react";
 
 /**
  *  Supprts 3 types of icons:
@@ -20,17 +21,30 @@ export const getIconComponent = ({
   // handle empty icon or heroicon
   if (!icon || icon.startsWith("heroicon://")) {
     const HeroIcon = getHeroIconComponent({ solid, icon });
-    return (props: { className?: string }) => <HeroIcon {...props} />;
+    const HeroIconComponent = (props: { className?: string }) => (
+      <HeroIcon {...props} />
+    );
+    HeroIconComponent.displayName = "icon";
+    return HeroIconComponent;
   }
+  
   // handle SVG strings
   if (icon.startsWith("<svg") || icon.startsWith("<?xml")) {
+    // remove the "width" and "height" attributes from the <svg>
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(icon, "image/svg+xml");
+    const svg = doc.getElementsByTagName("svg")[0];
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+
     const SvgIcon = (props: { className?: string }) => (
       <div
         {...props}
-        dangerouslySetInnerHTML={{ __html: icon }}
+        dangerouslySetInnerHTML={{ __html: svg.outerHTML }}
         aria-hidden="true"
       />
     );
+    SvgIcon.displayName = "icon";
     return SvgIcon;
   }
 
