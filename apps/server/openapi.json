@@ -428,7 +428,8 @@
                   "type": "object",
                   "properties": {
                     "user": {
-                      "type": "object"
+                      "type": "object",
+                      "properties": {}
                     }
                   }
                 }
@@ -589,13 +590,16 @@
             "type": "string"
           },
           "metadata": {
-            "type": "object"
+            "type": "object",
+            "properties": {}
           },
           "spec": {
-            "type": "object"
+            "type": "object",
+            "properties": {}
           },
           "status": {
-            "type": "object"
+            "type": "object",
+            "properties": {}
           }
         }
       }
