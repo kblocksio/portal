@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-
 import {
   Sidebar,
   SidebarRail,
@@ -24,15 +23,13 @@ import {
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
 import { useAppContext } from "@/app-context";
-import { getLucideIcon } from "@/lib/lucide-icon";
+import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
 
 export const AppSidebar = () => {
-  const { projects } = useAppContext();
-  const { resourceTypes } = useContext(ResourceContext);
-
+  const { resourceTypes, categories } = useContext(ResourceContext);
   const location = useLocation();
 
   const platformSideBarItems = useMemo(() => {
@@ -52,14 +49,22 @@ export const AppSidebar = () => {
         title: "Catalog",
         url: "#",
         icon: "Blocks",
-        items: Object.keys(resourceTypes).map((resourceType) => ({
-          title: resourceTypes[resourceType].kind,
-          url: `/catalog/${resourceType}`,
-          icon: resourceTypes[resourceType].icon,
+        items: Object.keys(categories).map((category) => ({
+          title: categories[category].title,
+          url: "#",
+          items: Object.keys(resourceTypes)
+            .filter((resourceTypeKey) =>
+              resourceTypes[resourceTypeKey].categories?.includes(category),
+            )
+            .map((resourceTypeKey) => ({
+              title: resourceTypes[resourceTypeKey].kind,
+              url: `/catalog/${resourceTypeKey}`,
+              icon: resourceTypes[resourceTypeKey].icon,
+            })),
         })),
       },
     ];
-  }, [resourceTypes]);
+  }, [resourceTypes, categories]);
 
   return (
     <Sidebar collapsible="icon">
@@ -90,7 +95,6 @@ export const AppSidebar = () => {
 
 const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   const location = useLocation();
-  // Add state to control the open status
   const [isOpen, setIsOpen] = useState(false);
 
   const isAnySubItemActive = useMemo(
@@ -110,8 +114,12 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             to={item.url as any}
             className={isActive ? "bg-sidebar-accent" : ""}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
-            <span>{item.title}</span>
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return <Icon className="h-5 w-5" aria-hidden="true" />;
+              })()}
+            <span title={item.title}>{item.title}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -128,21 +136,38 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
-            tooltip={item.title}
             className={isActive ? "bg-sidebar-accent" : ""}
             onClick={(e) => {
               e.preventDefault();
               setIsOpen(!isOpen);
             }}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
-            <span>{item.title}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return <Icon className="h-5 w-5" aria-hidden="true" />;
+              })()}
+            <span title={item.title}>{item.title}</span>
+            <ChevronRight
+              className={`ml-auto transition-transform duration-300 ${
+                isOpen ? "rotate-90" : ""
+              }`}
+            />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent asChild>
           <SidebarMenuSub>
             {item.items?.map((subItem: any) => {
+              if (subItem.items) {
+                return (
+                  <SidebarItem
+                    key={subItem.title}
+                    item={subItem}
+                    isActive={location.pathname === subItem.url}
+                  />
+                );
+              }
+
               const isSubItemActive = location.pathname === subItem.url;
               return (
                 <SidebarMenuSubItem key={subItem.title}>
@@ -151,7 +176,14 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
                       to={subItem.url as any}
                       className={isSubItemActive ? "bg-sidebar-accent" : ""}
                     >
-                      <span>{subItem.title}</span>
+                      {subItem.icon &&
+                        (() => {
+                          const Icon = getIconComponent({ icon: subItem.icon });
+                          return (
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          );
+                        })()}
+                      <span title={subItem.title}>{subItem.title}</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

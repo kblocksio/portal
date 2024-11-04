@@ -24,7 +24,18 @@ function Resources() {
   const { setBreadcrumbs } = useAppContext();
 
   const allResources = useMemo(() => {
-    return Object.values(objects).filter((r) => r.kind !== "Block");
+    return Object.values(objects).filter((r) => {
+      if (r.kind === "Block") {
+        return false;
+      }
+
+      // don't show resources that are children of other resources
+      if (r.metadata?.ownerReferences?.length) {
+        return false;
+      }
+
+      return true;
+    });
   }, [objects]);
 
   useEffect(() => {

@@ -1,7 +1,61 @@
+import * as LucideIcons from "lucide-react"; // Import all icons
+import { BoxesIcon, LucideProps } from "lucide-react"; // Import props type
 import * as OutlineHeroIcons from "@heroicons/react/24/outline";
 import * as SolidHeroIcons from "@heroicons/react/24/solid";
-
 import type { Colors } from "./colors.ts";
+
+/**
+ *  Supprts 3 types of icons:
+ *  - Heroicons
+ *  - SVG
+ *  - LucideIcons
+ */
+export const getIconComponent = ({
+  solid = false,
+  icon,
+}: {
+  solid?: boolean;
+  icon?: string;
+}): React.ComponentType<{ className?: string }> => {
+  // handle empty icon or heroicon
+  if (!icon || icon.startsWith("heroicon://")) {
+    const HeroIcon = getHeroIconComponent({ solid, icon });
+    return (props: { className?: string }) => <HeroIcon {...props} />;
+  }
+  // handle SVG strings
+  if (icon.startsWith("<svg") || icon.startsWith("<?xml")) {
+    const SvgIcon = (props: { className?: string }) => (
+      <div
+        {...props}
+        dangerouslySetInnerHTML={{ __html: icon }}
+        aria-hidden="true"
+      />
+    );
+    return SvgIcon;
+  }
+
+  // handle Lucide icons
+  return getLucideIcon(icon);
+};
+
+export const getIconColors = (options: {
+  darkenOnGroupHover?: boolean;
+  forceDarken?: boolean;
+  color?: Colors | string;
+}) => {
+  const color: Colors =
+    options.color && Object.keys(colors).includes(options.color)
+      ? (options.color as Colors)
+      : "slate";
+
+  const chosenColor = [
+    colors[color].default,
+    options.darkenOnGroupHover && colors[color].groupHover,
+    options.forceDarken && colors[color].forceDarken,
+  ];
+
+  return chosenColor;
+};
 
 const getHeroIconName = (heroiconId: string): string => {
   const parts = heroiconId.split("-");
@@ -11,7 +65,7 @@ const getHeroIconName = (heroiconId: string): string => {
   return `${resourceName}Icon`;
 };
 
-export const getIconComponent = ({
+const getHeroIconComponent = ({
   solid = false,
   icon = "code-bracket-square",
 }: {
@@ -27,6 +81,24 @@ export const getIconComponent = ({
     return iconComponent;
   } else {
     return iconSet.CogIcon;
+  }
+};
+
+const getLucideIcon = (icon: string) => {
+  const IconComponent = LucideIcons[icon as keyof typeof LucideIcons];
+  if (
+    typeof IconComponent === "function" ||
+    (IconComponent && "render" in IconComponent)
+  ) {
+    return (props?: LucideProps) => {
+      const Icon = IconComponent as React.ElementType;
+      return <Icon {...props} />;
+    };
+  } else {
+    console.warn(
+      `Icon "${icon}" not found or is not a valid component, fallback to BoxesIcon`,
+    );
+    return (props?: LucideProps) => <BoxesIcon {...props} />;
   }
 };
 
@@ -93,23 +165,4 @@ const colors: Record<Colors, ColorSet> = {
     groupHover: "group-hover:text-slate-600 dark:group-hover:text-slate-300",
     forceDarken: "text-slate-600 dark:text-slate-300",
   },
-};
-
-export const getResourceIconColors = (options: {
-  darkenOnGroupHover?: boolean;
-  forceDarken?: boolean;
-  color?: Colors | string;
-}) => {
-  const color: Colors =
-    options.color && Object.keys(colors).includes(options.color)
-      ? (options.color as Colors)
-      : "slate";
-
-  const chosenColor = [
-    colors[color].default,
-    options.darkenOnGroupHover && colors[color].groupHover,
-    options.forceDarken && colors[color].forceDarken,
-  ];
-
-  return chosenColor;
 };

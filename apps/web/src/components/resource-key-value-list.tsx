@@ -17,14 +17,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
 import { ResourceContext } from "@/resource-context";
-import { getResourceIconColors } from "@/lib/hero-icon";
-import { Link } from "./ui/link";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { ResourceLink } from "./resource-link";
 
 const CopyToClipboard = ({
   text,
@@ -70,7 +69,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
   data,
   resourceObjUri,
 }) => {
-  const { objects, resourceTypes } = useContext(ResourceContext);
+  const { objects } = useContext(ResourceContext);
   const renderValue = useCallback(
     (value: any) => {
       if (typeof value === "string") {
@@ -82,10 +81,6 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
             const referencedPropValue =
               getResourceOutputs(referencedObject)?.[attribute];
             if (referencedPropValue) {
-              const selectedResourceType =
-                resourceTypes[referencedObject.objType];
-              const Icon = selectedResourceType?.iconComponent;
-
               return (
                 <div className="flex items-center space-x-2 truncate">
                   <div className="text-muted-foreground flex gap-2 truncate italic">
@@ -95,36 +90,10 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
                           <LinkIcon className="h-4 w-4" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <div className="flex items-center gap-2">
-                            <div className="relative">
-                              {Icon && (
-                                <Icon
-                                  className={`h-5 w-5 ${getResourceIconColors({
-                                    color: referencedObject.color,
-                                  })}`}
-                                />
-                              )}
-                            </div>
-                            <Link
-                              to={
-                                `/resources/${refUri.replace(
-                                  "kblocks://",
-                                  "",
-                                )}` as any
-                              }
-                              onMouseEnter={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              // className="underline"
-                            >
-                              <div className="text-md flex items-center gap-2">
-                                {referencedObject.metadata.name}
-                              </div>
-                            </Link>
-                            <span className="font-bold">{attribute}</span>
-                          </div>
-                          {/* <div className="truncate p-2 font-mono">{value}</div> */}
+                          <ResourceLink
+                            resource={referencedObject}
+                            attribute={attribute}
+                          />
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -180,7 +149,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
 
       return value;
     },
-    [objects, resourceTypes, resourceObjUri],
+    [objects, resourceObjUri],
   );
 
   const renderKey = (key: string) => {

@@ -1,4 +1,4 @@
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResourceType } from "@/resource-context";
 import { MarkdownWrapper } from "../markdown";
@@ -14,7 +14,7 @@ export const ResourceTypeCard = ({
   handleDocsOpen: (docs: string | undefined) => void;
 }) => {
   const Icon = resource.iconComponent;
-  const iconColor = getResourceIconColors({ color: resource?.color });
+  const iconColor = getIconColors({ color: resource?.color });
 
   return (
     <Card

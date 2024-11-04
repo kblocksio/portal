@@ -8,11 +8,9 @@ import { Input } from "@/components/ui/input";
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { useAppContext } from "@/app-context";
-import { ProjectCard } from "@/components/project-card";
 import { ResourcePageProject } from "./resources.index";
 import { useNavigate } from "@tanstack/react-router";
 import { getResourcesStatuses } from "@/components/components-utils";
-import MyResources from "@/components/my-resources";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -43,14 +41,6 @@ function Index() {
     },
     [openWizard],
   );
-
-  const resourcesProject = useMemo(() => {
-    return {
-      ...ResourcePageProject,
-      // get all resources statuses
-      ...getResourcesStatuses(Object.values(objects)),
-    };
-  }, [objects]);
 
   useEffect(() => {
     setBreadcrumbs([{ name: "Home", url: "/" }]);

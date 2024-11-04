@@ -1,14 +1,18 @@
 import { useState, useContext, useEffect, useMemo } from "react";
-import { CardTitle } from "@/components/ui/card";
+import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { ResourceContext } from "@/resource-context";
+import {
+  RelationshipType,
+  Resource,
+  ResourceContext,
+} from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import {
   DropdownMenu,
@@ -29,6 +33,7 @@ import {
   PropertyValue,
 } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
+import { ResourceTable } from "@/components/resource-table/resource-table";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -37,10 +42,10 @@ export function urlForResource(blockUri: BlockUriComponents) {
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
 )({
-  component: Resource,
+  component: ResourcePage,
 });
 
-function Resource() {
+function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const router = useRouter();
   const {
@@ -49,6 +54,7 @@ function Resource() {
     eventsPerObject,
     setSelectedResourceId,
     loadEvents,
+    relationships,
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
@@ -104,7 +110,7 @@ function Resource() {
   const Icon = selectedResourceType?.iconComponent;
 
   const iconColor = useMemo(
-    () => getResourceIconColors({ color: selectedResource?.color }),
+    () => getIconColors({ color: selectedResource?.color }),
     [selectedResource],
   );
 
@@ -121,6 +127,22 @@ function Resource() {
   const outputs = useMemo(() => {
     return selectedResource ? getResourceOutputs(selectedResource) : {};
   }, [selectedResource]);
+
+  const children = useMemo(() => {
+    if (!selectedResource) {
+      return [];
+    }
+
+    const children: Resource[] = [];
+    const rels = relationships[selectedResource.objUri] ?? {};
+    for (const [relUri, rel] of Object.entries(rels)) {
+      if (rel.type === RelationshipType.CHILD) {
+        children.push(objects[relUri]);
+      }
+    }
+
+    return children;
+  }, [selectedResource, relationships, objects]);
 
   useEffect(() => {
     if (!selectedResource) return;
@@ -140,7 +162,7 @@ function Resource() {
   }
 
   return (
-    <div className="flex flex-col gap-4 py-4 sm:gap-8 sm:py-8">
+    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -214,79 +236,91 @@ function Resource() {
         </TabsList>
         <TabsContent value="details">
           <div className="flex flex-col gap-8">
-            <div className="">
-              <div className="w-full">
-                <div className="pb-4 pt-4 sm:pt-6">
-                  <CardTitle>Status</CardTitle>
-                </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                  <PropertyKey>Status</PropertyKey>
-                  <PropertyValue>
-                    <div className="flex gap-2">
-                      {selectedResource.status?.conditions?.map((condition) => (
-                        <StatusBadge
-                          key={condition.type}
-                          obj={selectedResource}
-                          showMessage
-                          type={condition.type}
-                        />
-                      ))}
-                    </div>
-                  </PropertyValue>
-
-                  <PropertyKey>Namespace</PropertyKey>
-                  <PropertyValue>
-                    {selectedResource.metadata.namespace && (
-                      <NamespaceBadge
-                        namespace={selectedResource.metadata.namespace}
-                      />
-                    )}
-                  </PropertyValue>
-
-                  <PropertyKey>System</PropertyKey>
-                  <PropertyValue>
-                    <SystemBadge blockUri={selectedResource.objUri} />
-                  </PropertyValue>
-                </div>
-              </div>
-
-              {/* Properties */}
-              <div className="w-full">
-                <div className="pb-4 pt-4 sm:pt-6">
-                  <CardTitle>Properties</CardTitle>
-                </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                  <KeyValueList
-                    data={properties}
-                    resourceObjUri={selectedResource.objUri}
-                  />
-                </div>
-              </div>
-
-              {outputs && Object.keys(outputs).length > 0 && (
+            <CardContent>
+              <div className="">
                 <div className="w-full">
                   <div className="pb-4 pt-4 sm:pt-6">
-                    <CardTitle>Outputs</CardTitle>
+                    <CardTitle>Status</CardTitle>
                   </div>
                   <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <Outputs
-                      outputs={outputs}
+                    <PropertyKey>Status</PropertyKey>
+                    <PropertyValue>
+                      <div className="flex gap-2">
+                        {selectedResource.status?.conditions?.map(
+                          (condition) => (
+                            <StatusBadge
+                              key={condition.type}
+                              obj={selectedResource}
+                              showMessage
+                              type={condition.type}
+                            />
+                          ),
+                        )}
+                      </div>
+                    </PropertyValue>
+
+                    <PropertyKey>Namespace</PropertyKey>
+                    <PropertyValue>
+                      {selectedResource.metadata.namespace && (
+                        <NamespaceBadge
+                          namespace={selectedResource.metadata.namespace}
+                        />
+                      )}
+                    </PropertyValue>
+
+                    <PropertyKey>System</PropertyKey>
+                    <PropertyValue>
+                      <SystemBadge blockUri={selectedResource.objUri} />
+                    </PropertyValue>
+                  </div>
+                </div>
+
+                {/* Properties */}
+                <div className="w-full">
+                  <div className="pb-4 pt-4 sm:pt-6">
+                    <CardTitle>Properties</CardTitle>
+                  </div>
+                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                    <KeyValueList
+                      data={properties}
                       resourceObjUri={selectedResource.objUri}
-                      resourceType={selectedResourceType}
                     />
                   </div>
                 </div>
-              )}
-            </div>
+
+                {outputs && Object.keys(outputs).length > 0 && (
+                  <div className="w-full">
+                    <div className="pb-4 pt-4 sm:pt-6">
+                      <CardTitle>Outputs</CardTitle>
+                    </div>
+                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                      <Outputs
+                        outputs={outputs}
+                        resourceObjUri={selectedResource.objUri}
+                        resourceType={selectedResourceType}
+                      />
+                    </div>
+                  </div>
+                )}
+                {children.length > 0 && (
+                  <div className="w-full">
+                    <div className="pb-4 pt-4 sm:pt-6">
+                      <CardTitle>Children</CardTitle>
+                    </div>
+                    <ResourceTable resources={children} className="w-full" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </div>
         </TabsContent>
         <TabsContent value="logs">
           <div className="flex flex-col gap-8">
-            <div className="h-full pt-4 sm:pt-6">
+            <CardContent className="h-full pt-6">
               {selectedResource && (
                 <Timeline events={events} className="mt-0" />
               )}
-            </div>
+            </CardContent>
           </div>
         </TabsContent>
       </Tabs>
@@ -320,4 +354,4 @@ function Resource() {
   );
 }
 
-export default Resource;
+export default ResourcePage;
