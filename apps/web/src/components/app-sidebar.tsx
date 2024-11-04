@@ -117,7 +117,9 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             {item.icon &&
               (() => {
                 const Icon = getIconComponent({ icon: item.icon });
-                return <Icon className="h-5 w-5" aria-hidden="true" />;
+                return (
+                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                );
               })()}
             <span title={item.title}>{item.title}</span>
           </Link>
@@ -145,7 +147,9 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             {item.icon &&
               (() => {
                 const Icon = getIconComponent({ icon: item.icon });
-                return <Icon className="h-5 w-5" aria-hidden="true" />;
+                return (
+                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                );
               })()}
             <span title={item.title}>{item.title}</span>
             <ChevronRight
@@ -180,7 +184,10 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
                         (() => {
                           const Icon = getIconComponent({ icon: subItem.icon });
                           return (
-                            <Icon className="h-5 w-5" aria-hidden="true" />
+                            <Icon
+                              className="h-5 w-5 flex-shrink-0"
+                              aria-hidden="true"
+                            />
                           );
                         })()}
                       <span title={subItem.title}>{subItem.title}</span>
