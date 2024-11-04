@@ -272,7 +272,7 @@
         }
       }
     },
-    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/logs}": {
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}/logs": {
       "get": {
         "summary": "Get logs of specific resource",
         "operationId": "getResourceLogs",
@@ -301,7 +301,7 @@
         }
       }
     },
-    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/events}": {
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}/events": {
       "get": {
         "summary": "Get events of specific resource",
         "operationId": "getResourceEvents",
