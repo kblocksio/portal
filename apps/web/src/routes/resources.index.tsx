@@ -32,7 +32,7 @@ function Resources() {
   }, [setBreadcrumbs]);
 
   return (
-    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flex flex-col gap-8 py-4 sm:gap-12 sm:py-8">
       <ProjectHeader selectedProject={ResourcePageProject} />
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect, useMemo } from "react";
-import { CardContent, CardTitle } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -140,7 +140,7 @@ function Resource() {
   }
 
   return (
-    <div className="container flex flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flex flex-col gap-8 py-4 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -214,83 +214,79 @@ function Resource() {
         </TabsList>
         <TabsContent value="details">
           <div className="flex flex-col gap-8">
-            <CardContent>
-              <div className="">
-                <div className="w-full">
-                  <div className="pb-4 pt-8">
-                    <CardTitle>Status</CardTitle>
-                  </div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <PropertyKey>Status</PropertyKey>
-                    <PropertyValue>
-                      <div className="flex gap-2">
-                        {selectedResource.status?.conditions?.map(
-                          (condition) => (
-                            <StatusBadge
-                              key={condition.type}
-                              obj={selectedResource}
-                              showMessage
-                              type={condition.type}
-                            />
-                          ),
-                        )}
-                      </div>
-                    </PropertyValue>
-
-                    <PropertyKey>Namespace</PropertyKey>
-                    <PropertyValue>
-                      {selectedResource.metadata.namespace && (
-                        <NamespaceBadge
-                          namespace={selectedResource.metadata.namespace}
-                        />
-                      )}
-                    </PropertyValue>
-
-                    <PropertyKey>System</PropertyKey>
-                    <PropertyValue>
-                      <SystemBadge blockUri={selectedResource.objUri} />
-                    </PropertyValue>
-                  </div>
+            <div className="">
+              <div className="w-full">
+                <div className="pb-4 pt-8">
+                  <CardTitle>Status</CardTitle>
                 </div>
+                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                  <PropertyKey>Status</PropertyKey>
+                  <PropertyValue>
+                    <div className="flex gap-2">
+                      {selectedResource.status?.conditions?.map((condition) => (
+                        <StatusBadge
+                          key={condition.type}
+                          obj={selectedResource}
+                          showMessage
+                          type={condition.type}
+                        />
+                      ))}
+                    </div>
+                  </PropertyValue>
 
-                {/* Properties */}
+                  <PropertyKey>Namespace</PropertyKey>
+                  <PropertyValue>
+                    {selectedResource.metadata.namespace && (
+                      <NamespaceBadge
+                        namespace={selectedResource.metadata.namespace}
+                      />
+                    )}
+                  </PropertyValue>
+
+                  <PropertyKey>System</PropertyKey>
+                  <PropertyValue>
+                    <SystemBadge blockUri={selectedResource.objUri} />
+                  </PropertyValue>
+                </div>
+              </div>
+
+              {/* Properties */}
+              <div className="w-full">
+                <div className="pb-4 pt-8">
+                  <CardTitle>Properties</CardTitle>
+                </div>
+                <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                  <KeyValueList
+                    data={properties}
+                    resourceObjUri={selectedResource.objUri}
+                  />
+                </div>
+              </div>
+
+              {outputs && Object.keys(outputs).length > 0 && (
                 <div className="w-full">
                   <div className="pb-4 pt-8">
-                    <CardTitle>Properties</CardTitle>
+                    <CardTitle>Outputs</CardTitle>
                   </div>
                   <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                    <KeyValueList
-                      data={properties}
+                    <Outputs
+                      outputs={outputs}
                       resourceObjUri={selectedResource.objUri}
+                      resourceType={selectedResourceType}
                     />
                   </div>
                 </div>
-
-                {outputs && Object.keys(outputs).length > 0 && (
-                  <div className="w-full">
-                    <div className="pb-4 pt-8">
-                      <CardTitle>Outputs</CardTitle>
-                    </div>
-                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                      <Outputs
-                        outputs={outputs}
-                        resourceObjUri={selectedResource.objUri}
-                        resourceType={selectedResourceType}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
+              )}
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="logs">
           <div className="flex flex-col gap-8">
-            <CardContent className="h-full pt-6">
+            <div className="h-full pt-6">
               {selectedResource && (
                 <Timeline events={events} className="mt-0" />
               )}
-            </CardContent>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
