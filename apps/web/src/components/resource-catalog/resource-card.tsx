@@ -42,7 +42,7 @@ export const ResourceTypeCard = ({
           />
         </div>
       </CardHeader>
-      <CardFooter className="mt-auto flex justify-between">
+      <CardFooter className="mt-auto flex justify-between p-6 pt-0">
         <div className="text-muted-foreground flex space-x-4 text-sm">
           <EngineLabel engine={resource.engine} />
         </div>
