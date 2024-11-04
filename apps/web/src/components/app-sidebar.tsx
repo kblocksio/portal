@@ -24,7 +24,7 @@ import {
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
 import { useAppContext } from "@/app-context";
-import { getLucideIcon } from "@/lib/lucide-icon";
+import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
@@ -110,7 +110,11 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             to={item.url as any}
             className={isActive ? "bg-sidebar-accent" : ""}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return <Icon className="h-5 w-5" aria-hidden="true" />;
+              })()}
             <span>{item.title}</span>
           </Link>
         </SidebarMenuButton>
@@ -135,7 +139,11 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
               setIsOpen(!isOpen);
             }}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return <Icon className="h-5 w-5" aria-hidden="true" />;
+              })()}
             <span>{item.title}</span>
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>

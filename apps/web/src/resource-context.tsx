@@ -18,10 +18,9 @@ import {
   Manifest,
 } from "@kblocks/api";
 import { request } from "./lib/backend";
-import { getIconComponent } from "./lib/hero-icon";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { NotificationsContext } from "./notifications-context";
-
+import { getIconComponent } from "./lib/get-icon";
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
   console.error("WebSocket URL is not set");

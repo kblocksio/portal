@@ -8,7 +8,7 @@ import { ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import {
   DropdownMenu,
@@ -104,7 +104,7 @@ function Resource() {
   const Icon = selectedResourceType?.iconComponent;
 
   const iconColor = useMemo(
-    () => getResourceIconColors({ color: selectedResource?.color }),
+    () => getIconColors({ color: selectedResource?.color }),
     [selectedResource],
   );
 

@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
 import { ResourceContext } from "@/resource-context";
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import {
   Tooltip,
@@ -90,7 +90,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
                             <div className="relative">
                               {Icon && (
                                 <Icon
-                                  className={`h-5 w-5 ${getResourceIconColors({
+                                  className={`h-5 w-5 ${getIconColors({
                                     color: referencedObject.color,
                                   })}`}
                                 />
@@ -113,9 +113,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
                                 {referencedObject.metadata.name}
                               </div>
                             </Link>
-                            <span className="font-bold">
-                                  {attribute}
-                                </span>
+                            <span className="font-bold">{attribute}</span>
                           </div>
                           {/* <div className="truncate p-2 font-mono">{value}</div> */}
                         </TooltipContent>

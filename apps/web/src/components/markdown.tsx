@@ -1,7 +1,7 @@
 import Markdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { DocumentCheckIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { markdownOverrides } from "@/lib/markdown-overides";
@@ -47,11 +47,11 @@ export const MarkdownWrapper = ({
                 <button className="absolute right-2 top-2 bg-transparent p-2 focus:outline-none">
                   {copied ? (
                     <DocumentCheckIcon
-                      className={`${getResourceIconColors({ color: "slate" })} h-5 w-5 flex-shrink-0`}
+                      className={`${getIconColors({ color: "slate" })} h-5 w-5 flex-shrink-0`}
                     />
                   ) : (
                     <DocumentIcon
-                      className={`${getResourceIconColors({ color: "slate" })} h-5 w-5 flex-shrink-0`}
+                      className={`${getIconColors({ color: "slate" })} h-5 w-5 flex-shrink-0`}
                     />
                   )}
                 </button>
