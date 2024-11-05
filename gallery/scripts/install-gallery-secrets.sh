@@ -2,10 +2,10 @@
 set -eu pipefail
 root=$(cd $(dirname $0) && pwd)
 
+envfile=${1:-}
+
 echo "Creating secret $secret from $envfile"
 cat $envfile
-
-envfile=${1:-}
 
 if [ -z "$envfile" ]; then
   echo "Usage: $0 <envfile>"
