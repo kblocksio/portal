@@ -2,7 +2,6 @@ import { ObjectMetadata } from "@repo/shared";
 import { InstancePicker } from "./instance-picker";
 import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";
-import { Shell } from "./shell";
 
 export const resolvePickerField = ({
   pickerType,
@@ -82,9 +81,6 @@ export const resolvePickerField = ({
           path={path}
         />
       );
-    }
-    case "shell": {
-      return <Shell value={value} />;
     }
     case "cron-picker": // <-- meanwhile, just render as a normal field
     default: {

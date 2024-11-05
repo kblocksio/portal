@@ -1,10 +1,13 @@
 import { uiPickerParser } from "../resource-form/pickers/ui-picker-parser";
 import SwaggerUIComponent from "./components/swagger-ui";
 import HiddenComponent from "./components/hidden-component";
+import { Shell } from "../resource-form/pickers/shell";
+import { PropertyKey, PropertyValue } from "../ui/property";
 
 export const resolveOutputField = ({
   schema,
   value,
+  key,
 }: {
   schema: any;
   value: any;
@@ -19,6 +22,16 @@ export const resolveOutputField = ({
     }
     case "hidden": {
       return <HiddenComponent />;
+    }
+    case "shell": {
+      return (
+        <>
+          <PropertyKey>{key}</PropertyKey>
+          <PropertyValue>
+            <Shell value={value} />
+          </PropertyValue>
+        </>
+      );
     }
     case "cron-picker": // <-- meanwhile, just render as a normal field
     default: {
