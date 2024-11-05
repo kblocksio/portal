@@ -108,7 +108,3 @@ export const readResource = async (objUri: string) => {
     `/api/resources/${group}/${version}/${plural}/${system}/${namespace}/${name}/read`,
   );
 };
-
-export const getProjects = async (): Promise<Project[]> => {
-  return (await import("@/mock-data/projects.json")).default;
-};

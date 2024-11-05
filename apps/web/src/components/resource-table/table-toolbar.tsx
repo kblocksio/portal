@@ -66,7 +66,7 @@ export function ResourceTableToolbar<TData>({
         {table.getColumn("system") && (
           <DataTableFacetedFilter
             column={table.getColumn("system")}
-            title="System"
+            title="Cluster"
             options={systems.map((system) => ({
               label: system,
               value: system,

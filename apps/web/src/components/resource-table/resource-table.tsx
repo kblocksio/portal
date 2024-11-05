@@ -124,7 +124,7 @@ const useColumns = () => {
       {
         accessorKey: "system",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="System" />
+          <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
