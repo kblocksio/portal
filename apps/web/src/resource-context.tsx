@@ -18,6 +18,7 @@ import {
   Manifest,
   formatBlockUri,
 } from "@kblocks/api";
+import { isEqual } from "lodash";
 import { request } from "./lib/backend";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { NotificationsContext } from "./notifications-context";
@@ -133,6 +134,10 @@ export const ResourceProvider = ({
       console.log("WebSocket message:", message);
     },
   });
+
+  const [previousMessage, setPreviousMessage] = useState<
+    WorkerEvent | undefined
+  >(undefined);
 
   const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
     "/api/resources",
@@ -319,12 +324,12 @@ export const ResourceProvider = ({
   }, []);
 
   useEffect(() => {
-    if (!lastJsonMessage) {
+    if (!lastJsonMessage || isEqual(lastJsonMessage, previousMessage)) {
       return;
     }
 
-    console.log("event:", lastJsonMessage);
-
+    console.log("new event:", lastJsonMessage);
+    setPreviousMessage(lastJsonMessage);
     addEvent(lastJsonMessage);
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
