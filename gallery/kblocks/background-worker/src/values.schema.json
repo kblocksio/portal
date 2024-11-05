@@ -10,10 +10,10 @@
     "required": [
       "region",
       "instanceType",
-      "image"
+      "source"
     ],
     "properties": {
-      "image": {
+      "source": {
         "description": "The Docker image or GitHub repository to use for the background worker.\n@ui kblocks.io/one-of",
         "$ref": "#/$defs/commonDefs/source"
       },
@@ -21,7 +21,10 @@
         "$ref": "#/$defs/commonDefs/environmentVariables"
       },
       "instanceType": {
-        "$ref": "#/$defs/commonDefs/instanceType",
+        "$ref": "#/$defs/commonDefs/instanceType"
+      },
+      "scaling": {
+        "$ref": "#/$defs/commonDefs/scaling"
       },
       "region": {
         "$ref": "#/$defs/commonDefs/region",

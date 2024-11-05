@@ -40,7 +40,7 @@ export const SystemSelector = ({
             disabled && "cursor-not-allowed",
           )}
         >
-          {value ?? "Select a system"}
+          {value ?? "Select a cluster"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -49,9 +49,9 @@ export const SystemSelector = ({
         style={{ zIndex: 1000 }}
       >
         <Command>
-          <CommandInput placeholder="Search systems..." />
+          <CommandInput placeholder="Search clusters..." />
           <CommandList>
-            <CommandEmpty>No system found.</CommandEmpty>
+            <CommandEmpty>No cluster found.</CommandEmpty>
             <CommandGroup>
               {systems.map((system) => (
                 <CommandItem

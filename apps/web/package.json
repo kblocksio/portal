@@ -66,6 +66,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-use-websocket": "^4.8.1",
     "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.0",
     "request": "^2.88.2",
     "swagger-ui-react": "^5.17.14",
     "swr": "^2.2.5",

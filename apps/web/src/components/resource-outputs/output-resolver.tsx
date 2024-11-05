@@ -1,5 +1,8 @@
 import { uiPickerParser } from "../resource-form/pickers/ui-picker-parser";
-import { resolvePickerField } from "../resource-form/pickers/picker-resolver";
+import SwaggerUIComponent from "./components/swagger-ui";
+import HiddenComponent from "./components/hidden-component";
+import { Shell } from "../resource-form/pickers/shell";
+import { PropertyKey, PropertyValue } from "../ui/property";
 
 export const resolveOutputField = ({
   schema,
@@ -13,28 +16,26 @@ export const resolveOutputField = ({
   const { description } = schema;
   const uiPicker = uiPickerParser(description ?? "");
 
-  if (uiPicker) {
-    const pickerField = resolvePickerField({
-      pickerType: uiPicker.type,
-      pickerConfig: uiPicker.config,
-      fieldName: key,
-      required: false,
-      schema: schema,
-      description: description,
-      handleChange: () => {},
-      objectMetadata: {
-        name: "",
-        namespace: "",
-        system: "",
-      },
-      value,
-      path: "",
-      formData: {},
-      updateFormData: () => {},
-    });
-
-    if (pickerField) {
-      return pickerField;
+  switch (uiPicker?.type) {
+    case "swagger-ui": {
+      return <SwaggerUIComponent spec={value} />;
+    }
+    case "hidden": {
+      return <HiddenComponent />;
+    }
+    case "shell": {
+      return (
+        <>
+          <PropertyKey>{key}</PropertyKey>
+          <PropertyValue>
+            <Shell value={value} />
+          </PropertyValue>
+        </>
+      );
+    }
+    case "cron-picker": // <-- meanwhile, just render as a normal field
+    default: {
+      return undefined;
     }
   }
 };

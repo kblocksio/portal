@@ -10,7 +10,7 @@ import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
 import { ResourceType } from "@/resource-context";
 import { SystemSelector } from "./system-selector";
-
+import cloneDeep from "lodash.clonedeep";
 export interface FormGeneratorProps {
   resourceType: ResourceType;
   isLoading: boolean;
@@ -28,7 +28,13 @@ export const FormGenerator = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
-  const schema = resourceType.schema;
+  // create a clone of the schema and remove the status property (the outputs)
+  const schema = useMemo(() => {
+    const result = cloneDeep(resourceType.schema);
+    delete result.properties?.status;
+    return result;
+  }, [resourceType]);
+
   const [formData, setFormData] = useState<any>(initialValues ?? {});
   const [system, setSystem] = useState(initialMeta?.system ?? "demo");
   const [namespace, setNamespace] = useState(
@@ -101,7 +107,7 @@ export const FormGenerator = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="system" className={"opacity-50"}>
-              System
+              Cluster
               <span className="text-destructive">*</span>
             </Label>
             <SystemSelector

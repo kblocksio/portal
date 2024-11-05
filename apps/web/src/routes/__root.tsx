@@ -4,31 +4,26 @@ import {
   ScrollRestoration,
 } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
-import { App } from "@/app";
+import { AppLayout } from "@/app";
 
 const TanStackRouterDevtools = import.meta.env.PROD
-  ? () => null // Render nothing in production
+  ? () => null
   : lazy(() =>
-      // Lazy load in development
       import("@tanstack/router-devtools").then((res) => ({
         default: res.TanStackRouterDevtools,
-        // For Embedded Mode
-        // default: res.TanStackRouterDevtoolsPanel
       })),
     );
 
 export const Route = createRootRoute({
   component: () => (
     <>
-      <App>
-        <Outlet />
-        <ScrollRestoration />
-        <Suspense>
-          <div className="hidden lg:visible">
-            <TanStackRouterDevtools />
-          </div>
-        </Suspense>
-      </App>
+      <AppLayout />
+      <ScrollRestoration />
+      <Suspense>
+        <div className="hidden lg:visible">
+          <TanStackRouterDevtools />
+        </div>
+      </Suspense>
     </>
   ),
 });

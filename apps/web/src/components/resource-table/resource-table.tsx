@@ -124,7 +124,7 @@ const useColumns = () => {
       {
         accessorKey: "system",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="System" />
+          <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
@@ -176,7 +176,7 @@ const useColumns = () => {
           const rels = Object.entries(
             relationships[props.row.original.objUri] ?? {},
           )
-            .filter(([_, rel]) => rel.type === RelationshipType.CHILD)
+            .filter(([, rel]) => rel.type === RelationshipType.CHILD)
             .map(([relUri]) => objects[relUri]);
 
           if (rels.length === 0) {
@@ -268,6 +268,7 @@ const useColumns = () => {
 export const ResourceTable = (props: {
   resources: Resource[];
   className?: string;
+  showActions?: boolean;
 }) => {
   const columns = useColumns();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -292,7 +293,7 @@ export const ResourceTable = (props: {
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
-      <ResourceTableToolbar table={table} />
+      <ResourceTableToolbar table={table} showActions={props.showActions} />
       <section>
         <div
           className={cn(

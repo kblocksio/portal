@@ -1,19 +1,19 @@
 apiVersion: kblocks.io/v1
 kind: Block
 metadata:
-  name: qkubes.acme.com
+  name: quickubes.acme.com
   namespace: kblocks
 spec:
   engine: custom
   definition:
     group: acme.com
     version: v1
-    kind: Qkube
-    plural: qkubes
-    singular: qkube
+    kind: Quickube
+    plural: quickubes
+    singular: quickube
     categories:
       - environments
-    listKind: QkubeList
+    listKind: QuickubeList
     outputs:
       - useCommand
     readme: README.md

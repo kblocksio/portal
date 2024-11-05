@@ -5,6 +5,7 @@ import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import { FieldRenderer } from "../field-renderer";
 import { Field } from "../form-field";
 import { updateDataByPath } from "../utils";
+import { useMemo } from "react";
 
 export const OneOfPicker = ({
   schema,
@@ -27,7 +28,7 @@ export const OneOfPicker = ({
   objectMetadata: any;
   path: string;
 }) => {
-  const properties = schema?.properties || {};
+  const properties = useMemo(() => schema?.properties || {}, [schema]);
 
   const getDataByPath = (data: any, path: string) => {
     if (!path) return data;

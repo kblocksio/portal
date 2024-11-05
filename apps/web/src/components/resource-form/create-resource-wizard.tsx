@@ -133,10 +133,9 @@ export const CreateResourceWizard = ({
         }}
       >
         <Description className="sr-only">
-          {step === 1 
+          {step === 1
             ? "Dialog for creating a new resource. Choose from available resource types."
-            : `Dialog for ${currentEditableResource ? 'editing' : 'creating'} a ${selectedResourceType?.kind} resource.`
-          }
+            : `Dialog for ${currentEditableResource ? "editing" : "creating"} a ${selectedResourceType?.kind} resource.`}
         </Description>
         <DialogHeader>
           <DialogTitle>
@@ -164,7 +163,7 @@ export const CreateResourceWizard = ({
               categories={categories}
               isLoading={isLoading}
               filtereResources={filtereResources}
-              handleResourceSelect={handleResourceSelect}
+              onResourceCreateClick={handleResourceSelect}
             />
           </div>
         ) : (

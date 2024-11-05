@@ -27,7 +27,7 @@ export const getIconComponent = ({
     HeroIconComponent.displayName = "icon";
     return HeroIconComponent;
   }
-  
+
   // handle SVG strings
   if (icon.startsWith("<svg") || icon.startsWith("<?xml")) {
     // remove the "width" and "height" attributes from the <svg>
@@ -109,7 +109,7 @@ const getLucideIcon = (icon: string) => {
       return <Icon {...props} />;
     };
   } else {
-    console.warn(
+    console.log(
       `Icon "${icon}" not found or is not a valid component, fallback to BoxesIcon`,
     );
     return (props?: LucideProps) => <BoxesIcon {...props} />;

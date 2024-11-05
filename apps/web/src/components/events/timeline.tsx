@@ -21,7 +21,7 @@ import { Timestamp } from "../timestamp";
 type GroupHeader = {
   timestamp: Date;
   reason: EventReason;
-  action: EventAction;
+  action: string;
   message: string;
   details?: string;
 };
@@ -41,9 +41,9 @@ export default function Timeline({
 
   return (
     <div className="relative w-full overflow-x-hidden">
-      <div className="absolute left-3.5 h-full w-px bg-gray-200"></div>
+      <div className="absolute left-3 h-full w-px bg-gray-200 top-2"></div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {eventGroups.map((eventGroup, index) => (
           <EventItem
             key={index}
@@ -72,19 +72,19 @@ function EventItem({
   const header = eventGroup.header;
   const ReasonIcon = getReasonIcon(header.reason);
   const reasonColor = getReasonColor(header.reason);
-  const action = getActionLabel(header.action);
+  const action = header.action;
   const [isOpen, setIsOpen] = useState(isLast);
 
-  const isClickable = eventGroup.logs.length > 0 ?? header.details;
+  const isClickable = eventGroup.logs.length > 0 || header.details;
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
   return (
-    <div className="relative pl-8 sm:pl-10">
-      <div className="absolute left-0 top-0">
+    <div className="relative sm:pl-6">
+      <div className="absolute left-0 top-1.5">
         <div className="flex items-center justify-around pl-0.5 pt-1.5 sm:pt-0">
-          <div className="flex size-6 items-center justify-center rounded-full border-2 border-gray-200 bg-white sm:size-7">
-            <ReasonIcon className={`size-4 sm:size-5 ${reasonColor}`} />
+          <div className="flex items-center justify-center rounded-full border-gray-200 bg-white sm:size-5">
+            <ReasonIcon className={reasonColor} />
           </div>
         </div>
       </div>
@@ -100,8 +100,8 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <div className="group-hover:bg-muted flex w-full flex-wrap items-center gap-x-3 rounded-md px-2 py-1">
-          <div className="flex items-center gap-1">
+        <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
+          <div className="flex items-center gap-1 min-w-[130pt]">
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform duration-300",
@@ -266,6 +266,21 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
     } else if (event.type === "ERROR" && event.explanation && currentGroup) {
       const details = formatExplanation(event.explanation);
       currentGroup.header.details = details.join("\n\n");
+    } else if (event.type === "ERROR") {
+      currentGroup = {
+        header: {
+          timestamp: event.timestamp ?? new Date(),
+          reason: EventReason.Failed,
+          action: event.body?.type ?? EventAction.Sync,
+          message: event.message,
+        },
+        logs: [],
+      };
+
+      groups.push(currentGroup);
+    } else {
+      // ignore
+      console.log("ignoring event", event);
     }
   }
 
@@ -281,21 +296,6 @@ const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
     objType: event.objType,
     timestamp: event.timestamp,
   };
-};
-
-const getActionLabel = (action: EventAction) => {
-  switch (action) {
-    case EventAction.Create:
-      return "Create";
-    case EventAction.Delete:
-      return "Delete";
-    case EventAction.Update:
-      return "Update";
-    case EventAction.Sync:
-      return "Sync";
-    default:
-      return "";
-  }
 };
 
 const getMessageColor = (header: GroupHeader) => {
