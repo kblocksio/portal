@@ -3,7 +3,7 @@
 # usage: ./install.sh [kblock]
 # if no kblock is provided, all kblocks will be installed
 #------------------------------------------------------------------------------#
-set -euo pipefail
+set -eu pipefail
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
 
