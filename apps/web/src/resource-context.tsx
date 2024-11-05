@@ -145,7 +145,6 @@ export const ResourceProvider = ({
 
   const addType = useCallback((block: BlockApiObject) => {
     const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
-    console.log("addType", key);
 
     setResourceTypes((prev) => {
       return {

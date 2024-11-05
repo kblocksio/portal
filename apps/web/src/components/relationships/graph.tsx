@@ -1,7 +1,11 @@
 import { useContext, useMemo } from "react";
 import { Box } from "lucide-react";
 import { OwnerGraph, OwnerNode } from "./owner-graph";
-import { Resource, ResourceContext } from "@/resource-context";
+import {
+  RelationshipType,
+  Resource,
+  ResourceContext,
+} from "@/resource-context";
 import { Edge, MarkerType } from "@xyflow/react";
 
 export const RelationshipGraph = ({
@@ -9,7 +13,7 @@ export const RelationshipGraph = ({
 }: {
   selectedResource?: Resource;
 }) => {
-  const { relationships, objects } = useContext(ResourceContext);
+  const { relationships, objects, resourceTypes } = useContext(ResourceContext);
 
   const { nodes, edges } = useMemo(() => {
     const nodes: OwnerNode[] = [];
@@ -21,11 +25,14 @@ export const RelationshipGraph = ({
         return;
       }
       visited.add(srcUri);
+
+      const obj = objects[srcUri];
+      const Icon = resourceTypes[obj.objType]?.iconComponent ?? Box;
       nodes.push({
         data: {
-          name: srcUri,
+          name: obj.metadata.name,
           description: srcUri,
-          icon: <Box />,
+          icon: <Icon className="size-5" />,
         },
         id: srcUri,
         type: "node",
@@ -35,17 +42,20 @@ export const RelationshipGraph = ({
       for (const [targetUri, rel] of Object.entries(
         relationships[srcUri] ?? {},
       )) {
-        console.log(targetUri, rel);
+        if (rel.type === RelationshipType.PARENT) {
+          continue;
+        }
 
         edges.push({
           type: "straight",
-          label: rel.type,
-          markerEnd: {
-            type: MarkerType.Arrow,
-          },
+          // label: rel.type,
+          // markerEnd: {
+          //   type: MarkerType.Arrow,
+          // },
           id: `${srcUri}-${targetUri}`,
           source: srcUri,
           target: targetUri,
+          animated: true,
         });
 
         addRels(targetUri);
