@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as ResourcesIndexImport } from './routes/resources.index'
+import { Route as CatalogIndexImport } from './routes/catalog.index'
 import { Route as CatalogGroupVersionKindImport } from './routes/catalog.$group.$version.$kind'
 import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from './routes/resources.$group.$version.$plural.$system.$namespace.$name'
 
@@ -34,6 +35,12 @@ const IndexRoute = IndexImport.update({
 const ResourcesIndexRoute = ResourcesIndexImport.update({
   id: '/resources/',
   path: '/resources/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CatalogIndexRoute = CatalogIndexImport.update({
+  id: '/catalog/',
+  path: '/catalog/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -68,6 +75,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
+    '/catalog/': {
+      id: '/catalog/'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/resources/': {
       id: '/resources/'
       path: '/resources'
@@ -97,6 +111,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/catalog': typeof CatalogIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
@@ -105,6 +120,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/catalog': typeof CatalogIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
@@ -114,6 +130,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/catalog/': typeof CatalogIndexRoute
   '/resources/': typeof ResourcesIndexRoute
   '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
   '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
@@ -124,6 +141,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/catalog'
     | '/resources'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
@@ -131,6 +149,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/catalog'
     | '/resources'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
@@ -138,6 +157,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/catalog/'
     | '/resources/'
     | '/catalog/$group/$version/$kind'
     | '/resources/$group/$version/$plural/$system/$namespace/$name'
@@ -147,6 +167,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CatalogIndexRoute: typeof CatalogIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
   CatalogGroupVersionKindRoute: typeof CatalogGroupVersionKindRoute
   ResourcesGroupVersionPluralSystemNamespaceNameRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
@@ -155,6 +176,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CatalogIndexRoute: CatalogIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
   CatalogGroupVersionKindRoute: CatalogGroupVersionKindRoute,
   ResourcesGroupVersionPluralSystemNamespaceNameRoute:
@@ -175,6 +197,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/admin",
+        "/catalog/",
         "/resources/",
         "/catalog/$group/$version/$kind",
         "/resources/$group/$version/$plural/$system/$namespace/$name"
@@ -185,6 +208,9 @@ export const routeTree = rootRoute
     },
     "/admin": {
       "filePath": "admin.tsx"
+    },
+    "/catalog/": {
+      "filePath": "catalog.index.tsx"
     },
     "/resources/": {
       "filePath": "resources.index.tsx"

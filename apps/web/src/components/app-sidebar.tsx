@@ -22,16 +22,14 @@ import {
 } from "@/components/ui/collapsible.js";
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
-import { useAppContext } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
 
 export const AppSidebar = () => {
   const { resourceTypes, categories } = useContext(ResourceContext);
   const location = useLocation();
-
   const platformSideBarItems = useMemo(() => {
     return [
       {
@@ -47,7 +45,7 @@ export const AppSidebar = () => {
       },
       {
         title: "Catalog",
-        url: "#",
+        url: "/catalog",
         icon: "Blocks",
         items: Object.keys(categories).map((category) => ({
           title: categories[category].title,
@@ -96,6 +94,18 @@ export const AppSidebar = () => {
 const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      location.pathname &&
+      item.url &&
+      item.url !== "#" &&
+      !location.pathname.includes(item.url)
+    ) {
+      setIsOpen(false);
+    }
+  }, [location.pathname]);
 
   const isAnySubItemActive = useMemo(
     () => item.items?.some((subItem: any) => location.pathname === subItem.url),
@@ -141,6 +151,9 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             className={isActive ? "bg-sidebar-accent" : ""}
             onClick={(e) => {
               e.preventDefault();
+              if (item.url && item.url !== "#") {
+                navigate({ to: item.url });
+              }
               setIsOpen(!isOpen);
             }}
           >
