@@ -5,49 +5,25 @@ metadata:
 image: {{ .Values.backend.image }}
 port: 3001
 replicas: 2
-ingress:
-  path: /
-  host: {{ .Values.backend.ingress.host }}
-  tls:
-    hosts:
-      - {{ .Values.backend.ingress.host }}
-    secret: {{ .Values.backend.ingress.tls.secret }}
+public:
+  - path: /
+    host: {{ .Values.backend.ingress.host }}
+    tls:
+      hosts:
+        - {{ .Values.backend.ingress.host }}
+      secret: {{ .Values.backend.ingress.tls.secret }}
+# in non vercel environments we need additional ingress for the <frontend>/api path
+{{- if .Values.frontend.enabled }}
+  - path: /api
+    host: {{ .Values.frontend.ingress.host }}
+    tls:
+      hosts:
+        - {{ .Values.frontend.ingress.host }}
+      secret: {{ .Values.frontend.ingress.tls.secret }}
+{{- end }}
 envFrom:
   - secretName: {{ .Values.backend.secretName }}
 allowCluster:
   - apiGroup: "*"
     resource: "*"
     verbs: ["*"]
----
-# in non vercel environments we need additional ingress for the <frontend>/api path
-{{- if .Values.frontend.enabled }}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: portal-backend-api
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
-    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-    nginx.ingress.kubernetes.io/large-client-header-buffers: "4 32k"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "36000"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "36000"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "36000"
-    nginx.ingress.kubernetes.io/enable-websocket: "true"
-spec:
-  tls:
-    - hosts:
-        - {{ .Values.frontend.ingress.host }}
-      secretName: {{ .Values.backend.ingress.tls.secret }}
-  rules:
-    - host: {{ .Values.frontend.ingress.host }}
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: portal-backend
-                port:
-                  number: 3001
-{{- end }}

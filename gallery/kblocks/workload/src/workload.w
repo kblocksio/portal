@@ -15,7 +15,11 @@ pub struct WorkloadSpec extends api.ContainerSpec, api.PolicySpec {
   rewrite: str?;
 
   /// Make this workload publicly accessible
+  /// @deprecated use `public` instead
   ingress: Ingress?;
+
+  /// Public ingresses for this workload
+  public: Array<Ingress>?;
 }
 
 pub struct Ingress {
@@ -108,10 +112,52 @@ pub class Workload {
         ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-connect-timeout", "36000");
         ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/enable-websocket", "true");
       }
+
+      this.addPublicIngress(spec, service);
     } else {
       if spec.route != nil {
         throw "Cannot specify 'path' without 'port'";
       }
     }
+  }
+
+  addPublicIngress(spec: WorkloadSpec, service: k8s.Service) {
+    let public = spec.public ?? [];
+    for i in 0..public.length {
+      let ig = public[i];
+
+      let tlsConfig = MutArray<k8s.IngressTls>[];
+  
+      if let certificate = ig.tls {
+        tlsConfig.push({ 
+          secret: k8s.Secret.fromSecretName(this, "tls-secret", certificate.secret),
+          hosts: certificate.hosts
+        });
+      }
+  
+      let ingress = new k8s.Ingress(
+        tls: tlsConfig.copy(),
+      ) as "route-{i}";
+  
+      if let host = ig.host {
+        ingress.addHostRule(host, ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
+      } else {
+        ingress.addRule(ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
+      }
+  
+      if let rewrite = ig.rewrite {
+        ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/rewrite-target", rewrite);
+      }
+  
+      // allow large request headers
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-buffer-size", "128k");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-buffers-number", "4");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-busy-buffers-size", "256k");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/large-client-header-buffers", "4 32k");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-read-timeout", "36000");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-send-timeout", "36000");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-connect-timeout", "36000");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/enable-websocket", "true");
+    } 
   }
 }
