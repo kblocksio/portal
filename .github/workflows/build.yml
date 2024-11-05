@@ -53,7 +53,7 @@ jobs:
       - name: Build
         run: |
           cd apps/web
-          sed -i 's|^VITE_BACKEND_URL=.*|VITE_BACKEND_URL=${{ env.ENV_NAME }}.kblocks.io|' .env.prod
+          sed -i 's|^VITE_BACKEND_URL=.*|VITE_BACKEND_URL=https://${{ env.ENV_NAME }}.kblocks.io|' .env.prod
           cd ../..
           npm run build
 
