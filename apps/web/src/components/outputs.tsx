@@ -29,12 +29,7 @@ export default function Outputs({
       key: key,
     });
     if (component) {
-      uiComponents.push(
-        <React.Fragment key={key}>
-          <PropertyKey>{key}</PropertyKey>
-          <PropertyValue>{component}</PropertyValue>
-        </React.Fragment>,
-      );
+      uiComponents.push(component);
     } else {
       nonUiComponents[key] = outputs[key];
     }
