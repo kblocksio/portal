@@ -76,7 +76,7 @@ jobs:
           QKUBE_NAME=$(npx qkube new --size small | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
           QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
           echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
-          echo "qbube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
+          echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
           echo "qkube-short-name=$QKUBE_SHORT_NAME" >> $GITHUB_OUTPUT
 
       - name: Create DNS record
