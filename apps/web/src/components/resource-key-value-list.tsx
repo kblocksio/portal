@@ -1,17 +1,13 @@
 import React, {
-  PropsWithChildren,
-  useState,
   useContext,
   useCallback,
 } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ClipboardCheckIcon, ClipboardIcon, LinkIcon } from "lucide-react";
+import { LinkIcon } from "lucide-react";
 import {
-  cn,
   getResourceOutputs,
   parseRef,
-  splitAndCapitalizeCamelCase,
 } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
@@ -24,39 +20,9 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { ResourceLink } from "./resource-link";
+import { PropertyKey, PropertyValue } from "./ui/property";
+import { CopyToClipboardButton } from "./copy-to-clipboard";
 
-const CopyToClipboardButton = ({
-  text,
-  className,
-  children,
-}: PropsWithChildren<{
-  text: string;
-  className?: string;
-}>) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    setCopied(true);
-    navigator.clipboard.writeText(text);
-    setTimeout(() => setCopied(false), 2000); // reset after 2 seconds
-  };
-
-  const Icon = copied ? ClipboardCheckIcon : ClipboardIcon;
-
-  return (
-    <button
-      onClick={handleCopy}
-      className={cn(
-        className,
-        "group/copy hover:bg-muted inline-flex items-center gap-1 truncate rounded-md px-1 py-0.5 text-left",
-      )}
-    >
-      {children}
-      <Icon className="-mr-1 ml-2 size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
-      <div className="grow"></div>
-    </button>
-  );
-};
 
 type KeyValueListProps = {
   data: Record<string, any>;
@@ -159,35 +125,12 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
     [objects, resourceObjUri],
   );
 
-  const renderKey = (key: string) => {
-    return (
-      <div className="flex items-center gap-2">
-        {splitAndCapitalizeCamelCase(key)}
-      </div>
-    );
-  };
 
   return Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
-      <PropertyKey>{renderKey(key)}</PropertyKey>
+      <PropertyKey>{key}</PropertyKey>
       <PropertyValue>{renderValue(value)}</PropertyValue>
     </React.Fragment>
   ));
 };
 
-export const PropertyKey = ({ children }: PropsWithChildren) => (
-  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
-    {children}
-  </div>
-);
-
-export const PropertyValue = ({ children }: PropsWithChildren) => {
-  const isLink = typeof children === "string" && /<a\s/i.test(children);
-
-  return (
-    <div className="flex items-center truncate">
-      {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
-      {!isLink && <span className="truncate">{children}</span>}
-    </div>
-  );
-};

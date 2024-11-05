@@ -27,13 +27,10 @@ import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useAppContext } from "@/app-context";
-import {
-  KeyValueList,
-  PropertyKey,
-  PropertyValue,
-} from "@/components/resource-key-value-list";
+import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
+import { PropertyKey, PropertyValue } from "@/components/ui/property";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;

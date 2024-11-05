@@ -4,6 +4,7 @@ import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";
 import SwaggerUIComponent from "./swagger-ui";
 import HiddenComponent from "./hidden-component";
+import { Shell } from "./shell";
 
 export const resolvePickerField = ({
   pickerType,
@@ -89,6 +90,9 @@ export const resolvePickerField = ({
     }
     case "hidden": {
       return <HiddenComponent />;
+    }
+    case "shell": {
+      return <Shell value={value} />;
     }
     case "cron-picker": // <-- meanwhile, just render as a normal field
     default: {

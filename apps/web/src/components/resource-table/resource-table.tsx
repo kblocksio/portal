@@ -176,7 +176,7 @@ const useColumns = () => {
           const rels = Object.entries(
             relationships[props.row.original.objUri] ?? {},
           )
-            .filter(([_, rel]) => rel.type === RelationshipType.CHILD)
+            .filter(([, rel]) => rel.type === RelationshipType.CHILD)
             .map(([relUri]) => objects[relUri]);
 
           if (rels.length === 0) {

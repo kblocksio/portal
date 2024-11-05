@@ -2,6 +2,7 @@ import React from "react";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import { ResourceType } from "@/resource-context";
 import { resolveOutputField } from "./resource-outputs/output-resolver";
+import { PropertyKey, PropertyValue } from "./ui/property";
 
 export default function Outputs({
   outputs,
@@ -28,7 +29,12 @@ export default function Outputs({
       key: key,
     });
     if (component) {
-      uiComponents.push(component);
+      uiComponents.push(
+        <React.Fragment key={key}>
+          <PropertyKey>{key}</PropertyKey>
+          <PropertyValue>{component}</PropertyValue>
+        </React.Fragment>,
+      );
     } else {
       nonUiComponents[key] = outputs[key];
     }
