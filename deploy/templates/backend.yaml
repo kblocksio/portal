@@ -5,7 +5,7 @@ metadata:
 image: {{ .Values.backend.image }}
 port: 3001
 replicas: 2
-public:
+expose:
   - path: /
     host: {{ .Values.backend.ingress.host }}
     tls:

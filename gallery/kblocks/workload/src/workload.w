@@ -7,19 +7,19 @@ pub struct WorkloadSpec extends api.ContainerSpec, api.PolicySpec {
   replicas: num?;
 
   /// Ingress path for this workload. If specified, this workload will be exposed publicly.
-  /// @deprecated use `public.path` instead
+  /// @deprecated use `expose.path` instead
   route: str?;
 
   /// Rewrite host header on backend 
-  /// @deprecated use `public.rewrite` instead
+  /// @deprecated use `expose.rewrite` instead
   rewrite: str?;
 
   /// Make this workload publicly accessible
-  /// @deprecated use `public` instead
+  /// @deprecated use `expose` instead
   ingress: Ingress?;
 
   /// Public ingresses for this workload
-  public: Array<Ingress>?;
+  expose: Array<Ingress>?;
 }
 
 pub struct Ingress {
@@ -113,7 +113,7 @@ pub class Workload {
         ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/enable-websocket", "true");
       }
 
-      this.addPublicIngress(spec, service);
+      this.exposeIngress(spec, service);
     } else {
       if spec.route != nil {
         throw "Cannot specify 'path' without 'port'";
@@ -121,10 +121,10 @@ pub class Workload {
     }
   }
 
-  addPublicIngress(spec: WorkloadSpec, service: k8s.Service) {
-    let public = spec.public ?? [];
-    for i in 0..public.length {
-      let ig = public[i];
+  exposeIngress(spec: WorkloadSpec, service: k8s.Service) {
+    let expose = spec.expose ?? [];
+    for i in 0..expose.length {
+      let ig = expose[i];
 
       let tlsConfig = MutArray<k8s.IngressTls>[];
   
