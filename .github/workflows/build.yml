@@ -73,7 +73,7 @@ jobs:
       - name: Setup a new qkube
         id: qkube
         run: |
-          QKUBE_NAME=$(npx qkube new --size small | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
+          QKUBE_NAME=$(npx qkube new --size medium | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
           QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
           echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
           echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
@@ -153,7 +153,7 @@ jobs:
       - name: Deploy portal
         working-directory: deploy
         run: |
-          helm upgrade --install portal --namespace default --values values.yaml \
+          helm upgrade --install portal . --namespace default --values values.yaml \
             --set backend.image=${{ steps.build.outputs.backend-tag }} \
             --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
             --set frontend.enabled=true
