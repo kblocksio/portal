@@ -9,6 +9,7 @@ on:
   pull_request:
     types:
       - opened
+      - reopened
       - synchronize
 
 concurrency:
@@ -114,9 +115,10 @@ jobs:
         working-directory: gallery
         env:
           KBLOCKS_GALLERY_ENV_FILE: ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
           echo "$KBLOCKS_GALLERY_ENV_FILE" > .gallery.env
-          export KBLOCKS_SYSTEM_ID=${{ steps.qkube.outputs.qkube-name }}
+          export KBLOCKS_SYSTEM_ID="${QKUBE_SHORT_NAME}.kblocks.io"
           ./scripts/install-gallery-secrets.sh .gallery.env
 
       - name: Install portal secrets
