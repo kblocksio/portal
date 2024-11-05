@@ -261,7 +261,7 @@ function ResourcePage() {
                   )}
                 </PropertyValue>
 
-                <PropertyKey>System</PropertyKey>
+                <PropertyKey>Cluster</PropertyKey>
                 <PropertyValue>
                   <SystemBadge blockUri={selectedResource.objUri} />
                 </PropertyValue>
