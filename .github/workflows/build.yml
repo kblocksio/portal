@@ -129,6 +129,7 @@ jobs:
           sed -i '/WEBSITE_ORIGIN/d' .portal.env
           echo "WEBSITE_ORIGIN=https://${QKUBE_SHORT_NAME}.kblocks.io" >> .portal.env
           echo "REDIS_PREFIX=${QKUBE_SHORT_NAME}" >> .portal.env
+          echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
           ./scripts/install-secrets.sh .portal.env $QKUBE_NAME
 
       - name: Install cert
