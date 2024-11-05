@@ -62,8 +62,6 @@ jobs:
 
           if [ -n "$ID" ]; then
             curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
-              -H 'Accept: application/json' \
-              -H 'Content-Type: application/json' \
               -X DELETE \
               https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records/$ID --verbose
           fi
@@ -76,8 +74,6 @@ jobs:
 
           if [ -n "$API_ID" ]; then
             curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
-              -H 'Accept: application/json' \
-              -H 'Content-Type: application/json' \
               -X DELETE \
               https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records/$API_ID --verbose
           fi
