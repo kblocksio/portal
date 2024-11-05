@@ -52,7 +52,7 @@ const CopyToClipboardButton = ({
       )}
     >
       {children}
-      <Icon className="-mr-1 size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
+      <Icon className="-mr-1 ml-2 size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
       <div className="grow"></div>
     </button>
   );
@@ -139,7 +139,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
         return (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="h-0">
+              <Button variant="outline" className="h-full">
                 View
               </Button>
             </PopoverTrigger>
