@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu pipefail
+set -eu
 root=$(cd $(dirname $0) && pwd)
 
 envfile=${1:-}
