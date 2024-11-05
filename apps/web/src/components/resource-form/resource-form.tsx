@@ -101,7 +101,7 @@ export const FormGenerator = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="system" className={"opacity-50"}>
-              System
+              Cluster
               <span className="text-destructive">*</span>
             </Label>
             <SystemSelector

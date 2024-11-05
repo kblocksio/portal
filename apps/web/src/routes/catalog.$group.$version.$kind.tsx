@@ -20,6 +20,7 @@ function Catalog() {
     setBreadcrumbs([
       {
         name: "Catalog",
+        url: "/catalog/",
       },
       {
         name: `${group}/${version}/${kind}`,

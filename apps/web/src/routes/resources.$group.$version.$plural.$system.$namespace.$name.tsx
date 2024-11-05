@@ -27,13 +27,10 @@ import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useAppContext } from "@/app-context";
-import {
-  KeyValueList,
-  PropertyKey,
-  PropertyValue,
-} from "@/components/resource-key-value-list";
+import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
+import { PropertyKey, PropertyValue } from "@/components/ui/property";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -261,7 +258,7 @@ function ResourcePage() {
                   )}
                 </PropertyValue>
 
-                <PropertyKey>System</PropertyKey>
+                <PropertyKey>Cluster</PropertyKey>
                 <PropertyValue>
                   <SystemBadge blockUri={selectedResource.objUri} />
                 </PropertyValue>
@@ -269,17 +266,19 @@ function ResourcePage() {
             </div>
 
             {/* Properties */}
-            <div className="w-full">
-              <div className="pb-4 sm:pt-6">
-                <CardTitle>Properties</CardTitle>
+            {Object.keys(properties).length > 0 && (
+              <div className="w-full">
+                <div className="pb-4 sm:pt-6">
+                  <CardTitle>Properties</CardTitle>
+                </div>
+                <div className="grid auto-rows-[32px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+                  <KeyValueList
+                    data={properties}
+                    resourceObjUri={selectedResource.objUri}
+                  />
+                </div>
               </div>
-              <div className="grid auto-rows-[28px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                <KeyValueList
-                  data={properties}
-                  resourceObjUri={selectedResource.objUri}
-                />
-              </div>
-            </div>
+            )}
 
             {/* Outputs */}
             {outputs && Object.keys(outputs).length > 0 && (
@@ -303,7 +302,11 @@ function ResourcePage() {
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
                 </div>
-                <ResourceTable resources={children} className="w-full" />
+                <ResourceTable
+                  resources={children}
+                  showActions={false}
+                  className="w-full"
+                />
               </div>
             )}
           </CardContent>
