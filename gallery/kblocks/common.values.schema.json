@@ -48,6 +48,23 @@
             }
         }
     },
+    "replicas": {
+        "type": "number",
+        "default": 2,
+        "description": "The number of replicas to deploy."
+    },
+    "scaling": {
+        "type": "object",
+        "description": "Scaling configuration",
+        "properties": {
+            "autoscaling": {
+                "$ref": "#/$defs/autoscaling"
+            },
+            "replicas": {
+                "$ref": "#/$defs/replicas"
+            }
+        }
+    },
     "environmentVariables": {
         "type": "object",
         "description": "Set environment-specific config and secrets (such as API keys), then read those values from your code. [Learn more](https://kbloks.io/docs/configure-environment-variables).",
