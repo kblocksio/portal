@@ -73,7 +73,7 @@ jobs:
       - name: Setup a new qkube
         id: qkube
         run: |
-          QKUBE_NAME=$(npx qkube new --size medium | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
+          QKUBE_NAME=$(npx qkube new --size large | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
           QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
           echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
           echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
@@ -88,7 +88,7 @@ jobs:
             -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
             -X POST \
-            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":60}' \
+            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":3600}' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
