@@ -32,7 +32,11 @@ export const RelationshipGraph = ({
         position: { x: 0, y: 0 },
       });
 
-      for (const [targetUri, rel] of Object.entries(relationships[srcUri])) {
+      for (const [targetUri, rel] of Object.entries(
+        relationships[srcUri] ?? {},
+      )) {
+        console.log(targetUri, rel);
+
         edges.push({
           type: "straight",
           label: rel.type,

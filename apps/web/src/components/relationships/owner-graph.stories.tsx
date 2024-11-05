@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { OwnerGraph } from "./owner-graph";
 
 const meta = {
-  title: "Components/OwnerGraph",
+  title: "Components/Relationships/OwnerGraph",
   component: OwnerGraph,
   decorators: [
     (Story) => (
