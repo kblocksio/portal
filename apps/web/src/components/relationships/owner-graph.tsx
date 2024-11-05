@@ -36,7 +36,12 @@ export type OwnerNode = ReactFlowNode<OwnerNodeData, "node">;
 const OwnerNode = memo(function OwnerNode(props: NodeProps<OwnerNode>) {
   return (
     <div className="relative">
-      <div className="bg-background rounded border p-3 shadow-md">
+      <div
+        className={cn(
+          "bg-background rounded border p-3 shadow-md",
+          props.selected && "border-blue-400",
+        )}
+      >
         {props.data.icon}
 
         <Handle
@@ -54,7 +59,12 @@ const OwnerNode = memo(function OwnerNode(props: NodeProps<OwnerNode>) {
 
       <div className="absolute inset-x-0 mt-2">
         <div className="flex flex-col items-center">
-          <div className="hover:bg-background/80 flex flex-col items-center">
+          <div
+            className={cn(
+              "hover:bg-background/90 flex flex-col items-center rounded p-1",
+              props.selected && "bg-background/90",
+            )}
+          >
             <div className="max-w-64 truncate text-sm">{props.data.name}</div>
             <div className="text-muted-foreground max-w-xs truncate text-xs">
               {props.data.description}
