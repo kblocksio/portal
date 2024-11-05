@@ -55,7 +55,7 @@
     },
     "scaling": {
         "type": "object",
-        "description": "Scaling configuration",
+        "description": "Scaling configuration \n@ui kblocks.io/one-of",
         "properties": {
             "autoscaling": {
                 "$ref": "#/$defs/autoscaling"
