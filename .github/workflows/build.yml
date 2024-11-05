@@ -88,7 +88,7 @@ jobs:
             -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
             -X POST \
-            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'.kblocks.io","content":"'$QKUBE_NAME'","ttl":60}' \
+            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":60}' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
@@ -140,7 +140,7 @@ jobs:
           blocks=$(find kblocks -maxdepth 1 -type d -not -path kblocks)
           for block in ${blocks}; do
             echo "Installing block: $block"
-            install_kblock "kblocks/$block"
+            install_kblock "$block"
           done      
 
       - name: Skaffold build
