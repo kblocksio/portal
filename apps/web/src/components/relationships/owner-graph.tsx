@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import * as d3 from "d3-force";
 import {
   ReactFlow,
@@ -13,14 +13,17 @@ import {
   StraightEdge,
   Background,
   Controls,
+  useInternalNode,
 } from "@xyflow/react";
 import type {
+  EdgeProps,
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
 } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 
 import "@xyflow/react/dist/style.css";
+import { getConnectingLineWithoutCrossing } from "./math";
 
 export type OwnerNodeData = {
   name: string;
@@ -30,72 +33,80 @@ export type OwnerNodeData = {
 
 export type OwnerNode = ReactFlowNode<OwnerNodeData, "node">;
 
-const OwnerNode = (props: NodeProps<OwnerNode>) => {
+const OwnerNode = memo(function OwnerNode(props: NodeProps<OwnerNode>) {
   return (
-    <div className="flex flex-col items-center justify-around gap-2">
-      <div className="bg-background relative rounded border p-3 shadow-md">
+    <div className="relative">
+      <div className="bg-background rounded border p-3 shadow-md">
         {props.data.icon}
 
-        <div className="absolute inset-0 flex items-center justify-around">
-          <div className="relative">
-            <Handle
-              type="target"
-              position={Position.Top}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="target"
-              position={Position.Bottom}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="target"
-              position={Position.Right}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="target"
-              position={Position.Left}
-              style={{ visibility: "hidden" }}
-            />
+        <Handle
+          type="target"
+          position={Position.Top}
+          style={{ visibility: "hidden" }}
+        />
 
-            <Handle
-              type="source"
-              position={Position.Top}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="source"
-              position={Position.Bottom}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="source"
-              position={Position.Right}
-              style={{ visibility: "hidden" }}
-            />
-            <Handle
-              type="source"
-              position={Position.Left}
-              style={{ visibility: "hidden" }}
-            />
-          </div>
-        </div>
+        <Handle
+          type="source"
+          position={Position.Top}
+          style={{ visibility: "hidden" }}
+        />
       </div>
 
-      <div className="hover:bg-background flex flex-col items-center">
-        <div className="max-w-64 truncate text-sm">{props.data.name}</div>
-        <div className="text-muted-foreground max-w-xs truncate text-xs">
-          {props.data.description}
+      <div className="absolute inset-x-0 mt-2">
+        <div className="flex flex-col items-center">
+          <div className="hover:bg-background/80 flex flex-col items-center">
+            <div className="max-w-64 truncate text-sm">{props.data.name}</div>
+            <div className="text-muted-foreground max-w-xs truncate text-xs">
+              {props.data.description}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
 const nodeTypes = { node: OwnerNode };
 
-const edgeTypes = { straight: StraightEdge };
+const CustomEdge = memo(function CustomEdge(props: EdgeProps) {
+  const sourceNode = useInternalNode(props.source);
+  const targetNode = useInternalNode(props.target);
+  const sourceSize = {
+    width: sourceNode!.measured?.width ?? 32,
+    height: sourceNode!.measured?.height ?? 32,
+  };
+  const targetSize = {
+    width: targetNode!.measured?.width ?? 32,
+    height: targetNode!.measured?.height ?? 32,
+  };
+  const source = {
+    x: sourceNode!.position.x + sourceSize.width / 2,
+    y: sourceNode!.position.y + sourceSize.height / 2,
+  };
+  const target = {
+    x: targetNode!.position.x + targetSize.width / 2,
+    y: targetNode!.position.y + targetSize.height / 2,
+  };
+
+  const { start, end } = getConnectingLineWithoutCrossing(
+    source,
+    sourceSize,
+    target,
+    targetSize,
+  );
+
+  return (
+    <StraightEdge
+      {...props}
+      sourceX={start.x}
+      sourceY={start.y}
+      targetX={end.x}
+      targetY={end.y}
+    />
+  );
+});
+
+const edgeTypes = { straight: CustomEdge };
 
 type NodeDatum = {
   id: string;
@@ -106,7 +117,10 @@ type NodeDatum = {
 
 type EdgeDatum = ReactFlowEdge;
 
-const OwnerFlow = (props: { nodes: OwnerNode[]; edges: ReactFlowEdge[] }) => {
+const OwnerFlow = memo(function OwnerFlow(props: {
+  nodes: OwnerNode[];
+  edges: ReactFlowEdge[];
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState(props.nodes);
   const [edges, , onEdgesChange] = useEdgesState(props.edges);
 
@@ -199,13 +213,15 @@ const OwnerFlow = (props: { nodes: OwnerNode[]; edges: ReactFlowEdge[] }) => {
       </ReactFlow>
     </div>
   );
-};
+});
 
-export const OwnerGraph = (props: {
+export const OwnerGraph = memo(function OwnerGraph(props: {
   nodes: OwnerNode[];
   edges: ReactFlowEdge[];
-}) => (
-  <ReactFlowProvider>
-    <OwnerFlow nodes={props.nodes} edges={props.edges} />
-  </ReactFlowProvider>
-);
+}) {
+  return (
+    <ReactFlowProvider>
+      <OwnerFlow nodes={props.nodes} edges={props.edges} />
+    </ReactFlowProvider>
+  );
+});

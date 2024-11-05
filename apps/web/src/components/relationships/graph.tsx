@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { memo, useContext, useMemo } from "react";
 import { Box } from "lucide-react";
 import { OwnerGraph, OwnerNode } from "./owner-graph";
 import {
@@ -8,11 +8,11 @@ import {
 } from "@/resource-context";
 import { Edge, MarkerType } from "@xyflow/react";
 
-export const RelationshipGraph = ({
+export const RelationshipGraph = memo(function RelationshipGraph({
   selectedResource,
 }: {
   selectedResource?: Resource;
-}) => {
+}) {
   const { relationships, objects, resourceTypes } = useContext(ResourceContext);
 
   const { nodes, edges } = useMemo(() => {
@@ -48,14 +48,12 @@ export const RelationshipGraph = ({
 
         edges.push({
           type: "straight",
-          // label: rel.type,
-          // markerEnd: {
-          //   type: MarkerType.Arrow,
-          // },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
           id: `${srcUri}-${targetUri}`,
           source: srcUri,
           target: targetUri,
-          animated: true,
         });
 
         addRels(targetUri);
@@ -70,7 +68,7 @@ export const RelationshipGraph = ({
       }
     }
     return { nodes, edges };
-  }, [relationships, selectedResource, objects]);
+  }, [selectedResource, objects, resourceTypes, relationships]);
 
   return <OwnerGraph nodes={nodes} edges={edges} />;
-};
+});
