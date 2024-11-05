@@ -1,6 +1,11 @@
 name: Build
 
 on:
+  workflow_dispatch:
+    inputs:
+      name:
+        type: string
+        description: The name of the environment to create
   pull_request:
     types:
       - opened
@@ -12,6 +17,7 @@ concurrency:
 
 env:
   NODE_VERSION: "20.17.0"
+  ENV_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.name }}
 
 jobs:
   build:
@@ -73,8 +79,10 @@ jobs:
       - name: Setup a new qkube
         id: qkube
         run: |
-          QKUBE_NAME=$(npx qkube new --size large | awk -F'"' '/\.quickube\.sh/ {print $2; exit}')
+          QKUBE_NAME="${{ env.ENV_NAME }}.quickube.sh"
           QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
+          npx qkube new --size large --name $QKUBE_SHORT_NAME || true
+          npx qkube use $QKUBE_NAME
           echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
           echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
           echo "qkube-short-name=$QKUBE_SHORT_NAME" >> $GITHUB_OUTPUT
@@ -89,6 +97,13 @@ jobs:
             -H 'Content-Type: application/json' \
             -X POST \
             -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":3600}' \
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
+
+          curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -X POST \
+            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'-api","content":"'$QKUBE_NAME'","ttl":3600}' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
@@ -152,9 +167,12 @@ jobs:
 
       - name: Deploy portal
         working-directory: deploy
+        env:
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
           helm upgrade --install portal . --namespace default --values values.yaml \
             --set backend.image=${{ steps.build.outputs.backend-tag }} \
+            --set backend.ingress.host=${QKUBE_SHORT_NAME}-api.kblocks.io \
             --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
+            --set frontend.ingress.host=${QKUBE_SHORT_NAME}.kblocks.io \
             --set frontend.enabled=true
-
