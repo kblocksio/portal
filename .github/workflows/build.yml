@@ -94,14 +94,14 @@ jobs:
             -H 'Content-Type: application/json' \
             -X POST \
             -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'.kblocks.io","content":"'$QKUBE_NAME'","ttl":60}' \
-            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/wingcloud.com/records --verbose
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
         working-directory: gallery
         run: |
-          echo ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }} > .env
+          echo ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }} > .gallery.env
           export KBLOCKS_SYSTEM_ID=${{ steps.qkube.outputs.qbube-name }}
-          ./scripts/install-gallery-secrets.sh .env
+          ./scripts/install-gallery-secrets.sh .gallery.env
 
       - name: Install portal secrets
         run: |

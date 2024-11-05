@@ -25,8 +25,10 @@ secret="kblocks-secrets"
 kubectl create namespace $namespace 2>/dev/null || true
 
 kubectl delete secret $secret -n $namespace || true
+echo "Creating secret $secret from $envfile"
+cat $envfile
 kubectl create secret generic $secret --from-env-file=$envfile -n $namespace
-
+echo "Secret $secret created"
 # by default blocks read the system id from the "kblocks-system" configmap, so we just need to put
 # it there and the blocks will all use it from there.
 system_config="kblocks-system"
