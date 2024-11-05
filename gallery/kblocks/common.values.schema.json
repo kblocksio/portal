@@ -58,10 +58,10 @@
         "description": "Scaling configuration \n@ui kblocks.io/one-of",
         "properties": {
             "autoscaling": {
-                "$ref": "#/$defs/autoscaling"
+                "$ref": "#/autoscaling"
             },
             "replicas": {
-                "$ref": "#/$defs/replicas"
+                "$ref": "#/replicas"
             }
         }
     },
