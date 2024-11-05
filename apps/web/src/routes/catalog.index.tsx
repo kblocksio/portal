@@ -6,6 +6,8 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { useAppContext } from "@/app-context";
+import { useNavigate } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/catalog/")({
   component: Catalog,
 });
@@ -14,6 +16,7 @@ function Catalog() {
   const { resourceTypes, categories } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
   const { openWizard } = useCreateResourceWizard();
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,11 +28,20 @@ function Catalog() {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleResourceSelect = useCallback(
+  const handleOnResourceCreateClick = useCallback(
     (resourceType: ResourceType) => {
       openWizard(undefined, resourceType, 2);
     },
     [openWizard],
+  );
+
+  const handleOnCardClick = useCallback(
+    (resourceType: ResourceType) => {
+      navigate({
+        to: `/catalog/${resourceType.group}/${resourceType.version}/${resourceType.plural}`,
+      });
+    },
+    [navigate],
   );
   const filteredResourceTypes = useMemo(() => {
     if (!resourceTypes) return [];
@@ -63,8 +75,9 @@ function Catalog() {
         <ResourceCatalog
           categories={categories}
           filtereResources={filteredResourceTypes}
-          handleResourceSelect={handleResourceSelect}
+          onResourceCreateClick={handleOnResourceCreateClick}
           isLoading={false}
+          onCardClick={handleOnCardClick}
         />
       </div>
     </div>

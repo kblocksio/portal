@@ -8,24 +8,24 @@ import {
 import { Skeleton } from "../ui/skeleton";
 import { ResourceType } from "@/resource-context";
 import { Category } from "@repo/shared";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { MarkdownWrapper } from "../markdown";
-import { ResourceTypeDocsDrawer } from "./resource-type-docs-drawer";
 import { ResourceTypeCard } from "./resource-card";
 
 export interface ResourceCatalogProps {
   categories: Record<string, Category>;
   filtereResources: ResourceType[];
-  handleResourceSelect: (resource: any) => void;
+  onResourceCreateClick: (resource: ResourceType) => void;
   isLoading: boolean;
+  onCardClick?: (resource: ResourceType) => void;
 }
 export const ResourceCatalog = ({
   filtereResources,
-  handleResourceSelect,
+  onResourceCreateClick,
   isLoading,
   categories,
+  onCardClick,
 }: ResourceCatalogProps) => {
-  const [docs, setDocs] = useState<string | undefined>(undefined);
   const typesForCategories = useMemo(() => {
     return Object.keys(categories).map((category) => ({
       category,
@@ -49,12 +49,11 @@ export const ResourceCatalog = ({
               key={category}
               category={categories[category]}
               resources={resources}
-              handleResourceSelect={handleResourceSelect}
-              handleDocsOpen={setDocs}
+              onResourceCreateClick={onResourceCreateClick}
+              onCardClick={onCardClick}
             />
           ),
       )}
-      <ResourceTypeDocsDrawer docs={docs} onClose={() => setDocs(undefined)} />
     </div>
   );
 };
@@ -62,13 +61,13 @@ export const ResourceCatalog = ({
 const ResourceTypeCategory = ({
   category,
   resources,
-  handleResourceSelect,
-  handleDocsOpen,
+  onResourceCreateClick,
+  onCardClick,
 }: {
   category: Category;
   resources: ResourceType[];
-  handleResourceSelect: (resource: ResourceType) => void;
-  handleDocsOpen: (docs: string | undefined) => void;
+  onResourceCreateClick: (resource: ResourceType) => void;
+  onCardClick?: (resource: ResourceType) => void;
 }) => {
   return (
     <div className="border-input flex flex-col">
@@ -88,8 +87,8 @@ const ResourceTypeCategory = ({
           <ResourceTypeCard
             key={`${resource.kind}-${resource.group}-${resource.version}`}
             resource={resource}
-            handleResourceSelect={handleResourceSelect}
-            handleDocsOpen={handleDocsOpen}
+            onResourceCreateClick={onResourceCreateClick}
+            onCardClick={onCardClick}
           />
         ))}
       </div>
