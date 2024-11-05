@@ -1,5 +1,5 @@
 #!/bin/sh
-set -euo pipefail
+set -eu
 root=$(cd $(dirname $0) && pwd)
 
 envfile=${1:-}
@@ -10,6 +10,10 @@ if [ -z "$envfile" ]; then
   echo "  https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=t2dmpkwt5hufldsxzhnnw43d5i&h=wingcloud.1password.com"
   exit 1
 fi
+
+echo "Environment file:"
+echo "Creating from $envfile"
+cat $envfile
 
 # TODO: infer KBLOCKS_SYSTEM_ID from the current kubectl context, but for now we have `demo` hardcoded in many places
 # KBLOCKS_SYSTEM_ID=$(kubectl config current-context)

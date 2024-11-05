@@ -5,7 +5,13 @@ import { slackNotify } from "./slack-notify";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
-const objPrefix = "obj:";
+const REDIS_PREFIX = process.env.REDIS_PREFIX;
+const objPrefix = (() => {
+  if (REDIS_PREFIX) {
+    return `${REDIS_PREFIX}:obj:`;
+  }
+  return "obj:";
+})();
 
 const config = {
   password: REDIS_PASSWORD,

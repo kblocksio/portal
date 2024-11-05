@@ -13,6 +13,11 @@ build:
         infer:
           - apps/server/src/**/*.ts
           - packages/shared/src/**/*.ts
+    - image: wingcloudbot/kblocks-frontend
+      context: ./apps/web
+      sync:
+        infer:
+          - apps/web/src/**/*.ts
 
 deploy:
   helm:
@@ -20,4 +25,5 @@ deploy:
       - name: kblocks-backend
         chartPath: ./deploy
         setValueTemplates:
-          image: "{{.IMAGE_FULLY_QUALIFIED}}"
+          backend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
+          frontend.image: "{{.IMAGE_FULLY_QUALIFIED}}"

@@ -1,0 +1,12 @@
+backend:
+  ingress:
+    host: api.kblocks.io
+    tls:
+      secret: kblocks-tls
+  secretName: kblocks-api-secrets
+frontend:
+  enabled: false
+  ingress:
+    host: kblocks.io
+    tls:
+      secret: kblocks-tls

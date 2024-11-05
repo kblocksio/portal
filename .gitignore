@@ -20,3 +20,5 @@ kblocks-gallery.env
 portal.env
 
 *.code-workspace
+
+target/

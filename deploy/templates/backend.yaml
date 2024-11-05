@@ -1,0 +1,29 @@
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-backend
+image: {{ .Values.backend.image }}
+port: 3001
+replicas: 2
+expose:
+  - path: /
+    host: {{ .Values.backend.ingress.host }}
+    tls:
+      hosts:
+        - {{ .Values.backend.ingress.host }}
+      secret: {{ .Values.backend.ingress.tls.secret }}
+# in non vercel environments we need additional ingress for the <frontend>/api path
+{{- if .Values.frontend.enabled }}
+  - path: /api
+    host: {{ .Values.frontend.ingress.host }}
+    tls:
+      hosts:
+        - {{ .Values.frontend.ingress.host }}
+      secret: {{ .Values.frontend.ingress.tls.secret }}
+{{- end }}
+envFrom:
+  - secretName: {{ .Values.backend.secretName }}
+allowCluster:
+  - apiGroup: "*"
+    resource: "*"
+    verbs: ["*"]

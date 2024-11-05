@@ -48,12 +48,19 @@ jobs:
           chmod +x skaffold
           sudo mv skaffold /usr/local/bin
 
+      - name: Build
+        run: npm run build
+
       - name: Skaffold build
         id: build
         run: |
           skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
           echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
 
+      - name: Publish the backend to staging
+        run: |
+          curl -X PATCH -H "content-type: application/json" "https://staging.kblocks.io/api/resources/acme.com/v1/workloads/staging.quickube.sh/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'
+  
       - name: Publish the backend
         run: |
           curl -X PATCH -H "content-type: application/json" "https://kblocks.io/api/resources/acme.com/v1/workloads/prod/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'

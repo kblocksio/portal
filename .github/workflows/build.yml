@@ -1,0 +1,185 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        type: string
+        description: The name of the environment to create
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.17.0"
+  ENV_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.name }}
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Build
+        run: |
+          cd apps/web
+          sed -i 's|^VITE_BACKEND_URL=.*|VITE_BACKEND_URL=https://${{ env.ENV_NAME }}.kblocks.io|' .env.prod
+          cd ../..
+          npm run build
+
+      - name: Install helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      - name: Install Skaffold
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          chmod +x skaffold
+          sudo mv skaffold /usr/local/bin
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Create empty kube config
+        run: |
+          mkdir -p /home/runner/.kube
+          echo "apiVersion: v1" > /home/runner/.kube/config
+
+      - name: Setup a new qkube
+        id: qkube
+        run: |
+          QKUBE_NAME="${{ env.ENV_NAME }}.quickube.sh"
+          QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
+          npx qkube new --size large --name $QKUBE_SHORT_NAME || true
+          npx qkube use $QKUBE_NAME
+          echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
+          echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
+          echo "qkube-short-name=$QKUBE_SHORT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create DNS record
+        env:
+          QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -X POST \
+            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":3600}' \
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
+
+          curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -X POST \
+            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'-api","content":"'$QKUBE_NAME'","ttl":3600}' \
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
+
+      - name: Install gallery secrets
+        working-directory: gallery
+        env:
+          KBLOCKS_GALLERY_ENV_FILE: ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          echo "$KBLOCKS_GALLERY_ENV_FILE" > .gallery.env
+          export KBLOCKS_SYSTEM_ID="${QKUBE_SHORT_NAME}.kblocks.io"
+          ./scripts/install-gallery-secrets.sh .gallery.env
+
+      - name: Install portal secrets
+        env:
+          PORTAL_ENV_FILE: ${{ secrets.PORTAL_ENV_FILE }}
+          QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          echo "$PORTAL_ENV_FILE" > .portal.env
+          sed -i '/WEBSITE_ORIGIN/d' .portal.env
+          echo "WEBSITE_ORIGIN=https://${QKUBE_SHORT_NAME}.kblocks.io" >> .portal.env
+          echo "REDIS_PREFIX=${QKUBE_SHORT_NAME}" >> .portal.env
+          echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
+          ./scripts/install-secrets.sh .portal.env $QKUBE_NAME
+
+      - name: Install cert
+        env:
+          STAR_KBLOCKS_CERT_KEY: ${{ secrets.STAR_KBLOCKS_CERT_KEY }}
+          STAR_KBLOCKS_CERT_PEM: ${{ secrets.STAR_KBLOCKS_CERT_PEM }}
+        run: |
+          echo "$STAR_KBLOCKS_CERT_KEY" > kblocks_io.key
+          echo "$STAR_KBLOCKS_CERT_PEM" > kblocks_io.pem
+          ./scripts/install-cert.sh kblocks_io.key kblocks_io.pem
+
+      - name: Install gallery blocks
+        working-directory: gallery
+        env:
+          QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          install_kblock() {
+            dir=$1
+            (
+              cd $dir
+              name=$(basename $dir)
+              echo "Installing block: $PWD..."
+              npx kb install -n kblocks -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" --release-name $name
+            )
+          }
+
+          blocks=$(find kblocks -maxdepth 1 -type d -not -path kblocks)
+          for block in ${blocks}; do
+            echo "Installing block: $block"
+            install_kblock "$block"
+          done      
+
+      - name: Skaffold build
+        id: build
+        run: |
+          skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
+          echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
+          echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
+
+      - name: Deploy portal
+        working-directory: deploy
+        env:
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          helm upgrade --install portal . --namespace default --values values.yaml \
+            --set backend.image=${{ steps.build.outputs.backend-tag }} \
+            --set backend.ingress.host=${QKUBE_SHORT_NAME}-api.kblocks.io \
+            --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
+            --set frontend.ingress.host=${QKUBE_SHORT_NAME}.kblocks.io \
+            --set frontend.enabled=true

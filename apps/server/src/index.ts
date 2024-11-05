@@ -32,6 +32,7 @@ import {
 import { categories } from "./categories";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
+const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
 
 const port = process.env.PORT ?? 3001;
 
@@ -453,6 +454,11 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
   }
 
   console.log("client_id", process.env.GITHUB_CLIENT_ID);
+
+  if (NON_PRIMARY_ENVIRONMENT) {
+    console.log("non-primary environment, skipping additional github auth");
+    return res.redirect(303, `${WEBSITE_ORIGIN}/`);
+  }
 
   const url = new URL("https://github.com/login/oauth/authorize");
   url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
