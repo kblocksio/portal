@@ -130,7 +130,7 @@ pub class Workload {
   
       if let certificate = ig.tls {
         tlsConfig.push({ 
-          secret: k8s.Secret.fromSecretName(this, "tls-secret", certificate.secret),
+          secret: k8s.Secret.fromSecretName(this, "tls-secret-{i}", certificate.secret),
           hosts: certificate.hosts
         });
       }
