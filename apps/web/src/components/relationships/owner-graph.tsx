@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo, useEffect, useState } from "react";
 import * as d3 from "d3-force";
 import {
   ReactFlow,
@@ -130,6 +130,8 @@ const OwnerFlow = memo(function OwnerFlow(props: {
   >();
   const initialized = useNodesInitialized();
 
+  const [simulationDone, setSimulationDone] = useState(false);
+
   useEffect(() => {
     const nodeDatums = getNodes().map<NodeDatum>((node) => ({
       id: node.id,
@@ -181,16 +183,16 @@ const OwnerFlow = memo(function OwnerFlow(props: {
         position: { x: node.x ?? 0, y: node.y ?? 0 },
       })),
     );
-    requestAnimationFrame(() => {
-      fitView();
-    });
+    setSimulationDone(true);
   }, [initialized, getNodes, getEdges, setNodes, fitView]);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      fitView();
-    });
-  }, [fitView, nodes]);
+    if (simulationDone) {
+      requestAnimationFrame(() => {
+        fitView();
+      });
+    }
+  }, [fitView, simulationDone]);
 
   return (
     <div
@@ -207,6 +209,7 @@ const OwnerFlow = memo(function OwnerFlow(props: {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        maxZoom={1.1}
       >
         <Background />
         <Controls showInteractive={false} />
