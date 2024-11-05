@@ -74,7 +74,7 @@ jobs:
           - bucket
           - cron-job
           - postgres
-          - qkube
+          - quickube
           - queue
           - redis
           - static-site

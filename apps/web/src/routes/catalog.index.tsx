@@ -1,12 +1,11 @@
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { useAppContext } from "@/app-context";
-import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/catalog/")({
   component: Catalog,
