@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import { appToast } from "@/components/app-toaster";
 
 export type NotificationType = "success" | "error";
@@ -7,6 +7,8 @@ export type Notification = {
   message: string;
   type: NotificationType;
 };
+
+const NOTIFICATIONS_THRESHOLD = 30;
 
 export const NotificationsContext = createContext<{
   notifications: Notification[];
@@ -24,6 +26,14 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    if (notifications.length > NOTIFICATIONS_THRESHOLD) {
+      setNotifications((prevNotifications) =>
+        prevNotifications.slice(-NOTIFICATIONS_THRESHOLD / 2),
+      );
+    }
+  }, [notifications]);
 
   const addNotifications = (notifications: Notification[]) => {
     notifications.forEach((notification) => {

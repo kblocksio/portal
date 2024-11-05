@@ -21,7 +21,10 @@
         "$ref": "#/$defs/commonDefs/environmentVariables"
       },
       "instanceType": {
-        "$ref": "#/$defs/commonDefs/instanceType",
+        "$ref": "#/$defs/commonDefs/instanceType"
+      },
+      "scaling": {
+        "$ref": "#/$defs/commonDefs/scaling"
       },
       "region": {
         "$ref": "#/$defs/commonDefs/region",
