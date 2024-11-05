@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu pipefail
+set -eu
 
 key=${1:-}
 cert=${2:-}

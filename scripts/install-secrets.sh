@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu pipefail
+set -eu
 dir=$(cd $(dirname "$0") && pwd)
 
 envfile=${1:-}
@@ -13,7 +13,7 @@ if [ -z "$envfile" ]; then
 fi
 
 current_context=$(kubectl config current-context)
-qkube use "$qkube_name"
+npx qkube use "$qkube_name"
 
 secret="kblocks-api-secrets"
 kubectl delete secret "$secret" || true

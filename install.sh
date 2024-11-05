@@ -1,4 +1,4 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 qkube use portal-backend.quickube.sh
 skaffold run
