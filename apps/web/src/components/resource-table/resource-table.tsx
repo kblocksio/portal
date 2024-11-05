@@ -268,6 +268,7 @@ const useColumns = () => {
 export const ResourceTable = (props: {
   resources: Resource[];
   className?: string;
+  showActions?: boolean;
 }) => {
   const columns = useColumns();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -292,7 +293,7 @@ export const ResourceTable = (props: {
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
-      <ResourceTableToolbar table={table} />
+      <ResourceTableToolbar table={table} showActions={props.showActions} />
       <section>
         <div
           className={cn(

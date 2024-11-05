@@ -9,10 +9,12 @@ import { DataTableFacetedFilter } from "./faceted-filter";
 import { getIconComponent } from "@/lib/get-icon";
 export interface ResourceTableToolbarProps<TData> {
   table: TanstackTable<TData>;
+  showActions?: boolean;
 }
 
 export function ResourceTableToolbar<TData>({
   table,
+  showActions = true,
 }: ResourceTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -96,9 +98,11 @@ export function ResourceTableToolbar<TData>({
 
         <div className="grow"></div>
 
-        <Button size="sm" onClick={() => openCreateWizard()}>
-          New Resource...
-        </Button>
+        {showActions && (
+          <Button size="sm" onClick={() => openCreateWizard()}>
+            New Resource...
+          </Button>
+        )}
       </div>
       {/* <DataTableViewOptions table={table} /> */}
     </div>
