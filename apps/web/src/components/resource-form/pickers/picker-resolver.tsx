@@ -2,8 +2,6 @@ import { ObjectMetadata } from "@repo/shared";
 import { InstancePicker } from "./instance-picker";
 import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";
-import SwaggerUIComponent from "./swagger-ui";
-import HiddenComponent from "./hidden-component";
 import { Shell } from "./shell";
 
 export const resolvePickerField = ({
@@ -84,12 +82,6 @@ export const resolvePickerField = ({
           path={path}
         />
       );
-    }
-    case "swagger-ui": {
-      return <SwaggerUIComponent spec={value} />;
-    }
-    case "hidden": {
-      return <HiddenComponent />;
     }
     case "shell": {
       return <Shell value={value} />;
