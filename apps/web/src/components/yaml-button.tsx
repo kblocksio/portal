@@ -28,7 +28,7 @@ export default function YamlButton({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <div className="mt-4 overflow-auto rounded border">
           <CopyButton text={yamlString} className="absolute top-12 right-8"/>
           <SyntaxHighlighter

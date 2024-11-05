@@ -66,7 +66,15 @@ export const ResourceForm = ({
       ...cloneDeep(formData),
     };
 
+    delete obj.status;
     delete obj.metadata?.system;
+    delete obj.metadata?.generation;
+    delete obj.metadata?.creationTimestamp;
+    delete obj.metadata?.managedFields;
+    delete obj.metadata?.resourceVersion;
+    delete obj.metadata?.uid;
+    delete obj.objUri;
+    delete obj.objType;
 
     return obj;
   }, [metadataObject, formData, resourceType]);
