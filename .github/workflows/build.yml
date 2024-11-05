@@ -51,7 +51,11 @@ jobs:
           npm install
 
       - name: Build
-        run: npm run build
+        run: |
+          cd apps/web
+          sed -i 's|^VITE_BACKEND_URL=.*|VITE_BACKEND_URL=${{ env.ENV_NAME }}.kblocks.io|' .env.prod
+          cd ../..
+          npm run build
 
       - name: Install helm
         run: |
