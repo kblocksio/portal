@@ -269,17 +269,19 @@ function ResourcePage() {
             </div>
 
             {/* Properties */}
-            <div className="w-full">
-              <div className="pb-4 sm:pt-6">
-                <CardTitle>Properties</CardTitle>
+            {Object.keys(properties).length > 0 && (
+              <div className="w-full">
+                <div className="pb-4 sm:pt-6">
+                  <CardTitle>Properties</CardTitle>
+                </div>
+                <div className="grid auto-rows-[28px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+                  <KeyValueList
+                    data={properties}
+                    resourceObjUri={selectedResource.objUri}
+                  />
+                </div>
               </div>
-              <div className="grid auto-rows-[28px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                <KeyValueList
-                  data={properties}
-                  resourceObjUri={selectedResource.objUri}
-                />
-              </div>
-            </div>
+            )}
 
             {/* Outputs */}
             {outputs && Object.keys(outputs).length > 0 && (
