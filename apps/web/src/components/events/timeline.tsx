@@ -75,7 +75,7 @@ function EventItem({
   const action = getActionLabel(header.action);
   const [isOpen, setIsOpen] = useState(isLast);
 
-  const isClickable = eventGroup.logs.length > 0 ?? header.details;
+  const isClickable = eventGroup.logs.length > 0 || header.details;
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
