@@ -11,7 +11,7 @@ export const PropertyValue = ({ children }: PropsWithChildren) => {
   const isLink = typeof children === "string" && /<a\s/i.test(children);
 
   return (
-    <div className="truncate">
+    <div className="flex items-center pb-1">
       {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
       {!isLink && <span className="truncate">{children}</span>}
     </div>

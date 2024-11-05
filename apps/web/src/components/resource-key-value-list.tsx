@@ -22,6 +22,7 @@ import {
 import { ResourceLink } from "./resource-link";
 import { PropertyKey, PropertyValue } from "./ui/property";
 import { CopyToClipboardButton } from "./copy-to-clipboard";
+import { Checkbox } from "./ui/checkbox";
 
 
 type KeyValueListProps = {
@@ -95,7 +96,12 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
       }
 
       if (typeof value === "boolean") {
-        return <Badge>{value.toString()}</Badge>;
+        return (
+          <div className="flex items-center gap-2"> 
+            <Checkbox checked={value} className="cursor-default" />
+            {value ? "Enabled" : "Disabled"}
+          </div>
+        );
       }
 
       if (

@@ -31,6 +31,7 @@ import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
+import { RelationshipGraph } from "@/components/relationships/graph";
 
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
@@ -225,6 +226,12 @@ function ResourcePage() {
               <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
             )}
           </TabsTrigger>
+          <TabsTrigger
+            value="relationships"
+            className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Relationships
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <CardContent className="flex flex-col gap-8">
@@ -318,6 +325,12 @@ function ResourcePage() {
                 <Timeline events={events} className="mt-0" />
               )}
             </CardContent>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="relationships">
+          <div className="flex h-[640px] flex-col gap-8">
+            <RelationshipGraph selectedResource={selectedResource} />
           </div>
         </TabsContent>
       </Tabs>

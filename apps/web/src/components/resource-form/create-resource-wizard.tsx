@@ -14,6 +14,7 @@ import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
 import { Description } from "@radix-ui/react-dialog";
+import { ResourceForm } from "./resource-form";
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
@@ -120,7 +121,7 @@ export const CreateResourceWizard = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="flex h-[90vh] max-w-[90vh] flex-col"
+        className="flex max-h-[90vh] max-w-[90vh] flex-col"
         onPointerDownOutside={(event) => {
           if (isLoading) {
             event.preventDefault();
@@ -169,11 +170,11 @@ export const CreateResourceWizard = ({
         ) : (
           <div className="flex h-full flex-col space-y-4 overflow-hidden p-2">
             {selectedResourceType && (
-              <CreateNewResourceForm
+              <ResourceForm
                 resourceType={selectedResourceType}
                 initialMeta={renderInitialMeta(currentEditableResource?.objUri)}
                 initialValues={currentEditableResource}
-                handleCreate={handleCreate}
+                handleSubmit={handleCreate}
                 handleBack={handleBack}
                 isLoading={isLoading}
               />

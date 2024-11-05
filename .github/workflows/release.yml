@@ -81,13 +81,15 @@ jobs:
           - bucket
           - cron-job
           - postgres
-          - qkube
+          - quickube
           - queue
           - redis
           - static-site
           - topic
           - workload
           - cloudfront
+          - worktmp
+          - web-service
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

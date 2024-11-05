@@ -3,17 +3,17 @@
     "$id": "https://example.com/cron-schema.json",
     "$defs": {
       "commonDefs": {
-        "$ref": "../../common.values.schema.json"
+        "$ref": "../common.values.schema.json"
       }
     },
     "type": "object",
     "required": [
       "region",
       "instanceType",
-      "image"
+      "source"
     ],
     "properties": {
-      "image": {
+      "source": {
         "description": "The Docker image or GitHub repository to use for the background worker.\n@ui kblocks.io/one-of",
         "$ref": "#/$defs/commonDefs/source"
       },
