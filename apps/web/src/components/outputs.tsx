@@ -2,7 +2,6 @@ import React from "react";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import { ResourceType } from "@/resource-context";
 import { resolveOutputField } from "./resource-outputs/output-resolver";
-import { PropertyKey, PropertyValue } from "./ui/property";
 
 export default function Outputs({
   outputs,
