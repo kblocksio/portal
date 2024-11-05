@@ -65,13 +65,6 @@ jobs:
           chmod +x kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Skaffold build
-        id: build
-        run: |
-          skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
-          echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
-          echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
-
       - name: Create empty kube config
         run: |
           mkdir -p /home/runner/.kube
@@ -135,6 +128,13 @@ jobs:
             echo "Installing block: $block"
             install_kblock "kblocks/$block"
           done      
+
+      - name: Skaffold build
+        id: build
+        run: |
+          skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
+          echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
+          echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
 
       - name: Deploy portal
         working-directory: deploy
