@@ -53,14 +53,8 @@ type BlockApiObject = ApiObject & {
 };
 
 export type Relationship = {
-  type: RelationshipType;
+  type: "parent" | "child" | "ref";
 };
-
-export enum RelationshipType {
-  PARENT = "parent",
-  CHILD = "child",
-  REF = "ref",
-}
 
 export interface ResourceContextValue {
   // objType -> ResourceType
@@ -128,11 +122,8 @@ export const ResourceProvider = ({
       console.log("WebSocket disconnected");
     },
     onError: (error) => {
-      console.error("WebSocket error:", error);
-    },
-    onMessage: (message) => {
-      console.log("WebSocket message:", message);
-    },
+      console.error("WebSocket Error:", error);
+    }
   });
 
   const [previousMessage, setPreviousMessage] = useState<
@@ -265,14 +256,14 @@ export const ResourceProvider = ({
           prev[childUri] = {
             ...(prev[childUri] ?? {}),
             [parentUri]: {
-              type: RelationshipType.PARENT,
+              type: "parent",
             },
           };
 
           prev[parentUri] = {
             ...(prev[parentUri] ?? {}),
             [childUri]: {
-              type: RelationshipType.CHILD,
+              type: "child",
             },
           };
         }

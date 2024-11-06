@@ -8,9 +8,8 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { memo, useContext, useEffect, useMemo, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import {
-  RelationshipType,
   Resource,
   ResourceContext,
   ResourceType,
@@ -176,7 +175,7 @@ const useColumns = () => {
           const rels = Object.entries(
             relationships[props.row.original.objUri] ?? {},
           )
-            .filter(([, rel]) => rel.type === RelationshipType.CHILD)
+            .filter(([, rel]) => rel.type === "child")
             .map(([relUri]) => objects[relUri]);
 
           if (rels.length === 0) {

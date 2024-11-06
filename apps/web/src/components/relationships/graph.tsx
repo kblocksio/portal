@@ -2,7 +2,6 @@ import { memo, useContext, useMemo } from "react";
 import { Box } from "lucide-react";
 import { OwnerGraph, OwnerNode } from "./owner-graph";
 import {
-  RelationshipType,
   Resource,
   ResourceContext,
 } from "@/resource-context";
@@ -43,7 +42,7 @@ export const RelationshipGraph = memo(function RelationshipGraph({
       for (const [targetUri, rel] of Object.entries(
         relationships[srcUri] ?? {},
       )) {
-        if (rel.type === RelationshipType.PARENT) {
+        if (rel.type === "parent") {
           continue;
         }
 
