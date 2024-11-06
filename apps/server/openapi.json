@@ -156,6 +156,183 @@
           }
         }
       }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}": {
+      "parameters": [
+        {
+          "name": "group",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "version",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "plural",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "system",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "namespace",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get specific resource",
+        "responses": {
+          "200": {
+            "description": "The requested resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update specific resource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Patch request accepted"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete specific resource",
+        "responses": {
+          "200": {
+            "description": "Delete request accepted"
+          }
+        }
+      }
+    },
+    "/api/resources/{group}/{version}/{plural}": {
+      "post": {
+        "summary": "Create a resource",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create request accepted"
+          }
+        }
+      }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}/logs": {
+      "get": {
+        "summary": "Get logs for a specific resource",
+        "responses": {
+          "200": {
+            "description": "Logs for the resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "objUri": {
+                      "type": "string"
+                    },
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkerEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/events": {
+      "get": {
+        "summary": "Get events for a specific resource",
+        "responses": {
+          "200": {
+            "description": "Events for the resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "objUri": {
+                      "type": "string"
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkerEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
