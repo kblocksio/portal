@@ -26,8 +26,11 @@ env:
 
 jobs:
   build:
-    name: "Build"
+    name: Build
     runs-on: ubuntu-latest
+    outputs:
+      qkube-name: ${{ steps.qkube.outputs.qkube-name }}
+      qkube-short-name: ${{ steps.qkube.outputs.qkube-short-name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -147,27 +150,16 @@ jobs:
           echo "$STAR_KBLOCKS_CERT_PEM" > kblocks_io.pem
           ./scripts/install-cert.sh kblocks_io.key kblocks_io.pem
 
-      - name: Install gallery blocks
-        working-directory: gallery
+      - name: Install the Workload block (needed for the portal)
+        working-directory: gallery/kblocks/workload
         env:
-          QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
           QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
-          install_kblock() {
-            dir=$1
-            (
-              cd $dir
-              name=$(basename $dir)
-              echo "Installing block: $PWD..."
-              npx kb install -n kblocks -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" --release-name $name
-            )
-          }
-
-          blocks=$(find kblocks -maxdepth 1 -type d -not -path kblocks)
-          for block in ${blocks}; do
-            echo "Installing block: $block"
-            install_kblock "$block"
-          done      
+          npx kb install -n kblocks \
+            -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" \
+            -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" \
+            -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" \
+            --release-name $(basename $PWD)
 
       - name: Skaffold build
         id: build
@@ -194,6 +186,55 @@ jobs:
         env:
           QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         with:
-          message: |
-            Environment is available at https://${{env.QKUBE_SHORT_NAME}}.kblocks.io :rocket:
-          comment_tag: Environment
+          message: "Environment is available at https://${{env.QKUBE_SHORT_NAME}}.kblocks.io :rocket:"
+          comment-tag: Environment
+
+  deploy-block:
+    name: "Deploy Block"
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    strategy:
+      matrix:
+        block:
+          - api-docs
+          - autobuild
+          - autobuild-static-site
+          - aws-account
+          - background-worker
+          - bucket
+          - cloudfront
+          - cron-job
+          - networked-workload
+          - postgres
+          - queue
+          - quickube
+          - redis
+          - static-site
+          - topic
+          - web-service
+          - workload          
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+  
+      - name: Install Dependencies
+        run: npm install
+  
+      - name: Install gallery blocks
+        working-directory: gallery/kblocks/${{ matrix.block }}
+        env:
+          QKUBE_SHORT_NAME: ${{ needs.build.outputs.qkube-short-name }}
+        run: |
+          npx kb install -n kblocks \
+            -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" \
+            -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" \
+            -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" \
+            --release-name $(basename $PWD)
