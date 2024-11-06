@@ -129,21 +129,38 @@ export const ResourceForm = ({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="system" className={"opacity-50"}>
+            <Label htmlFor="system">
               Cluster
               <span className="text-destructive">*</span>
             </Label>
-            <SystemSelector
-              resourceType={resourceType}
-              disabled={!!initialValues}
-              value={system}
-              onChange={(value) => setSystem(value)}
-            />
+            <div className="relative">
+              <SystemSelector
+                resourceType={resourceType}
+                disabled={!!initialValues}
+                value={system}
+                onChange={(value) => setSystem(value)}
+                required={true}
+              />
+              <input
+                type="text"
+                tabIndex={-1}
+                required
+                value={system}
+                onChange={() => {}}
+                style={{
+                  position: "absolute",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  top: "12px",
+                  left: 0,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
-      <div className="relative flex-1 overflow-y-auto p-0 m-0 border-t">
-        <div className="pointer-events-none sticky top-0 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent"></div>
+      <div className="relative m-0 flex-1 overflow-y-auto border-t p-0">
+        <div className="pointer-events-none sticky left-0 right-0 top-0 h-6 bg-gradient-to-b from-white to-transparent"></div>
         <FieldRenderer
           objectMetadata={metadataObject}
           schema={schema}
@@ -159,9 +176,7 @@ export const ResourceForm = ({
         <Button type="button" variant="outline" onClick={handleBack}>
           {!initialValues ? "Back" : "Cancel"}
         </Button>
-        <YamlButton
-          object={yamlObject}
-        >
+        <YamlButton object={yamlObject}>
           <Button
             type="button"
             variant="secondary"

@@ -18,15 +18,20 @@ export const SystemSelector = ({
   resourceType,
   onChange,
   disabled,
+  required,
 }: {
   resourceType: ResourceType;
   disabled: boolean;
-  value: string;
+  value?: string;
+  required?: boolean;
   onChange: (value: string) => void;
 }) => {
   const [open, setOpen] = useState(false);
-  const systems = useMemo(() => Array.from(resourceType.systems), [resourceType]);
-  
+  const systems = useMemo(
+    () => Array.from(resourceType.systems),
+    [resourceType],
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -35,17 +40,18 @@ export const SystemSelector = ({
           disabled={disabled}
           role="combobox"
           aria-expanded={open}
+          aria-required={required}
           className={cn(
             "w-full justify-between",
             disabled && "cursor-not-allowed",
           )}
         >
-          {value ?? "Select a cluster"}
+          {value || "Select a cluster"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[350px] p-0 pointer-events-auto"
+        className="pointer-events-auto w-[350px] p-0"
         style={{ zIndex: 1000 }}
       >
         <Command>
