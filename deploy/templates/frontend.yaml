@@ -10,7 +10,14 @@ image: {{ $image }}
 port: 80
 replicas: 2
 expose:
-  - path: /
+  - path: /assets(/|$)(.*)
+    host: {{ $ingressHost }}
+    tls:
+      hosts:
+        - {{ $ingressHost }}
+      secret: {{ $ingressTlsSecret }}
+  - path: /(.*)
+    rewrite: /
     host: {{ $ingressHost }}
     tls:
       hosts:

@@ -96,16 +96,15 @@ pub class Workload {
       ) as "route-{i}";
   
       if let host = ig.host {
-        ingress.addHostRule(host, ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
+        ingress.addHostRule(host, ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.IMPLEMENTATION_SPECIFIC);
       } else {
-        ingress.addRule(ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
+        ingress.addRule(ig.path, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.IMPLEMENTATION_SPECIFIC);
       }
   
       if let rewrite = ig.rewrite {
         ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/rewrite-target", rewrite);
       }
   
-      // allow large request headers
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-buffer-size", "128k");
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-buffers-number", "4");
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-busy-buffers-size", "256k");
@@ -114,6 +113,7 @@ pub class Workload {
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-send-timeout", "36000");
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/proxy-connect-timeout", "36000");
       ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/enable-websocket", "true");
+      ingress.metadata.addAnnotation("nginx.ingress.kubernetes.io/use-regex", "true");
     } 
   }
 }

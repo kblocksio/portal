@@ -11,7 +11,7 @@ image: {{ $image }}
 port: 3001
 replicas: 2
 expose:
-  - path: /api
+  - path: /api(/|$)(.*)
     host: {{ $ingressHost }}
     tls:
       hosts:
