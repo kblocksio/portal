@@ -29,8 +29,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     outputs:
-      qkube-name: ${{ steps.qkube.outputs.qkube-name }}
-      qkube-short-name: ${{ steps.qkube.outputs.qkube-short-name }}
+      kblocks-host: ${{ steps.qkube.outputs.kblocks-host }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -92,52 +91,42 @@ jobs:
         id: qkube
         run: |
           QKUBE_NAME="${{ env.ENV_NAME }}.quickube.sh"
-          QKUBE_SHORT_NAME=$(echo $QKUBE_NAME | cut -d'.' -f1)
-          npx qkube new --size large --name $QKUBE_SHORT_NAME || true
+          npx qkube new --size large --name ${{ env.ENV_NAME }} || true
           npx qkube use $QKUBE_NAME
-          echo "Using qkube $QKUBE_NAME ($QKUBE_SHORT_NAME)"
+          echo "Using qkube $QKUBE_NAME (${{ env.ENV_NAME }})"
           echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
-          echo "qkube-short-name=$QKUBE_SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "kblocks-host=${{ env.ENV_NAME }}.kblocks.io" >> $GITHUB_OUTPUT
 
       - name: Create DNS record
         env:
           QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
           curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
             -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
             -X POST \
-            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'","content":"'$QKUBE_NAME'","ttl":3600}' \
-            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
-
-          curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
-            -H 'Accept: application/json' \
-            -H 'Content-Type: application/json' \
-            -X POST \
-            -d '{"type":"CNAME","name":"'$QKUBE_SHORT_NAME'-api","content":"'$QKUBE_NAME'","ttl":3600}' \
+            -d '{"type":"CNAME","name":"'${{ env.ENV_NAME }}'","content":"'$QKUBE_NAME'","ttl":3600}' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
         working-directory: gallery
         env:
           KBLOCKS_GALLERY_ENV_FILE: ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }}
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
           echo "$KBLOCKS_GALLERY_ENV_FILE" > .gallery.env
-          export KBLOCKS_SYSTEM_ID="${QKUBE_SHORT_NAME}.kblocks.io"
+          export KBLOCKS_SYSTEM_ID="${{ steps.qkube.outputs.kblocks-host }}"
           ./scripts/install-gallery-secrets.sh .gallery.env
 
       - name: Install portal secrets
         env:
           PORTAL_ENV_FILE: ${{ secrets.PORTAL_ENV_FILE }}
           QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+          KBLOCKS_HOST: ${{ steps.qkube.outputs.kblocks-host }}
         run: |
           echo "$PORTAL_ENV_FILE" > .portal.env
           sed -i '/WEBSITE_ORIGIN/d' .portal.env
-          echo "WEBSITE_ORIGIN=https://${QKUBE_SHORT_NAME}.kblocks.io" >> .portal.env
-          echo "REDIS_PREFIX=${QKUBE_SHORT_NAME}" >> .portal.env
+          echo "WEBSITE_ORIGIN=https://${KBLOCKS_HOST}" >> .portal.env
+          echo "REDIS_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
           echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
           ./scripts/install-secrets.sh .portal.env $QKUBE_NAME
 
@@ -151,16 +140,10 @@ jobs:
           ./scripts/install-cert.sh kblocks_io.key kblocks_io.pem
 
       - name: Install the Workload block (needed for the portal)
-        working-directory: gallery/kblocks/workload
+        working-directory: gallery
         env:
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
-        run: |
-          npx kb install -n kblocks \
-            -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" \
-            -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" \
-            -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" \
-            --release-name $(basename $PWD)
-
+          KBLOCKS_HOST: ${{ steps.qkube.outputs.kblocks-host }}
+        run: ./install-blocks.sh ./kblocks/workload
       - name: Skaffold build
         id: build
         run: |
@@ -170,23 +153,18 @@ jobs:
 
       - name: Deploy portal
         working-directory: deploy
-        env:
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         run: |
           helm upgrade --install portal . --namespace default --values values.yaml \
             --set backend.image=${{ steps.build.outputs.backend-tag }} \
-            --set backend.ingress.host=${QKUBE_SHORT_NAME}-api.kblocks.io \
             --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
-            --set frontend.ingress.host=${QKUBE_SHORT_NAME}.kblocks.io \
-            --set frontend.enabled=true
+            --set ingress.host=${{ steps.qkube.outputs.kblocks-host }} \
 
+  
       - name: Post PR comment
         if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v3
-        env:
-          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
         with:
-          message: "Environment is available at https://${{env.QKUBE_SHORT_NAME}}.kblocks.io :rocket:"
+          message: "Environment is available at https://${{ steps.qkube.outputs.kblocks-host }} :rocket:"
           comment-tag: Environment
 
   deploy-block:
@@ -229,12 +207,7 @@ jobs:
         run: npm install
   
       - name: Install gallery blocks
-        working-directory: gallery/kblocks/${{ matrix.block }}
+        working-directory: gallery
         env:
-          QKUBE_SHORT_NAME: ${{ needs.build.outputs.qkube-short-name }}
-        run: |
-          npx kb install -n kblocks \
-            -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" \
-            -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" \
-            -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" \
-            --release-name $(basename $PWD)
+          KBLOCKS_HOST: ${{ needs.build.outputs.kblocks-host }}
+        run: ./install-blocks.sh ./kblocks/${{ matrix.block }}

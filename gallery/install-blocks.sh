@@ -6,8 +6,7 @@
 set -eu
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
-
-KBLOCKS_HOST=${KBLOCKS_HOST:-}
+KBLOCKS_HOST="${KBLOCKS_HOST:-}"
 
 if [ -z "$KBLOCKS_HOST" ]; then
   echo "KBLOCKS_HOST is not set (e.g. staging.kblocks.io)"
@@ -25,13 +24,12 @@ install_kblock() {
     cd $dir
     name=$(basename $dir)
     echo "Installing block: $PWD..."
-
-
     $KBLOCKS_CLI install \
-      -e KBLOCKS_API="https://${KBLOCKS_HOST}.kblocks.io/api" \
-      -e KBLOCKS_EVENTS_URL="https://${KBLOCKS_HOST}.kblocks.io/api/events" \
-      -e KBLOCKS_CONTROL_URL="https://${KBLOCKS_HOST}.kblocks.io/api/control" \
-      -n kblocks --release-name $name
+      -e KBLOCKS_API="https://${KBLOCKS_HOST}/api" \
+      -e KBLOCKS_EVENTS_URL="https://${KBLOCKS_HOST}/api/events" \
+      -e KBLOCKS_CONTROL_URL="https://${KBLOCKS_HOST}/api/control" \
+      -n kblocks \
+      --release-name $name
   )
 }
 

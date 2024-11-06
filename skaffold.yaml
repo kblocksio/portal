@@ -22,8 +22,13 @@ build:
 deploy:
   helm:
     releases:
-      - name: kblocks-backend
+      - name: portal
         chartPath: ./deploy
+        namespace: default
+        valuesFiles:
+          - deploy/values.yaml
         setValueTemplates:
           backend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
           frontend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
+          ingress.host: "staging.kblocks.io"
+
