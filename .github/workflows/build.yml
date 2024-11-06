@@ -159,7 +159,7 @@ jobs:
               cd $dir
               name=$(basename $dir)
               echo "Installing block: $PWD..."
-              npx kb install -n kblocks -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" --release-name $name
+              npx kb install -n kblocks -e KBLOCKS_API="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api" -e KBLOCKS_EVENTS_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/events" -e KBLOCKS_CONTROL_URL="https://${QKUBE_SHORT_NAME}-api.kblocks.io/api/control" --release-name $name
             )
           }
 
