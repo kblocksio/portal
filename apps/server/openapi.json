@@ -359,6 +359,25 @@
           }
         }
       }
+    },
+    "/api/events": {
+      "post": {
+        "summary": "Publish an event to the events stream",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkerEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event published successfully"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -436,6 +455,31 @@
           },
           "organization": {
             "type": "string"
+          }
+        }
+      },
+      "WorkerEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "objUri": {
+            "type": "string"
+          },
+          "object": {
+            "$ref": "#/components/schemas/ApiObject"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
           }
         }
       }
