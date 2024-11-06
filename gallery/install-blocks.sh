@@ -7,7 +7,7 @@ set -eu
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
 
-KBLOCKS_HOST=${:-}
+KBLOCKS_HOST=${KBLOCKS_HOST:-}
 
 if [ -z "$KBLOCKS_HOST" ]; then
   echo "KBLOCKS_HOST is not set (e.g. staging.kblocks.io)"
