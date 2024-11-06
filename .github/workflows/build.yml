@@ -15,6 +15,10 @@ on:
       - opened
       - reopened
       - synchronize
+  push:
+    branches:
+      - main
+      - acme
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,7 +26,12 @@ concurrency:
 
 env:
   NODE_VERSION: "20.17.0"
-  ENV_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.name }}
+  # Environment name:
+  # 1. If event is push AND branch is main → returns staging
+  # 2. If event is push AND any other branch → returns the branch name (github.ref_name)
+  # 3. If event is pull_request → returns pr-XXX (where XXX is PR number)
+  # 4. For any other event → returns the workflow dispatch input name
+  ENV_NAME: ${{ github.event_name == 'push' && github.ref_name == 'main' && 'staging' || github.event_name == 'push' && github.ref_name || github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.name }}
 
 jobs:
   build:
@@ -142,6 +151,7 @@ jobs:
         env:
           KBLOCKS_HOST: ${{ steps.qkube.outputs.kblocks-host }}
         run: ./install-blocks.sh ./kblocks/workload
+
       - name: Skaffold build
         id: build
         run: |
