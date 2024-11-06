@@ -13,13 +13,13 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarFooter,
-} from "@/components/ui/sidebar.js";
+} from "@/components/ui/sidebar";
 import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible.js";
+} from "@/components/ui/collapsible";
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
 import { getIconComponent } from "@/lib/get-icon";
@@ -39,11 +39,6 @@ export const AppSidebar = () => {
         isActive: true,
       },
       {
-        title: "Resources",
-        url: "/resources",
-        icon: "LayoutDashboard",
-      },
-      {
         title: "Catalog",
         url: "/catalog",
         icon: "Blocks",
@@ -61,6 +56,12 @@ export const AppSidebar = () => {
             })),
         })),
       },
+      {
+        title: "Resources",
+        url: "/resources",
+        icon: "LayoutDashboard",
+      },
+
     ];
   }, [resourceTypes, categories]);
 
