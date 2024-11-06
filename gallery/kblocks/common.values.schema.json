@@ -24,16 +24,26 @@
     },
     "autoscaling": {
         "type": "object",
+        "required": ["enabled"],
         "description": "Autoscaling configuration",
         "properties": {
+            "enabled": {
+                "type": "string",
+                "default": "No",
+                "enum": [
+                    "Yes",
+                    "No"
+                ],
+                "description": "Whether autoscaling is enabled."
+            },
             "minReplicas": {
                 "type": "number",
-                "default": 1,
+                "default": 2,
                 "description": "The minimum number of replicas to scale to."
             },
             "maxReplicas": {
                 "type": "number",
-                "default": 10,
+                "default": 5,
                 "description": "The maximum number of replicas to scale to."
             },
             "targetCpuUtilization": {
