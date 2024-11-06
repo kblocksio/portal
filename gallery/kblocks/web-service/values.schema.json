@@ -9,21 +9,13 @@
     "type": "object",
     "required": [
       "instanceType",
-      "source"
+      "source",
+      "ingress"
     ],
     "properties": {
       "source": {
         "description": "The Docker image or GitHub repository to use for the web service.\n@ui kblocks.io/one-of",
         "$ref": "#/$defs/commonDefs/source"
-      },
-      "environmentVariables": {
-        "$ref": "#/$defs/commonDefs/environmentVariables"
-      },
-      "instanceType": {
-        "$ref": "#/$defs/commonDefs/instanceType"
-      },
-      "scaling": {
-        "$ref": "#/$defs/commonDefs/scaling"
       },
       "ingress": {
         "type": "object",
@@ -59,6 +51,15 @@
             }
           }
         }
+      },
+      "instanceType": {
+        "$ref": "#/$defs/commonDefs/instanceType"
+      },
+      "scaling": {
+        "$ref": "#/$defs/commonDefs/scaling"
+      },
+      "environmentVariables": {
+        "$ref": "#/$defs/commonDefs/environmentVariables"
       },
       "region": {
         "$ref": "#/$defs/commonDefs/region",
