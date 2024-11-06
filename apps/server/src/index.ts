@@ -178,6 +178,10 @@ app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async
   });
 
   const obj = await getObject(objUri);
+  if (!obj) {
+    return res.status(404).json({ error: `Block ${objUri} not found` });
+  }
+  
   return res.status(200).json(obj);
 });
 
@@ -357,6 +361,12 @@ app.delete(
         objUri,
       },
     );
+
+    // if this is a kblocks.io/v1.Block object, we need to delete the object from storage
+    if (objUri.startsWith("kblocks://kblocks.io/v1/blocks/")) {
+      await deleteObject(objUri);
+      return res.status(200).json({ message: `Block ${objUri} deleted` });
+    }
 
     return res.status(200).json({ message: "Delete request accepted" });
   },
