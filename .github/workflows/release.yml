@@ -48,6 +48,12 @@ jobs:
           chmod +x skaffold
           sudo mv skaffold /usr/local/bin
 
+      - name: Invoke staging release
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build.yml
+          inputs: '{ "name": "staging" }'
+
       - name: Build
         run: npm run build
 
@@ -58,14 +64,6 @@ jobs:
           echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
           echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
 
-      - name: Publish the backend to staging
-        run: |
-          curl -X PATCH -H "content-type: application/json" "https://staging.kblocks.io/api/resources/acme.com/v1/workloads/staging.kblocks.io/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'
-
-      - name: Publish the frontend to staging
-        run: |
-          curl -X PATCH -H "content-type: application/json" "https://staging.kblocks.io/api/resources/acme.com/v1/workloads/staging.kblocks.io/default/portal-frontend" -d '{"image":"${{ steps.build.outputs.frontend-tag }}"}'
-  
       - name: Publish the backend to production
         run: |
           curl -X PATCH -H "content-type: application/json" "https://kblocks.io/api/resources/acme.com/v1/workloads/prod/default/portal-backend" -d '{"image":"${{ steps.build.outputs.backend-tag }}"}'
