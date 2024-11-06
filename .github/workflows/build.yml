@@ -147,7 +147,7 @@ jobs:
       - name: Skaffold build
         id: build
         run: |
-          skaffold build --platform=linux/arm64,linux/amd64 --file-output build.json
+          skaffold build --platform=linux/arm64 --file-output build.json
           echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
           echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
 
