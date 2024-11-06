@@ -1,7 +1,4 @@
-import {
-  PropsWithChildren,
-  useState,
-} from "react";
+import { PropsWithChildren, useState } from "react";
 import { ClipboardCheckIcon, ClipboardIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +25,7 @@ export const CopyToClipboardButton = ({
       onClick={handleCopy}
       className={cn(
         className,
-        "group/copy hover:bg-muted inline-flex items-center gap-1 truncate rounded-md px-1 py-0.5 text-left",
+        "group/copy inline-flex items-center gap-1 truncate rounded-md px-1 py-0.5 text-left",
       )}
     >
       {children}

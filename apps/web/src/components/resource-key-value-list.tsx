@@ -1,14 +1,8 @@
-import React, {
-  useContext,
-  useCallback,
-} from "react";
+import React, { useContext, useCallback } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { LinkIcon } from "lucide-react";
-import {
-  getResourceOutputs,
-  parseRef,
-} from "@/lib/utils";
+import { getResourceOutputs, parseRef } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
@@ -23,7 +17,6 @@ import { ResourceLink } from "./resource-link";
 import { PropertyKey, PropertyValue } from "./ui/property";
 import { CopyToClipboardButton } from "./copy-to-clipboard";
 import { Checkbox } from "./ui/checkbox";
-
 
 type KeyValueListProps = {
   data: Record<string, any>;
@@ -97,7 +90,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
 
       if (typeof value === "boolean") {
         return (
-          <div className="flex items-center gap-2"> 
+          <div className="flex items-center gap-2">
             <Checkbox checked={value} className="cursor-default" />
             {value ? "Enabled" : "Disabled"}
           </div>
@@ -131,7 +124,6 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
     [objects, resourceObjUri],
   );
 
-
   return Object.entries(data).map(([key, value]) => (
     <React.Fragment key={key}>
       <PropertyKey>{key}</PropertyKey>
@@ -139,4 +131,3 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
     </React.Fragment>
   ));
 };
-
