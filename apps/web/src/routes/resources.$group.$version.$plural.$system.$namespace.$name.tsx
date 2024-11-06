@@ -5,7 +5,6 @@ import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
-  RelationshipType,
   Resource,
   ResourceContext,
 } from "@/resource-context";
@@ -149,7 +148,7 @@ function ResourcePage() {
     const children: Resource[] = [];
     const rels = relationships[selectedResource.objUri] ?? {};
     for (const [relUri, rel] of Object.entries(rels)) {
-      if (rel.type === RelationshipType.CHILD) {
+      if (rel.type === "child") {
         children.push(objects[relUri]);
       }
     }
