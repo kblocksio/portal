@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu
-qkube use portal-backend.quickube.sh
+qkube use staging.quickube.sh
 skaffold run
