@@ -279,7 +279,9 @@
                 "type": "string"
               }
             },
-            "required": ["name"]
+            "required": [
+              "name"
+            ]
           },
           "spec": {
             "type": "object"
@@ -288,7 +290,11 @@
             "type": "object"
           }
         },
-        "required": ["apiVersion", "kind", "metadata"]
+        "required": [
+          "apiVersion",
+          "kind",
+          "metadata"
+        ]
       }
     }
   }
