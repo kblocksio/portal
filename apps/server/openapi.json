@@ -334,5 +334,127 @@
         }
       }
     }
+  },
+  "components": {
+    "schemas": {
+      "ObjectEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "object": {
+            "type": "object"
+          },
+          "objUri": {
+            "type": "string"
+          },
+          "objType": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "docslink": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "WorkerEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "event": {
+            "type": "object"
+          },
+          "objUri": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "blocks": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ApiObject": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "namespace": {
+                "type": "string"
+              }
+            },
+            "required": ["name"]
+          },
+          "spec": {
+            "type": "object"
+          },
+          "status": {
+            "type": "object"
+          }
+        },
+        "required": ["apiVersion", "kind", "metadata"]
+      }
+    }
   }
 }
