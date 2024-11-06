@@ -306,7 +306,7 @@
         }
       }
     },
-    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name/events": {
+    "/api/resources/{group}/{version}/{plural}/{system}/{namespace}/{name}/events": {
       "get": {
         "summary": "Get events for a specific resource",
         "responses": {
