@@ -83,11 +83,13 @@ function ResourcePage() {
     name,
   });
 
-  const [lastEventCount, setLastEventCount] = useState(0);
+  const [lastEventCount, setLastEventCount] = useState(Object.keys(eventsPerObject[objUri])?.length ?? 0);
+
   const events = useMemo(
     () => Object.values(eventsPerObject[objUri] ?? {}),
     [eventsPerObject, objUri],
   );
+
   const showLogsBadge = useMemo(
     () => events.length > lastEventCount,
     [events, lastEventCount],
@@ -173,7 +175,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
+    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8 overflow-x-hidden">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -337,7 +339,6 @@ function ResourcePage() {
                 <ResourceTable
                   resources={children}
                   showActions={false}
-                  className="w-full"
                 />
               </div>
             )}
