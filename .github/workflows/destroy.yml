@@ -20,7 +20,7 @@ env:
 
 jobs:
   destroy:
-    name: "Build"
+    name: "Destroy"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
             -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose | \
-            jq '.data[] | select(.name == "'$QKUBE_SHORT_NAME'") | .id')
+            jq -r '.data[] | select(.name == "'$QKUBE_SHORT_NAME'") | .id')
 
           if [ -n "$ID" ]; then
             curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
@@ -70,7 +70,7 @@ jobs:
             -H 'Accept: application/json' \
             -H 'Content-Type: application/json' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose | \
-            jq '.data[] | select(.name == "'$QKUBE_SHORT_NAME'-api") | .id')
+            jq -r '.data[] | select(.name == "'$QKUBE_SHORT_NAME'-api") | .id')
 
           if [ -n "$API_ID" ]; then
             curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
