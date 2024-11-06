@@ -16,6 +16,12 @@ expose:
       hosts:
         - {{ $ingressHost }}
       secret: {{ $ingressTlsSecret }}
+  - path: /images(/|$)(.*)
+    host: {{ $ingressHost }}
+    tls:
+      hosts:
+        - {{ $ingressHost }}
+      secret: {{ $ingressTlsSecret }}
   - path: /(.*)
     rewrite: /
     host: {{ $ingressHost }}

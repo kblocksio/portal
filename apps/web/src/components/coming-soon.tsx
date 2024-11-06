@@ -45,7 +45,7 @@ export function ComingSoon() {
         transition={{ duration: 0.5 }}
         className="z-10 flex flex-col items-center text-center"
       >
-        <img src="/wing.svg" alt="Wing Logo" />
+        <img src="/images/wing.svg" alt="Wing Logo" />
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
