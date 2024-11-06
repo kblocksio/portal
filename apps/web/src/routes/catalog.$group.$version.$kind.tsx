@@ -47,7 +47,7 @@ function Catalog() {
         <>
           {/* fixed position bellow the app header with some margin - app header is h-16 */}
           <Button
-            className="fixed right-6 top-[88px] z-10"
+            className="absolute right-0 top-0 z-10"
             onClick={() => onCreateResource(currentResourceType)}
           >
             New Resource...
