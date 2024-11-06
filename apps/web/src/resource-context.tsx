@@ -1,5 +1,12 @@
 import { Category } from "@repo/shared";
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import useWebSocket from "react-use-websocket";
 import { useFetch } from "./hooks/use-fetch";
 import {
@@ -9,12 +16,13 @@ import {
   WorkerEvent,
   parseBlockUri,
   Manifest,
+  formatBlockUri,
 } from "@kblocks/api";
-import { toast } from "react-hot-toast"; // Add this import
+import { isEqual } from "lodash";
 import { request } from "./lib/backend";
-import { getIconComponent } from "./lib/hero-icon";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
-
+import { NotificationsContext } from "./notifications-context";
+import { getIconComponent } from "./lib/get-icon";
 const WS_URL = import.meta.env.VITE_WS_URL;
 if (!WS_URL) {
   console.error("WebSocket URL is not set");
@@ -35,17 +43,28 @@ type Definition = Manifest["definition"];
 export interface ResourceType extends Definition {
   iconComponent: React.ComponentType<{ className?: string }>;
   engine: string;
+
+  // which systems support this resource type
+  systems: Set<string>;
 }
 
 type BlockApiObject = ApiObject & {
   spec: Manifest;
 };
 
+export type Relationship = {
+  type: RelationshipType;
+};
+
+export enum RelationshipType {
+  PARENT = "parent",
+  CHILD = "child",
+  REF = "ref",
+}
+
 export interface ResourceContextValue {
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
-  // objType -> objUri -> Resource
-  resources: Map<string, Map<string, Resource>>;
   // objUri -> Record<timestamp, LogEvent>
   handleObjectMessages: (messages: ObjectEvent[]) => void;
   selectedResourceId: SelectedResourceId | undefined;
@@ -57,11 +76,11 @@ export interface ResourceContextValue {
   eventsPerObject: Record<string, Record<string, WorkerEvent>>;
   loadEvents: (objUri: string) => void;
   categories: Record<string, Category>;
+  relationships: Record<string, Record<string, Relationship>>;
 }
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
-  resources: new Map<string, Map<string, Resource>>(),
   handleObjectMessages: () => {},
   selectedResourceId: undefined,
   setSelectedResourceId: () => {},
@@ -72,6 +91,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   eventsPerObject: {},
   categories: {},
   loadEvents: () => {},
+  relationships: {},
 });
 
 export const ResourceProvider = ({
@@ -79,18 +99,21 @@ export const ResourceProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { addNotifications } = useContext(NotificationsContext);
   const [resourceTypes, setResourceTypes] = useState<
     Record<string, ResourceType>
   >({});
   const [categories, setCategories] = useState<Record<string, Category>>({});
-  const [resources, setResources] = useState<
-    Map<string, Map<string, Resource>>
-  >(new Map());
+  const [objects, setObjects] = useState<Record<string, Resource>>({});
+
   const [selectedResourceId, setSelectedResourceId] = useState<
     SelectedResourceId | undefined
   >(undefined);
   const [eventsPerObject, setEventsPerObject] = useState<
     Record<string, Record<string, WorkerEvent>>
+  >({});
+  const [relationships, setRelationships] = useState<
+    Record<string, Record<string, Relationship>>
   >({});
 
   const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
@@ -107,7 +130,14 @@ export const ResourceProvider = ({
     onError: (error) => {
       console.error("WebSocket error:", error);
     },
+    onMessage: (message) => {
+      console.log("WebSocket message:", message);
+    },
   });
+
+  const [previousMessage, setPreviousMessage] = useState<
+    WorkerEvent | undefined
+  >(undefined);
 
   const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
     "/api/resources",
@@ -116,110 +146,159 @@ export const ResourceProvider = ({
     useFetch<Record<string, Category>>("/api/categories");
 
   useEffect(() => {
-    if (!initialResources || !initialResources.objects) {
-      return;
-    }
-    handleObjectMessages(initialResources.objects);
-  }, [initialResources]);
-
-  useEffect(() => {
     if (categoriesData) {
       setCategories(categoriesData);
     }
   }, [categoriesData]);
 
-  const addType = (block: BlockApiObject) => {
-    const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
-    console.log("addType", key);
+  const resolvePluralFromKind = useCallback(
+    (kind: string) => {
+      for (const def of Object.values(resourceTypes)) {
+        if (def.kind === kind) {
+          return def.plural;
+        }
+      }
 
-    setResourceTypes((prev) => {
-      return {
-        ...prev,
-        [key]: {
-          ...block.spec.definition,
-          engine: block.spec.engine,
-          iconComponent: getIconComponent({ icon: block.spec.definition.icon }),
-        },
-      };
-    });
-  };
+      return kind.toLowerCase();
+    },
+    [resourceTypes],
+  );
 
-  const handleObjectMessage = (message: ObjectEvent) => {
+  const resolveOwnerUri = useCallback(
+    (ref: OwnerReference, system: string, namespace: string) => {
+      const [group, version] = ref.apiVersion.split("/");
+      const plural = resolvePluralFromKind(ref.kind);
+      return formatBlockUri({
+        group,
+        version,
+        system,
+        namespace,
+        plural,
+        name: ref.name,
+      });
+    },
+    [resolvePluralFromKind],
+  );
+
+  const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
+    const { system } = parseBlockUri(objUri);
 
     if (objType === "kblocks.io/v1/blocks") {
-      addType(object as BlockApiObject);
+      const block = object as BlockApiObject;
+      const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
+
+      setResourceTypes((prev) => {
+        const systems = prev[key]?.systems ?? new Set();
+        systems.add(system);
+
+        return {
+          ...prev,
+          [key]: {
+            ...block.spec.definition,
+            engine: block.spec.engine,
+            iconComponent: getIconComponent({
+              icon: block.spec.definition.icon,
+            }),
+            systems,
+          },
+        };
+      });
     }
 
+    // add the object to the list of objects
     if (Object.keys(object).length > 0) {
-      setResources((prevResourcesForTypes) => {
-        const resoucesForTypeMap =
-          prevResourcesForTypes.get(objType) ?? new Map<string, Resource>();
-        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-        newResourcesForTypeMap.set(objUri, {
-          ...object,
+      // load the events for the object
+      loadEvents(objUri);
+      setObjects((prev) => {
+        const r: Resource = {
+          ...(object as ApiObject),
           objUri,
           objType,
-        } as Resource);
-        const newResources = new Map(prevResourcesForTypes);
-        newResources.set(objType, newResourcesForTypeMap);
-        return newResources;
-      });
-    } else {
-      setResources((prevResourcesForTypes) => {
-        const resoucesForTypeMap = prevResourcesForTypes.get(objType);
-        if (!resoucesForTypeMap) {
-          console.error(
-            "WebSocket Object Message unknown object type:",
-            objType,
-            object,
-            prevResourcesForTypes,
-          );
-          return prevResourcesForTypes;
-        }
+        };
 
-        const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-        newResourcesForTypeMap.delete(objUri);
-        const newResources = new Map(prevResourcesForTypes);
-        newResources.set(objType, newResourcesForTypeMap);
-        return newResources;
+        return {
+          ...prev,
+          [objUri]: r,
+        };
+      });
+      // delete the object from the list of objects
+    } else {
+      setObjects((prev) => {
+        const newObjects = { ...prev };
+        delete newObjects[objUri];
+        return newObjects;
       });
     }
-  };
+  }, []);
 
-  const handleObjectMessages = (messages: ObjectEvent[]) => {
-    messages.forEach((message) => {
-      handleObjectMessage(message);
-    });
-  };
+  const handleObjectMessages = useCallback(
+    (messages: ObjectEvent[]) => {
+      messages.forEach((message) => {
+        handleObjectMessage(message);
+      });
+    },
+    [handleObjectMessage],
+  );
 
-  const handlePatchMessage = (message: PatchEvent) => {
-    const { objUri, objType, patch } = message;
-    setResources((prevResourcesForTypes) => {
-      const resoucesForTypeMap = prevResourcesForTypes.get(objType);
-      if (!resoucesForTypeMap) {
-        console.error(
-          "WebSocket Patch Message unknown object type:",
-          objType,
-          patch,
-        );
-        return prevResourcesForTypes;
+  useEffect(() => {
+    if (!initialResources || !initialResources.objects) {
+      return;
+    }
+    handleObjectMessages(initialResources.objects);
+  }, [initialResources, handleObjectMessages]);
+
+  useEffect(() => {
+    setRelationships((prev) => {
+      for (const r of Object.values(objects)) {
+        const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
+        if (refs.length === 0) {
+          continue;
+        }
+
+        const childUri = r.objUri;
+        const { system, namespace } = parseBlockUri(childUri);
+
+        for (const ref of refs) {
+          const parentUri = resolveOwnerUri(ref, system, namespace);
+
+          prev[childUri] = {
+            ...(prev[childUri] ?? {}),
+            [parentUri]: {
+              type: RelationshipType.PARENT,
+            },
+          };
+
+          prev[parentUri] = {
+            ...(prev[parentUri] ?? {}),
+            [childUri]: {
+              type: RelationshipType.CHILD,
+            },
+          };
+        }
       }
-      const oldObject = resoucesForTypeMap.get(objUri);
-      if (!oldObject) {
-        console.error("No existing object to patch", objType, objUri);
-        return prevResourcesForTypes;
-      }
-      const newObject = { ...oldObject, ...patch };
-      const newResourcesForTypeMap = new Map(resoucesForTypeMap);
-      newResourcesForTypeMap.set(objUri, newObject);
-      const newResources = new Map(prevResourcesForTypes);
-      newResources.set(objType, newResourcesForTypeMap);
-      return newResources;
-    });
-  };
 
-  const addEvent = (event: WorkerEvent) => {
+      return prev;
+    });
+  }, [resolvePluralFromKind, objects, resolveOwnerUri]);
+
+  const handlePatchMessage = useCallback((message: PatchEvent) => {
+    const { objUri, patch } = message;
+
+    setObjects((prev) => {
+      if (!prev[objUri]) {
+        return prev;
+      }
+
+      const newObject = { ...prev[objUri], ...patch };
+      return {
+        ...prev,
+        [objUri]: newObject,
+      };
+    });
+  }, []);
+
+  const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
       timestamp = new Date(timestamp);
@@ -242,13 +321,15 @@ export const ResourceProvider = ({
         },
       };
     });
-  };
+  }, []);
 
   useEffect(() => {
-    if (!lastJsonMessage) {
+    if (!lastJsonMessage || isEqual(lastJsonMessage, previousMessage)) {
       return;
     }
 
+    console.log("new event:", lastJsonMessage);
+    setPreviousMessage(lastJsonMessage);
     addEvent(lastJsonMessage);
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
@@ -260,19 +341,31 @@ export const ResourceProvider = ({
         handlePatchMessage(lastJsonMessage as PatchEvent);
         break;
       case "ERROR":
-        toast.error(lastJsonMessage.message ?? "Unknown error", {
-          id: urlForResource(blockUri),
-        });
+        addNotifications([
+          {
+            id: urlForResource(blockUri),
+            message: lastJsonMessage.message ?? "Unknown error",
+            type: "error",
+          },
+        ]);
         break;
       case "LIFECYCLE":
-        toast.success(`${blockUri.name}: ${lastJsonMessage.event.message}`, {
-          duration: 2000,
-          id: urlForResource(blockUri),
-          icon: "",
-        });
+        addNotifications([
+          {
+            id: urlForResource(blockUri),
+            message: `${blockUri.name}: ${lastJsonMessage.event.message}`,
+            type: "success",
+          },
+        ]);
         break;
     }
-  }, [lastJsonMessage]);
+  }, [
+    lastJsonMessage,
+    handleObjectMessage,
+    handlePatchMessage,
+    addNotifications,
+    addEvent,
+  ]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
@@ -285,28 +378,16 @@ export const ResourceProvider = ({
     };
   }, [getWebSocket]);
 
-  const objects = useMemo(() => {
-    const result: Record<string, Resource> = {};
-    for (const resourcesForType of resources.values()) {
-      for (const [objUri, resource] of resourcesForType.entries()) {
-        result[objUri] = resource;
-      }
-    }
-    return result;
-  }, [resources]);
-
   const { systems, namespaces, kinds } = useMemo(() => {
     const systems = new Set<string>();
     const namespaces = new Set<string>();
     const kinds = new Set<string>();
 
-    for (const resourcesForType of resources.values()) {
-      for (const resource of resourcesForType.values()) {
-        const { system, namespace } = parseBlockUri(resource.objUri);
-        systems.add(system);
-        namespaces.add(namespace);
-        kinds.add(resource.kind);
-      }
+    for (const obj of Object.values(objects)) {
+      const { system, namespace } = parseBlockUri(obj.objUri);
+      systems.add(system);
+      namespaces.add(namespace);
+      kinds.add(obj.kind);
     }
 
     return {
@@ -314,28 +395,23 @@ export const ResourceProvider = ({
       namespaces: Array.from(namespaces),
       kinds: Array.from(kinds),
     };
-  }, [resources]);
+  }, [objects]);
 
-  const loadEvents = (objUri: string) => {
-    const requests = [];
+  const loadEvents = useCallback(
+    (objUri: string) => {
+      const uri = parseBlockUri(objUri);
+      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+      const fetchEvents = async () => {
+        const response = await request("GET", eventsUrl);
 
-    const uri = parseBlockUri(objUri);
-
-    const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-    const fetchEvents = async () => {
-      const response = await request("GET", eventsUrl);
-
-      for (const event of response.events) {
-        addEvent(event);
-      }
-    };
-
-    requests.push(fetchEvents());
-
-    Promise.all(requests).catch((e) => {
-      console.error(e);
-    });
-  };
+        for (const event of response.events) {
+          addEvent(event);
+        }
+      };
+      fetchEvents();
+    },
+    [addEvent],
+  );
 
   const value: ResourceContextValue = {
     resourceTypes,
@@ -344,12 +420,12 @@ export const ResourceProvider = ({
     systems,
     namespaces,
     kinds,
-    resources,
     eventsPerObject,
     handleObjectMessages,
     selectedResourceId,
     setSelectedResourceId,
     categories,
+    relationships,
   };
 
   return (
@@ -357,4 +433,13 @@ export const ResourceProvider = ({
       {children}
     </ResourceContext.Provider>
   );
+};
+
+export type OwnerReference = {
+  apiVersion: string;
+  kind: string;
+  name: string;
+  uid?: string;
+  blockOwnerDeletion?: boolean;
+  controller?: boolean;
 };

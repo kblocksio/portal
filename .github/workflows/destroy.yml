@@ -1,0 +1,80 @@
+name: Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        type: string
+        description: The name of the environment to destroy
+  pull_request:
+    types:
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.17.0"
+  ENV_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.name }}
+
+jobs:
+  destroy:
+    name: "Destroy"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Create empty kube config
+        run: |
+          mkdir -p /home/runner/.kube
+          echo "apiVersion: v1" > /home/runner/.kube/config
+
+      - name: Delete qkube
+        id: qkube
+        run: |
+          QKUBE_NAME="${{ env.ENV_NAME }}.quickube.sh"
+          npx qkube rm --name $QKUBE_NAME
+          echo "qkube-name=$QKUBE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Delete DNS record
+        env:
+          QKUBE_NAME: ${{ steps.qkube.outputs.qkube-name }}
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        run: |
+          ID=$(curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose | \
+            jq -r '.data[] | select(.name == "'$QKUBE_SHORT_NAME'") | .id')
+
+          if [ -n "$ID" ]; then
+            curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+              -X DELETE \
+              https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records/$ID --verbose
+          fi
+
+          API_ID=$(curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose | \
+            jq -r '.data[] | select(.name == "'$QKUBE_SHORT_NAME'-api") | .id')
+
+          if [ -n "$API_ID" ]; then
+            curl -H 'Authorization: Bearer ${{ secrets.DNSIMPLE_TOKEN }}' \
+              -X DELETE \
+              https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records/$API_ID --verbose
+          fi
+

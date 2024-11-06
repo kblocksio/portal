@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": [
+    "name",
+    "owner"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the GitHub repository you wish to reference."
+    },
+    "owner": {
+      "type": "string",
+      "description": "The owner of the GitHub repository, typically a user or organization."
+    },
+    "data": {
+      "type": "object",
+      "description": "Optional metadata to associate with the repository reference. It can hold any additional data as key-value pairs.",
+      "additionalProperties": true
+    }
+  }
+}

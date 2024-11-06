@@ -18,3 +18,7 @@ apps/web/.vercel
 # Do not accidentally commit secrets
 kblocks-gallery.env
 portal.env
+
+*.code-workspace
+
+target/

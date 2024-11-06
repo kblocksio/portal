@@ -7,7 +7,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./button";
 
-const linkVariants = cva("", {
+export const linkVariants = cva("", {
   variants: {
     variant: {
       default: "text-primary underline-offset-4 hover:underline",
@@ -22,10 +22,22 @@ const linkVariants = cva("", {
 
 export interface LinkProps
   extends RouterLinkProps,
-    VariantProps<typeof linkVariants> {}
+    VariantProps<typeof linkVariants> {
+  onMouseEnter?: (e: React.MouseEvent) => void;
+}
 
-const Link = ({ variant, ...props }: LinkProps & { className?: string }) => {
-  return <RouterLink className={cn(linkVariants({ variant }))} {...props} />;
+const Link = ({
+  variant,
+  onMouseEnter,
+  ...props
+}: LinkProps & { className?: string }) => {
+  return (
+    <RouterLink
+      className={cn(linkVariants({ variant }))}
+      onMouseEnter={onMouseEnter}
+      {...props}
+    />
+  );
 };
 Link.displayName = "Link";
 

@@ -1,0 +1,32 @@
+apiVersion: acme.com/v1
+kind: Postgres
+metadata:
+  name: shai-db-2
+---
+apiVersion: acme.com/v1
+kind: Run
+metadata:
+  name: shai-database-test
+image: docker.io/bitnami/postgresql:16.3.0-debian-12-r23
+retries: 100
+command:
+  - psql
+  - --host
+  - ${ref://postgres.acme.com/my-database/host}
+  - -U
+  - ${ref://postgres.acme.com/my-database/user}
+  - -d
+  - ${ref://postgres.acme.com/my-database/database}
+  - -p
+  - ${ref://postgres.acme.com/my-database/port}
+  - -c
+  - SELECT version();
+env:
+  POSTGRES_PASSWORD:
+    fromSecret:
+      secretName: ${ref://postgres.acme.com/my-database/passwordSecret}
+      key: ${ref://postgres.acme.com/my-database/passwordKey}
+  PGPASSWORD:
+    fromSecret:
+      secretName: ${ref://postgres.acme.com/my-database/passwordSecret}
+      key: ${ref://postgres.acme.com/my-database/passwordKey}

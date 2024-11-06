@@ -17,6 +17,7 @@ export const resolvePickerField = ({
   formData,
   updateFormData,
   path,
+  defaultValue,
 }: {
   pickerType: string;
   pickerConfig: any;
@@ -31,6 +32,7 @@ export const resolvePickerField = ({
   value: any;
   hideField?: boolean;
   description?: string;
+  defaultValue?: string;
 }) => {
   switch (pickerType) {
     case "instance-picker": {
@@ -44,13 +46,19 @@ export const resolvePickerField = ({
           defaultInstanceName={schema.default}
           config={pickerConfig}
           onInstanceChange={handleChange}
+          defaultValue={defaultValue}
         />
       );
     }
     case "repo-picker": {
       return (
         <RepoPicker
+          fieldName={fieldName}
+          required={required}
+          description={description}
+          hideField={hideField}
           initialValue={value}
+          defaultValue={defaultValue}
           handleOnSelection={(repo) => {
             if (repo?.full_name) {
               handleChange(repo?.full_name);

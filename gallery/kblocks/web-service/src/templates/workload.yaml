@@ -1,0 +1,46 @@
+{{- if .Values.source }}
+{{- if .Values.source.fromImage }}
+{{- if .Values.source.fromImage.image }}
+apiVersion: acme.com/v1
+kind: NetworkedWorkload
+metadata:
+  name: {{ .Release.Name }}-web-service
+  labels:
+    foo: web
+    hello: service
+image: {{ .Values.source.fromImage.image }}
+cpu:
+  request: {{ get (get .Values.instanceTypes .Values.instanceType) "cpu" | quote }}
+  limit: {{ get (get .Values.instanceTypes .Values.instanceType) "cpu" | quote }}
+memory:
+  request: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
+  limit: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
+scaling:  
+  {{- if and .Values.scaling.autoscaling (eq .Values.scaling.enabled "Yes") }}
+  autoscaling:
+    minReplicas: {{ default 2 .Values.scaling.autoscaling.minReplicas }}
+    maxReplicas: {{ default 5 .Values.scaling.autoscaling.maxReplicas }}
+    targetCpuUtilization: {{ default 70 .Values.scaling.autoscaling.targetCpuUtilization }}
+    targetMemoryUtilization: {{ default 70 .Values.scaling.autoscaling.targetMemoryUtilization }}
+  {{- else }}
+  replicas: {{ default 2 .Values.scaling.autoscaling.replicas }}
+  {{- end }}
+region: {{ .Values.region }}
+{{- if .Values.ingress }}
+ingress:
+  path: {{ .Values.ingress.path }}
+  host: {{ .Values.ingress.host }}
+  rewrite: {{ .Values.ingress.rewrite }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    secret: {{ .Values.ingress.tls.secret }}
+    hosts: 
+      {{- toYaml .Values.ingress.tls.hosts | nindent 6 }}
+  {{- end }}
+{{- end }}
+{{- if and .Values.ingress .Values.ingress.path }}
+port: 3000
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

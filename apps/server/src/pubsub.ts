@@ -1,11 +1,18 @@
 import { createClient } from "redis";
 import { getEnv } from "./util";
 import { EventEmitter } from "stream";
-import { ControlCommand } from "@kblocks/api";
+import { ControlCommand, WorkerEvent } from "@kblocks/api";
+import { handleEvent } from "./storage";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
-const EVENTS_CHANNEL = "events";
+const REDIS_PREFIX = process.env.REDIS_PREFIX;
+const EVENTS_CHANNEL = (() => {
+  if (REDIS_PREFIX) {
+    return `${REDIS_PREFIX}:events`;
+  }
+  return "events";
+})();
 
 const config = {
   password: REDIS_PASSWORD,
@@ -32,9 +39,13 @@ subscribeClient
   })
   .catch(console.error);
 
-export async function publishEvent(message: string) {
+export async function publishEvent(event: WorkerEvent) {
+  console.log("EVENT:", JSON.stringify(event));
+
+  await handleEvent(event);
+
   try {
-    await publishClient.publish(EVENTS_CHANNEL, message);
+    await publishClient.publish(EVENTS_CHANNEL, JSON.stringify(event));
   } catch (error) {
     console.warn("Error publishing message", error);
   }
@@ -48,7 +59,7 @@ export async function unsubscribeFromEvents(callback: (event: string) => void) {
   events.removeListener("event", callback);
 }
 
-export function subscribeToControlRequests(
+export async function subscribeToControlRequests(
   {
     system,
     group,
@@ -58,7 +69,7 @@ export function subscribeToControlRequests(
   callback: (event: string) => void,
 ) {
   const channel = createChannelFor(system, group, version, plural);
-  subscribeClient.subscribe(channel, callback);
+  await subscribeClient.subscribe(channel, callback);
 
   return {
     unsubscribe: () => {
@@ -68,7 +79,7 @@ export function subscribeToControlRequests(
   };
 }
 
-export function publishControlRequest(
+export async function publishControlRequest(
   {
     system,
     group,
@@ -79,7 +90,7 @@ export function publishControlRequest(
 ) {
   const channel = createChannelFor(system, group, version, plural);
   console.log(`publishing control message to ${channel}:`, command);
-  publishClient.publish(channel, JSON.stringify(command));
+  await publishClient.publish(channel, JSON.stringify(command));
 }
 
 function createChannelFor(

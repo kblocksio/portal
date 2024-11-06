@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -67,7 +67,7 @@ const engines = [
 
 function Logo() {
   return (
-    <a className="flex items-center space-x-2">
+    <a className="flex items-center space-x-2" href="/">
       <img
         src="/wing.svg"
         alt="Wing Logo"

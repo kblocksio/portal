@@ -1,4 +1,4 @@
-import { getResourceIconColors } from "@/lib/hero-icon";
+import { getIconColors } from "@/lib/get-icon";
 import { CardTitle, CardDescription } from "./ui/card";
 import { ResourceType } from "@/resource-context";
 
@@ -14,7 +14,7 @@ export const WizardSimpleHeader = ({
   resourceType,
 }: WizardSimpleHeaderProps) => {
   const ResourceIcon = resourceType?.iconComponent;
-  const iconColor = getResourceIconColors({ color: resourceType?.color });
+  const iconColor = getIconColors({ color: resourceType?.color });
 
   return (
     <div className="flex items-center space-x-2">

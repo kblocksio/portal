@@ -1,0 +1,6 @@
+apiVersion: acme.com/v1
+kind: ApiDoc
+metadata:
+  name: api-docs-test
+repository: "monadaco/vote-backend"
+directory: "src"

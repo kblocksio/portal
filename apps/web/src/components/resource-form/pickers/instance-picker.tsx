@@ -24,7 +24,9 @@ export const InstancePicker = ({
   required,
   description,
   fieldName,
+  defaultValue,
 }: {
+  defaultValue?: string;
   initialValue?: string;
   defaultInstanceName: string;
   hideField?: boolean;
@@ -42,11 +44,13 @@ export const InstancePicker = ({
     }),
   );
 
-  const [selectedInstance, setSelectedInstance] = useState<InstanceItem>(
-    () =>
-      instanceTypes.find((instance) => instance.name === initialValue) ??
-      instanceTypes[0],
-  );
+  const [selectedInstance, setSelectedInstance] = useState<InstanceItem>(() => {
+    const value = initialValue ?? defaultValue;
+    return (
+      instanceTypes.find((instance) => instance.name === value) ??
+      instanceTypes[0]
+    );
+  });
 
   // make sure default instance name value is set in form data
   useEffect(() => {

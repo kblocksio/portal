@@ -5,6 +5,7 @@ import {
 } from "@supabase/ssr";
 
 import type { Request, Response } from "express";
+import type { Database } from "./supabase.types";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 if (!SUPABASE_URL) {
@@ -17,7 +18,7 @@ if (!SUPABASE_SERVICE_KEY) {
 }
 
 export const createServerSupabase = (req: Request, res: Response) => {
-  return createServerClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+  return createServerClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     cookies: {
       getAll() {
         return parseCookieHeader(req.header("Cookie") ?? "");

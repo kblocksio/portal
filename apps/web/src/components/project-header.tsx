@@ -31,24 +31,31 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
           {selectedProject ? selectedProject.description : ""}
         </p>
       </div>
-      <div className="w-full md:w-auto">
-        <div className="grid grid-cols-4 gap-0">
-          {(users ?? []).map((user, index) => (
-            <div key={index} className="relative">
-              <Avatar className="border-background h-12 w-12 border-2">
-                <AvatarImage
-                  alt={`@${user.user_metadata.full_name}`}
-                  src={user.user_metadata.avatar_url}
-                />
-                <AvatarFallback
-                  className={`${colors[index % colors.length]} text-primary-foreground text-xs`}
-                >
-                  {getUserInitials(user.user_metadata.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          ))}
-        </div>
+      { /* hide team */ }
+      {false && <Team users={users ?? []} />}
+    </div>
+  );
+};
+
+const Team = ({ users }: { users: User[] }) => {
+  return (
+    <div className="w-full md:w-auto">
+      <div className="grid grid-cols-4 gap-0">
+        {(users ?? []).map((user, index) => (
+          <div key={index} className="relative">
+            <Avatar className="border-background h-12 w-12 border-2">
+              <AvatarImage
+                alt={`@${user.user_metadata.full_name}`}
+                src={user.user_metadata.avatar_url}
+              />
+              <AvatarFallback
+                className={`${colors[index % colors.length]} text-primary-foreground text-xs`}
+              >
+                {getUserInitials(user.user_metadata.full_name)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        ))}
       </div>
     </div>
   );

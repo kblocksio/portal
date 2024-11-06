@@ -29,7 +29,7 @@ export const NamespaceBadge = ({ namespace }: { namespace: string }) => {
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{namespace} Namespace</p>
+          <p>Namespace: <span className="font-bold">{namespace}</span></p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

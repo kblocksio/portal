@@ -5,7 +5,13 @@ import { slackNotify } from "./slack-notify";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
-const objPrefix = "obj:";
+const REDIS_PREFIX = process.env.REDIS_PREFIX;
+const objPrefix = (() => {
+  if (REDIS_PREFIX) {
+    return `${REDIS_PREFIX}:obj:`;
+  }
+  return "obj:";
+})();
 
 const config = {
   password: REDIS_PASSWORD,
@@ -56,7 +62,7 @@ async function saveObject(blockUri: string, obj: kblocks.ApiObject | {}) {
   await redis.set(keyForObject(blockUri), JSON.stringify(obj));
 }
 
-export async function loadObject(
+export async function getObject(
   blockUri: string,
 ): Promise<kblocks.ApiObject | null> {
   const redis = await connection();
@@ -86,7 +92,7 @@ export async function resetStorage() {
   await redis.flushDb();
 }
 
-async function deleteObject(blockUri: string) {
+export async function deleteObject(blockUri: string) {
   const redis = await connection();
   await redis.del(keyForObject(blockUri));
 }
@@ -154,7 +160,7 @@ export async function setSlackThread(objUri: string, thread: string) {
 }
 
 async function patchObject(objUri: string, patch: kblocks.ApiObject) {
-  const obj = await loadObject(objUri);
+  const obj = await getObject(objUri);
   if (!obj) {
     console.warn(`Object not found: ${objUri}`);
     return;
@@ -177,14 +183,16 @@ async function storeEvent(event: kblocks.WorkerEvent) {
   return store(event.objUri, event);
 }
 
-export function handleEvent(event: kblocks.WorkerEvent) {
-  storeEvent(event).catch((e) => {
-    console.error(
-      `Error storing event: ${JSON.stringify(event)}: ${e.message}`,
-    );
-  });
+export async function handleEvent(event: kblocks.WorkerEvent) {
+  try {
+    await storeEvent(event);
+  } catch (e) {
+    console.error(`Error storing event: ${JSON.stringify(event)}: ${e}`);
+  }
 
-  slackNotify(event).catch((e) => {
-    console.error(`Error sending slack notification: ${e.message}`);
-  });
+  try {
+    await slackNotify(event);
+  } catch (e) {
+    console.error(`Error sending slack notification: ${e}`);
+  }
 }

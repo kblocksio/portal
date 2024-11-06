@@ -4,6 +4,7 @@ import {
   CheckCircle,
   RefreshCw,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import {
   EventAction,
@@ -15,11 +16,12 @@ import {
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
+import { Timestamp } from "../timestamp";
 
 type GroupHeader = {
   timestamp: Date;
   reason: EventReason;
-  action: EventAction;
+  action: string;
   message: string;
   details?: string;
 };
@@ -31,7 +33,6 @@ type EventGroup = {
 
 export default function Timeline({
   events,
-  className,
 }: {
   events: WorkerEvent[];
   className?: string;
@@ -40,16 +41,17 @@ export default function Timeline({
 
   return (
     <div className="relative w-full overflow-x-hidden">
-      <div className="absolute left-3.5 h-full w-px bg-gray-200"></div>
+      <div className="absolute left-3 h-full w-px bg-gray-200 top-2"></div>
 
-      {eventGroups.map((eventGroup, index) => (
-        <EventItem
-          key={index}
-          eventGroup={eventGroup}
-          isLast={index === eventGroups.length - 1}
-        />
-      ))}
-
+      <div className="flex flex-col gap-1">
+        {eventGroups.map((eventGroup, index) => (
+          <EventItem
+            key={index}
+            eventGroup={eventGroup}
+            isLast={index === eventGroups.length - 1}
+          />
+        ))}
+      </div>
 
       {/* <div
         ref={(el) =>
@@ -68,10 +70,9 @@ function EventItem({
   isLast: boolean;
 }) {
   const header = eventGroup.header;
-  const timestamp = header.timestamp.toLocaleString();
   const ReasonIcon = getReasonIcon(header.reason);
   const reasonColor = getReasonColor(header.reason);
-  const action = getActionLabel(header.action);
+  const action = header.action;
   const [isOpen, setIsOpen] = useState(isLast);
 
   const isClickable = eventGroup.logs.length > 0 || header.details;
@@ -79,12 +80,17 @@ function EventItem({
   const message = formatMessage(header.message);
 
   return (
-    <div className="relative pl-10">
-      <div className="absolute left-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-gray-200 bg-white">
-        <ReasonIcon className={`h-5 w-5 ${reasonColor}`} />
+    <div className="relative sm:pl-6">
+      <div className="absolute left-0 top-1.5">
+        <div className="flex items-center justify-around pl-0.5 pt-1.5 sm:pt-0">
+          <div className="flex items-center justify-center rounded-full border-gray-200 bg-white sm:size-5">
+            <ReasonIcon className={reasonColor} />
+          </div>
+        </div>
       </div>
+
       <div
-        className={cn("flex gap-2 rounded-md pb-4 pl-0 pr-2 pt-0")}
+        className={cn("group flex gap-2")}
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -94,35 +100,50 @@ function EventItem({
         role="button"
         tabIndex={0}
       >
-        <div className="flex flex-wrap gap-2">
-          <span className="text-gray-500">{timestamp}</span>
-          <span className="text-gray-500">{action}</span>
-          <span className={messageColor}>
-            <pre className="font-sans">{message}</pre>
+        <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
+          <div className="flex items-center gap-1 min-w-[130pt]">
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 transition-transform duration-300",
+                isOpen ? "rotate-90" : "rotate-0",
+                isClickable ? "visible" : "invisible",
+              )}
+            />
+
+            <div className="-mx-1.5 sm:mx-0">
+              <Timestamp timestamp={header.timestamp} />
+            </div>
+          </div>
+
+          <span className="text-muted-foreground min-w-12 font-mono text-xs uppercase">
+            {action}
           </span>
-        </div>
 
-        {isClickable && (
-          <ChevronRight
-            className={cn(
-              "mt-1 h-4 w-4 transition-transform duration-300",
-              isOpen ? "rotate-90" : "rotate-0",
-            )}
-          />
-        )}
+          <div className="flex items-center gap-1 truncate">
+            <div className="size-4 sm:hidden"></div>
+            <span className={cn(messageColor, "grow truncate sm:grow-0")}>
+              <pre className="truncate font-sans">{message}</pre>
+            </span>
+          </div>
+        </div>
       </div>
-
-      {isOpen && header.details && (
-        <div>
-          <MarkdownWrapper content={header.details}/>
-        </div>
-      )}
-
       {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mb-10 space-y-1 rounded-sm bg-slate-800 p-4 font-mono shadow-md overflow-x-auto">
+        <div className="mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
           {eventGroup.logs.map((log, index) => (
             <LogItem key={index} log={log} />
           ))}
+        </div>
+      )}
+
+      {isOpen && header.details && (
+        <div className="flex flex-col pt-6">
+          <MarkdownWrapper content={header.details} />
+          <div className="flex items-center gap-2 py-4">
+            <Sparkles className="size-4 text-yellow-500" />
+            <span className="text-xs italic text-gray-700">
+              This content is AI-generated and may contain errors
+            </span>
+          </div>
         </div>
       )}
     </div>
@@ -134,7 +155,6 @@ function LogItem({ log }: { log: LogEvent }) {
   const message = log.message;
 
   const classes = [];
-
 
   switch (log.level) {
     case LogLevel.DEBUG:
@@ -220,7 +240,9 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
 
       const messageLines = event.event.message.split("\n");
       if (messageLines.length > 1) {
-        currentGroup.logs.push(...messageLines.map(line => renderLogEvent(event, line)));
+        currentGroup.logs.push(
+          ...messageLines.map((line) => renderLogEvent(event, line)),
+        );
       }
 
       groups.push(currentGroup);
@@ -232,16 +254,33 @@ function groupEventsByLifecycle(events: WorkerEvent[]) {
         //   messageLines.unshift("");
         // }
 
-        currentGroup.logs.push(...messageLines.map(line => ({
-          ...event,
-          message: line,
-        })));
+        currentGroup.logs.push(
+          ...messageLines.map((line) => ({
+            ...event,
+            message: line,
+          })),
+        );
       } else {
         // ignore
       }
     } else if (event.type === "ERROR" && event.explanation && currentGroup) {
       const details = formatExplanation(event.explanation);
       currentGroup.header.details = details.join("\n\n");
+    } else if (event.type === "ERROR") {
+      currentGroup = {
+        header: {
+          timestamp: event.timestamp ?? new Date(),
+          reason: EventReason.Failed,
+          action: event.body?.type ?? EventAction.Sync,
+          message: event.message,
+        },
+        logs: [],
+      };
+
+      groups.push(currentGroup);
+    } else {
+      // ignore
+      console.log("ignoring event", event);
     }
   }
 
@@ -257,22 +296,6 @@ const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
     objType: event.objType,
     timestamp: event.timestamp,
   };
-};
-
-
-const getActionLabel = (action: EventAction) => {
-  switch (action) {
-    case EventAction.Create:
-      return "Create";
-    case EventAction.Delete:
-      return "Delete";
-    case EventAction.Update:
-      return "Update";
-    case EventAction.Sync:
-      return "Sync";
-    default:
-      return "";
-  }
 };
 
 const getMessageColor = (header: GroupHeader) => {
@@ -302,4 +325,3 @@ function formatExplanation(explanation: any): string[] {
 
   return [JSON.stringify(explanation)];
 }
-

@@ -1,18 +1,11 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
-import { ApiObject } from "@kblocks/api";
+import { ApiObject, formatBlockUri, parseBlockUri } from "@kblocks/api";
 import { Resource } from "@/resource-context";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-type Schema = {
-  type?: string;
-  properties?: { [key: string]: Schema };
-  items?: Schema;
-  additionalProperties?: boolean | Schema;
-};
 
 export function getReadyCondition(obj: ApiObject) {
   return obj.status?.conditions?.find(
@@ -63,12 +56,50 @@ export function getResourceProperties(resource: Resource) {
 
 export function getResourceOutputs(resource: Resource) {
   const outputs: Record<string, any> = {};
-  const conditions = resource.status?.conditions;
-  delete resource.status?.conditions;
-  addProperty(outputs, {
-    ...resource.status,
-    ...conditions,
-    conditions: undefined,
-  });
+
+  for (const [key, value] of Object.entries(resource.status ?? {})) {
+    if (key === "conditions") {
+      continue;
+    }
+
+    addProperty(outputs, value, [key]);
+  }
+
   return outputs;
+}
+
+export const splitAndCapitalizeCamelCase = (str: string): string => {
+  if (!str) {
+    return "";
+  }
+
+  return (
+    str
+      // Insert a space between lowercase and uppercase letters
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      // Insert a space between sequences of uppercase letters followed by lowercase letters
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+      // Split the string into words
+      .split(" ")
+      // Capitalize the first letter of each word
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      // Join the words back into a single string
+      .join(" ")
+  );
+};
+
+export function parseRef(ref: string, referencingObjectUri: string) {
+  const sanitizedRef = ref.replace("${ref://", "").replace("}", "");
+  const { version, system, namespace } = parseBlockUri(referencingObjectUri);
+  const [pluralAndGroup, name, attribute] = sanitizedRef.split("/");
+  const [plural, group] = pluralAndGroup.split(/\.(.+)/);
+  const uri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  return { objUri: uri, attribute: attribute.split("?")[0] };
 }

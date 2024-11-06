@@ -1,0 +1,69 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/cron-schema.json",
+    "$defs": {
+      "commonDefs": {
+        "$ref": "../common.values.schema.json"
+      }
+    },
+    "type": "object",
+    "required": [
+      "instanceType",
+      "source",
+      "ingress"
+    ],
+    "properties": {
+      "source": {
+        "description": "The Docker image or GitHub repository to use for the web service.\n@ui kblocks.io/one-of",
+        "$ref": "#/$defs/commonDefs/source"
+      },
+      "ingress": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "default": "/",
+            "description": "Ingress path for this web service."
+          },
+          "host": {
+            "type": "string",
+            "enum": ["kblocks-demo.quickube.sh"],
+            "default": "kblocks-demo.quickube.sh",
+            "description": "Hostname to use for this endpoint"
+          },
+          "tls": {
+            "type": "object",
+            "required": ["secret", "hosts"],
+            "properties": {
+              "secret": {
+                "type": "string",
+                "description": "Secret name containing the TLS certificate and key to use for this web service"
+              },
+              "hosts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Hostnames to use for this certificate",
+                "default": ["acme.com"]
+              }
+            }
+          }
+        }
+      },
+      "instanceType": {
+        "$ref": "#/$defs/commonDefs/instanceType"
+      },
+      "scaling": {
+        "$ref": "#/$defs/commonDefs/scaling"
+      },
+      "environmentVariables": {
+        "$ref": "#/$defs/commonDefs/environmentVariables"
+      },
+      "region": {
+        "$ref": "#/$defs/commonDefs/region",
+        "description": "The region to deploy the web service. Your services in the same [region](https://kblocks.io/docs/regions) can communicate over a [private network](https://kblocks.io/docs/private-network)."
+      }
+    }
+  }

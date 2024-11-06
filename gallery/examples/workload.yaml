@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-workload-config
+data:
+  message: hello, worldload!
+
+---
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: my-workload
+  labels:
+    foo: bar
+    hello: world
+image: hashicorp/http-echo
+route: /my-service(/|$)(.*)
+rewrite: /$2
+replicas: 2
+env:
+  ECHO_TEXT:
+    value: Hello service
+port: 5678
+---
+apiVersion: acme.com/v1
+kind: Run
+metadata:
+  name: my-workload-tester
+image: busybox
+command:
+  - /bin/sh
+  - -c
+  - wget $WORKLOAD_HOST:$WORKLOAD_PORT -qO -
+env:
+  WORKLOAD_HOST:
+    value: ${ref://workloads.acme.com/my-workload/host}
+  WORKLOAD_PORT:
+    value: ${ref://workloads.acme.com/my-workload/port}

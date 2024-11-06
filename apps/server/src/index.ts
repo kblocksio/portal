@@ -19,18 +19,18 @@ import {
   formatBlockUri,
   Manifest,
   ObjectEvent,
-  WorkerEvent,
 } from "@kblocks/api";
 import {
   getAllObjects,
-  handleEvent,
   loadEvents,
-  loadObject,
+  getObject,
   resetStorage,
+  deleteObject,
 } from "./storage";
 import { categories } from "./categories";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
+const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
 
 const port = process.env.PORT ?? 3001;
 
@@ -41,7 +41,7 @@ app.use(
   cors({
     origin: "*",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   }),
 );
 
@@ -66,7 +66,7 @@ app.ws("/api/events", (ws) => {
   });
 });
 
-app.ws("/api/control/:group/:version/:plural", (ws, req) => {
+app.ws("/api/control/:group/:version/:plural", async (ws, req) => {
   const { group, version, plural } = req.params;
   const { system: sys, system_id } = req.query as unknown as {
     system?: string;
@@ -86,7 +86,7 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
   const resourceType = `${group}/${version}/${plural}`;
   console.log(`control connection: ${resourceType} for ${system}`);
 
-  const { unsubscribe } = pubsub.subscribeToControlRequests(
+  const { unsubscribe } = await pubsub.subscribeToControlRequests(
     { system, group, version, plural },
     (message) => {
       console.log(`sending control message to ${resourceType}:`, message);
@@ -104,10 +104,7 @@ app.ws("/api/control/:group/:version/:plural", (ws, req) => {
 
 // publish an event to the events stream (called by workers)
 app.post("/api/events", async (req, res) => {
-  const body = JSON.stringify(req.body);
-  console.log("EVENT:", body);
-  await pubsub.publishEvent(body);
-  handleEvent(req.body as WorkerEvent); // <-- runs in the background
+  await pubsub.publishEvent(req.body);
   return res.sendStatus(200);
 });
 
@@ -123,6 +120,7 @@ app.get("/api/resources", async (_, res) => {
       objUri,
       objType: blockTypeFromUri(objUri),
       reason: "SYNC",
+      timestamp: new Date(),
     });
   }
 
@@ -168,57 +166,63 @@ app.get("/api/types", async (_, res) => {
   return res.status(200).json(result);
 });
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
 
-    const obj = await loadObject(objUri);
-    return res.status(200).json(obj);
-  },
-);
+  const obj = await getObject(objUri);
+  return res.status(200).json(obj);
+});
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
-    const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
-    return res.status(200).json({ objUri, logs } as GetLogsResponse);
-  },
-);
+app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
 
-app.get(
-  "/api/resources/:group/:version/:plural/:system/:namespace/:name/events",
-  async (req, res) => {
-    const { group, version, plural, system, namespace, name } = req.params;
-    const objUri = formatBlockUri({
-      group,
-      version,
-      plural,
-      system,
-      namespace,
-      name,
-    });
-    const events = await loadEvents(objUri);
-    return res.status(200).json({ objUri, events } as GetEventsResponse);
-  },
-);
+  await deleteObject(objUri);
+  return res.status(200).json({ message: `${objUri} deleted` });
+});
+
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
+  return res.status(200).json({ objUri, logs } as GetLogsResponse);
+});
+
+app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
+  const { group, version, plural, system, namespace, name } = req.params;
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+  const events = await loadEvents(objUri);
+  return res.status(200).json({ objUri, events } as GetEventsResponse);
+});
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
@@ -232,8 +236,47 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   }
 
   const obj = req.body as ApiObject;
+  
+  const objUri = formatBlockUri({
+    group,
+    version,
+    plural,
+    system,
+    namespace: obj.metadata?.namespace ?? "default",
+    name: obj.metadata?.name,
+  });
+
+  const objType = blockTypeFromUri(objUri);
 
   console.log("creating object:", JSON.stringify(obj));
+
+  // patch the status and add a "Ready" condition indicating that the object is pending
+  obj.status = {
+    ...obj.status,
+
+    conditions: [
+      ...(obj.status?.conditions ?? []).filter((c) => c.type !== "Ready"),
+      {
+        type: "Ready",
+        status: "False",
+        reason: "Pending",
+        message: "Pending",
+        lastTransitionTime: new Date().toISOString(),
+      }
+    ],
+  };
+
+  // we are going to publish a synthetic OBJECT event to the event stream which will serve
+  // as a placeholder for the object until it is actually created and the real OBJECT
+  // event is published by the worker.
+  await pubsub.publishEvent({
+    type: "OBJECT",
+    object: obj,
+    objUri,
+    objType,
+    reason: "CREATE",
+    timestamp: new Date(),
+  });
 
   sanitizeObject(obj);
 
@@ -251,7 +294,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
       .json({ error: `Object is missing "metadata.name" field` });
   }
 
-  pubsub.publishControlRequest(
+  await pubsub.publishControlRequest(
     { system, group, version, plural },
     {
       type: "APPLY",
@@ -334,6 +377,41 @@ app.delete(
   },
 );
 
+app.post(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/read",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+
+    if (!system) {
+      return res
+        .status(400)
+        .json({ error: "'system' is required as a query param" });
+    }
+
+    console.log("reading object:", objUri);
+
+    pubsub.publishControlRequest(
+      { system, group, version, plural },
+      {
+        type: "READ",
+        objUri,
+      },
+    );
+
+    return res.status(200).json({
+      message: "Read request accepted",
+    });
+  },
+);
+
 app.get("/api/auth/sign-in", async (req, res) => {
   const supabase = createServerSupabase(req, res);
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -390,6 +468,11 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
 
   console.log("client_id", process.env.GITHUB_CLIENT_ID);
 
+  if (NON_PRIMARY_ENVIRONMENT) {
+    console.log("non-primary environment, skipping additional github auth");
+    return res.redirect(303, `${WEBSITE_ORIGIN}/`);
+  }
+
   const url = new URL("https://github.com/login/oauth/authorize");
   url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
   url.searchParams.append("scope", "repo, org:read");
@@ -409,18 +492,26 @@ app.get("/api/auth/callback/github", async (req, res) => {
   const supabase = createServerSupabase(req, res);
 
   const user = await supabase.auth.getUser();
+  if (user.error) {
+    return res.redirect(
+      `${WEBSITE_ORIGIN}/auth-error?error=${user.error.name}`,
+    );
+  }
 
   const tokens = await exchangeCodeForTokens(code.toString());
 
   const { error } = await supabase.from("user_ghtokens").upsert([
     {
-      user_id: user.data.user?.id,
+      user_id: user.data.user.id,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_in: tokens.expires_in,
       refresh_token_expires_in: tokens.refresh_token_expires_in,
       token_type: tokens.token_type,
       scope: tokens.scope,
+      expires_at: new Date(
+        new Date().getTime() + tokens.expires_in * 1000,
+      ).toISOString(),
     },
   ]);
 

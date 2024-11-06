@@ -1,0 +1,33 @@
+apiVersion: kblocks.io/v1
+kind: Block
+metadata:
+  name: runs.acme.com
+  namespace: kblocks
+spec:
+  engine: wing
+  definition:
+    group: acme.com
+    version: v1
+    kind: Run
+    plural: runs
+    readme: README.md
+    icon: heroicon://play
+    color: lime
+    schema: ./src/run.w
+    description: A Kubernetes CRD for managing job executions with retry and service
+      account options.
+  operator:
+    envConfigMaps:
+      SLACK_CHANNEL: slack-config
+      AWS_DEFAULT_REGION: tf-backend-config
+      TF_BACKEND_BUCKET: tf-backend-config
+      TF_BACKEND_REGION: tf-backend-config
+      TF_BACKEND_KEY: tf-backend-config
+      TF_BACKEND_DYNAMODB: tf-backend-config
+      KBLOCKS_SYSTEM_ID: system-config
+    envSecrets:
+      SLACK_API_TOKEN: slack-token
+      OPENAI_API_KEY: openai-token
+      AWS_ACCESS_KEY_ID: aws-credentials
+      AWS_SECRET_ACCESS_KEY: aws-credentials
+      GITHUB_TOKEN: github-token

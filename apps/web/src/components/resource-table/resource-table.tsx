@@ -6,29 +6,33 @@ import {
   ColumnSort,
   getFilteredRowModel,
   getSortedRowModel,
+  flexRender,
 } from "@tanstack/react-table";
-import { useContext, useMemo, useState } from "react";
-import { Resource, ResourceContext } from "@/resource-context";
+import { memo, useContext, useEffect, useMemo, useState } from "react";
+import {
+  RelationshipType,
+  Resource,
+  ResourceContext,
+  ResourceType,
+} from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
-import { getReadyCondition, getResourceOutputs } from "@/lib/utils";
+import { cn, getReadyCondition, getResourceOutputs } from "@/lib/utils";
 import { LastLogMessage } from "../last-log-message";
 import { StatusBadge } from "../status-badge";
 import { SystemBadge } from "../system-badge";
 import { NamespaceBadge } from "../namespace-badge";
-import { ResourceActionsMenu } from "../resource-actions-menu";
-import { TableHead } from "../ui/table";
-import { flexRender } from "@tanstack/react-table";
 import {
   Table,
+  TableHead,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "@tanstack/react-router";
-import { KeyValueList } from "@/routes/resources.$group.$version.$plural.$system.$namespace.$name";
+import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./table-toolbar";
@@ -39,9 +43,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { ResourceActionsMenu } from "../resource-actions-menu";
+import { ResourceLink } from "../resource-link";
 
 const useColumns = () => {
-  const { resourceTypes } = useContext(ResourceContext);
+  const { resourceTypes, relationships, objects } = useContext(ResourceContext);
+
   return useMemo<ColumnDef<Resource>[]>(() => {
     return [
       {
@@ -117,7 +124,7 @@ const useColumns = () => {
       {
         accessorKey: "system",
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="System" />
+          <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
@@ -161,6 +168,46 @@ const useColumns = () => {
       },
 
       {
+        accessorKey: "children",
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Children" />
+        ),
+        cell: (props) => {
+          const rels = Object.entries(
+            relationships[props.row.original.objUri] ?? {},
+          )
+            .filter(([, rel]) => rel.type === RelationshipType.CHILD)
+            .map(([relUri]) => objects[relUri]);
+
+          if (rels.length === 0) {
+            return null;
+          }
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    <div>{rels.length} Children</div>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-2">
+                    {rels.map((r) => {
+                      return (
+                        <div key={r.objUri}>
+                          <ResourceLink resource={r} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+      },
+
+      {
         accessorKey: "lastUpdated",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
@@ -187,7 +234,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         size: 400,
-        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
+        cell: LastLogMessageCell,
         // enableSorting: false,
       },
       {
@@ -195,7 +242,12 @@ const useColumns = () => {
         size: 0,
         header: () => <></>,
         cell: (props) => {
-          return <ResourceOutputs resource={props.row.original} />;
+          return (
+            <ResourceOutputs
+              resource={props.row.original}
+              resourceType={resourceTypes[props.row.original.objType]}
+            />
+          );
         },
       },
       {
@@ -210,10 +262,14 @@ const useColumns = () => {
         ),
       },
     ];
-  }, [resourceTypes]);
+  }, [resourceTypes, objects, relationships]);
 };
 
-export const ResourceTable = (props: { resources: Resource[] }) => {
+export const ResourceTable = (props: {
+  resources: Resource[];
+  className?: string;
+  showActions?: boolean;
+}) => {
   const columns = useColumns();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<ColumnSort[]>([]);
@@ -232,17 +288,20 @@ export const ResourceTable = (props: { resources: Resource[] }) => {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const emptyTable = useMemo(
-    () => table.getFilteredRowModel().rows.length === 0,
-    [table.getFilteredRowModel().rows],
-  );
+  const rows = useMemo(() => table.getFilteredRowModel().rows, [table]);
+  const emptyTable = useMemo(() => rows.length === 0, [rows]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <ResourceTableToolbar table={table} />
+    <div className={cn("flex flex-col gap-8", props.className)}>
+      <ResourceTableToolbar table={table} showActions={props.showActions} />
       <section>
-        <div className="overflow-x-auto rounded-md border bg-white">
-          <Table>
+        <div
+          className={cn(
+            "overflow-x-auto rounded-md border bg-white",
+            props.className,
+          )}
+        >
+          <Table className="w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -291,29 +350,39 @@ export const ResourceTable = (props: { resources: Resource[] }) => {
   );
 };
 
-function ResourceTableRow({
+const ResourceTableRow = memo(
+  ({
+    resource,
+    children,
+  }: {
+    resource: Resource;
+    children: React.ReactNode;
+  }) => {
+    const navigate = useNavigate();
+
+    return (
+      <TableRow
+        key={resource.objUri}
+        className="cursor-pointer"
+        onClick={() => {
+          const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
+          navigate({ to: `/resources/${resourceDetailsUri}` });
+        }}
+      >
+        {children}
+      </TableRow>
+    );
+  },
+);
+ResourceTableRow.displayName = "ResourceTableRow";
+
+const ResourceOutputs = ({
   resource,
-  children,
+  resourceType,
 }: {
   resource: Resource;
-  children: React.ReactNode;
-}) {
-  const navigate = useNavigate();
-  return (
-    <TableRow
-      key={resource.objUri}
-      className="cursor-pointer"
-      onClick={() => {
-        const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
-        navigate({ to: `/resources/${resourceDetailsUri}` });
-      }}
-    >
-      {children}
-    </TableRow>
-  );
-}
-
-const ResourceOutputs = ({ resource }: { resource: Resource }) => {
+  resourceType: ResourceType;
+}) => {
   const outputs = getResourceOutputs(resource);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -330,7 +399,7 @@ const ResourceOutputs = ({ resource }: { resource: Resource }) => {
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  className="h-0"
                   onClick={(e) => {
                     setIsOpen(true);
                     e.stopPropagation();
@@ -349,7 +418,11 @@ const ResourceOutputs = ({ resource }: { resource: Resource }) => {
         <PopoverContent onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-col space-y-8">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <KeyValueList data={outputs} />
+              <Outputs
+                outputs={outputs}
+                resourceObjUri={resource.objUri}
+                resourceType={resourceType}
+              />
             </div>
           </div>
         </PopoverContent>
@@ -357,3 +430,7 @@ const ResourceOutputs = ({ resource }: { resource: Resource }) => {
     </div>
   );
 };
+
+const LastLogMessageCell = memo((props: any) => (
+  <LastLogMessage objUri={props.row.original.objUri} />
+));

@@ -1,0 +1,27 @@
+apiVersion: acme.com/v1
+kind: Redis
+metadata:
+  name: ref://postgres.acme.com/my-database/port-redis
+# ---
+# apiVersion: acme.com/v1
+# kind: Run
+# metadata:
+#   name: my-redis-test
+# image: redis:6.2-alpine
+# retries: 100
+# command:
+#   - redis-cli
+#   - -h
+#   - ${ref://redis.acme.com/my-redis/host}
+#   - -p
+#   - ${ref://redis.acme.com/my-redis/port}
+#   - -a
+#   - ${ref://redis.acme.com/my-redis/passwordSecret}
+#   - SET
+#   - mykey
+#   - "Hello, Redis!"
+# env:
+#   REDIS_PASSWORD:
+#     fromSecret:
+#       secretName: ${ref://redis.acme.com/my-redis/passwordSecret}
+#       key: ${ref://redis.acme.com/my-redis/passwordKey}

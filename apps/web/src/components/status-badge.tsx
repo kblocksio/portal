@@ -37,7 +37,13 @@ export interface StatusBadgeProps extends VariantProps<typeof variants> {
   type?: string;
 }
 
-export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadgeProps) => {
+export const StatusBadge = ({
+  obj,
+  showMessage,
+  size,
+  type,
+  merge,
+}: StatusBadgeProps) => {
   if (merge && type) {
     throw new Error("merge and type cannot be used together");
   }
@@ -50,7 +56,9 @@ export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadge
     switch (reason) {
       case StatusReason.Completed:
         return (
-          <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>
+          <div
+            className={cn(variants({ size }), "rounded-full bg-green-500")}
+          />
         );
       case StatusReason.ResolvingReferences:
       case StatusReason.InProgress:
@@ -63,11 +71,30 @@ export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadge
         return (
           <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
         );
+
+      case StatusReason.Pending:
+        return (
+          <div
+            className={cn(
+              variants({ size }),
+              "animate-pulse rounded-full border-2 border-gray-300",
+            )}
+          />
+        );
+
       default:
         if (readyCondition?.status === "True") {
-          return <div className={cn(variants({ size }), "rounded-full bg-green-500")}/>
+          return (
+            <div
+              className={cn(variants({ size }), "rounded-full bg-green-500")}
+            />
+          );
         } else {
-          return <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
+          return (
+            <div
+              className={cn(variants({ size }), "rounded-full bg-red-500")}
+            />
+          );
         }
     }
   };
@@ -90,7 +117,9 @@ export const StatusBadge = ({ obj, showMessage, size, type, merge }: StatusBadge
           )}
         </TooltipTrigger>
         <TooltipContent>
-          <p>{showMessage ? `${type}?` :(readyCondition?.reason ?? `${type}?`)}</p>
+          <p>
+            {showMessage ? `${type}?` : (readyCondition?.reason ?? `${type}?`)}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

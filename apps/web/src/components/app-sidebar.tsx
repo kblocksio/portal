@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-
 import {
   Sidebar,
   SidebarRail,
@@ -14,73 +13,23 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarFooter,
-} from "@/components/ui/sidebar.js";
+} from "@/components/ui/sidebar";
 import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible.js";
+} from "@/components/ui/collapsible";
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
-import { useAppContext } from "@/app-context";
-import { getLucideIcon } from "@/lib/lucide-icon";
+import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
-import { useLocation } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
 
-const platformSidebarNavData = [
-  {
-    title: "Home",
-    url: "/",
-    icon: "Home",
-    isActive: true,
-  },
-  {
-    title: "Catalog",
-    url: "#",
-    icon: "Blocks",
-    items: [],
-  },
-  {
-    title: "Documentation",
-    url: "#",
-    icon: "BookOpen",
-    items: [
-      {
-        title: "Introduction",
-        url: "#",
-      },
-      {
-        title: "Get Started",
-        url: "#",
-      },
-      {
-        title: "Tutorials",
-        url: "#",
-      },
-      {
-        title: "Changelog",
-        url: "#",
-      },
-    ],
-  },
-];
-
 export const AppSidebar = () => {
-  const { projects } = useAppContext();
-  const { resourceTypes } = useContext(ResourceContext);
-
+  const { resourceTypes, categories } = useContext(ResourceContext);
   const location = useLocation();
-
-  const sidebarProjects = useMemo(() => {
-    return projects.map((project) => ({
-      title: project.label,
-      url: `/projects/${project.value}`,
-      icon: project.icon,
-    }));
-  }, [projects]);
-
   const platformSideBarItems = useMemo(() => {
     return [
       {
@@ -91,39 +40,30 @@ export const AppSidebar = () => {
       },
       {
         title: "Catalog",
-        url: "#",
+        url: "/catalog",
         icon: "Blocks",
-        items: Object.keys(resourceTypes).map((resourceType) => ({
-          title: resourceTypes[resourceType].kind,
-          url: `/catalog/${resourceType}`,
-          icon: resourceTypes[resourceType].icon,
+        items: Object.keys(categories).map((category) => ({
+          title: categories[category].title,
+          url: "#",
+          items: Object.keys(resourceTypes)
+            .filter((resourceTypeKey) =>
+              resourceTypes[resourceTypeKey].categories?.includes(category),
+            )
+            .map((resourceTypeKey) => ({
+              title: resourceTypes[resourceTypeKey].kind,
+              url: `/catalog/${resourceTypeKey}`,
+              icon: resourceTypes[resourceTypeKey].icon,
+            })),
         })),
       },
       {
-        title: "Documentation",
-        url: "#",
-        icon: "BookOpen",
-        items: [
-          {
-            title: "Introduction",
-            url: "#",
-          },
-          {
-            title: "Get Started",
-            url: "#",
-          },
-          {
-            title: "Tutorials",
-            url: "#",
-          },
-          {
-            title: "Changelog",
-            url: "#",
-          },
-        ],
+        title: "Resources",
+        url: "/resources",
+        icon: "LayoutDashboard",
       },
+
     ];
-  }, [resourceTypes]);
+  }, [resourceTypes, categories]);
 
   return (
     <Sidebar collapsible="icon">
@@ -143,18 +83,6 @@ export const AppSidebar = () => {
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>My Projects</SidebarGroupLabel>
-          <SidebarMenu>
-            {sidebarProjects.map((item) => (
-              <SidebarItem
-                key={item.title}
-                item={item}
-                isActive={location.pathname === item.url}
-              />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <AppSidebarFooter />
@@ -166,8 +94,19 @@ export const AppSidebar = () => {
 
 const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   const location = useLocation();
-  // Add state to control the open status
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      location.pathname &&
+      item.url &&
+      item.url !== "#" &&
+      !location.pathname.includes(item.url)
+    ) {
+      setIsOpen(false);
+    }
+  }, [location.pathname]);
 
   const isAnySubItemActive = useMemo(
     () => item.items?.some((subItem: any) => location.pathname === subItem.url),
@@ -186,8 +125,14 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             to={item.url as any}
             className={isActive ? "bg-sidebar-accent" : ""}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
-            <span>{item.title}</span>
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return (
+                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                );
+              })()}
+            <span title={item.title}>{item.title}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -204,21 +149,43 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
-            tooltip={item.title}
             className={isActive ? "bg-sidebar-accent" : ""}
             onClick={(e) => {
               e.preventDefault();
+              if (item.url && item.url !== "#") {
+                navigate({ to: item.url });
+              }
               setIsOpen(!isOpen);
             }}
           >
-            {item.icon && getLucideIcon(item.icon)({})}
-            <span>{item.title}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            {item.icon &&
+              (() => {
+                const Icon = getIconComponent({ icon: item.icon });
+                return (
+                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                );
+              })()}
+            <span title={item.title}>{item.title}</span>
+            <ChevronRight
+              className={`ml-auto transition-transform duration-300 ${
+                isOpen ? "rotate-90" : ""
+              }`}
+            />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent asChild>
           <SidebarMenuSub>
             {item.items?.map((subItem: any) => {
+              if (subItem.items) {
+                return (
+                  <SidebarItem
+                    key={subItem.title}
+                    item={subItem}
+                    isActive={location.pathname === subItem.url}
+                  />
+                );
+              }
+
               const isSubItemActive = location.pathname === subItem.url;
               return (
                 <SidebarMenuSubItem key={subItem.title}>
@@ -227,7 +194,17 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
                       to={subItem.url as any}
                       className={isSubItemActive ? "bg-sidebar-accent" : ""}
                     >
-                      <span>{subItem.title}</span>
+                      {subItem.icon &&
+                        (() => {
+                          const Icon = getIconComponent({ icon: subItem.icon });
+                          return (
+                            <Icon
+                              className="h-5 w-5 flex-shrink-0"
+                              aria-hidden="true"
+                            />
+                          );
+                        })()}
+                      <span title={subItem.title}>{subItem.title}</span>
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>

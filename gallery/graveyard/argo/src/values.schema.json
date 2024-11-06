@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "ingressHost": {
+      "type": "string",
+      "description": "The host to use for the ingress. This must be a valid hostname to route traffic to your ArgoCD application."
+    }
+  }
+}

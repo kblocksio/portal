@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "../ui/button";
-import { Loader2 } from "lucide-react";
+import { FileCode, Loader2 } from "lucide-react";
 import { FieldRenderer } from "./field-renderer";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
-
+import { ResourceType } from "@/resource-context";
+import { SystemSelector } from "./system-selector";
+import cloneDeep from "lodash.clonedeep";
+import YamlButton from "../yaml-button";
 export interface FormGeneratorProps {
-  schema: any;
+  resourceType: ResourceType;
   isLoading: boolean;
   handleBack: () => void;
   handleSubmit: (meta: ObjectMetadata, fields: any) => void;
@@ -16,17 +19,24 @@ export interface FormGeneratorProps {
   initialMeta: Partial<ObjectMetadata>;
 }
 
-export const FormGenerator = ({
-  schema,
+export const ResourceForm = ({
+  resourceType,
   isLoading,
   handleBack,
   handleSubmit,
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
-  const [formData, setFormData] = useState<any>(initialValues || {});
-  const [system] = useState<string>(initialMeta?.system ?? "demo");
-  const [namespace, setNamespace] = useState<string>(
+  // create a clone of the schema and remove the status property (the outputs)
+  const schema = useMemo(() => {
+    const result = cloneDeep(resourceType.schema);
+    delete result.properties?.status;
+    return result;
+  }, [resourceType]);
+
+  const [formData, setFormData] = useState<any>(initialValues ?? {});
+  const [system, setSystem] = useState(initialMeta?.system ?? "demo");
+  const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
   );
   const [name, setName] = useState<string>(initialMeta?.name ?? "");
@@ -48,16 +58,40 @@ export const FormGenerator = ({
     [name, namespace, system],
   );
 
+  const yamlObject = useMemo(() => {
+    const obj = {
+      apiVersion: `${resourceType.group}/${resourceType.version}`,
+      kind: resourceType.kind,
+      metadata: cloneDeep(metadataObject),
+      ...cloneDeep(formData),
+    };
+
+    delete obj.status;
+    delete obj.metadata?.system;
+    delete obj.metadata?.generation;
+    delete obj.metadata?.creationTimestamp;
+    delete obj.metadata?.managedFields;
+    delete obj.metadata?.resourceVersion;
+    delete obj.metadata?.uid;
+    delete obj.objUri;
+    delete obj.objType;
+
+    return obj;
+  }, [metadataObject, formData, resourceType]);
+
   return (
     <form
-      className="flex h-full flex-col space-y-4 overflow-hidden"
+      className="flex h-full flex-col overflow-hidden"
+      style={{
+        marginBlockEnd: "0px",
+      }}
       onSubmit={(e) => {
         e.preventDefault();
         const meta: ObjectMetadata = metadataObject;
         handleSubmit(meta, formData);
       }}
     >
-      <div className="ml-2 mr-2 space-y-4 border-b pb-4">
+      <div className="ml-2 mr-2 space-y-4 pb-4">
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label
@@ -96,35 +130,50 @@ export const FormGenerator = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="system" className={"opacity-50"}>
-              System
+              Cluster
+              <span className="text-destructive">*</span>
             </Label>
-            <Input
-              required
-              id="system"
-              placeholder="System"
-              disabled={true}
+            <SystemSelector
+              resourceType={resourceType}
+              disabled={!!initialValues}
               value={system}
+              onChange={(value) => setSystem(value)}
             />
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-4 overflow-y-auto pb-4 pr-4">
-          <FieldRenderer
-            objectMetadata={metadataObject}
-            schema={schema}
-            fieldName=""
-            path=""
-            formData={formData}
-            updateFormData={setFormData}
-            hideField={true}
-          />
-        </div>
+      <div className="relative flex-1 overflow-y-auto p-0 m-0 border-t">
+        <div className="pointer-events-none sticky top-0 left-0 right-0 h-6 bg-gradient-to-b from-white to-transparent"></div>
+        <FieldRenderer
+          objectMetadata={metadataObject}
+          schema={schema}
+          fieldName=""
+          path=""
+          formData={formData}
+          updateFormData={setFormData}
+          hideField={true}
+        />
+        <div className="pointer-events-none sticky bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent"></div>
       </div>
-      <div className="flex justify-between border-t border-gray-200 pt-4">
+      <div className="flex justify-between border-t border-gray-200 px-2 py-4 pt-4">
         <Button type="button" variant="outline" onClick={handleBack}>
           {!initialValues ? "Back" : "Cancel"}
         </Button>
+        <YamlButton
+          object={yamlObject}
+        >
+          <Button
+            type="button"
+            variant="secondary"
+            className="ml-auto mr-4"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <FileCode className="h-4 w-4" />
+            YAML
+          </Button>
+        </YamlButton>
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
             <>

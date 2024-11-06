@@ -4,15 +4,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ResourceCatalog } from "../resource-catalog/resource-catalog";
 import { WizardSearchHeader } from "../wizard-search-header";
 import { WizardSimpleHeader } from "../wizard-simple-header";
-import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
+import { Description } from "@radix-ui/react-dialog";
+import { ResourceForm } from "@/components/resource-form/resource-form";
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export const CreateResourceWizard = ({
       handleOnOpenChange(open);
       setSelectedResourceType(undefined);
     },
-    [currentEditableResource, handleOnOpenChange, setSelectedResourceType],
+    [handleOnOpenChange, setSelectedResourceType],
   );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
@@ -119,8 +120,7 @@ export const CreateResourceWizard = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="flex h-[90vh] min-w-[90vh] flex-col"
-        aria-describedby="Create a new resource"
+        className="flex max-h-[90vh] max-w-[90vh] flex-col"
         onPointerDownOutside={(event) => {
           if (isLoading) {
             event.preventDefault();
@@ -132,6 +132,11 @@ export const CreateResourceWizard = ({
           }
         }}
       >
+        <Description className="sr-only">
+          {step === 1
+            ? "Dialog for creating a new resource. Choose from available resource types."
+            : `Dialog for ${currentEditableResource ? "editing" : "creating"} a ${selectedResourceType?.kind} resource.`}
+        </Description>
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? (
@@ -158,17 +163,17 @@ export const CreateResourceWizard = ({
               categories={categories}
               isLoading={isLoading}
               filtereResources={filtereResources}
-              handleResourceSelect={handleResourceSelect}
+              onResourceCreateClick={handleResourceSelect}
             />
           </div>
         ) : (
           <div className="flex h-full flex-col space-y-4 overflow-hidden p-2">
             {selectedResourceType && (
-              <CreateNewResourceForm
+              <ResourceForm
                 resourceType={selectedResourceType}
                 initialMeta={renderInitialMeta(currentEditableResource?.objUri)}
                 initialValues={currentEditableResource}
-                handleCreate={handleCreate}
+                handleSubmit={handleCreate}
                 handleBack={handleBack}
                 isLoading={isLoading}
               />
