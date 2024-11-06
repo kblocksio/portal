@@ -11,8 +11,6 @@ spec:
     kind: Worktmp
     plural: worktmps
     singular: worktmp
-    categories:
-      - workloads
     listKind: WorktmpList
     shortNames:
       - wt
