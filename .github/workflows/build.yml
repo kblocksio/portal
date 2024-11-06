@@ -30,11 +30,20 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       kblocks-host: ${{ steps.qkube.outputs.kblocks-host }}
+      qkube-name: ${{ steps.qkube.outputs.qkube-name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-      
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -81,9 +90,6 @@ jobs:
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
-
-      - name: Create empty kube config
-        run: |
           mkdir -p /home/runner/.kube
           echo "apiVersion: v1" > /home/runner/.kube/config
 
@@ -205,6 +211,18 @@ jobs:
   
       - name: Install Dependencies
         run: npm install
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          mkdir -p /home/runner/.kube
+          echo "apiVersion: v1" > /home/runner/.kube/config
+
+      - name: Switch clusters
+        run: |
+          npx qkube use ${{ needs.build.outputs.qkube-name }}
   
       - name: Install gallery blocks
         working-directory: gallery
