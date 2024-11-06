@@ -15,7 +15,7 @@ export const ResourcePageProject: Project = {
   label: "Resources",
   value: "Resources",
   description:
-    "Here is a comprehensive list of Kubernetes resources associated with your account. You can manage these resources, view their status, edit, update, delete, check logs, and access detailed information, relationships, and other useful insight",
+    "Here is a comprehensive list of resources associated with your account. You can manage these resources, view their status, edit, update, delete, check logs, and access detailed information, relationships, and other useful insight",
   icon: "LayoutDashboard",
 };
 

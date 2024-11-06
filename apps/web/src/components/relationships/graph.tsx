@@ -27,11 +27,12 @@ export const RelationshipGraph = memo(function RelationshipGraph({
       visited.add(srcUri);
 
       const obj = objects[srcUri];
-      const Icon = resourceTypes[obj.objType]?.iconComponent ?? Box;
+      const type = resourceTypes[obj.objType];
+      const Icon = type?.iconComponent ?? Box;
       nodes.push({
         data: {
           name: obj.metadata.name,
-          description: srcUri,
+          description: type?.kind,
           icon: <Icon className="size-5" />,
         },
         id: srcUri,
