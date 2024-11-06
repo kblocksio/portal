@@ -1,35 +1,42 @@
 import { ChevronRightIcon } from "lucide-react";
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { WorkerEvent } from "@kblocks/api";
 
 export const LastLogMessage = ({ objUri }: { objUri: string }) => {
   const { eventsPerObject } = useContext(ResourceContext);
+  const [prevLogMessage, setPrevLogMessage] = useState<
+    WorkerEvent | undefined
+  >();
+  const [lastLogMessageToDisplay, setLastLogMessageToDisplay] = useState<
+    WorkerEvent | undefined
+  >();
 
-  const events = useMemo(
-    () => Object.values(eventsPerObject[objUri] ?? {}),
-    [eventsPerObject, objUri],
-  );
+  useEffect(() => {
+    const events = Object.values(eventsPerObject[objUri] ?? {});
+    const lastEvent = events.pop();
+    if (lastEvent === lastLogMessageToDisplay) {
+      return;
+    }
+    setPrevLogMessage(lastLogMessageToDisplay);
+    setLastLogMessageToDisplay(lastEvent);
+  }, [eventsPerObject, objUri, lastLogMessageToDisplay]);
 
-  const last = useMemo(() => events.pop(), [events]);
+  const getLogMessage = (lastEvent: WorkerEvent) => {
+    switch (lastEvent.type) {
+      case "LOG":
+        return lastEvent.message;
+      case "LIFECYCLE":
+        return `${lastEvent.event.action} ${lastEvent.event.message}`;
+      case "ERROR":
+        return lastEvent.message;
+      default:
+        return "Unknown event type";
+    }
+  };
 
-  let message;
-  switch (last?.type) {
-    case "LOG":
-      message = last.message;
-      break;
-    case "LIFECYCLE":
-      message = `${last.event.action} ${last.event.message}`;
-      break;
-    case "ERROR":
-      message = last.message;
-      break;
-    default:
-      message = "Unknown event type";
-      break;
-  }
-
-  if (!last) {
+  if (!lastLogMessageToDisplay) {
     return null;
   }
 
@@ -37,11 +44,11 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
     <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
         <motion.div
-          key={last.timestamp?.toString()}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          key={lastLogMessageToDisplay.timestamp?.toString()}
+          initial={prevLogMessage ? { y: "100%", opacity: 0 } : undefined}
+          animate={prevLogMessage ? { y: "0%", opacity: 1 } : undefined}
+          exit={prevLogMessage ? { y: "-100%", opacity: 0 } : undefined}
+          transition={prevLogMessage ? { duration: 0.5 } : undefined}
           className="absolute inset-0 flex min-w-0 items-center gap-0.5 px-1"
         >
           <span className="text-muted-foreground">
@@ -49,9 +56,9 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
           </span>
           <span
             className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-xs"
-            title={message}
+            title={getLogMessage(lastLogMessageToDisplay)}
           >
-            {message}
+            {getLogMessage(lastLogMessageToDisplay)}
           </span>
         </motion.div>
       </AnimatePresence>

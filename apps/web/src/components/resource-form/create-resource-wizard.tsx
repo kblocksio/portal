@@ -8,13 +8,12 @@ import React, { useCallback, useMemo, useState } from "react";
 import { ResourceCatalog } from "../resource-catalog/resource-catalog";
 import { WizardSearchHeader } from "../wizard-search-header";
 import { WizardSimpleHeader } from "../wizard-simple-header";
-import { CreateNewResourceForm } from "./create-new-resource-form";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { Resource, ResourceType } from "@/resource-context";
 import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { ObjectMetadata } from "@repo/shared";
 import { Description } from "@radix-ui/react-dialog";
-import { ResourceForm } from "./resource-form";
+import { ResourceForm } from "@/components/resource-form/resource-form";
 
 export interface CreateResourceWizardProps {
   isOpen: boolean;

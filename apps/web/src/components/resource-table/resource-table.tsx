@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { useContext, useMemo, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useState } from "react";
 import {
   RelationshipType,
   Resource,
@@ -234,7 +234,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         size: 400,
-        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
+        cell: LastLogMessageCell,
         // enableSorting: false,
       },
       {
@@ -350,27 +350,31 @@ export const ResourceTable = (props: {
   );
 };
 
-function ResourceTableRow({
-  resource,
-  children,
-}: {
-  resource: Resource;
-  children: React.ReactNode;
-}) {
-  const navigate = useNavigate();
-  return (
-    <TableRow
-      key={resource.objUri}
-      className="cursor-pointer"
-      onClick={() => {
-        const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
-        navigate({ to: `/resources/${resourceDetailsUri}` });
-      }}
-    >
-      {children}
-    </TableRow>
-  );
-}
+const ResourceTableRow = memo(
+  ({
+    resource,
+    children,
+  }: {
+    resource: Resource;
+    children: React.ReactNode;
+  }) => {
+    const navigate = useNavigate();
+
+    return (
+      <TableRow
+        key={resource.objUri}
+        className="cursor-pointer"
+        onClick={() => {
+          const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
+          navigate({ to: `/resources/${resourceDetailsUri}` });
+        }}
+      >
+        {children}
+      </TableRow>
+    );
+  },
+);
+ResourceTableRow.displayName = "ResourceTableRow";
 
 const ResourceOutputs = ({
   resource,
@@ -426,3 +430,7 @@ const ResourceOutputs = ({
     </div>
   );
 };
+
+const LastLogMessageCell = memo((props: any) => (
+  <LastLogMessage objUri={props.row.original.objUri} />
+));
