@@ -17,6 +17,7 @@ const MockUser = {
   user_metadata: {
     email: "test@test.com",
     name: "Test User",
+    avatar_url: "https://ui-avatars.com/api/?name=Test+User&background=random",
   },
   app_metadata: {},
   aud: "test",

@@ -24,11 +24,12 @@ export const AppSidebarFooter = () => {
   const userData = useMemo(() => {
     const name = user?.user_metadata.name;
     const initials = getUserInitials(name);
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random`;
+    const avatarUrl = user?.user_metadata?.avatar_url;
 
     return {
       name,
       email: user?.user_metadata.email,
+      initials,
       avatar: avatarUrl,
     };
   }, [user]);
@@ -64,7 +65,7 @@ export const AppSidebarFooter = () => {
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={userData.avatar} alt={userData.name} />
                   <AvatarFallback className="rounded-lg">
-                    {getUserInitials(userData.name)}
+                    {userData.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
