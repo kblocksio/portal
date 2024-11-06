@@ -2,7 +2,7 @@
 {{- if .Values.source.fromImage }}
 {{- if .Values.source.fromImage.image }}
 apiVersion: acme.com/v1
-kind: Worktmp
+kind: NetworkedWorkload
 metadata:
   name: {{ .Release.Name }}-web-service
   labels:

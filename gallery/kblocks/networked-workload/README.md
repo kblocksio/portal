@@ -1,5 +1,5 @@
-# Workload
-A Kubernetes Custom Resource Definition (CRD) for managing workloads.
+# Networked Workload
+A Kubernetes Custom Resource Definition (CRD) for managing workloads that are connected to a network (private or public).
 
 ## Options
 - `image` (string, required): The container image to use. This is a mandatory field that specifies the Docker image which the container will run.

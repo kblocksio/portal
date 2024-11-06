@@ -2,7 +2,7 @@ bring "cdk8s-plus-30" as k8s;
 bring "cdk8s" as cdk8s;
 bring "./shared.w" as api;
 
-pub struct WorktmpSpec extends api.ContainerSpec, api.PolicySpec {
+pub struct NetworkedWorkloadSpec extends api.ContainerSpec, api.PolicySpec {
   /// Make this workload publicly accessible
   ingress: Ingress?;
 
@@ -64,11 +64,11 @@ pub struct Certificate {
   hosts: Array<str>;
 }
 
-pub class Worktmp {
+pub class NetworkedWorkload {
   pub host: str?;
   pub port: str?;
 
-  new(spec: WorktmpSpec) {
+  new(spec: NetworkedWorkloadSpec) {
 
     let d = new k8s.Deployment(
       replicas: spec?.scaling?.replicas,

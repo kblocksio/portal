@@ -93,7 +93,7 @@ jobs:
           - topic
           - workload
           - cloudfront
-          - worktmp
+          - networked-workload
           - web-service
     steps:
       - name: Checkout code
