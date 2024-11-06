@@ -9,10 +9,13 @@ export default function SwaggerUIComponent({ spec }: { spec: any }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="items-center grid auto-rows-[28px] grid-cols-[auto_1fr]">
+    <div className="grid auto-rows-[32px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
       <PropertyKey>Open API Spec</PropertyKey>
       <PropertyValue>
-        <Button variant="ghost" onClick={() => {
+        <Button
+          variant="outline"
+          className="mt-auto h-full"
+          onClick={() => {
             setOpen(true);
           }}
         >

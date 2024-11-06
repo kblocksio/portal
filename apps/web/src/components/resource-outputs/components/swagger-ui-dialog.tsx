@@ -1,12 +1,12 @@
 import { PropsWithChildren } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface SwaggerUIDialogProps extends PropsWithChildren {
   isOpen: boolean;
@@ -29,20 +29,19 @@ export function SwaggerUIDialog({
     >
       <DialogContent className="flex h-[90vh] max-w-[90vh] flex-col justify-between overflow-auto">
         <DialogHeader>
-          <DialogTitle>
-            Open API Spec
-          </DialogTitle>
+          <DialogTitle>Open API Spec</DialogTitle>
           {children}
         </DialogHeader>
         <DialogFooter>
-          <DialogClose
+          <Button
+            variant="outline"
             onClick={(e: any) => {
               e.preventDefault();
               onClose();
             }}
           >
-            {"Close"}
-          </DialogClose>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
