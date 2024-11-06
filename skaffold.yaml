@@ -4,6 +4,8 @@ apiVersion: skaffold/v4beta11
 kind: Config
 
 build:
+  local:
+    push: true
   artifacts:
     - image: wingcloudbot/kblocks-backend
       docker:
@@ -15,6 +17,9 @@ build:
           - packages/shared/src/**/*.ts
     - image: wingcloudbot/kblocks-frontend
       context: ./apps/web
+      hooks:
+        before:
+          - command: ["npm", "run", "build"]
       sync:
         infer:
           - apps/web/src/**/*.ts
@@ -28,7 +33,7 @@ deploy:
         valuesFiles:
           - deploy/values.yaml
         setValueTemplates:
-          backend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
-          frontend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
+          backend.image: "{{.IMAGE_FULLY_QUALIFIED_wingcloudbot_kblocks_backend}}"
+          frontend.image: "{{.IMAGE_FULLY_QUALIFIED_wingcloudbot_kblocks_frontend}}"
           ingress.host: "staging.kblocks.io"
 
