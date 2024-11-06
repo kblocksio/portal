@@ -1,5 +1,8 @@
 name: Build
 
+permissions: 
+  pull-requests: write 
+
 on:
   workflow_dispatch:
     inputs:
@@ -183,3 +186,13 @@ jobs:
             --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
             --set frontend.ingress.host=${QKUBE_SHORT_NAME}.kblocks.io \
             --set frontend.enabled=true
+
+      - name: Post PR comment
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v3
+        env:
+          QKUBE_SHORT_NAME: ${{ steps.qkube.outputs.qkube-short-name }}
+        with:
+          message: |
+            Environment is available at https://${{env.QKUBE_SHORT_NAME}}.kblocks.io :rocket:
+          comment_tag: Environment
