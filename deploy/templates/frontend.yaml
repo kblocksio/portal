@@ -9,13 +9,13 @@ metadata:
 image: {{ $image }}
 port: 80
 replicas: 2
-ingress:
-  path: /
-  host: {{ $ingressHost }}
-  tls:
-    hosts:
-      - {{ $ingressHost }}
-    secret: {{ $ingressTlsSecret }}
+expose:
+  - path: /
+    host: {{ $ingressHost }}
+    tls:
+      hosts:
+        - {{ $ingressHost }}
+      secret: {{ $ingressTlsSecret }}
 allowCluster:
   - apiGroup: "*"
     resource: "*"
