@@ -33,6 +33,8 @@ import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
 
+const DEFAULT_TAB = "details";
+
 export function urlForResource(blockUri: BlockUriComponents) {
   return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
 }
@@ -55,6 +57,22 @@ function ResourcePage() {
   } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
+  const [activeTab, setActiveTab] = useState("details");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && ["details", "logs", "relationships"].includes(hash)) {
+        setActiveTab(hash);
+      } else {
+        window.location.hash = DEFAULT_TAB;
+        setActiveTab(DEFAULT_TAB);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   const objUri = formatBlockUri({
     group,
@@ -208,7 +226,14 @@ function ResourcePage() {
         </div>
       </div>
 
-      <Tabs defaultValue="details" className="w-full">
+      <Tabs
+        value={activeTab}
+        className="w-full"
+        onValueChange={(value) => {
+          setActiveTab(value);
+          window.location.hash = value;
+        }}
+      >
         <TabsList className="border-border h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
           <TabsTrigger
             value="details"
