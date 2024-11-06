@@ -62,7 +62,7 @@ async function saveObject(blockUri: string, obj: kblocks.ApiObject | {}) {
   await redis.set(keyForObject(blockUri), JSON.stringify(obj));
 }
 
-export async function loadObject(
+export async function getObject(
   blockUri: string,
 ): Promise<kblocks.ApiObject | null> {
   const redis = await connection();
@@ -92,7 +92,7 @@ export async function resetStorage() {
   await redis.flushDb();
 }
 
-async function deleteObject(blockUri: string) {
+export async function deleteObject(blockUri: string) {
   const redis = await connection();
   await redis.del(keyForObject(blockUri));
 }
@@ -160,7 +160,7 @@ export async function setSlackThread(objUri: string, thread: string) {
 }
 
 async function patchObject(objUri: string, patch: kblocks.ApiObject) {
-  const obj = await loadObject(objUri);
+  const obj = await getObject(objUri);
   if (!obj) {
     console.warn(`Object not found: ${objUri}`);
     return;

@@ -35,7 +35,7 @@ export const ResourceForm = ({
   }, [resourceType]);
 
   const [formData, setFormData] = useState<any>(initialValues ?? {});
-  const [system, setSystem] = useState(initialMeta?.system ?? "demo");
+  const [system, setSystem] = useState(initialMeta?.system ?? "");
   const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
   );

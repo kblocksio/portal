@@ -4,16 +4,16 @@
 apiVersion: acme.com/v1
 kind: AutoBuild
 metadata:
-  name: {{ .Release.Name }}-cronjob-autobuild
+  name: {{ .Release.Name }}-private-service-autobuild
   labels:
-    foo: cron
-    hello: job
+    foo: private
+    hello: service
 repository: {{ .Values.source.fromRepository.repository }}
 branch: {{ .Values.source.fromRepository.branch }}
 rootDirectory: {{ .Values.source.fromRepository.rootDirectory }}
 deploy:
   field: source.fromImage.image
-  blockUri: "acme.com/v1/cronjobs/{{ .Values.kblocks.system }}/{{ .Release.Namespace }}/{{ .Release.Name }}"
+  blockUri: "acme.com/v1/privateservices/{{ .Values.kblocks.system }}/{{ .Release.Namespace }}/{{ .Release.Name }}"
 {{- end }}
 {{- end }}
 {{- end }}

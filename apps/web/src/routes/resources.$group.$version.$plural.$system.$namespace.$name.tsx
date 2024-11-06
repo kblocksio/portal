@@ -83,7 +83,7 @@ function ResourcePage() {
     name,
   });
 
-  const [lastEventCount, setLastEventCount] = useState(Object.keys(eventsPerObject[objUri])?.length ?? 0);
+  const [lastEventCount, setLastEventCount] = useState(Object.keys(eventsPerObject?.[objUri] ?? {}).length);
 
   const events = useMemo(
     () => Object.values(eventsPerObject[objUri] ?? {}),

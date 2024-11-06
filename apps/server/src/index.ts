@@ -16,18 +16,16 @@ import * as pubsub from "./pubsub";
 import {
   ApiObject,
   blockTypeFromUri,
-  Condition,
   formatBlockUri,
   Manifest,
   ObjectEvent,
-  WorkerEvent,
 } from "@kblocks/api";
 import {
   getAllObjects,
-  handleEvent,
   loadEvents,
-  loadObject,
+  getObject,
   resetStorage,
+  deleteObject,
 } from "./storage";
 import { categories } from "./categories";
 
@@ -179,7 +177,7 @@ app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async
     name,
   });
 
-  const obj = await loadObject(objUri);
+  const obj = await getObject(objUri);
   return res.status(200).json(obj);
 });
 
