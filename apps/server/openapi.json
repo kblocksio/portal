@@ -123,6 +123,71 @@
             }
           }
         }
+      },
+      "patch": {
+        "summary": "Patch a resource",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Patch request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "objType": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ApiObject"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a resource",
+        "responses": {
+          "200": {
+            "description": "Delete request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/resources/{group}/{version}/{plural}": {
@@ -149,7 +214,25 @@
         },
         "responses": {
           "200": {
-            "description": "Create request accepted"
+            "description": "Create request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "objType": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ApiObject"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -185,7 +268,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "account": {
+                        "type": "object"
+                      },
+                      "repository_selection": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
@@ -221,7 +315,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "full_name": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
