@@ -23,7 +23,7 @@ import { request } from "./lib/backend";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { NotificationsContext } from "./notifications-context";
 import { getIconComponent } from "./lib/get-icon";
-const WS_URL = import.meta.env.VITE_WS_URL;
+const WS_URL = `wss://${import.meta.env.VITE_BACKEND_ENDPOINT}/api/events`;
 if (!WS_URL) {
   console.error("WebSocket URL is not set");
 }
