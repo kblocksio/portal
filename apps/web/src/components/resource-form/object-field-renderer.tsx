@@ -110,7 +110,7 @@ export const ObjectFieldRenderer = ({
                     position: "absolute",
                     opacity: 0,
                     pointerEvents: "none",
-                    top: "8px",
+                    top: 0,
                     left: 0,
                   }}
                 />
