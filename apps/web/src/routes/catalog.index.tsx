@@ -29,9 +29,11 @@ function Catalog() {
 
   const handleOnResourceCreateClick = useCallback(
     (resourceType: ResourceType) => {
-      openWizard(undefined, resourceType, 2);
+      navigate({
+        to: `/resources/new/${resourceType.group}/${resourceType.version}/${resourceType.plural}`,
+      });
     },
-    [openWizard],
+    [navigate],
   );
 
   const handleOnCardClick = useCallback(
@@ -55,9 +57,7 @@ function Catalog() {
       <div className="flex flex-col gap-4 pb-8 pt-8">
         <div className="flex flex-col items-start justify-between md:flex-row">
           <div className="flex-1 space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Catalog
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">Catalog</h1>
             <p className="text-md text-muted-foreground">
               These are the resource types available in the platform.
             </p>

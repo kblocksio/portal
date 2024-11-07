@@ -10,210 +10,210 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as AdminImport } from './routes/admin'
-import { Route as IndexImport } from './routes/index'
-import { Route as ResourcesIndexImport } from './routes/resources.index'
-import { Route as CatalogIndexImport } from './routes/catalog.index'
-import { Route as ResourcesNewIndexImport } from './routes/resources.new.index'
-import { Route as CatalogGroupVersionKindImport } from './routes/catalog.$group.$version.$kind'
-import { Route as ResourcesNewGroupVersionPluralImport } from './routes/resources.new.$group.$version.$plural'
-import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from './routes/resources.$group.$version.$plural.$system.$namespace.$name'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as AdminImport } from "./routes/admin";
+import { Route as IndexImport } from "./routes/index";
+import { Route as ResourcesIndexImport } from "./routes/resources.index";
+import { Route as CatalogIndexImport } from "./routes/catalog.index";
+import { Route as ResourcesNewIndexImport } from "./routes/resources.new.index";
+import { Route as CatalogGroupVersionPluralImport } from "./routes/catalog.$group.$version.$plural";
+import { Route as ResourcesNewGroupVersionPluralImport } from "./routes/resources.new.$group.$version.$plural";
+import { Route as ResourcesGroupVersionPluralSystemNamespaceNameImport } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 
 // Create/Update Routes
 
 const AdminRoute = AdminImport.update({
-  id: '/admin',
-  path: '/admin',
+  id: "/admin",
+  path: "/admin",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ResourcesIndexRoute = ResourcesIndexImport.update({
-  id: '/resources/',
-  path: '/resources/',
+  id: "/resources/",
+  path: "/resources/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const CatalogIndexRoute = CatalogIndexImport.update({
-  id: '/catalog/',
-  path: '/catalog/',
+  id: "/catalog/",
+  path: "/catalog/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ResourcesNewIndexRoute = ResourcesNewIndexImport.update({
-  id: '/resources/new/',
-  path: '/resources/new/',
+  id: "/resources/new/",
+  path: "/resources/new/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
-const CatalogGroupVersionKindRoute = CatalogGroupVersionKindImport.update({
-  id: '/catalog/$group/$version/$kind',
-  path: '/catalog/$group/$version/$kind',
+const CatalogGroupVersionPluralRoute = CatalogGroupVersionPluralImport.update({
+  id: "/catalog/$group/$version/$plural",
+  path: "/catalog/$group/$version/$plural",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const ResourcesNewGroupVersionPluralRoute =
   ResourcesNewGroupVersionPluralImport.update({
-    id: '/resources/new/$group/$version/$plural',
-    path: '/resources/new/$group/$version/$plural',
+    id: "/resources/new/$group/$version/$plural",
+    path: "/resources/new/$group/$version/$plural",
     getParentRoute: () => rootRoute,
-  } as any)
+  } as any);
 
 const ResourcesGroupVersionPluralSystemNamespaceNameRoute =
   ResourcesGroupVersionPluralSystemNamespaceNameImport.update({
-    id: '/resources/$group/$version/$plural/$system/$namespace/$name',
-    path: '/resources/$group/$version/$plural/$system/$namespace/$name',
+    id: "/resources/$group/$version/$plural/$system/$namespace/$name",
+    path: "/resources/$group/$version/$plural/$system/$namespace/$name",
     getParentRoute: () => rootRoute,
-  } as any)
+  } as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminImport
-      parentRoute: typeof rootRoute
-    }
-    '/catalog/': {
-      id: '/catalog/'
-      path: '/catalog'
-      fullPath: '/catalog'
-      preLoaderRoute: typeof CatalogIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/resources/': {
-      id: '/resources/'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/resources/new/': {
-      id: '/resources/new/'
-      path: '/resources/new'
-      fullPath: '/resources/new'
-      preLoaderRoute: typeof ResourcesNewIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/catalog/$group/$version/$kind': {
-      id: '/catalog/$group/$version/$kind'
-      path: '/catalog/$group/$version/$kind'
-      fullPath: '/catalog/$group/$version/$kind'
-      preLoaderRoute: typeof CatalogGroupVersionKindImport
-      parentRoute: typeof rootRoute
-    }
-    '/resources/new/$group/$version/$plural': {
-      id: '/resources/new/$group/$version/$plural'
-      path: '/resources/new/$group/$version/$plural'
-      fullPath: '/resources/new/$group/$version/$plural'
-      preLoaderRoute: typeof ResourcesNewGroupVersionPluralImport
-      parentRoute: typeof rootRoute
-    }
-    '/resources/$group/$version/$plural/$system/$namespace/$name': {
-      id: '/resources/$group/$version/$plural/$system/$namespace/$name'
-      path: '/resources/$group/$version/$plural/$system/$namespace/$name'
-      fullPath: '/resources/$group/$version/$plural/$system/$namespace/$name'
-      preLoaderRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameImport
-      parentRoute: typeof rootRoute
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/admin": {
+      id: "/admin";
+      path: "/admin";
+      fullPath: "/admin";
+      preLoaderRoute: typeof AdminImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/catalog/": {
+      id: "/catalog/";
+      path: "/catalog";
+      fullPath: "/catalog";
+      preLoaderRoute: typeof CatalogIndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/resources/": {
+      id: "/resources/";
+      path: "/resources";
+      fullPath: "/resources";
+      preLoaderRoute: typeof ResourcesIndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/resources/new/": {
+      id: "/resources/new/";
+      path: "/resources/new";
+      fullPath: "/resources/new";
+      preLoaderRoute: typeof ResourcesNewIndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/catalog/$group/$version/$plural": {
+      id: "/catalog/$group/$version/$plural";
+      path: "/catalog/$group/$version/$plural";
+      fullPath: "/catalog/$group/$version/$plural";
+      preLoaderRoute: typeof CatalogGroupVersionPluralImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/resources/new/$group/$version/$plural": {
+      id: "/resources/new/$group/$version/$plural";
+      path: "/resources/new/$group/$version/$plural";
+      fullPath: "/resources/new/$group/$version/$plural";
+      preLoaderRoute: typeof ResourcesNewGroupVersionPluralImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/resources/$group/$version/$plural/$system/$namespace/$name": {
+      id: "/resources/$group/$version/$plural/$system/$namespace/$name";
+      path: "/resources/$group/$version/$plural/$system/$namespace/$name";
+      fullPath: "/resources/$group/$version/$plural/$system/$namespace/$name";
+      preLoaderRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/catalog': typeof CatalogIndexRoute
-  '/resources': typeof ResourcesIndexRoute
-  '/resources/new': typeof ResourcesNewIndexRoute
-  '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
-  '/resources/new/$group/$version/$plural': typeof ResourcesNewGroupVersionPluralRoute
-  '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
+  "/": typeof IndexRoute;
+  "/admin": typeof AdminRoute;
+  "/catalog": typeof CatalogIndexRoute;
+  "/resources": typeof ResourcesIndexRoute;
+  "/resources/new": typeof ResourcesNewIndexRoute;
+  "/catalog/$group/$version/$plural": typeof CatalogGroupVersionPluralRoute;
+  "/resources/new/$group/$version/$plural": typeof ResourcesNewGroupVersionPluralRoute;
+  "/resources/$group/$version/$plural/$system/$namespace/$name": typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/catalog': typeof CatalogIndexRoute
-  '/resources': typeof ResourcesIndexRoute
-  '/resources/new': typeof ResourcesNewIndexRoute
-  '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
-  '/resources/new/$group/$version/$plural': typeof ResourcesNewGroupVersionPluralRoute
-  '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
+  "/": typeof IndexRoute;
+  "/admin": typeof AdminRoute;
+  "/catalog": typeof CatalogIndexRoute;
+  "/resources": typeof ResourcesIndexRoute;
+  "/resources/new": typeof ResourcesNewIndexRoute;
+  "/catalog/$group/$version/$plural": typeof CatalogGroupVersionPluralRoute;
+  "/resources/new/$group/$version/$plural": typeof ResourcesNewGroupVersionPluralRoute;
+  "/resources/$group/$version/$plural/$system/$namespace/$name": typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/catalog/': typeof CatalogIndexRoute
-  '/resources/': typeof ResourcesIndexRoute
-  '/resources/new/': typeof ResourcesNewIndexRoute
-  '/catalog/$group/$version/$kind': typeof CatalogGroupVersionKindRoute
-  '/resources/new/$group/$version/$plural': typeof ResourcesNewGroupVersionPluralRoute
-  '/resources/$group/$version/$plural/$system/$namespace/$name': typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
+  __root__: typeof rootRoute;
+  "/": typeof IndexRoute;
+  "/admin": typeof AdminRoute;
+  "/catalog/": typeof CatalogIndexRoute;
+  "/resources/": typeof ResourcesIndexRoute;
+  "/resources/new/": typeof ResourcesNewIndexRoute;
+  "/catalog/$group/$version/$plural": typeof CatalogGroupVersionPluralRoute;
+  "/resources/new/$group/$version/$plural": typeof ResourcesNewGroupVersionPluralRoute;
+  "/resources/$group/$version/$plural/$system/$namespace/$name": typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/admin'
-    | '/catalog'
-    | '/resources'
-    | '/resources/new'
-    | '/catalog/$group/$version/$kind'
-    | '/resources/new/$group/$version/$plural'
-    | '/resources/$group/$version/$plural/$system/$namespace/$name'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/admin"
+    | "/catalog"
+    | "/resources"
+    | "/resources/new"
+    | "/catalog/$group/$version/$plural"
+    | "/resources/new/$group/$version/$plural"
+    | "/resources/$group/$version/$plural/$system/$namespace/$name";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/admin'
-    | '/catalog'
-    | '/resources'
-    | '/resources/new'
-    | '/catalog/$group/$version/$kind'
-    | '/resources/new/$group/$version/$plural'
-    | '/resources/$group/$version/$plural/$system/$namespace/$name'
+    | "/"
+    | "/admin"
+    | "/catalog"
+    | "/resources"
+    | "/resources/new"
+    | "/catalog/$group/$version/$plural"
+    | "/resources/new/$group/$version/$plural"
+    | "/resources/$group/$version/$plural/$system/$namespace/$name";
   id:
-    | '__root__'
-    | '/'
-    | '/admin'
-    | '/catalog/'
-    | '/resources/'
-    | '/resources/new/'
-    | '/catalog/$group/$version/$kind'
-    | '/resources/new/$group/$version/$plural'
-    | '/resources/$group/$version/$plural/$system/$namespace/$name'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/admin"
+    | "/catalog/"
+    | "/resources/"
+    | "/resources/new/"
+    | "/catalog/$group/$version/$plural"
+    | "/resources/new/$group/$version/$plural"
+    | "/resources/$group/$version/$plural/$system/$namespace/$name";
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
-  CatalogIndexRoute: typeof CatalogIndexRoute
-  ResourcesIndexRoute: typeof ResourcesIndexRoute
-  ResourcesNewIndexRoute: typeof ResourcesNewIndexRoute
-  CatalogGroupVersionKindRoute: typeof CatalogGroupVersionKindRoute
-  ResourcesNewGroupVersionPluralRoute: typeof ResourcesNewGroupVersionPluralRoute
-  ResourcesGroupVersionPluralSystemNamespaceNameRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute
+  IndexRoute: typeof IndexRoute;
+  AdminRoute: typeof AdminRoute;
+  CatalogIndexRoute: typeof CatalogIndexRoute;
+  ResourcesIndexRoute: typeof ResourcesIndexRoute;
+  ResourcesNewIndexRoute: typeof ResourcesNewIndexRoute;
+  CatalogGroupVersionPluralRoute: typeof CatalogGroupVersionPluralRoute;
+  ResourcesNewGroupVersionPluralRoute: typeof ResourcesNewGroupVersionPluralRoute;
+  ResourcesGroupVersionPluralSystemNamespaceNameRoute: typeof ResourcesGroupVersionPluralSystemNamespaceNameRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -222,15 +222,15 @@ const rootRouteChildren: RootRouteChildren = {
   CatalogIndexRoute: CatalogIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
   ResourcesNewIndexRoute: ResourcesNewIndexRoute,
-  CatalogGroupVersionKindRoute: CatalogGroupVersionKindRoute,
+  CatalogGroupVersionPluralRoute: CatalogGroupVersionPluralRoute,
   ResourcesNewGroupVersionPluralRoute: ResourcesNewGroupVersionPluralRoute,
   ResourcesGroupVersionPluralSystemNamespaceNameRoute:
     ResourcesGroupVersionPluralSystemNamespaceNameRoute,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* prettier-ignore-end */
 
@@ -245,7 +245,7 @@ export const routeTree = rootRoute
         "/catalog/",
         "/resources/",
         "/resources/new/",
-        "/catalog/$group/$version/$kind",
+        "/catalog/$group/$version/$plural",
         "/resources/new/$group/$version/$plural",
         "/resources/$group/$version/$plural/$system/$namespace/$name"
       ]
@@ -265,8 +265,8 @@ export const routeTree = rootRoute
     "/resources/new/": {
       "filePath": "resources.new.index.tsx"
     },
-    "/catalog/$group/$version/$kind": {
-      "filePath": "catalog.$group.$version.$kind.tsx"
+    "/catalog/$group/$version/$plural": {
+      "filePath": "catalog.$group.$version.$plural.tsx"
     },
     "/resources/new/$group/$version/$plural": {
       "filePath": "resources.new.$group.$version.$plural.tsx"

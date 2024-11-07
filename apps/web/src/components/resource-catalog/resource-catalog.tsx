@@ -23,7 +23,6 @@ export interface ResourceCatalogProps {
 export const ResourceCatalog = ({
   filtereResources,
   onResourceCreateClick,
-  isLoading = false,
   categories,
   onCardClick,
 }: ResourceCatalogProps) => {

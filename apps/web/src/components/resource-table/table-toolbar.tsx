@@ -2,7 +2,6 @@ import { type Table as TanstackTable } from "@tanstack/react-table";
 import { useContext } from "react";
 import { ResourceContext } from "@/resource-context";
 import { Input } from "@/components/ui/input";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "./faceted-filter";
@@ -22,7 +21,6 @@ export function ResourceTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const { systems, namespaces, kinds } = useContext(ResourceContext);
-  const { openWizard: openCreateWizard } = useCreateResourceWizard();
 
   return (
     <div className="flex items-center justify-between gap-2">

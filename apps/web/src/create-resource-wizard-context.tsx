@@ -14,6 +14,11 @@ interface CreateResourceWizardContextType {
   isOpen: boolean;
   isLoading: boolean;
   selectedResourceType: ResourceType | undefined;
+  handleCreateOrEdit: (
+    system: string,
+    resourceType: ResourceType,
+    providedValues: any,
+  ) => Promise<void>;
   setSelectedResourceType: (resourceType: ResourceType | undefined) => void;
   openWizard: (
     currentEditableResource?: Resource,
@@ -135,6 +140,7 @@ export const CreateResourceWizardProvider: React.FC<
     step,
     setStep,
     currentEditableResource,
+    handleCreateOrEdit,
   };
 
   return (
