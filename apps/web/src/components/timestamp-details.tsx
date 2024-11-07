@@ -41,11 +41,11 @@ export const TimestampDetails = (props: { timestamp: Date }) => {
 
   return (
     <div className="grid grid-cols-[8em_1fr] gap-1 py-1 text-xs">
-      <span className="text-muted-foreground">{timezone}</span>
+      <span className="text-muted-foreground font-light">{timezone}</span>
       <span className="text-foreground">{localTime}</span>
-      <span className="text-muted-foreground">UTC</span>
+      <span className="text-muted-foreground font-light">UTC</span>
       <span className="text-foreground">{utcTime}</span>
-      <span className="text-muted-foreground">Timestamp</span>
+      <span className="text-muted-foreground font-light">Timestamp</span>
       <span className="text-foreground">{timestamp}</span>
     </div>
   );

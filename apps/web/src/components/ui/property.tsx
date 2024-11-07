@@ -2,7 +2,7 @@ import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 import { PropsWithChildren } from "react";
 
 export const PropertyKey = ({ children }: PropsWithChildren) => (
-  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm font-medium">
+  <div className="text-muted-foreground flex items-center whitespace-nowrap text-sm">
     {renderKey(String(children))}
   </div>
 );
