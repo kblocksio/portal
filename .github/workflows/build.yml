@@ -69,13 +69,6 @@ jobs:
         run: |
           npm install
 
-      - name: Build
-        run: |
-          cd apps/web
-          sed -i 's|^VITE_BACKEND_ENDPOINT=.*|VITE_BACKEND_ENDPOINT=${{ env.ENV_NAME }}.kblocks.io|' .env.prod
-          cd ../..
-          npm run build
-
       - name: Install helm
         run: |
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -137,7 +130,7 @@ jobs:
           echo "WEBSITE_ORIGIN=https://${KBLOCKS_HOST}" >> .portal.env
           echo "REDIS_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
           echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
-          ./scripts/install-secrets.sh .portal.env $QKUBE_NAME
+          ./scripts/install-secrets.sh .portal.env
 
       - name: Install cert
         env:
@@ -151,15 +144,14 @@ jobs:
       - name: Install the Workload block (needed for the portal)
         working-directory: gallery
         env:
-          KBLOCKS_HOST: ${{ steps.qkube.outputs.kblocks-host }}
+          KBLOCKS_HOST: https://${{ steps.qkube.outputs.kblocks-host }}
         run: ./install-blocks.sh ./kblocks/workload
 
       - name: Build and push backend
-        if: github.event_name == 'push'
         uses: docker/build-push-action@v6
         with:
           context: "."
-          push: true
+          push: ${{ github.event_name == 'push' }}
           platforms: linux/arm64
           tags: wingcloudbot/kblocks-backend:latest
           cache-from: type=registry,ref=wingcloudbot/kblocks-backend:latest
@@ -167,20 +159,15 @@ jobs:
           build-args: |
             ENV=prod
 
-      - name: Skaffold build
-        id: build
+      - name: Skaffold run
+        id: run
         run: |
-          skaffold build --platform=linux/arm64 --file-output build.json
-          echo "backend-tag=$(cat build.json | jq -r ".builds[0].tag")" >> $GITHUB_OUTPUT
-          echo "frontend-tag=$(cat build.json | jq -r ".builds[1].tag")" >> $GITHUB_OUTPUT
-
-      - name: Deploy portal
-        working-directory: deploy
-        run: |
-          helm upgrade --install portal . --namespace default --values values.yaml \
-            --set backend.image=${{ steps.build.outputs.backend-tag }} \
-            --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
-            --set ingress.host=${{ steps.qkube.outputs.kblocks-host }} \
+          export VITE_BACKEND_ENDPOINT="${{ steps.qkube.outputs.kblocks-host }}"
+          export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
+          export PORTAL_REDIS_ENABLED=false
+          # TODO: Remove this step
+          npm run build
+          skaffold run --platform=linux/arm64
 
       - name: Post PR comment
         if: github.event_name == 'pull_request'
@@ -243,5 +230,5 @@ jobs:
       - name: Install gallery blocks
         working-directory: gallery
         env:
-          KBLOCKS_HOST: ${{ needs.build.outputs.kblocks-host }}
+          KBLOCKS_HOST: https://${{ needs.build.outputs.kblocks-host }}
         run: ./install-blocks.sh ./kblocks/${{ matrix.block }}
