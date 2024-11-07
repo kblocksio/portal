@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Resource, ResourceContext } from "@/resource-context";
+import { Relationship, Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -79,6 +79,24 @@ function ResourcePage() {
     namespace,
     name,
   });
+
+  const ownerResourceURI = useMemo((): string | null => {
+    // Wait until relationships is populated
+    if (!relationships || Object.keys(relationships).length === 0) {
+      return null;
+    }
+    const rels = relationships[objUri];
+    if (!rels) {
+      return null;
+    }
+    let owner: string | null = null;
+    Object.keys(rels)?.forEach((key) => {
+      if (rels[key].type === "parent") {
+        owner = key;
+      }
+    });
+    return owner;
+  }, [Object.keys(relationships).length, objUri]);
 
   const [lastEventCount, setLastEventCount] = useState(
     Object.keys(eventsPerObject?.[objUri] ?? {}).length,
@@ -156,16 +174,25 @@ function ResourcePage() {
 
   useEffect(() => {
     if (!selectedResource) return;
-    setBreadcrumbs([
+    const breadcrumbs = [
       {
         name: "Resources",
         url: `/resources/`,
       },
+    ];
+    if (ownerResourceURI) {
+      breadcrumbs.push({
+        name: objects[ownerResourceURI].metadata.name,
+        url: `/resources/${ownerResourceURI.replace("kblocks://", "")}`,
+      });
+    }
+    setBreadcrumbs([
+      ...breadcrumbs,
       {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedResource, setBreadcrumbs]);
+  }, [selectedResource, setBreadcrumbs, ownerResourceURI]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
