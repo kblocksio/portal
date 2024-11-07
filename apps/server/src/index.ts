@@ -178,22 +178,11 @@ app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async
   });
 
   const obj = await getObject(objUri);
+  if (!obj) {
+    return res.status(404).json({ error: `Block ${objUri} not found` });
+  }
+  
   return res.status(200).json(obj);
-});
-
-app.delete("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-
-  await deleteObject(objUri);
-  return res.status(200).json({ message: `${objUri} deleted` });
 });
 
 app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
@@ -355,6 +344,7 @@ app.delete(
   "/api/resources/:group/:version/:plural/:system/:namespace/:name",
   async (req, res) => {
     const { group, version, plural, system, namespace, name } = req.params;
+    const force = req.query["force"] !== undefined && req.query["force"] !== "false";
 
     const objUri = formatBlockUri({
       group,
@@ -372,6 +362,12 @@ app.delete(
         objUri,
       },
     );
+
+    // if this is a kblocks.io/v1.Block object, we need to delete the object from storage
+    if (force || objUri.startsWith("kblocks://kblocks.io/v1/blocks/")) {
+      await deleteObject(objUri);
+      return res.status(200).json({ message: `Block ${objUri} deleted` });
+    }
 
     return res.status(200).json({ message: "Delete request accepted" });
   },

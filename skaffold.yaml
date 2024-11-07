@@ -4,9 +4,13 @@ apiVersion: skaffold/v4beta11
 kind: Config
 
 build:
+  local:
+    push: true
   artifacts:
     - image: wingcloudbot/kblocks-backend
       docker:
+        cacheFrom:
+          - wingcloudbot/kblocks-backend:latest
         buildArgs:
           ENV: prod
       sync:
@@ -15,6 +19,9 @@ build:
           - packages/shared/src/**/*.ts
     - image: wingcloudbot/kblocks-frontend
       context: ./apps/web
+      hooks:
+        before:
+          - command: ["npm", "run", "build"]
       sync:
         infer:
           - apps/web/src/**/*.ts
@@ -22,8 +29,13 @@ build:
 deploy:
   helm:
     releases:
-      - name: kblocks-backend
+      - name: portal
         chartPath: ./deploy
+        namespace: default
+        valuesFiles:
+          - deploy/values.yaml
         setValueTemplates:
-          backend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
-          frontend.image: "{{.IMAGE_FULLY_QUALIFIED}}"
+          backend.image: "{{.IMAGE_FULLY_QUALIFIED_wingcloudbot_kblocks_backend}}"
+          frontend.image: "{{.IMAGE_FULLY_QUALIFIED_wingcloudbot_kblocks_frontend}}"
+          ingress.host: "{{.PORTAL_INGRESS_HOST}}"
+          redis.enabled: "{{.PORTAL_REDIS_ENABLED}}"

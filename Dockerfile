@@ -1,8 +1,5 @@
 FROM node:20
 
-ARG ENV=prod
-ENV NODE_ENV=$ENV
-
 WORKDIR /usr/src/app
 
 COPY package.json ./
@@ -24,4 +21,8 @@ COPY .npmrc ./
 EXPOSE 3001
 
 WORKDIR /usr/src/app/apps/server
+
+ARG ENV=prod
+ENV NODE_ENV=$ENV
+
 CMD npm run $NODE_ENV

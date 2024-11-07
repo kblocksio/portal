@@ -13,3 +13,10 @@ outputDirectory: {{ .Values.outputDirectory }}
 cloudFrontDistributionId: ${ref://cloudfronts.acme.com/{{ .Release.Name }}-static-site-cloudfront/cloudfrontDistributionId?timeout=20m}
 bucketName: ${ref://buckets.acme.com/{{ .Release.Name }}-static-site-bucket/bucketName}
 region: "us-east-1"
+{{- if .Values.environmentVariables }}
+env:
+  {{- range $key, $value := .Values.environmentVariables }}
+  {{ $key }}:
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -13,7 +13,7 @@ branch: {{ .Values.source.fromRepository.branch }}
 rootDirectory: {{ .Values.source.fromRepository.rootDirectory }}
 deploy:
   field: source.fromImage.image
-  blockUri: "acme.com/v1/webservices/demo/{{ .Release.Namespace }}/{{ .Release.Name }}"
+  blockUri: "acme.com/v1/webservices/{{ .Values.kblocks.system }}/{{ .Release.Namespace }}/{{ .Release.Name }}"
 {{- end }}
 {{- end }}
 {{- end }}

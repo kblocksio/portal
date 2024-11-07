@@ -1,28 +1,47 @@
+{{- $image := required "backend.image is required" .Values.backend.image }}
+{{- $ingressHost := required "ingress.host is required" .Values.ingress.host }}
+{{- $ingressTlsSecret := required "ingress.tls.secret is required" .Values.ingress.tls.secret }}
+{{- $secretName := required "backend.secretName is required" .Values.backend.secretName }}
+
+{{- if eq true .Values.redis.enabled }}
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-redis
+image: "redis:7.4.0-alpine"
+command:
+  - redis-server
+  - --requirepass "pass1234"
+  - --port 18284
+port: 18284
+replicas: 1
+{{- end }}
+---
 apiVersion: acme.com/v1
 kind: Workload
 metadata:
   name: portal-backend
-image: {{ .Values.backend.image }}
+image: {{ $image }}
 port: 3001
 replicas: 2
 expose:
-  - path: /
-    host: {{ .Values.backend.ingress.host }}
+  - path: /api(/|$)(.*)
+    host: {{ $ingressHost }}
     tls:
       hosts:
-        - {{ .Values.backend.ingress.host }}
-      secret: {{ .Values.backend.ingress.tls.secret }}
-# in non vercel environments we need additional ingress for the <frontend>/api path
-{{- if .Values.frontend.enabled }}
-  - path: /api
-    host: {{ .Values.frontend.ingress.host }}
-    tls:
-      hosts:
-        - {{ .Values.frontend.ingress.host }}
-      secret: {{ .Values.frontend.ingress.tls.secret }}
-{{- end }}
+        - {{ $ingressHost }}
+      secret: {{ $ingressTlsSecret }}
 envFrom:
-  - secretName: {{ .Values.backend.secretName }}
+  - secretName: {{ $secretName }}
+{{- if .Values.redis.enabled }}
+env:
+  REDIS_HOST:
+    value: "portal-redis.default.svc.cluster.local"
+  REDIS_PASSWORD:
+    value: "pass1234"
+  REDIS_WORKLOAD_HOST:
+    value: ${ref://workloads.acme.com/portal-redis/host}
+{{- end }}
 allowCluster:
   - apiGroup: "*"
     resource: "*"

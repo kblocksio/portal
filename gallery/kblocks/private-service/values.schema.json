@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/cron-schema.json",
+    "$defs": {
+      "commonDefs": {
+        "$ref": "../common.values.schema.json"
+      }
+    },
+    "type": "object",
+    "required": [
+      "instanceType",
+      "source"
+    ],
+    "properties": {
+      "source": {
+        "description": "The Docker image or GitHub repository to use for the private service.\n@ui kblocks.io/one-of",
+        "$ref": "#/$defs/commonDefs/source"
+      },
+      "instanceType": {
+        "$ref": "#/$defs/commonDefs/instanceType"
+      },
+      "scaling": {
+        "$ref": "#/$defs/commonDefs/scaling"
+      },
+      "environmentVariables": {
+        "$ref": "#/$defs/commonDefs/environmentVariables"
+      },
+      "region": {
+        "$ref": "#/$defs/commonDefs/region",
+        "description": "The region to deploy the private service. Your services in the same [region](https://kblocks.io/docs/regions) can communicate over a [private network](https://kblocks.io/docs/private-network)."
+      }
+    }
+  }

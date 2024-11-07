@@ -8,7 +8,7 @@
     "format": "prettier . --write"
   },
   "devDependencies": {
-    "@kblocks/cli": "^0.4.35",
+    "@kblocks/cli": "^0.4.42",
     "@quickube/cli": "^0.47.0",
     "eslint": "^8.57.1",
     "prettier": "^3.3.3",

@@ -3,24 +3,24 @@ import {
   GetUserResponse,
   ResourceQuery,
   CreateResourceResponse,
-  ResourceType,
-  Project,
 } from "@repo/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 
-// if VITE_BACKEND_URL is not set, use the current origin
-const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-if (!VITE_BACKEND_URL) {
-  throw new Error("VITE_BACKEND_URL is not set");
+// if VITE_BACKEND_ENDPOINT is not set, use the current origin
+const VITE_BACKEND_ENDPOINT = import.meta.env.VITE_BACKEND_ENDPOINT;
+if (!VITE_BACKEND_ENDPOINT) {
+  throw new Error("VITE_BACKEND_ENDPOINT is not set");
 }
 
-export const signInUrl = `${VITE_BACKEND_URL}/api/auth/sign-in`;
+const BACKEND_URL = `https://${VITE_BACKEND_ENDPOINT}`;
+
+export const signInUrl = `${BACKEND_URL}/api/auth/sign-in`;
 
 export const get = async (path: string, params?: Record<string, string>) => {
   const queryParams = new URLSearchParams(params).toString();
   const url = queryParams
-    ? `${VITE_BACKEND_URL}${path}?${queryParams}`
-    : `${VITE_BACKEND_URL}${path}`;
+    ? `${BACKEND_URL}${path}?${queryParams}`
+    : `${BACKEND_URL}${path}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(
@@ -32,7 +32,7 @@ export const get = async (path: string, params?: Record<string, string>) => {
 
 export const request = async (method: string, path: string, body?: any) => {
   try {
-    const res = await fetch(`${VITE_BACKEND_URL}${path}`, {
+    const res = await fetch(`${BACKEND_URL}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",

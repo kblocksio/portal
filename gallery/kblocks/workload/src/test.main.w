@@ -42,4 +42,4 @@ new w.Workload(
     { configMapName: "my-config-map", configMapPrefix: "CONFIG_MAP_" },
     { secretName: "my-secret" }
   ]
-);
+) as "my-workload";

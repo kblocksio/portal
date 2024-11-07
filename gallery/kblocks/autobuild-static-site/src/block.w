@@ -27,6 +27,34 @@ pub struct AutoBuildStaticSiteSpec {
 
   /// The CloudFront distribution ID whos cache to invalidate after deployment.
   cloudFrontDistributionId: str?;
+
+  /// Individual environment variables to set in the container
+  env: Map<EnvVariable>?;
+}
+
+pub struct EnvVariable {
+  value: str?;
+}
+
+pub class Util {
+  pub static renderEnvVariables(env: Map<EnvVariable>?): Map<str> {
+    let result = MutMap<str>{};
+
+    for e in env?.entries() ?? [] {
+
+      let name = e.key;
+      let val = e.value;
+
+      if let value = val.value {
+        result.set(name, value);
+        continue;
+      }
+
+      throw "`value` must be specified for variable {name}";
+    }
+
+    return result.copy();
+  }
 }
 
 pub class AutoBuildStaticSite {
@@ -46,6 +74,8 @@ pub class AutoBuildStaticSite {
     let username = #"${{ secrets.DOCKER_USERNAME }}";
     let password = #"${{ secrets.DOCKER_PASSWORD }}";
     let githubSha = #"${{ github.sha }}";
+
+    let env = Util.renderEnvVariables(spec.env);
 
     let steps = MutArray<Json> [
       {
@@ -164,6 +194,7 @@ pub class AutoBuildStaticSite {
       "jobs": {
         "release": {
           "runs-on": "ubuntu-latest",
+          "env": Json env,
           "steps": steps.copy()
         }
       }

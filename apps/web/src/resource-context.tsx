@@ -23,7 +23,7 @@ import { request } from "./lib/backend";
 import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { NotificationsContext } from "./notifications-context";
 import { getIconComponent } from "./lib/get-icon";
-const WS_URL = import.meta.env.VITE_WS_URL;
+const WS_URL = `wss://${import.meta.env.VITE_BACKEND_ENDPOINT}/api/events`;
 if (!WS_URL) {
   console.error("WebSocket URL is not set");
 }
@@ -53,14 +53,8 @@ type BlockApiObject = ApiObject & {
 };
 
 export type Relationship = {
-  type: RelationshipType;
+  type: "parent" | "child" | "ref";
 };
-
-export enum RelationshipType {
-  PARENT = "parent",
-  CHILD = "child",
-  REF = "ref",
-}
 
 export interface ResourceContextValue {
   // objType -> ResourceType
@@ -128,11 +122,8 @@ export const ResourceProvider = ({
       console.log("WebSocket disconnected");
     },
     onError: (error) => {
-      console.error("WebSocket error:", error);
-    },
-    onMessage: (message) => {
-      console.log("WebSocket message:", message);
-    },
+      console.error("WebSocket Error:", error);
+    }
   });
 
   const [previousMessage, setPreviousMessage] = useState<
@@ -183,6 +174,11 @@ export const ResourceProvider = ({
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
     const { system } = parseBlockUri(objUri);
+
+    if (!(object as ApiObject)?.metadata) {
+      return;
+    }
+
 
     if (objType === "kblocks.io/v1/blocks") {
       const block = object as BlockApiObject;
@@ -265,14 +261,14 @@ export const ResourceProvider = ({
           prev[childUri] = {
             ...(prev[childUri] ?? {}),
             [parentUri]: {
-              type: RelationshipType.PARENT,
+              type: "parent",
             },
           };
 
           prev[parentUri] = {
             ...(prev[parentUri] ?? {}),
             [childUri]: {
-              type: RelationshipType.CHILD,
+              type: "child",
             },
           };
         }

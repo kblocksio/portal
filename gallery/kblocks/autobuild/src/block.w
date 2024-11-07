@@ -96,12 +96,13 @@ pub class AutoBuild {
       currentObj.set(fieldParts[fieldParts.length - 1], "{username}/{imageName}:{githubSha}");
       
       let patchStr = Json.stringify(patch);
+      let kblocksApi = util.env("KBLOCKS_API");
   
       let command = [
         "curl",
         "-X", "PATCH",
         "-H", Json.stringify("content-type: application/json"),
-        "https://kblocks.io/api/resources/{deploy.blockUri}",
+        "{kblocksApi}/resources/{deploy.blockUri}",
         "-d",
         "'{patchStr}'",
       ];

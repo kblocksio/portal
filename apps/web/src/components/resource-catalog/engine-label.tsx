@@ -37,44 +37,44 @@ const EngineIcon = ({
     case "tofu":
       return (
         <div className="flex items-center">
-          <img src="/tofu.svg" alt="Tofu" className={className} />
+          <img src="/images/tofu.svg" alt="Tofu" className={className} />
         </div>
       );
 
     case "wing/tf-aws":
       return (
         <div className="flex items-center">
-          <img src="/terraform.svg" alt="Terraform" className={className} />
-          <img src="/aws.svg" alt="AWS" className={className} />
-          <img src="/wing.svg" alt="Tofu" className={className} />
+          <img src="/images/terraform.svg" alt="Terraform" className={className} />
+          <img src="/images/aws.svg" alt="AWS" className={className} />
+          <img src="/images/wing.svg" alt="Tofu" className={className} />
         </div>
       );
 
     case "helm":
       return (
         <div className="flex items-center">
-          <img src="/helm.svg" alt="Helm" className={className} />
+          <img src="/images/helm.svg" alt="Helm" className={className} />
         </div>
       );
 
     case "wing":
       return (
         <div className="flex items-center">
-          <img src="/wing.svg" alt="Wing" className={className} />
+          <img src="/images/wing.svg" alt="Wing" className={className} />
         </div>
       );
 
     case "custom":
       return (
         <div className="flex items-center">
-          <img src="/shell.svg" alt="Custom" className={className} />
+          <img src="/images/shell.svg" alt="Custom" className={className} />
         </div>
       );
 
     case "pulumi":
       return (
         <div className="flex items-center">
-          <img src="/pulumi.svg" alt="Pulumi" className={className} />
+          <img src="/images/pulumi.svg" alt="Pulumi" className={className} />
         </div>
       );
 
@@ -82,7 +82,7 @@ const EngineIcon = ({
       return (
         <div className="flex items-center">
           <img
-            src="/cloudformation.svg"
+            src="/images/cloudformation.svg"
             alt="CloudFormation"
             className={className}
           />
@@ -92,7 +92,7 @@ const EngineIcon = ({
     case "awscdk":
       return (
         <div className="flex items-center">
-          <img src="/awscdk.svg" alt="AWS CDK" className={className} />
+          <img src="/images/awscdk.svg" alt="AWS CDK" className={className} />
         </div>
       );
 

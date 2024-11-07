@@ -4,16 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  RelationshipType,
-  Resource,
-  ResourceContext,
-} from "@/resource-context";
+import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
 import { getIconColors } from "@/lib/get-icon";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +27,7 @@ import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
+import { useNavigate } from "@tanstack/react-router";
 
 const DEFAULT_TAB = "details";
 
@@ -48,6 +44,7 @@ export const Route = createFileRoute(
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const router = useRouter();
+  const navigate = useNavigate();
   const {
     resourceTypes,
     objects,
@@ -83,7 +80,9 @@ function ResourcePage() {
     name,
   });
 
-  const [lastEventCount, setLastEventCount] = useState(Object.keys(eventsPerObject[objUri])?.length ?? 0);
+  const [lastEventCount, setLastEventCount] = useState(
+    Object.keys(eventsPerObject?.[objUri] ?? {}).length,
+  );
 
   const events = useMemo(
     () => Object.values(eventsPerObject[objUri] ?? {}),
@@ -127,8 +126,6 @@ function ResourcePage() {
     [selectedResource],
   );
 
-  const { openWizard: openEditWizard } = useCreateResourceWizard();
-
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
   const [isReadOpen, setIsReadOpen] = useState(false);
@@ -149,7 +146,7 @@ function ResourcePage() {
     const children: Resource[] = [];
     const rels = relationships[selectedResource.objUri] ?? {};
     for (const [relUri, rel] of Object.entries(rels)) {
-      if (rel.type === RelationshipType.CHILD) {
+      if (rel.type === "child") {
         children.push(objects[relUri]);
       }
     }
@@ -175,7 +172,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8 overflow-x-hidden">
+    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -196,7 +193,9 @@ function ResourcePage() {
             <Button
               variant="default"
               onClick={() =>
-                openEditWizard(selectedResource, selectedResourceType)
+                navigate({
+                  to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
+                })
               }
             >
               Edit...
@@ -336,10 +335,7 @@ function ResourcePage() {
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
                 </div>
-                <ResourceTable
-                  resources={children}
-                  showActions={false}
-                />
+                <ResourceTable resources={children} showActions={false} />
               </div>
             )}
           </CardContent>

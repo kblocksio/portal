@@ -28,8 +28,8 @@
           },
           "host": {
             "type": "string",
-            "enum": ["kblocks-demo.quickube.sh"],
-            "default": "kblocks-demo.quickube.sh",
+            "enum": ["staging.quickube.sh"],
+            "default": "staging.quickube.sh",
             "description": "Hostname to use for this endpoint"
           },
           "tls": {

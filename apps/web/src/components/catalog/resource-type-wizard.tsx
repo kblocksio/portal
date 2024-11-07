@@ -25,43 +25,43 @@ const engines = [
     name: "Terraform",
     description:
       "Terraform is an open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud providers.",
-    src: "/terraform.svg",
+    src: "/images/terraform.svg",
   },
   {
     name: "CloudFormation",
     description:
       "CloudFormation is a service that enables you to model and set up your Amazon Web Services resources so that they can be provisioned and managed efficiently.",
-    src: "/cloudformation.svg",
+    src: "/images/cloudformation.svg",
   },
   {
     name: "Pulumi",
     description:
       "Pulumi is an open-source infrastructure as code software tool that enables you to preview, deploy, and manage infrastructure on any cloud using your favorite language.",
-    src: "/pulumi.svg",
+    src: "/images/pulumi.svg",
   },
   {
     name: "AWS CDK",
     description:
       "AWS Cloud Development Kit (AWS CDK) is an open-source software development framework that enables you to define cloud infrastructure in code and provision it through AWS CloudFormation.",
-    src: "/awscdk.svg",
+    src: "/images/awscdk.svg",
   },
   {
     name: "Helm",
     description:
       "Helm is an open-source package manager for Kubernetes that allows you to define, install, and upgrade even the most complex Kubernetes applications.",
-    src: "/helm.svg",
+    src: "/images/helm.svg",
   },
   {
     name: "OpenTofu",
     description:
       "OpenTofu is an open-source infrastructure as code software tool that enables you to manage your infrastructure as code.",
-    src: "/tofu.svg",
+    src: "/images/tofu.svg",
   },
   {
     name: "Winglang",
     description:
       "Winglang is an open-source programming language that enables you to build cloud applications.",
-    src: "/wing.svg",
+    src: "/images/wing.svg",
   },
 ];
 
@@ -69,7 +69,7 @@ function Logo() {
   return (
     <a className="flex items-center space-x-2" href="/">
       <img
-        src="/wing.svg"
+        src="/images/wing.svg"
         alt="Wing Logo"
         className="h-6 w-6"
         width={24}

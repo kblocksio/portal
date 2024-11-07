@@ -16,14 +16,14 @@ memory:
   request: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
   limit: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
 scaling:  
-  {{- if .Values.scaling.autoscaling }}
+  {{- if and .Values.scaling .Values.scaling.autoscaling (eq .Values.scaling.autoscaling.enabled "Yes") }}
   autoscaling:
-    minReplicas: {{ .Values.scaling.autoscaling.minReplicas }}
-    maxReplicas: {{ .Values.scaling.autoscaling.maxReplicas }}
-    targetCpuUtilization: {{ .Values.scaling.autoscaling.targetCpuUtilization }}
-    targetMemoryUtilization: {{ .Values.scaling.autoscaling.targetMemoryUtilization }}
+    minReplicas: {{ default 2 .Values.scaling.autoscaling.minReplicas }}
+    maxReplicas: {{ default 5 .Values.scaling.autoscaling.maxReplicas }}
+    targetCpuUtilization: {{ default 70 .Values.scaling.autoscaling.targetCpuUtilization }}
+    targetMemoryUtilization: {{ default 70 .Values.scaling.autoscaling.targetMemoryUtilization }}
   {{- else }}
-  replicas: 2
+  replicas: {{ default 2 .Values.scaling.replicas }}
   {{- end }}
 region: {{ .Values.region }}
 {{- if .Values.ingress }}

@@ -65,7 +65,8 @@ pub struct Certificate {
 }
 
 pub class NetworkedWorkload {
-  pub host: str?;
+  pub internalHost: str?;
+  pub externalHost: str?;
   pub port: str?;
 
   new(spec: NetworkedWorkloadSpec) {
@@ -82,7 +83,7 @@ pub class NetworkedWorkload {
 
     if let port = spec.port {
       let service = d.exposeViaService(ports: [{ port }]);
-      this.host = service.name;
+      this.internalHost = service.name;
       this.port = "{service.port}";
       
       let rewrite = spec.ingress?.rewrite;
@@ -103,6 +104,7 @@ pub class NetworkedWorkload {
 
         if let host = spec.ingress?.host {
           ingress.addHostRule(host, route, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
+          this.externalHost = host;
         } else {
           ingress.addRule(route, k8s.IngressBackend.fromService(service), k8s.HttpIngressPathType.PREFIX);
         }

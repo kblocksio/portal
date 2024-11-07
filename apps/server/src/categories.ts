@@ -7,30 +7,6 @@ export type Category = {
 };
 
 export const categories: Record<string, Category> = {
-  environments: {
-    title: "Environments",
-    description:
-      "Environments are a critical aspect of software development and deployment. They represent isolated spaces where developers can build, test, and deploy their applications without interference.",
-    icon: "heroicon://server",
-    color: "slate",
-    docslink: "https://docs.kblocks.io/categories/environments",
-  },
-  cicd: {
-    title: "CI/CD",
-    description:
-      "Continuous Integration and Continuous Delivery (CI/CD) is a set of practices that enable rapid and reliable software development by automating the integration of code changes and their delivery to production environments.",
-    icon: "heroicon://code-bracket",
-    color: "amber",
-    docslink: "https://docs.kblocks.io/categories/cicd",
-  },
-  cloud: {
-    title: "Cloud",
-    description:
-      "The 'Cloud' category provides developers with the building blocks to manage and provision cloud resources, enabling them to leverage the full potential of cloud platforms.",
-    icon: "heroicon://cloud",
-    color: "blue",
-    docslink: "https://docs.kblocks.io/categories/cloud",
-  },
   workloads: {
     title: "Workloads",
     description:
@@ -46,5 +22,29 @@ export const categories: Record<string, Category> = {
     icon: "heroicon://database",
     color: "green",
     docslink: "https://docs.kblocks.io/categories/databases",
+  },
+  environments: {
+    title: "Environments",
+    description:
+      "Environments are a critical aspect of software development and deployment. They represent isolated spaces where developers can build, test, and deploy their applications without interference.",
+    icon: "heroicon://server",
+    color: "slate",
+    docslink: "https://docs.kblocks.io/categories/environments",
+  },
+  cloud: {
+    title: "Cloud",
+    description:
+      "The 'Cloud' category provides developers with the building blocks to manage and provision cloud resources, enabling them to leverage the full potential of cloud platforms.",
+    icon: "heroicon://cloud",
+    color: "blue",
+    docslink: "https://docs.kblocks.io/categories/cloud",
+  },
+  cicd: {
+    title: "CI/CD",
+    description:
+      "Continuous Integration and Continuous Delivery (CI/CD) is a set of practices that enable rapid and reliable software development by automating the integration of code changes and their delivery to production environments.",
+    icon: "heroicon://code-bracket",
+    color: "amber",
+    docslink: "https://docs.kblocks.io/categories/cicd",
   },
 };
