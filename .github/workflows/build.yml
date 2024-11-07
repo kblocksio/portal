@@ -165,6 +165,8 @@ jobs:
           export VITE_BACKEND_ENDPOINT="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_REDIS_ENABLED=false
+          # TODO: Remove this step
+          npm run build
           skaffold run --platform=linux/arm64
 
       - name: Post PR comment
