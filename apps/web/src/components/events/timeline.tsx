@@ -17,6 +17,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
+import { ScrollAreaResizeObserver } from "../scroll-area-resize-observer";
 
 type GroupHeader = {
   timestamp: Date;
@@ -40,25 +41,27 @@ export default function Timeline({
   const eventGroups = useMemo(() => groupEventsByLifecycle(events), [events]);
 
   return (
-    <div className="relative w-full overflow-x-hidden">
-      <div className="absolute left-3 h-full w-px bg-gray-200 top-2"></div>
+    <ScrollAreaResizeObserver>
+      <div className="relative w-full">
+        <div className="absolute left-3 top-2 h-full w-px bg-gray-200"></div>
 
-      <div className="flex flex-col gap-1">
-        {eventGroups.map((eventGroup, index) => (
-          <EventItem
-            key={index}
-            eventGroup={eventGroup}
-            isLast={index === eventGroups.length - 1}
-          />
-        ))}
-      </div>
+        <div className="flex flex-col gap-1">
+          {eventGroups.map((eventGroup, index) => (
+            <EventItem
+              key={index}
+              eventGroup={eventGroup}
+              isLast={index === eventGroups.length - 1}
+            />
+          ))}
+        </div>
 
-      {/* <div
+        {/* <div
         ref={(el) =>
           el && el.scrollIntoView({ behavior: "smooth", block: "end" })
         }
       /> */}
-    </div>
+      </div>
+    </ScrollAreaResizeObserver>
   );
 }
 
@@ -101,7 +104,7 @@ function EventItem({
         tabIndex={0}
       >
         <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
-          <div className="flex items-center gap-1 min-w-[130pt]">
+          <div className="flex min-w-[130pt] items-center gap-1">
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform duration-300",
