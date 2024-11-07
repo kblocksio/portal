@@ -9,28 +9,17 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
-  ChevronsUpDown,
-  GalleryVerticalEnd,
   AudioWaveform,
-  Command,
+  ChevronsUpDown,
   Plus,
 } from "lucide-react";
 import { useState } from "react";
+
 const teams = [
   {
     name: "Acme Inc",
-    logo: GalleryVerticalEnd,
+    logo: AudioWaveform ,
     plan: "Enterprise",
-  },
-  {
-    name: "Acme Corp.",
-    logo: AudioWaveform,
-    plan: "Startup",
-  },
-  {
-    name: "Evil Corp.",
-    logo: Command,
-    plan: "Free",
   },
 ];
 
