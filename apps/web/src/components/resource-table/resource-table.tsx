@@ -8,12 +8,8 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { memo, useContext, useMemo, useState } from "react";
-import {
-  Resource,
-  ResourceContext,
-  ResourceType,
-} from "@/resource-context";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
@@ -233,7 +229,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         size: 400,
-        cell: LastLogMessageCell,
+        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
         // enableSorting: false,
       },
       {
@@ -262,6 +258,36 @@ const useColumns = () => {
       },
     ];
   }, [resourceTypes, objects, relationships]);
+};
+
+const TableWrapper = ({ children }: { children: React.ReactNode }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+
+    if (!container || !content) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      container.style.height = `${content.scrollHeight}px`;
+    });
+
+    resizeObserver.observe(content);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <div className="absolute inset-0 overflow-x-auto overflow-y-hidden">
+        <div ref={contentRef}>{children}</div>
+      </div>
+    </div>
+  );
 };
 
 export const ResourceTable = (props: {
@@ -293,13 +319,9 @@ export const ResourceTable = (props: {
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} showActions={props.showActions} />
-      <section>
-        <div
-          className={cn(
-            "overflow-x-auto rounded-md border bg-white",
-            props.className,
-          )}
-        >
+
+      <TableWrapper>
+        <div className={cn("rounded-md border bg-white", props.className)}>
           <Table className="w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -337,7 +359,8 @@ export const ResourceTable = (props: {
             </TableBody>
           </Table>
         </div>
-      </section>
+      </TableWrapper>
+
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
           <p className="text-muted-foreground">
@@ -429,7 +452,3 @@ const ResourceOutputs = ({
     </div>
   );
 };
-
-const LastLogMessageCell = memo((props: any) => (
-  <LastLogMessage objUri={props.row.original.objUri} />
-));

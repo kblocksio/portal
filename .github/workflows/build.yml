@@ -50,6 +50,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
       
       - name: Docker Login
         uses: docker/login-action@v3
@@ -152,6 +154,19 @@ jobs:
           KBLOCKS_HOST: ${{ steps.qkube.outputs.kblocks-host }}
         run: ./install-blocks.sh ./kblocks/workload
 
+      - name: Build and push backend
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: "."
+          push: true
+          platforms: linux/arm64
+          tags: wingcloudbot/kblocks-backend:latest
+          cache-from: type=registry,ref=wingcloudbot/kblocks-backend:latest
+          cache-to: type=inline
+          build-args: |
+            ENV=prod
+
       - name: Skaffold build
         id: build
         run: |
@@ -167,7 +182,6 @@ jobs:
             --set frontend.image=${{ steps.build.outputs.frontend-tag }} \
             --set ingress.host=${{ steps.qkube.outputs.kblocks-host }} \
 
-  
       - name: Post PR comment
         if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v3

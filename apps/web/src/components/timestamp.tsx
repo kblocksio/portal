@@ -11,16 +11,30 @@ const shortDateTimeFormat = new Intl.DateTimeFormat(undefined, {
   hour12: false,
 });
 
-export const Timestamp = (props: { timestamp: Date }) => {
+export const Timestamp = (props: { timestamp: Date | number }) => {
   const timestamp = useMemo(() => {
-    return shortDateTimeFormat.format(props.timestamp);
+    return props.timestamp instanceof Date
+      ? props.timestamp
+      : new Date(props.timestamp);
   }, [props.timestamp]);
 
+  const formatted = useMemo(() => {
+    return shortDateTimeFormat.format(timestamp);
+  }, [timestamp]);
+
+  const isoString = useMemo(() => {
+    return timestamp.toISOString();
+  }, [timestamp]);
+
   return (
-    <TimestampTooltip timestamp={props.timestamp}>
-      <span className="text-foreground rounded-sm px-1 py-0.5 font-mono text-xs uppercase hover:bg-gray-100">
-        {timestamp}
-      </span>
+    <TimestampTooltip timestamp={timestamp}>
+      <time
+        dateTime={isoString}
+        className="whitespace-nowrap px-1 py-0.5 font-mono text-xs uppercase leading-none"
+        role="time"
+      >
+        {formatted}
+      </time>
     </TimestampTooltip>
   );
 };
