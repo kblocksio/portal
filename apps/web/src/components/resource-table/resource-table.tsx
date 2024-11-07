@@ -229,7 +229,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         size: 400,
-        cell: LastLogMessageCell,
+        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
         // enableSorting: false,
       },
       {
@@ -452,7 +452,3 @@ const ResourceOutputs = ({
     </div>
   );
 };
-
-const LastLogMessageCell = memo((props: any) => (
-  <LastLogMessage objUri={props.row.original.objUri} />
-));
