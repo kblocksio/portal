@@ -18,7 +18,7 @@ import {
 import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
-import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
+import { formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useAppContext } from "@/app-context";
@@ -30,10 +30,6 @@ import { RelationshipGraph } from "@/components/relationships/graph";
 import { useNavigate } from "@tanstack/react-router";
 
 const DEFAULT_TAB = "details";
-
-export function urlForResource(blockUri: BlockUriComponents) {
-  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
-}
 
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
@@ -199,7 +195,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8">
+    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8 overflow-y-hidden">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">

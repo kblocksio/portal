@@ -1,26 +1,20 @@
-import { PropsWithChildren } from "react";
 import { AppProvider } from "./app-context";
 import { UserProvider } from "./hooks/use-user";
 import { ResourceProvider } from "./resource-context.js";
 import { CreateResourceProvider } from "./create-resource-context.js";
 import {
   SidebarProvider,
-  SidebarInset,
   SidebarTrigger,
-} from "@/components/ui/sidebar.js";
-import { Separator } from "@/components/ui/separator.js";
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "./components/app-sidebar.js";
 import { AppBreadcrumbs } from "./components/app-breadcrumbs.js";
 import { AppToaster } from "./components/app-toaster.js";
 import { NotificationMenu } from "./components/notifications-menu.js";
 import { NotificationsProvider } from "./notifications-context.js";
-import {
-  createRootRoute,
-  Outlet,
-  ScrollRestoration,
-} from "@tanstack/react-router";
+import { Outlet } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
-import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 export function App({ children }: { children: React.ReactNode }) {

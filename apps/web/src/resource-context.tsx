@@ -17,10 +17,10 @@ import {
   parseBlockUri,
   Manifest,
   formatBlockUri,
+  BlockUriComponents,
 } from "@kblocks/api";
 import { isEqual } from "lodash";
 import { request } from "./lib/backend";
-import { urlForResource } from "./routes/resources.$group.$version.$plural.$system.$namespace.$name";
 import { NotificationsContext } from "./notifications-context";
 import { getIconComponent } from "./lib/get-icon";
 const WS_URL = `wss://${import.meta.env.VITE_BACKEND_ENDPOINT}/api/events`;
@@ -439,3 +439,7 @@ export type OwnerReference = {
   blockOwnerDeletion?: boolean;
   controller?: boolean;
 };
+
+function urlForResource(blockUri: BlockUriComponents) {
+  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
+}

@@ -5,10 +5,13 @@ import {
   RefreshCw,
   ChevronRight,
   Sparkles,
+  Circle,
 } from "lucide-react";
 import {
+  ErrorEvent,
   EventAction,
   EventReason,
+  LifecycleEvent,
   LogEvent,
   LogLevel,
   WorkerEvent,
@@ -24,12 +27,12 @@ type GroupHeader = {
   reason: EventReason;
   action: string;
   message: string;
-  details?: string;
 };
 
 type EventGroup = {
   header: GroupHeader;
-  logs: LogEvent[];
+  events: WorkerEvent[];
+  requestId: string;
 };
 
 export default function Timeline({
@@ -38,7 +41,7 @@ export default function Timeline({
   events: WorkerEvent[];
   className?: string;
 }) {
-  const eventGroups = useMemo(() => groupEventsByLifecycle(events), [events]);
+  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
 
   return (
     <ScrollAreaResizeObserver>
@@ -47,7 +50,7 @@ export default function Timeline({
 
         <div className="flex flex-col gap-1">
           {eventGroups.map((eventGroup, index) => (
-            <EventItem
+            <EventGroupItem
               key={index}
               eventGroup={eventGroup}
               isLast={index === eventGroups.length - 1}
@@ -65,7 +68,7 @@ export default function Timeline({
   );
 }
 
-function EventItem({
+function EventGroupItem({
   eventGroup,
   isLast,
 }: {
@@ -78,7 +81,7 @@ function EventItem({
   const action = header.action;
   const [isOpen, setIsOpen] = useState(isLast);
 
-  const isClickable = eventGroup.logs.length > 0 || header.details;
+  const isClickable = eventGroup.events.length > 0;
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
@@ -104,7 +107,7 @@ function EventItem({
         tabIndex={0}
       >
         <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
-          <div className="flex min-w-[130pt] items-center gap-1">
+          <div className="flex min-w-[90pt] items-center gap-1">
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform duration-300",
@@ -130,65 +133,114 @@ function EventItem({
           </div>
         </div>
       </div>
-      {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
-          {eventGroup.logs.map((log, index) => (
-            <LogItem key={index} log={log} />
-          ))}
-        </div>
-      )}
-
-      {isOpen && header.details && (
-        <div className="flex flex-col pt-6">
-          <MarkdownWrapper content={header.details} />
-          <div className="flex items-center gap-2 py-4">
-            <Sparkles className="size-4 text-yellow-500" />
-            <span className="text-xs italic text-gray-700">
-              This content is AI-generated and may contain errors
-            </span>
-          </div>
-        </div>
+      {isOpen && eventGroup.events.length > 0 && (
+        <Events events={eventGroup.events} />
       )}
     </div>
   );
 }
 
-function LogItem({ log }: { log: LogEvent }) {
-  const timestamp = log.timestamp.toLocaleTimeString();
-  const message = log.message;
+const Events = ({ events }: { events: WorkerEvent[] }) => {
+  const items: React.ReactNode[] = [];
+  const logEvents: LogEvent[] = [];
 
-  const classes = [];
-
-  switch (log.level) {
-    case LogLevel.DEBUG:
-      classes.push("text-gray-500");
-      break;
-    case LogLevel.INFO:
-      classes.push("text-gray-400");
-      break;
-    case LogLevel.WARNING:
-      classes.push("text-yellow-500");
-      break;
-    case LogLevel.ERROR:
-      classes.push("text-red-500");
-      break;
-  }
-
-  if (!log.parentLogId) {
-    classes.push("text-white");
-  }
-
-  return (
-    <div className="text-xs">
-      <div className="grid grid-cols-[8em_1fr]">
-        <span className="text-gray-600">{timestamp}</span>
-        <span className={cn("whitespace-pre pr-4", classes)}>
-          <pre>{message}</pre>
-        </span>
+  const renderLogSection = () => {
+    return (
+      <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+        {logEvents.map((event, index) => (
+          <LogItem key={index} log={event} />
+        ))}
       </div>
-    </div>
-  );
-}
+    );
+  };
+
+  events.forEach((event, index) => {
+    if (
+      event.type !== "LOG" &&
+      event.type != "LIFECYCLE" &&
+      logEvents.length > 0
+    ) {
+      items.push(renderLogSection());
+      logEvents.length = 0;
+    }
+
+    switch (event.type) {
+      case "LOG":
+        logEvents.push(event);
+        break;
+
+      case "ERROR":
+        items.push(<ErrorItem key={index} error={event} />);
+        break;
+
+      case "LIFECYCLE":
+        logEvents.push(renderLogEvent(event));
+        break;
+
+      default:
+        // ignore
+        break;
+    }
+  });
+
+  if (logEvents.length > 0) {
+    items.push(renderLogSection());
+    logEvents.length = 0;
+  }
+
+  return <div className="flex flex-col gap-2 pb-6">{items}</div>;
+};
+
+const ErrorItem = ({ error }: { error: ErrorEvent }) => {
+  if (error.explanation) {
+    const details = formatExplanation(error.explanation).join("\n\n");
+    return (
+      <div className="flex flex-col pt-4">
+        <MarkdownWrapper content={details} />
+        <div className="flex items-center gap-2 py-4">
+          <Sparkles className="size-4 text-yellow-500" />
+          <span className="text-xs italic text-gray-700">
+            This content is AI-generated and may contain errors
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return null; //<div>{error.message}</div>;
+};
+
+const LogItem = ({ log }: { log: LogEvent }) => {
+  const LogLine = ({ line }: { line: string }) => {
+    const timestamp = log.timestamp.toLocaleTimeString();
+
+    const classes = [];
+
+    const colors = {
+      [LogLevel.DEBUG]: [`text-gray-200`, "text-gray-200"],
+      [LogLevel.INFO]: [`text-gray-400`, "text-white"],
+      [LogLevel.WARNING]: [`text-yellow-500`, "text-yellow-200"],
+      [LogLevel.ERROR]: [`text-red-800`, "text-red-500"],
+    };
+
+    const index = !log.parentLogId ? 1 : 0;
+    classes.push(colors[log.level][index]);
+
+    return (
+      <div className="text-xs">
+        <div className="grid grid-cols-[8em_1fr]">
+          <span className="text-gray-600">{timestamp}</span>
+          <span className={cn("whitespace-pre pr-4", classes)}>
+            <pre>{line}</pre>
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const lines = log.message.trimEnd().split("\n");
+  return lines.map((line, index) => <LogLine key={index} line={line} />);
+};
 
 const getReasonIcon = (reason: EventReason) => {
   switch (reason) {
@@ -203,7 +255,7 @@ const getReasonIcon = (reason: EventReason) => {
     case EventReason.Resolved:
       return CheckCircle;
     default:
-      return Activity;
+      return Circle;
   }
 };
 
@@ -224,81 +276,109 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-function groupEventsByLifecycle(events: WorkerEvent[]) {
+const renderHeader = (event: WorkerEvent): GroupHeader => {
+  switch (event.type) {
+    case "LIFECYCLE":
+      return {
+        timestamp: event.timestamp,
+        reason: event.event.reason,
+        action: event.event.action,
+        message: event.event.message,
+      };
+
+    case "ERROR":
+      return {
+        timestamp: event.timestamp,
+        reason: EventReason.Failed,
+        action: event.body?.type ?? EventAction.Sync,
+        message: event.body?.message ?? "",
+      };
+
+    case "LOG":
+      return {
+        timestamp: event.timestamp,
+        reason: EventReason.Started,
+        action: event.level.toString(),
+        message: event.message,
+      };
+
+    default:
+      return {
+        timestamp: new Date(),
+        reason: EventReason.Started,
+        action: EventAction.Sync,
+        message: "",
+      };
+  }
+};
+
+function groupEventsByRequestId(events: WorkerEvent[]) {
   const groups: EventGroup[] = [];
 
-  let currentGroup: EventGroup | null = null;
+  let currentGroup: EventGroup = {
+    requestId: "",
+    header: {
+      timestamp: new Date(),
+      reason: EventReason.Started,
+      action: EventAction.Sync,
+      message: "",
+    },
+    events: [],
+  };
 
   for (const event of events) {
-    if (event.type === "LIFECYCLE") {
+    const currentRequestId = currentGroup.requestId;
+
+    // new group
+    if (event.requestId !== currentRequestId) {
       currentGroup = {
-        header: {
-          timestamp: event.timestamp,
-          reason: event.event.reason,
-          action: event.event.action,
-          message: event.event.message,
-        },
-        logs: [],
-      };
-
-      const messageLines = event.event.message.split("\n");
-      if (messageLines.length > 1) {
-        currentGroup.logs.push(
-          ...messageLines.map((line) => renderLogEvent(event, line)),
-        );
-      }
-
-      groups.push(currentGroup);
-    } else if (event.type === "LOG") {
-      if (currentGroup) {
-        const messageLines = event.message.trimEnd().split("\n");
-
-        // if (!event.parentLogId) {
-        //   messageLines.unshift("");
-        // }
-
-        currentGroup.logs.push(
-          ...messageLines.map((line) => ({
-            ...event,
-            message: line,
-          })),
-        );
-      } else {
-        // ignore
-      }
-    } else if (event.type === "ERROR" && event.explanation && currentGroup) {
-      const details = formatExplanation(event.explanation);
-      currentGroup.header.details = details.join("\n\n");
-    } else if (event.type === "ERROR") {
-      currentGroup = {
-        header: {
-          timestamp: event.timestamp ?? new Date(),
-          reason: EventReason.Failed,
-          action: event.body?.type ?? EventAction.Sync,
-          message: event.message,
-        },
-        logs: [],
+        requestId: event.requestId,
+        header: renderHeader(event),
+        events: [],
       };
 
       groups.push(currentGroup);
-    } else {
-      // ignore
-      console.log("ignoring event", event);
     }
+
+    switch (event.type) {
+      case "ERROR":
+        currentGroup.header.reason = EventReason.Failed;
+        currentGroup.header.message = event.message;
+        break;
+
+      case "LIFECYCLE":
+        currentGroup.header.reason = event.event.reason;
+        currentGroup.header.message = event.event.message;
+        break;
+    }
+
+    currentGroup?.events.push(event);
   }
 
   return groups;
 }
 
-const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
+const renderLogEvent = (event: LifecycleEvent): LogEvent => {
+  const level = renderLevel(event.event.reason);
+
   return {
+    requestId: event.requestId,
     type: "LOG",
-    level: LogLevel.ERROR,
-    message: line,
+    level,
+    message: event.event.message,
     objUri: event.objUri,
     objType: event.objType,
     timestamp: event.timestamp,
   };
+};
+
+const renderLevel = (reason: EventReason): LogLevel => {
+  switch (reason) {
+    case EventReason.Failed:
+      return LogLevel.ERROR;
+    default:
+      return LogLevel.INFO;
+  }
 };
 
 const getMessageColor = (header: GroupHeader) => {
