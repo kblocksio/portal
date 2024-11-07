@@ -64,7 +64,7 @@ pub class Workload {
     d.addContainer(api.newContainer(spec));
 
     if let port = spec.port {
-      let service = d.exposeViaService(ports: [{ port }]);
+      let service = d.exposeViaService(ports: [{ port }], name: nodeof(this).id);
       this.host = service.name;
       this.port = "{service.port}";
 

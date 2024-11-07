@@ -3,6 +3,20 @@
 {{- $ingressTlsSecret := required "ingress.tls.secret is required" .Values.ingress.tls.secret }}
 {{- $secretName := required "backend.secretName is required" .Values.backend.secretName }}
 
+{{- if eq true .Values.redis.enabled }}
+apiVersion: acme.com/v1
+kind: Workload
+metadata:
+  name: portal-redis
+image: "redis:7.4.0-alpine"
+command:
+  - redis-server
+  - --requirepass "pass1234"
+  - --port 18284
+port: 18284
+replicas: 1
+{{- end }}
+---
 apiVersion: acme.com/v1
 kind: Workload
 metadata:
@@ -19,6 +33,15 @@ expose:
       secret: {{ $ingressTlsSecret }}
 envFrom:
   - secretName: {{ $secretName }}
+{{- if .Values.redis.enabled }}
+env:
+  REDIS_HOST:
+    value: "portal-redis.default.svc.cluster.local"
+  REDIS_PASSWORD:
+    value: "pass1234"
+  REDIS_WORKLOAD_HOST:
+    value: ${ref://workloads.acme.com/portal-redis/host}
+{{- end }}
 allowCluster:
   - apiGroup: "*"
     resource: "*"

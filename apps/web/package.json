@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "dotenv -e .env.prod -- vite build",
+    "build": "vite build",
     "dev": "dotenv -e .env.dev -- vite --open",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "typecheck": "tsc",

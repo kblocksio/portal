@@ -5,3 +5,6 @@ ingress:
 
 backend:
   secretName: kblocks-api-secrets
+
+redis:
+  enabled: false
