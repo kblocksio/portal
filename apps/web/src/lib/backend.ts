@@ -5,6 +5,7 @@ import {
   CreateResourceResponse,
 } from "@repo/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
+import { ResourceType } from "@/resource-context";
 
 // if VITE_BACKEND_ENDPOINT is not set, use the current origin
 const VITE_BACKEND_ENDPOINT = import.meta.env.VITE_BACKEND_ENDPOINT;
