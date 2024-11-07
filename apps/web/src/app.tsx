@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 import { AppProvider } from "./app-context";
 import { UserProvider } from "./hooks/use-user";
 import { ResourceProvider } from "./resource-context.js";
-import { CreateResourceWizardProvider } from "./create-resource-wizard-context.js";
+import { CreateResourceProvider } from "./create-resource-context.js";
 import {
   SidebarProvider,
   SidebarInset,
@@ -19,6 +19,9 @@ import {
   Outlet,
   ScrollRestoration,
 } from "@tanstack/react-router";
+import { ErrorBoundary } from "react-error-boundary";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
+import { AlertCircle } from "lucide-react";
 
 export function App({ children }: { children: React.ReactNode }) {
   return (
@@ -26,9 +29,7 @@ export function App({ children }: { children: React.ReactNode }) {
       <UserProvider>
         <NotificationsProvider>
           <ResourceProvider>
-            <CreateResourceWizardProvider>
-              {children}
-            </CreateResourceWizardProvider>
+            <CreateResourceProvider>{children}</CreateResourceProvider>
           </ResourceProvider>
         </NotificationsProvider>
       </UserProvider>
@@ -42,8 +43,8 @@ export function AppLayout() {
     <div className="flex min-h-screen">
       <SidebarProvider>
         <AppSidebar />
-        <div className="flex flex-1 flex-col overflow-x-hidden">
-          <header className="bg-background sticky top-0 z-50 flex h-16 items-center border-b transition-[height] duration-200 ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <div className="flex grow flex-col">
+          <header className="bg-background/80 sticky top-0 z-10 flex h-16 w-full items-center self-start border-b backdrop-blur transition-[height] duration-200 ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex w-full items-center gap-2 px-4">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
@@ -53,9 +54,25 @@ export function AppLayout() {
               <NotificationMenu className="ml-auto" />
             </div>
           </header>
-          <main className="flex-1 px-4 sm:px-6 lg:px-8">
+          <main className="grow px-4 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-screen-2xl py-4">
-              <Outlet />
+              <ErrorBoundary
+                fallbackRender={(props) => (
+                  <div className="pt-4">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Unexpected Error</AlertTitle>
+                      <AlertDescription>
+                        {props.error instanceof Error
+                          ? props.error.message
+                          : "An unexpected error occurred"}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              >
+                <Outlet />
+              </ErrorBoundary>
             </div>
           </main>
         </div>

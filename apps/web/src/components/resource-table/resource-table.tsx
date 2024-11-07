@@ -9,11 +9,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { memo, useContext, useMemo, useState } from "react";
-import {
-  Resource,
-  ResourceContext,
-  ResourceType,
-} from "@/resource-context";
+import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
@@ -44,6 +40,7 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
+import { ScrollAreaResizeObserver } from "../scroll-area-resize-observer";
 
 const useColumns = () => {
   const { resourceTypes, relationships, objects } = useContext(ResourceContext);
@@ -233,7 +230,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Logs" />
         ),
         size: 400,
-        cell: LastLogMessageCell,
+        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
         // enableSorting: false,
       },
       {
@@ -293,13 +290,9 @@ export const ResourceTable = (props: {
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} showActions={props.showActions} />
-      <section>
-        <div
-          className={cn(
-            "overflow-x-auto rounded-md border bg-white",
-            props.className,
-          )}
-        >
+
+      <ScrollAreaResizeObserver>
+        <div className={cn("rounded-md border bg-white", props.className)}>
           <Table className="w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -337,7 +330,8 @@ export const ResourceTable = (props: {
             </TableBody>
           </Table>
         </div>
-      </section>
+      </ScrollAreaResizeObserver>
+
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
           <p className="text-muted-foreground">
@@ -429,7 +423,3 @@ const ResourceOutputs = ({
     </div>
   );
 };
-
-const LastLogMessageCell = memo((props: any) => (
-  <LastLogMessage objUri={props.row.original.objUri} />
-));

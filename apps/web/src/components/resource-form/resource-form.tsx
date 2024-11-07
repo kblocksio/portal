@@ -13,16 +13,14 @@ import YamlButton from "../yaml-button";
 export interface FormGeneratorProps {
   resourceType: ResourceType;
   isLoading: boolean;
-  handleBack: () => void;
   handleSubmit: (meta: ObjectMetadata, fields: any) => void;
   initialValues?: ApiObject;
-  initialMeta: Partial<ObjectMetadata>;
+  initialMeta?: Partial<ObjectMetadata>;
 }
 
 export const ResourceForm = ({
   resourceType,
   isLoading,
-  handleBack,
   handleSubmit,
   initialValues,
   initialMeta,
@@ -173,9 +171,6 @@ export const ResourceForm = ({
         <div className="pointer-events-none sticky bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent"></div>
       </div>
       <div className="flex justify-between border-t border-gray-200 px-2 py-4 pt-4">
-        <Button type="button" variant="outline" onClick={handleBack}>
-          {!initialValues ? "Back" : "Cancel"}
-        </Button>
         <YamlButton object={yamlObject}>
           <Button
             type="button"

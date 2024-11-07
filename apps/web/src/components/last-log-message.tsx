@@ -36,31 +36,29 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
     }
   };
 
-  if (!lastLogMessageToDisplay) {
-    return null;
-  }
-
   return (
     <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
-        <motion.div
-          key={lastLogMessageToDisplay.timestamp?.toString()}
-          initial={prevLogMessage ? { y: "100%", opacity: 0 } : undefined}
-          animate={prevLogMessage ? { y: "0%", opacity: 1 } : undefined}
-          exit={prevLogMessage ? { y: "-100%", opacity: 0 } : undefined}
-          transition={prevLogMessage ? { duration: 0.5 } : undefined}
-          className="absolute inset-0 flex min-w-0 items-center gap-0.5 px-1"
-        >
-          <span className="text-muted-foreground">
-            <ChevronRightIcon className="text-muted-foreground h-3 w-3" />
-          </span>
-          <span
-            className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-xs"
-            title={getLogMessage(lastLogMessageToDisplay)}
+        {lastLogMessageToDisplay && (
+          <motion.div
+            key={lastLogMessageToDisplay.timestamp?.toString()}
+            initial={prevLogMessage ? { y: "100%", opacity: 0 } : undefined}
+            animate={prevLogMessage ? { y: "0%", opacity: 1 } : undefined}
+            exit={prevLogMessage ? { y: "-100%", opacity: 0 } : undefined}
+            transition={prevLogMessage ? { duration: 0.5 } : undefined}
+            className="absolute inset-0 flex min-w-0 items-center gap-0.5 px-1"
           >
-            {getLogMessage(lastLogMessageToDisplay)}
-          </span>
-        </motion.div>
+            <span className="text-muted-foreground">
+              <ChevronRightIcon className="text-muted-foreground h-3 w-3" />
+            </span>
+            <span
+              className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-xs"
+              title={getLogMessage(lastLogMessageToDisplay)}
+            >
+              {getLogMessage(lastLogMessageToDisplay)}
+            </span>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

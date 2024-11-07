@@ -15,6 +15,13 @@ cpu:
 memory:
   request: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
   limit: {{ get (get .Values.instanceTypes .Values.instanceType) "memory" | quote }}
+{{- if .Values.environmentVariables }}
+env:
+  {{- range $key, $value := .Values.environmentVariables }}
+  {{ $key }}:
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+{{- end }}
 scaling:  
   {{- if and .Values.scaling.autoscaling (eq .Values.scaling.enabled "Yes") }}
   autoscaling:

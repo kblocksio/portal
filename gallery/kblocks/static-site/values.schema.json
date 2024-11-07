@@ -50,6 +50,9 @@
         "acme.kblocks.io"
       ],
       "default": "acme.kblocks.io"
+    },
+    "environmentVariables": {
+      "$ref": "#/$defs/commonDefs/environmentVariables"
     }
   }
 }
