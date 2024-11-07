@@ -23,14 +23,14 @@ env:
   {{- end }}
 {{- end }}
 scaling:  
-  {{- if and .Values.scaling.autoscaling (eq .Values.scaling.enabled "Yes") }}
+  {{- if and .Values.scaling .Values.scaling.autoscaling (eq .Values.scaling.autoscaling.enabled "Yes") }}
   autoscaling:
     minReplicas: {{ default 2 .Values.scaling.autoscaling.minReplicas }}
     maxReplicas: {{ default 5 .Values.scaling.autoscaling.maxReplicas }}
     targetCpuUtilization: {{ default 70 .Values.scaling.autoscaling.targetCpuUtilization }}
     targetMemoryUtilization: {{ default 70 .Values.scaling.autoscaling.targetMemoryUtilization }}
   {{- else }}
-  replicas: {{ default 2 .Values.scaling.autoscaling.replicas }}
+  replicas: {{ default 2 .Values.scaling.replicas }}
   {{- end }}
 region: {{ .Values.region }}
 {{- if .Values.ingress }}
