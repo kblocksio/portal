@@ -43,7 +43,7 @@ export function AppLayout() {
       <SidebarProvider>
         <AppSidebar />
         <div className="flex grow flex-col">
-          <header className="bg-background/80 sticky top-0 flex h-16 w-full items-center self-start border-b backdrop-blur transition-[height] duration-200 ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <header className="bg-background/80 sticky top-0 z-10 flex h-16 w-full items-center self-start border-b backdrop-blur transition-[height] duration-200 ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex w-full items-center gap-2 px-4">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />

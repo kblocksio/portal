@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { memo, useContext, useMemo, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
@@ -40,7 +40,6 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
-import { ScrollArea } from "@/ui/scroll-area";
 
 const useColumns = () => {
   const { resourceTypes, relationships, objects } = useContext(ResourceContext);
@@ -261,6 +260,36 @@ const useColumns = () => {
   }, [resourceTypes, objects, relationships]);
 };
 
+const TableWrapper = ({ children }: { children: React.ReactNode }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+
+    if (!container || !content) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      container.style.height = `${content.scrollHeight}px`;
+    });
+
+    resizeObserver.observe(content);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <div className="absolute inset-0 overflow-x-auto overflow-y-hidden">
+        <div ref={contentRef}>{children}</div>
+      </div>
+    </div>
+  );
+};
+
 export const ResourceTable = (props: {
   resources: Resource[];
   className?: string;
@@ -291,13 +320,8 @@ export const ResourceTable = (props: {
     <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} showActions={props.showActions} />
 
-      <section className="hidden">
-        <div
-          className={cn(
-            "overflow-x-auto rounded-md border bg-white",
-            props.className,
-          )}
-        >
+      <TableWrapper>
+        <div className={cn("rounded-md border bg-white", props.className)}>
           <Table className="w-full">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -335,7 +359,7 @@ export const ResourceTable = (props: {
             </TableBody>
           </Table>
         </div>
-      </section>
+      </TableWrapper>
 
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
