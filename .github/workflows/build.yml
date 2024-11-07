@@ -59,7 +59,7 @@ jobs:
           context: "."
           push: true
           platforms: linux/arm64
-          tags: wingcloudbot/kblocks-backend:${{ github.sha }}${{ github.event_name == 'push' && ",wingcloudbot/kblocks-backend:latest" || "" }}
+          tags: wingcloudbot/kblocks-backend:${{ github.sha }}${{ github.event_name == 'push' && ',wingcloudbot/kblocks-backend:latest' || '' }}
           cache-from: type=registry,ref=wingcloudbot/kblocks-backend:latest
           cache-to: type=inline
           build-args: |
