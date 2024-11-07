@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 import { AppProvider } from "./app-context";
 import { UserProvider } from "./hooks/use-user";
 import { ResourceProvider } from "./resource-context.js";
-import { CreateResourceWizardProvider } from "./create-resource-wizard-context.js";
+import { CreateResourceProvider } from "./create-resource-context.js";
 import {
   SidebarProvider,
   SidebarInset,
@@ -29,9 +29,7 @@ export function App({ children }: { children: React.ReactNode }) {
       <UserProvider>
         <NotificationsProvider>
           <ResourceProvider>
-            <CreateResourceWizardProvider>
-              {children}
-            </CreateResourceWizardProvider>
+            <CreateResourceProvider>{children}</CreateResourceProvider>
           </ResourceProvider>
         </NotificationsProvider>
       </UserProvider>

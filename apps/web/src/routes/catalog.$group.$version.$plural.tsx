@@ -4,27 +4,20 @@ import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "@/components/markdown";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { useAppContext } from "@/app-context";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/catalog/$group/$version/$kind")({
+export const Route = createFileRoute("/catalog/$group/$version/$plural")({
   component: Catalog,
 });
 
 function Catalog() {
   const { setBreadcrumbs } = useAppContext();
   const { resourceTypes } = useContext(ResourceContext);
-  const { group, version, kind } = Route.useParams();
+  const navigate = useNavigate();
+  const { group, version, plural } = Route.useParams();
   const [currentResourceType, setCurrentResourceType] =
     useState<ResourceType | null>(null);
-  const { openWizard } = useCreateResourceWizard();
-
-  const onCreateResource = useCallback(
-    (resourceType: ResourceType) => {
-      openWizard(undefined, resourceType, 2);
-    },
-    [openWizard],
-  );
 
   useEffect(() => {
     setBreadcrumbs([
@@ -33,13 +26,13 @@ function Catalog() {
         url: "/catalog/",
       },
       {
-        name: `${group}/${version}/${kind}`,
+        name: `${group}/${version}/${plural}`,
       },
     ]);
     if (resourceTypes) {
-      setCurrentResourceType(resourceTypes[`${group}/${version}/${kind}`]);
+      setCurrentResourceType(resourceTypes[`${group}/${version}/${plural}`]);
     }
-  }, [resourceTypes, group, version, kind]);
+  }, [resourceTypes, group, version, plural]);
 
   return (
     <div className={cn("container relative mx-auto flex flex-col gap-4")}>
@@ -48,7 +41,11 @@ function Catalog() {
           {/* fixed position bellow the app header with some margin - app header is h-16 */}
           <Button
             className="absolute right-0 top-0"
-            onClick={() => onCreateResource(currentResourceType)}
+            onClick={() => {
+              navigate({
+                to: `/resources/new/${group}/${version}/${plural}`,
+              });
+            }}
           >
             New Resource...
           </Button>

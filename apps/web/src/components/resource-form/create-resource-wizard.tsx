@@ -174,7 +174,6 @@ export const CreateResourceWizard = ({
                 initialMeta={renderInitialMeta(currentEditableResource?.objUri)}
                 initialValues={currentEditableResource}
                 handleSubmit={handleCreate}
-                handleBack={handleBack}
                 isLoading={isLoading}
               />
             )}

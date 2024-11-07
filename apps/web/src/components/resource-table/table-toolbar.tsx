@@ -2,11 +2,12 @@ import { type Table as TanstackTable } from "@tanstack/react-table";
 import { useContext } from "react";
 import { ResourceContext } from "@/resource-context";
 import { Input } from "@/components/ui/input";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "./faceted-filter";
 import { getIconComponent } from "@/lib/get-icon";
+import { useNavigate } from "@tanstack/react-router";
+
 import { ScrollArea } from "../ui/scroll-area";
 export interface ResourceTableToolbarProps<TData> {
   table: TanstackTable<TData>;
@@ -17,15 +18,15 @@ export function ResourceTableToolbar<TData>({
   table,
   showActions = true,
 }: ResourceTableToolbarProps<TData>) {
+  const navigate = useNavigate();
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const { systems, namespaces, kinds } = useContext(ResourceContext);
-  const { openWizard: openCreateWizard } = useCreateResourceWizard();
 
   const newResourceButton = (
-    <Button size="sm" onClick={() => openCreateWizard()}>
-      New Resource...
-    </Button>
+      <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
+          New Resource...
+      </Button>
   );
 
   return (
@@ -112,7 +113,7 @@ export function ResourceTableToolbar<TData>({
 
       {showActions && (
         <div className="hidden sm:block">
-          <Button size="sm" onClick={() => openCreateWizard()}>
+          <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
             New Resource...
           </Button>
         </div>
