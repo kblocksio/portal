@@ -15,9 +15,9 @@ export const WizardSearchHeader = ({
   handleSearch,
 }: WizardSearchHeaderProps) => {
   return (
-    <div>
-      {title}
-      <p className="mt-2 text-sm text-gray-500">{description}</p>
+    <div className="flex flex-col gap-y-2">
+      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      <p className="text-sm text-gray-500">{description}</p>
       <div className="relative mb-2 mt-4 flex-grow">
         <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
         <Input

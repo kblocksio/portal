@@ -2,6 +2,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "../ui/card";
@@ -16,13 +17,13 @@ export interface ResourceCatalogProps {
   categories: Record<string, Category>;
   filtereResources: ResourceType[];
   onResourceCreateClick: (resource: ResourceType) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
   onCardClick?: (resource: ResourceType) => void;
 }
 export const ResourceCatalog = ({
   filtereResources,
   onResourceCreateClick,
-  isLoading,
+  isLoading = false,
   categories,
   onCardClick,
 }: ResourceCatalogProps) => {
@@ -35,10 +36,12 @@ export const ResourceCatalog = ({
     }));
   }, [filtereResources, categories]);
 
-  return isLoading ? (
-    Array.from({ length: 3 }).map((_, index) => (
-      <ResourceCardSkeleton key={index} />
-    ))
+  return filtereResources.length === 0 ? (
+    <div className="flex flex-wrap gap-4">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <ResourceCardSkeleton key={index} />
+      ))}
+    </div>
   ) : (
     <div className="flex flex-col gap-12">
       {typesForCategories.map(
@@ -97,20 +100,27 @@ const ResourceTypeCategory = ({
 };
 
 const ResourceCardSkeleton = () => (
-  <Card className="flex max-h-[160px] cursor-pointer flex-col justify-center">
-    <CardHeader className="flex h-[50px] flex-row items-center border-b border-b-gray-200 text-center align-middle">
-      <div className="flex w-full items-center justify-center self-center">
-        <Skeleton className="h-7 w-7" />
+  <Card className="flex w-[300px] flex-col rounded-md shadow-sm">
+    <CardHeader className="flex flex-col gap-y-2">
+      <div className="space-y-3">
+        <CardTitle>
+          <div className="flex items-center gap-x-2">
+            <Skeleton className="h-6 w-6" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-1 h-3 w-12" />
+          </div>
+        </CardTitle>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+        </div>
       </div>
     </CardHeader>
-    <CardContent className="flex h-[110px] flex-col p-2">
-      <CardTitle className="mb-2">
-        <Skeleton className="h-6 w-1/2" />
-      </CardTitle>
-      <CardDescription>
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="mt-2 h-4 w-3/4" />
-      </CardDescription>
-    </CardContent>
+    <CardFooter className="mt-auto flex justify-between">
+      <div className="text-muted-foreground flex space-x-4 text-sm">
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <Skeleton className="h-8 w-[70px]" />
+    </CardFooter>
   </Card>
 );
