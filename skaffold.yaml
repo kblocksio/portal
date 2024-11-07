@@ -9,6 +9,8 @@ build:
   artifacts:
     - image: wingcloudbot/kblocks-backend
       docker:
+        cacheFrom:
+          - wingcloudbot/kblocks-backend
         buildArgs:
           ENV: prod
       sync:
