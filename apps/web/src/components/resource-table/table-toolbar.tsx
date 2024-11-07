@@ -30,7 +30,7 @@ export function ResourceTableToolbar<TData>({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
-      <div className="w-1/2 sm:w-64 sm:grow">
+      <div className="w-1/2 sm:grow">
         <Input
           placeholder="Filter resources..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -41,12 +41,7 @@ export function ResourceTableToolbar<TData>({
         />
       </div>
 
-      {showActions && (
-        <>
-          {/* <div className="grow-1"></div> */}
-          <div className="sm:hidden">{newResourceButton}</div>
-        </>
-      )}
+      {showActions && <div className="sm:hidden">{newResourceButton}</div>}
 
       <ScrollArea className="w-full" orientation="horizontal">
         <div className="flex items-center gap-2">

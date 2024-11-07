@@ -9,11 +9,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { memo, useContext, useMemo, useState } from "react";
-import {
-  Resource,
-  ResourceContext,
-  ResourceType,
-} from "@/resource-context";
+import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
@@ -44,6 +40,7 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
+import { ScrollArea } from "@/ui/scroll-area";
 
 const useColumns = () => {
   const { resourceTypes, relationships, objects } = useContext(ResourceContext);
@@ -293,7 +290,8 @@ export const ResourceTable = (props: {
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} showActions={props.showActions} />
-      <section>
+
+      <section className="hidden">
         <div
           className={cn(
             "overflow-x-auto rounded-md border bg-white",
@@ -338,6 +336,7 @@ export const ResourceTable = (props: {
           </Table>
         </div>
       </section>
+
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
           <p className="text-muted-foreground">

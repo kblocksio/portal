@@ -4,10 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  Resource,
-  ResourceContext,
-} from "@/resource-context";
+import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -82,7 +79,9 @@ function ResourcePage() {
     name,
   });
 
-  const [lastEventCount, setLastEventCount] = useState(Object.keys(eventsPerObject?.[objUri] ?? {}).length);
+  const [lastEventCount, setLastEventCount] = useState(
+    Object.keys(eventsPerObject?.[objUri] ?? {}).length,
+  );
 
   const events = useMemo(
     () => Object.values(eventsPerObject[objUri] ?? {}),
@@ -174,7 +173,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8 overflow-x-hidden">
+    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -335,10 +334,7 @@ function ResourcePage() {
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
                 </div>
-                <ResourceTable
-                  resources={children}
-                  showActions={false}
-                />
+                <ResourceTable resources={children} showActions={false} />
               </div>
             )}
           </CardContent>
