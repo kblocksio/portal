@@ -175,6 +175,11 @@ export const ResourceProvider = ({
     const { object, objUri, objType } = message;
     const { system } = parseBlockUri(objUri);
 
+    if (!(object as ApiObject)?.metadata) {
+      return;
+    }
+
+
     if (objType === "kblocks.io/v1/blocks") {
       const block = object as BlockApiObject;
       const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;

@@ -344,6 +344,7 @@ app.delete(
   "/api/resources/:group/:version/:plural/:system/:namespace/:name",
   async (req, res) => {
     const { group, version, plural, system, namespace, name } = req.params;
+    const force = req.query["force"] !== undefined && req.query["force"] !== "false";
 
     const objUri = formatBlockUri({
       group,
@@ -363,7 +364,7 @@ app.delete(
     );
 
     // if this is a kblocks.io/v1.Block object, we need to delete the object from storage
-    if (objUri.startsWith("kblocks://kblocks.io/v1/blocks/")) {
+    if (force || objUri.startsWith("kblocks://kblocks.io/v1/blocks/")) {
       await deleteObject(objUri);
       return res.status(200).json({ message: `Block ${objUri} deleted` });
     }
