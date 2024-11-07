@@ -205,14 +205,15 @@ qkube use kblocks-demo.quickube.sh
 
 If you want to test the portal locally, you can use `kind` to setup the environment.
 
-Install the blocks so they would refer to the local backend:
+Install kind, and setup all of the secrets as described in the previous section.
+Then, install the blocks so they would refer to the local backend:
 
 ```sh
 cd $GALLERY
 KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local ./install-blocks.sh
 ```
 
-Then, install the portal:
+Then, install the portal in kind mode:
 
 ```sh
 cd $PORTAL
