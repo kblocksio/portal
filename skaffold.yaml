@@ -10,7 +10,7 @@ build:
     - image: wingcloudbot/kblocks-backend
       docker:
         cacheFrom:
-          - wingcloudbot/kblocks-backend
+          - wingcloudbot/kblocks-backend:latest
         buildArgs:
           ENV: prod
       sync:
