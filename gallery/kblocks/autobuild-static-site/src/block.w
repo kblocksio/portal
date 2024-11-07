@@ -194,7 +194,7 @@ pub class AutoBuildStaticSite {
       "jobs": {
         "release": {
           "runs-on": "ubuntu-latest",
-          "env": Json.stringify((Json env)),
+          "env": Json env,
           "steps": steps.copy()
         }
       }
