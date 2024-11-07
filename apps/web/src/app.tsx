@@ -19,6 +19,9 @@ import {
   Outlet,
   ScrollRestoration,
 } from "@tanstack/react-router";
+import { ErrorBoundary } from "react-error-boundary";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert.js";
+import { AlertCircle } from "lucide-react";
 
 export function App({ children }: { children: React.ReactNode }) {
   return (
@@ -53,7 +56,23 @@ export function AppLayout() {
           </header>
           <main className="grow px-4 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-screen-2xl py-4">
-              <Outlet />
+              <ErrorBoundary
+                fallbackRender={(props) => (
+                  <div className="pt-4">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Unexpected Error</AlertTitle>
+                      <AlertDescription>
+                        {props.error instanceof Error
+                          ? props.error.message
+                          : "An unexpected error occurred"}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              >
+                <Outlet />
+              </ErrorBoundary>
             </div>
           </main>
         </div>
