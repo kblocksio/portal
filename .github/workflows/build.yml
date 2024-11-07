@@ -148,11 +148,10 @@ jobs:
         run: ./install-blocks.sh ./kblocks/workload
 
       - name: Build and push backend
-        if: github.event_name == 'push'
         uses: docker/build-push-action@v6
         with:
           context: "."
-          push: true
+          push: ${{ github.event_name == 'push' }}
           platforms: linux/arm64
           tags: wingcloudbot/kblocks-backend:latest
           cache-from: type=registry,ref=wingcloudbot/kblocks-backend:latest
@@ -166,7 +165,7 @@ jobs:
           export VITE_BACKEND_ENDPOINT="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_REDIS_ENABLED=false
-          skaffold run --platform=linux/arm64 --file-output build.json
+          skaffold run --platform=linux/arm64
 
       - name: Post PR comment
         if: github.event_name == 'pull_request'
