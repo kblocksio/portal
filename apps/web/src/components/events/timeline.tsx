@@ -45,24 +45,14 @@ export default function Timeline({
 
   return (
     <ScrollAreaResizeObserver>
-      <div className="relative w-full">
-        <div className="absolute left-3 top-2 h-full w-px bg-gray-200"></div>
-
-        <div className="flex flex-col gap-1">
-          {eventGroups.map((eventGroup, index) => (
-            <EventGroupItem
-              key={index}
-              eventGroup={eventGroup}
-              isLast={index === eventGroups.length - 1}
-            />
-          ))}
-        </div>
-
-        {/* <div
-        ref={(el) =>
-          el && el.scrollIntoView({ behavior: "smooth", block: "end" })
-        }
-      /> */}
+      <div className="flex flex-col gap-1">
+        {eventGroups.map((eventGroup, index) => (
+          <EventGroupItem
+            key={index}
+            eventGroup={eventGroup}
+            isLast={index === eventGroups.length - 1}
+          />
+        ))}
       </div>
     </ScrollAreaResizeObserver>
   );
@@ -86,15 +76,7 @@ function EventGroupItem({
   const message = formatMessage(header.message);
 
   return (
-    <div className="relative sm:pl-6">
-      <div className="absolute left-0 top-1.5">
-        <div className="flex items-center justify-around pl-0.5 pt-1.5 sm:pt-0">
-          <div className="flex items-center justify-center rounded-full border-gray-200 bg-white sm:size-5">
-            <ReasonIcon className={reasonColor} />
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col">
       <div
         className={cn("group flex gap-2")}
         onClick={() => setIsOpen(!isOpen)}
@@ -107,7 +89,7 @@ function EventGroupItem({
         tabIndex={0}
       >
         <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
-          <div className="flex min-w-[90pt] items-center gap-1">
+          <div className="flex items-center gap-1">
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform duration-300",
@@ -115,6 +97,8 @@ function EventGroupItem({
                 isClickable ? "visible" : "invisible",
               )}
             />
+
+            <ReasonIcon className={cn(reasonColor, "size-4")} />
 
             <div className="-mx-1.5 sm:mx-0">
               <Timestamp timestamp={header.timestamp} />
@@ -140,19 +124,19 @@ function EventGroupItem({
   );
 }
 
+const LogSection = ({ events }: { events: LogEvent[] }) => {
+  return (
+    <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+      {events.map((event, index) => (
+        <LogItem key={index} log={event} />
+      ))}
+    </div>
+  );
+};
+
 const Events = ({ events }: { events: WorkerEvent[] }) => {
   const items: React.ReactNode[] = [];
-  const logEvents: LogEvent[] = [];
-
-  const renderLogSection = () => {
-    return (
-      <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
-        {logEvents.map((event, index) => (
-          <LogItem key={index} log={event} />
-        ))}
-      </div>
-    );
-  };
+  let logEvents: LogEvent[] = [];
 
   events.forEach((event, index) => {
     if (
@@ -160,8 +144,9 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
       event.type != "LIFECYCLE" &&
       logEvents.length > 0
     ) {
-      items.push(renderLogSection());
-      logEvents.length = 0;
+      console.log("logEvents", logEvents);
+      items.push(<LogSection events={logEvents} />);
+      logEvents = [];
     }
 
     switch (event.type) {
@@ -184,30 +169,45 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
   });
 
   if (logEvents.length > 0) {
-    items.push(renderLogSection());
-    logEvents.length = 0;
+    items.push(<LogSection events={logEvents} />);
+    logEvents = [];
   }
 
   return <div className="flex flex-col gap-2 pb-6">{items}</div>;
 };
 
-const ErrorItem = ({ error }: { error: ErrorEvent }) => {
-  if (error.explanation) {
-    const details = formatExplanation(error.explanation).join("\n\n");
-    return (
-      <div className="flex flex-col pt-4">
-        <MarkdownWrapper content={details} />
-        <div className="flex items-center gap-2 py-4">
-          <Sparkles className="size-4 text-yellow-500" />
-          <span className="text-xs italic text-gray-700">
-            This content is AI-generated and may contain errors
-          </span>
-        </div>
+const Explanation = ({ explanation }: { explanation: any }) => {
+  const details = formatExplanation(explanation).join("\n\n");
+  return (
+    <div className="flex flex-col pt-4 pl-2 pr-4">
+      <MarkdownWrapper content={details} />
+      <div className="flex items-center gap-2 py-4">
+        <Sparkles className="size-4 text-yellow-500" />
+        <span className="text-xs italic text-gray-700">
+          This content is AI-generated and may contain errors
+        </span>
       </div>
-    );
-  }
+    </div>
+  );
+};
 
-  return null; //<div>{error.message}</div>;
+const ErrorItem = ({ error }: { error: ErrorEvent }) => {
+  const logEvent: LogEvent = {
+    requestId: error.requestId,
+    type: "LOG",
+    level: LogLevel.ERROR,
+    message: error.message,
+    timestamp: error.timestamp,
+    objUri: error.objUri,
+    objType: error.objType,
+  };
+
+  return (
+    <div>
+      <LogSection events={[logEvent]} />
+      {error.explanation && <Explanation explanation={error.explanation} />}
+    </div>
+  );
 };
 
 const LogItem = ({ log }: { log: LogEvent }) => {

@@ -3,8 +3,8 @@ import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Relationship, Resource, ResourceContext } from "@/resource-context";
+import { createFileRoute, useRouter , useNavigate } from "@tanstack/react-router";
+import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -27,7 +27,6 @@ import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
-import { useNavigate } from "@tanstack/react-router";
 
 const DEFAULT_TAB = "details";
 
@@ -364,13 +363,11 @@ function ResourcePage() {
           </CardContent>
         </TabsContent>
         <TabsContent value="logs">
-          <div className="flex flex-col gap-8">
-            <CardContent className="h-full pt-2 sm:pt-6">
-              {selectedResource && (
-                <Timeline events={events} className="mt-0" />
-              )}
-            </CardContent>
-          </div>
+          <CardContent className="h-full p-0">
+            {selectedResource && (
+              <Timeline events={events} className="mt-0" />
+            )}
+          </CardContent>
         </TabsContent>
 
         <TabsContent value="relationships">
