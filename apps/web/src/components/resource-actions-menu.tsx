@@ -10,7 +10,7 @@ import { DeleteResourceDialog } from "./delete-resource";
 import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
 import { Resource, ResourceType } from "@/resource-context";
-import { useCreateResource } from "@/create-resource-context";
+import { useNavigate } from "@tanstack/react-router";
 
 export const ResourceActionsMenu = ({
   resource,
@@ -22,10 +22,10 @@ export const ResourceActionsMenu = ({
   onDeleteClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { handleCreateOrEdit: openEditWizard } = useCreateResource();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
   const [isReadOpen, setIsReadOpen] = useState(false);
+  const navigate = useNavigate();
 
   const closeMenu = () => setIsOpen(false);
 
@@ -40,7 +40,9 @@ export const ResourceActionsMenu = ({
       <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem
           onSelect={() => {
-            openEditWizard(resource, resourceType);
+            navigate({
+              to: `/resources/edit/${resource.objUri.replace("kblocks://", "")}`,
+            });
             closeMenu();
           }}
         >

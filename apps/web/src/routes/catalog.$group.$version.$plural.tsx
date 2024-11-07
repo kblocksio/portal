@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "@/components/markdown";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { useAppContext } from "@/app-context";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 
