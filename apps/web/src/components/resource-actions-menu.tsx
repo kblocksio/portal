@@ -10,7 +10,7 @@ import { DeleteResourceDialog } from "./delete-resource";
 import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
 import { Resource, ResourceType } from "@/resource-context";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
+import { useCreateResource } from "@/create-resource-context";
 
 export const ResourceActionsMenu = ({
   resource,
@@ -22,7 +22,7 @@ export const ResourceActionsMenu = ({
   onDeleteClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { openWizard: openEditWizard } = useCreateResourceWizard();
+  const { handleCreateOrEdit: openEditWizard } = useCreateResource();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
   const [isReadOpen, setIsReadOpen] = useState(false);

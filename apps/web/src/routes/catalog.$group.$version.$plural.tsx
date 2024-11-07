@@ -19,14 +19,6 @@ function Catalog() {
   const { group, version, plural } = Route.useParams();
   const [currentResourceType, setCurrentResourceType] =
     useState<ResourceType | null>(null);
-  const { openWizard } = useCreateResourceWizard();
-
-  const onCreateResource = useCallback(
-    (resourceType: ResourceType) => {
-      openWizard(undefined, resourceType, 2);
-    },
-    [openWizard],
-  );
 
   useEffect(() => {
     setBreadcrumbs([

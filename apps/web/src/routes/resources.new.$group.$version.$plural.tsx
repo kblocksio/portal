@@ -1,9 +1,8 @@
 import { useAppContext } from "@/app-context";
 import { ResourceForm } from "@/components/resource-form/resource-form";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
-import { useCreateResourceWizard } from "@/create-resource-wizard-context";
+import { useCreateResource } from "@/create-resource-context";
 import { ResourceContext, ResourceType } from "@/resource-context";
-import { parseBlockUri } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useContext, useEffect, useMemo } from "react";
@@ -15,7 +14,7 @@ export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
 
 function CreateResourcePage() {
   const { resourceTypes } = useContext(ResourceContext);
-  const { handleCreateOrEdit, isLoading } = useCreateResourceWizard();
+  const { handleCreateOrEdit, isLoading } = useCreateResource();
   const { setBreadcrumbs } = useAppContext();
   const { group, version, plural } = Route.useParams();
   const navigate = useNavigate();
