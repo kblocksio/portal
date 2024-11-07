@@ -21,7 +21,7 @@ export const ResourceTypeCard = ({
   return (
     <Card
       className={cn(
-        "flex w-[300px] flex-col rounded-md shadow-sm",
+        "flex flex-col rounded-md shadow-sm sm:w-[300px]",
         onCardClick && "hover:bg-muted cursor-pointer",
       )}
       onClick={(e) => {
