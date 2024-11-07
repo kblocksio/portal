@@ -43,7 +43,7 @@ function Resources() {
   }, [setBreadcrumbs]);
 
   return (
-    <div className="flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
+    <div className="flex flex-col gap-4 py-4 pt-0 sm:gap-12 sm:py-8">
       <ProjectHeader selectedProject={ResourcePageProject} />
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
@@ -59,28 +59,32 @@ function Resources() {
 }
 
 const LoadingSkeleton = () => {
-  return [...Array(3)].map((_, index) => (
-    <div key={index} className="w-full space-y-4 p-4">
-      <div className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-6 w-6" />
-          <Skeleton className="h-6 w-16" />
-        </div>
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-4 w-4 rounded-full" />
-            <Skeleton className="h-4 w-40" />
+  return (
+    <div className="space-y-8">
+      {[...Array(3)].map((_, index) => (
+        <div key={index} className="w-full">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-6 w-6" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+            <div className="flex grow items-center justify-between">
+              <div className="flex grow items-center space-x-4 sm:w-auto">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-full sm:max-w-40" />
+              </div>
+              <Skeleton className="hidden h-4 w-32 sm:block" />
+            </div>
+            <div className="flex w-full items-center justify-between">
+              <div className="flex grow items-center space-x-4 sm:w-auto">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-full sm:max-w-40" />
+              </div>
+              <Skeleton className="hidden h-4 w-32 sm:block" />
+            </div>
           </div>
-          <Skeleton className="h-4 w-32" />
         </div>
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-4 w-4 rounded-full" />
-            <Skeleton className="h-4 w-40" />
-          </div>
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
+      ))}
     </div>
-  ));
+  );
 };
