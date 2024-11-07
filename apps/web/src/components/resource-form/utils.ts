@@ -54,6 +54,10 @@ export const reorderProperties = (schema: any): any => {
 };
 
 export const updateDataByPath = (data: any, path: string, value: any): any => {
+  if (typeof data !== "object") {
+    return value;
+  }
+
   const keys = path.split(".");
   const newData = { ...data };
 
