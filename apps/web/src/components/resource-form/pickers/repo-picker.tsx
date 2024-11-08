@@ -11,6 +11,7 @@ import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "@/hooks/use-fetch";
 import { linkVariants } from "@/components/ui/link";
 import { Field } from "../form-field";
+import { InputField } from "../input-field";
 
 interface RepoPickerProps {
   initialValue?: string;
@@ -19,7 +20,7 @@ interface RepoPickerProps {
   required?: boolean;
   description?: string;
   hideField?: boolean;
-  handleOnSelection?: (repository: Repository | null) => void;
+  handleOnSelection?: (repository: string | null) => void;
 }
 
 export const RepoPicker = memo(function RepoPicker({
@@ -90,15 +91,33 @@ export const RepoPicker = memo(function RepoPicker({
   }, [selectedInstallationId, refetchRepositories]);
 
   useEffect(() => {
-    const selectedRepository = repositories?.find(
-      (repo) => repo.full_name === selectedRepositoryFullName,
-    );
-    handleOnSelection?.(selectedRepository ?? null);
-  }, [repositories, selectedRepositoryFullName, handleOnSelection]);
+    handleOnSelection?.(selectedRepositoryFullName ?? null);
+  }, [selectedRepositoryFullName, handleOnSelection]);
 
   const isLoading = useMemo(() => {
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
+
+  if (import.meta.env.VITE_SKIP_AUTH) {
+    return (
+      <Field
+        fieldName={fieldName}
+        description={description}
+        hideField={hideField}
+        required={required}
+      >
+        <InputField
+          required={required}
+          placeholder="Enter repository name (GitHub integration is disabled in DEV mode)"
+          type="text"
+          value={initialValue ?? ""}
+          onChange={(value) => {
+            handleOnSelection?.(value as string);
+          }}
+        />
+      </Field>
+    );
+  }
 
   return (
     <Field
@@ -107,7 +126,7 @@ export const RepoPicker = memo(function RepoPicker({
       hideField={hideField}
       required={required}
     >
-      <div className="ml-2 mr-2 flex flex-col gap-4">
+      <div className="ml-0 mr-0 flex flex-col gap-4">
         <div className="flex items-center justify-between gap-2">
           <Select
             disabled={isLoadingInstallations}
@@ -170,10 +189,9 @@ export const RepoPicker = memo(function RepoPicker({
             </SelectContent>
           </Select>
         </div>
-        <div className="text-muted-foreground mb-4 mt-4 text-sm">
-          <p>
-            Can't find the repository you're looking for? You may need to adjust
-            your GitHub App installation.{" "}
+        <div className="text-muted-foreground mb-4 mt-0 ml-2 text-xs">
+          <p className="text-xs">
+            {"Can't find the repository you're looking for? You may need to adjust your GitHub App installation. "}
             <a
               href="https://github.com/apps/kblocks-io/installations/new"
               target="_blank"

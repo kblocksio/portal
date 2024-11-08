@@ -60,8 +60,8 @@ export const resolvePickerField = ({
           initialValue={value}
           defaultValue={defaultValue}
           handleOnSelection={(repo) => {
-            if (repo?.full_name) {
-              handleChange(repo?.full_name);
+            if (repo !== null) {
+              handleChange(repo);
             }
           }}
         />

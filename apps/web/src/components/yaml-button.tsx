@@ -12,6 +12,7 @@ import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { dump } from "js-yaml";
 import { Button } from "./ui/button";
 import { ClipboardCheckIcon, ClipboardIcon } from "lucide-react";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 SyntaxHighlighter.registerLanguage("yaml", yaml);
 
@@ -27,21 +28,29 @@ export default function YamlButton({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTitle className="sr-only">YAML</DialogTitle>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <div className="mt-4 overflow-auto rounded border">
-          <CopyButton text={yamlString} className="absolute top-12 right-8"/>
-          <SyntaxHighlighter
-            language="yaml"
-            style={docco}
-            customStyle={{
-              fontSize: "14px",
-              padding: "16px",
-              // backgroundColor: "transparent",
-            }}
-          >
+        <DialogDescription>
+          <p className="text-sm text-gray-500">
+            Copy & paste to add this into a Kubernetes manifest
+          </p>
+        </DialogDescription>
+        <div className="overflow-auto rounded border">
+          <div className="relative">
+            <CopyButton text={yamlString} className="absolute top-2 right-2 z-10"/>
+            <SyntaxHighlighter
+              language="yaml"
+              style={docco}
+              customStyle={{
+                fontSize: "14px",
+                padding: "16px",
+                // backgroundColor: "transparent",
+              }}
+            >
             {yamlString}
-          </SyntaxHighlighter>
+            </SyntaxHighlighter>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
