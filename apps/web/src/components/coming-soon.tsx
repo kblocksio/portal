@@ -1,90 +1,77 @@
+import { Button } from "./ui/button";
+import { SparklesCore } from "./ui/sparkles";
+import wingLogo from "../assets/wing-light.svg";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
-import "./coming-soon.css";
-
-const Star = () => {
-  const style = useMemo(() => {
-    const size = Math.ceil(Math.random() * 2);
-    const delay = Math.random().toFixed(2);
-    const duration = 1 + Math.random() * 5;
-    const intensity = Math.random() * 0.5 + 0.25;
-    return {
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      width: `${size}px`,
-      height: `${size}px`,
-      transitionDelay: `${delay}s`,
-      animationDelay: `${delay}s`,
-      "--duration": `${duration}s`,
-      backgroundColor: `rgba(255, 255, 255, ${intensity})`,
-    };
-  }, []);
+export const ComingSoon = () => {
   return (
-    <div
-      className="absolute animate-[pulse_var(--duration)_ease-in-out_infinite] rounded-full"
-      style={style}
-    ></div>
-  );
-};
-
-const starCount = 1000;
-
-export function ComingSoon() {
-  return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black bg-gradient-to-b from-black via-purple-900/80 to-indigo-900/80">
-      <div className="pointer-events-none">
-        {Array.from({ length: starCount }).map((_, index) => (
-          <Star key={index} />
-        ))}
+    <div className="flex h-full w-full flex-col items-center justify-center gap-12 overflow-hidden bg-black">
+      <div className="absolute inset-0 h-screen w-full">
+        <SparklesCore
+          id="tsparticlesfullpage"
+          background="transparent"
+          minSize={0.6}
+          maxSize={1.4}
+          particleDensity={100}
+          className="h-full w-full"
+          particleColor="#FFFFFF"
+        />
       </div>
-
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="z-10 flex flex-col items-center text-center"
-      >
-        <img src="/images/wing.svg" alt="Wing Logo" />
+      <div className="mx-auto flex flex-col items-center justify-center gap-10">
+        <motion.img
+          src={wingLogo}
+          className="text-white"
+          alt="Wing Logo"
+          width={280}
+          height={153}
+          initial={{ opacity: 0, y: 30, scale: 0.75 }}
+          animate={{ opacity: 0.68, y: 0, scale: 1 }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+        />
         <motion.h1
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mb-4 text-5xl font-bold text-white"
+          className={cn(
+            "text-center text-3xl font-bold md:text-7xl lg:text-6xl",
+            "bg-gradient-to-b from-neutral-50 to-neutral-300 bg-clip-text text-transparent",
+          )}
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 3, ease: "easeInOut" }}
         >
-          Coming Soon
+          Your{" "}
+          <span className="bg-gradient-to-b from-yellow-50 to-yellow-600 bg-clip-text text-transparent">
+            golden
+          </span>{" "}
+          path to production
         </motion.h1>
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="mb-8 text-xl text-white"
-        >
-          We're working on something{" "}
-          <motion.span
-            className="font-bold"
-            animate={{
-              color: [
-                "hsl(0, 100%, 70%)",
-                "hsl(60, 100%, 70%)",
-                "hsl(120, 100%, 70%)",
-                "hsl(180, 100%, 70%)",
-                "hsl(240, 100%, 70%)",
-                "hsl(300, 100%, 70%)",
-                "hsl(360, 100%, 70%)",
-              ],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          >
-            exciting
-          </motion.span>
-          . Come back later!
-        </motion.p>
-      </motion.div>
+        {/* <TextGenerateEffect
+          className="mt-6 self-end"
+          textClassName="text-white text-3xl"
+          duration={4}
+          filter={false}
+          words={"Coming Soon..."}
+        /> */}
+      </div>
+      <Button
+        variant="outline"
+        className="z-10"
+        onClick={() => {
+          window.open("https://go.kblocks.io/early-access", "_blank");
+        }}
+      >
+        Apply for early access
+      </Button>
+      {/* <button
+        className={cn(
+          "relative overflow-hidden rounded-full px-6 py-3",
+          "bg-gradient-to-r from-yellow-500 to-yellow-600",
+          "text-lg font-bold text-white shadow-lg",
+          "transform transition-transform hover:scale-105",
+          "focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50",
+        )}
+      >
+        Apply for early access
+      </button> */}
     </div>
   );
-}
+};
