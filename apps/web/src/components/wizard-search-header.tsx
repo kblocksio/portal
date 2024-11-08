@@ -21,7 +21,9 @@ export const WizardSearchHeader = ({
       <div className="relative mb-2 mt-4 flex-grow">
         <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
         <Input
+          autoFocus
           type="text"
+          tabIndex={0}
           placeholder="Search resource..."
           value={searchQuery}
           onChange={handleSearch}

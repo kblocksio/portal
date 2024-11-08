@@ -11,7 +11,7 @@ export const EngineLabel = ({ engine }: { engine: string }) => {
     <div className="flex items-center">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger tabIndex={-1}>
             <EngineIcon engine={engine} className="h-8 w-8" />
           </TooltipTrigger>
           <TooltipContent>
@@ -44,7 +44,11 @@ const EngineIcon = ({
     case "wing/tf-aws":
       return (
         <div className="flex items-center">
-          <img src="/images/terraform.svg" alt="Terraform" className={className} />
+          <img
+            src="/images/terraform.svg"
+            alt="Terraform"
+            className={className}
+          />
           <img src="/images/aws.svg" alt="AWS" className={className} />
           <img src="/images/wing.svg" alt="Tofu" className={className} />
         </div>

@@ -67,6 +67,8 @@ function Catalog() {
         <div className="relative mb-6 flex-grow">
           <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
           <Input
+            autoFocus
+            tabIndex={0}
             type="text"
             placeholder="Search resource..."
             value={searchQuery}

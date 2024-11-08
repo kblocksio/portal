@@ -20,6 +20,7 @@ export const ResourceTypeCard = ({
 
   return (
     <Card
+      tabIndex={onCardClick ? 0 : -1}
       className={cn(
         "flex flex-col rounded-md shadow-sm sm:w-[300px]",
         onCardClick && "hover:bg-muted cursor-pointer",
@@ -56,7 +57,10 @@ export const ResourceTypeCard = ({
         </div>
       </CardHeader>
       <CardFooter className="mt-auto flex justify-between">
-        <div className="text-muted-foreground flex space-x-4 text-sm">
+        <div
+          className="text-muted-foreground flex space-x-4 text-sm"
+          tabIndex={-1}
+        >
           <EngineLabel engine={resource.engine} />
         </div>
         <Button
