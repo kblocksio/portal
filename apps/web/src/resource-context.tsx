@@ -88,6 +88,10 @@ export const ResourceContext = createContext<ResourceContextValue>({
   relationships: {},
 });
 
+export function urlForResource(blockUri: BlockUriComponents) {
+  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
+}
+
 export const ResourceProvider = ({
   children,
 }: {
@@ -123,7 +127,7 @@ export const ResourceProvider = ({
     },
     onError: (error) => {
       console.error("WebSocket Error:", error);
-    }
+    },
   });
 
   const [previousMessage, setPreviousMessage] = useState<
@@ -175,10 +179,14 @@ export const ResourceProvider = ({
     const { object, objUri, objType } = message;
     const { system } = parseBlockUri(objUri);
 
-    if (!(object as ApiObject)?.metadata) {
+    // ignore object messages that don't have metadata (don't skip is object is empty - it means the object was deleted)
+    if (
+      object &&
+      Object.keys(object).length > 0 &&
+      !(object as ApiObject)?.metadata
+    ) {
       return;
     }
-
 
     if (objType === "kblocks.io/v1/blocks") {
       const block = object as BlockApiObject;
@@ -439,7 +447,3 @@ export type OwnerReference = {
   blockOwnerDeletion?: boolean;
   controller?: boolean;
 };
-
-function urlForResource(blockUri: BlockUriComponents) {
-  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
-}
