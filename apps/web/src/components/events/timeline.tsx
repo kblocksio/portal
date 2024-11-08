@@ -16,10 +16,11 @@ import {
   LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
+import { Button } from "../ui/button";
 
 type GroupHeader = {
   timestamp: Date;
@@ -34,39 +35,78 @@ type EventGroup = {
   requestId: string;
 };
 
+const EVENT_GROUPS_SIZE = 10;
+
 export default function Timeline({
   events,
 }: {
   events: WorkerEvent[];
   className?: string;
 }) {
+  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
   const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  useEffect(() => {
+    if (eventGroupIndex === undefined && eventGroups.length > 0) {
+      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+    }
+  }, [eventGroupIndex, eventGroups]);
+
+  const canLoadPreviousLogs = useMemo(
+    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
+    [eventGroupIndex],
+  );
+
+  const loadPreviousLogs = useCallback(() => {
+    setEventGroupIndex((eventGroupIndex) => {
+      if (eventGroupIndex === undefined) {
+        return undefined;
+      }
+
+      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+    });
+  }, []);
 
   return (
     <div className="flex flex-col gap-1">
-      {eventGroups.map((eventGroup, index) => (
-        <EventGroupItem
-          key={index}
-          eventGroup={eventGroup}
-          isLast={index === eventGroups.length - 1}
-        />
-      ))}
+      {eventGroups
+        .slice(eventGroupIndex)
+        .reverse()
+        .map((eventGroup, index) => (
+          <EventGroupItem
+            key={index}
+            eventGroup={eventGroup}
+            defaultOpen={index === 0}
+          />
+        ))}
+
+      {canLoadPreviousLogs && (
+        <div className="py-4">
+          <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+            Load previous logs
+          </Button>
+        </div>
+      )}
+      {!canLoadPreviousLogs && (
+        <div className="text-muted-foreground py-4 text-sm">
+          There are no older log entries to display.
+        </div>
+      )}
     </div>
   );
 }
 
 function EventGroupItem({
   eventGroup,
-  isLast,
+  defaultOpen,
 }: {
   eventGroup: EventGroup;
-  isLast: boolean;
+  defaultOpen: boolean;
 }) {
   const header = eventGroup.header;
   const ReasonIcon = getReasonIcon(header.reason);
   const reasonColor = getReasonColor(header.reason);
   const action = header.action;
-  const [isOpen, setIsOpen] = useState(isLast);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const isClickable = eventGroup.events.length > 0;
   const messageColor = getMessageColor(header);
