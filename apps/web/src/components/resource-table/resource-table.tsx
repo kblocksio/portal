@@ -40,7 +40,6 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
-import { ScrollAreaResizeObserver } from "../scroll-area-resize-observer";
 
 const useColumns = () => {
   const { resourceTypes, relationships, objects } = useContext(ResourceContext);
@@ -291,46 +290,41 @@ export const ResourceTable = (props: {
     <div className={cn("flex flex-col gap-8", props.className)}>
       <ResourceTableToolbar table={table} showActions={props.showActions} />
 
-      <ScrollAreaResizeObserver>
-        <div className={cn("rounded-md border bg-white", props.className)}>
-          <Table className="w-full">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) =>
-                    header.isPlaceholder ? null : (
-                      <TableHead
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        style={{ width: header.getSize() }}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      </TableHead>
-                    ),
-                  )}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <ResourceTableRow key={row.id} resource={row.original}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+      <div className={cn("rounded-md border bg-white", props.className)}>
+        <Table className="w-full">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) =>
+                  header.isPlaceholder ? null : (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      style={{ width: header.getSize() }}
+                    >
                       {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
+                        header.column.columnDef.header,
+                        header.getContext(),
                       )}
-                    </TableCell>
-                  ))}
-                </ResourceTableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </ScrollAreaResizeObserver>
+                    </TableHead>
+                  ),
+                )}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <ResourceTableRow key={row.id} resource={row.original}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </ResourceTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">

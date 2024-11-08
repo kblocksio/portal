@@ -20,7 +20,6 @@ import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
-import { ScrollAreaResizeObserver } from "../scroll-area-resize-observer";
 
 type GroupHeader = {
   timestamp: Date;
@@ -44,17 +43,15 @@ export default function Timeline({
   const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
 
   return (
-    <ScrollAreaResizeObserver>
-      <div className="flex flex-col gap-1">
-        {eventGroups.map((eventGroup, index) => (
-          <EventGroupItem
-            key={index}
-            eventGroup={eventGroup}
-            isLast={index === eventGroups.length - 1}
-          />
-        ))}
-      </div>
-    </ScrollAreaResizeObserver>
+    <div className="flex flex-col gap-1">
+      {eventGroups.map((eventGroup, index) => (
+        <EventGroupItem
+          key={index}
+          eventGroup={eventGroup}
+          isLast={index === eventGroups.length - 1}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -179,7 +176,7 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
 const Explanation = ({ explanation }: { explanation: any }) => {
   const details = formatExplanation(explanation).join("\n\n");
   return (
-    <div className="flex flex-col pt-4 pl-2 pr-4">
+    <div className="flex flex-col pl-2 pr-4 pt-4">
       <MarkdownWrapper content={details} />
       <div className="flex items-center gap-2 py-4">
         <Sparkles className="size-4 text-yellow-500" />
