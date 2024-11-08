@@ -121,6 +121,7 @@ app.get("/api/resources", async (_, res) => {
       objType: blockTypeFromUri(objUri),
       reason: "SYNC",
       timestamp: new Date(),
+      requestId: "<server>",
     });
   }
 
@@ -265,6 +266,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
     objType,
     reason: "CREATE",
     timestamp: new Date(),
+    requestId: "<server>",
   });
 
   sanitizeObject(obj);

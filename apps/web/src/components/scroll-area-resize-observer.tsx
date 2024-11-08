@@ -26,7 +26,7 @@ export const ScrollAreaResizeObserver = ({
   }, []);
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative w-full" ref={containerRef}>
       <div className="absolute inset-0 overflow-x-auto overflow-y-hidden">
         <div ref={contentRef}>{children}</div>
       </div>

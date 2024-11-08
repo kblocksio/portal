@@ -3,7 +3,11 @@ import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useRouter,
+  useNavigate,
+} from "@tanstack/react-router";
 import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
@@ -18,7 +22,7 @@ import {
 import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
-import { BlockUriComponents, formatBlockUri } from "@kblocks/api";
+import { formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useAppContext } from "@/app-context";
@@ -27,13 +31,8 @@ import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
-import { useNavigate } from "@tanstack/react-router";
 
 const DEFAULT_TAB = "details";
-
-export function urlForResource(blockUri: BlockUriComponents) {
-  return `/resources/${blockUri.group}/${blockUri.version}/${blockUri.plural}/${blockUri.system}/${blockUri.namespace}/${blockUri.name}`;
-}
 
 export const Route = createFileRoute(
   "/resources/$group/$version/$plural/$system/$namespace/$name",
@@ -79,6 +78,24 @@ function ResourcePage() {
     namespace,
     name,
   });
+
+  const ownerResourceURI = useMemo((): string | null => {
+    // Wait until relationships is populated
+    if (!relationships || Object.keys(relationships).length === 0) {
+      return null;
+    }
+    const rels = relationships[objUri];
+    if (!rels) {
+      return null;
+    }
+    let owner: string | null = null;
+    Object.keys(rels)?.forEach((key) => {
+      if (rels[key].type === "parent") {
+        owner = key;
+      }
+    });
+    return owner;
+  }, [Object.keys(relationships).length, objUri]);
 
   const [lastEventCount, setLastEventCount] = useState(
     Object.keys(eventsPerObject?.[objUri] ?? {}).length,
@@ -156,23 +173,32 @@ function ResourcePage() {
 
   useEffect(() => {
     if (!selectedResource) return;
-    setBreadcrumbs([
+    const breadcrumbs = [
       {
         name: "Resources",
         url: `/resources/`,
       },
+    ];
+    if (ownerResourceURI) {
+      breadcrumbs.push({
+        name: objects[ownerResourceURI].metadata.name,
+        url: `/resources/${ownerResourceURI.replace("kblocks://", "")}`,
+      });
+    }
+    setBreadcrumbs([
+      ...breadcrumbs,
       {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedResource, setBreadcrumbs]);
+  }, [selectedResource, setBreadcrumbs, ownerResourceURI]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8">
+    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -341,17 +367,17 @@ function ResourcePage() {
           </CardContent>
         </TabsContent>
         <TabsContent value="logs">
-          <div className="flex flex-col gap-8">
-            <CardContent className="h-full pt-2 sm:pt-6">
-              {selectedResource && (
-                <Timeline events={events} className="mt-0" />
-              )}
-            </CardContent>
-          </div>
+          <CardContent className="h-full p-0">
+            {selectedResource && (
+              <div className="pt-4 sm:pt-6">
+                <Timeline events={events} />
+              </div>
+            )}
+          </CardContent>
         </TabsContent>
 
         <TabsContent value="relationships">
-          <div className="flex h-[640px] flex-col gap-8">
+          <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
             <RelationshipGraph selectedResource={selectedResource} />
           </div>
         </TabsContent>

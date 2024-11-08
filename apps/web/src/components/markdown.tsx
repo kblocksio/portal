@@ -2,13 +2,13 @@ import Markdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { DocumentCheckIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import { getIconColors } from "@/lib/get-icon";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { markdownOverrides } from "@/lib/markdown-overides";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { ghcolors, githubGist } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import githubGist from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { Button } from "./ui/button";
+import remarkEmoji from "remark-emoji";
 
 export const MarkdownWrapper = ({
   content,
@@ -21,7 +21,7 @@ export const MarkdownWrapper = ({
     <Markdown
       className={"pb-2"}
       rehypePlugins={[rehypeRaw]}
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={[remarkGfm, remarkEmoji]}
       components={{
         ...markdownOverrides,
         ...componentsOverrides,

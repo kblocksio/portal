@@ -205,7 +205,7 @@ qkube use kblocks-demo.quickube.sh
 
 If you want to test the portal locally, you can use `kind` to setup the environment.
 
-Install kind, and setup all of the secrets as described in the previous section.
+Install kind, and setup all of the secrets and certs as described in the previous section.
 Then, install the blocks so they would refer to the local backend:
 
 ```sh
@@ -219,6 +219,14 @@ Then, install the portal in kind mode:
 cd $PORTAL
 ./install.sh kind
 ```
+
+Next, modify the `/etc/hosts` file to include the following line:
+
+```
+127.0.0.1 localhost.kblocks.io
+```
+
+Now the portal should be available at https://localhost.kblocks.io.
 
 That's it. Have fun!
 

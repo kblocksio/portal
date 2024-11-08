@@ -74,14 +74,30 @@ export const ArrayFieldRenderer = ({
   return (
     <div className="mb-6 space-y-4">
       <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="text-sm font-medium">
-          {splitAndCapitalizeCamelCase(fieldName ?? "")}
-          {required && <span className="text-destructive">*</span>}
-          {description && (
-            <p className="text-muted-foreground pt-1 text-[0.8rem]">
-              {linkifyDescription(sanitizeDescription(description))}
-            </p>
-          )}
+        <div className="relative">
+          <div className="text-sm font-medium">
+            {splitAndCapitalizeCamelCase(fieldName ?? "")}
+            {required && <span className="text-destructive">*</span>}
+            {description && (
+              <p className="text-muted-foreground pt-1 text-[0.8rem]">
+                {linkifyDescription(sanitizeDescription(description))}
+              </p>
+            )}
+            <input
+              type="text"
+              tabIndex={-1}
+              required={required}
+              value={items.length > 0 ? "true" : undefined}
+              onChange={() => {}}
+              style={{
+                position: "absolute",
+                opacity: 0,
+                pointerEvents: "none",
+                top: 0,
+                left: 0,
+              }}
+            />
+          </div>
         </div>
         <Button
           type="button"

@@ -24,25 +24,27 @@ export function ResourceTableToolbar<TData>({
   const { systems, namespaces, kinds } = useContext(ResourceContext);
 
   const newResourceButton = (
-      <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
-          New Resource...
-      </Button>
+    <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
+      New Resource...
+    </Button>
   );
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
-      <div className="w-1/2 sm:grow">
-        <Input
-          placeholder="Filter resources..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="h-8"
-        />
-      </div>
+    <div className="flex flex-wrap items-center justify-between gap-2 md:flex-nowrap">
+      <div className="flex grow items-center gap-2 sm:w-64">
+        <div className="grow">
+          <Input
+            placeholder="Filter resources..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="h-8"
+          />
+        </div>
 
-      {showActions && <div className="sm:hidden">{newResourceButton}</div>}
+        {showActions && <div className="md:hidden">{newResourceButton}</div>}
+      </div>
 
       <ScrollArea className="w-full" orientation="horizontal">
         <div className="flex items-center gap-2">

@@ -5,31 +5,55 @@ import {
   RefreshCw,
   ChevronRight,
   Sparkles,
+  Circle,
 } from "lucide-react";
 import {
+  ErrorEvent,
   EventAction,
   EventReason,
+  LifecycleEvent,
   LogEvent,
   LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
-import { ScrollAreaResizeObserver } from "../scroll-area-resize-observer";
+import { Button } from "../ui/button";
+import { AiErrorGuide } from "./ai-error-guide";
 
 type GroupHeader = {
   timestamp: Date;
   reason: EventReason;
   action: string;
   message: string;
-  details?: string;
 };
 
 type EventGroup = {
   header: GroupHeader;
-  logs: LogEvent[];
+  events: WorkerEvent[];
+  requestId: string;
+};
+
+const EVENT_GROUPS_SIZE = 10;
+
+const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+function formatDate(date: Date) {
+  const today = new Date();
+  const formattedDate = dateTimeFormat.format(date);
+  const isToday = today.toDateString() === date.toDateString();
+  return isToday ? `Today - ${formattedDate}` : `${formattedDate}`;
+}
+
+const TimeGroupHeader = (props: { timestamp: Date }) => {
+  const text = useMemo(() => formatDate(props.timestamp), [props.timestamp]);
+  return <p className="text-muted-foreground text-xs uppercase">{text}</p>;
 };
 
 export default function Timeline({
@@ -38,60 +62,93 @@ export default function Timeline({
   events: WorkerEvent[];
   className?: string;
 }) {
-  const eventGroups = useMemo(() => groupEventsByLifecycle(events), [events]);
+  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
+  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  useEffect(() => {
+    if (eventGroupIndex === undefined && eventGroups.length > 0) {
+      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+    }
+  }, [eventGroupIndex, eventGroups]);
+
+  const canLoadPreviousLogs = useMemo(
+    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
+    [eventGroupIndex],
+  );
+
+  const loadPreviousLogs = useCallback(() => {
+    setEventGroupIndex((eventGroupIndex) => {
+      if (eventGroupIndex === undefined) {
+        return undefined;
+      }
+
+      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+    });
+  }, []);
+
+  const reversedEventGroups = useMemo(
+    () => eventGroups.slice(eventGroupIndex).reverse(),
+    [eventGroups, eventGroupIndex],
+  );
 
   return (
-    <ScrollAreaResizeObserver>
-      <div className="relative w-full">
-        <div className="absolute left-3 top-2 h-full w-px bg-gray-200"></div>
-
-        <div className="flex flex-col gap-1">
-          {eventGroups.map((eventGroup, index) => (
-            <EventItem
+    reversedEventGroups.length > 0 && (
+      <div className="flex flex-col gap-1">
+        {reversedEventGroups.map((eventGroup, index) => (
+          <>
+            {(index === 0 ||
+              eventGroup.header.timestamp.getDay() !==
+                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+              <div className={cn(index !== 0 && "pt-6")}>
+                <TimeGroupHeader
+                  key={eventGroup.header.timestamp.getDate()}
+                  timestamp={eventGroup.header.timestamp}
+                />
+              </div>
+            )}
+            <EventGroupItem
               key={index}
               eventGroup={eventGroup}
-              isLast={index === eventGroups.length - 1}
+              defaultOpen={index === 0}
             />
-          ))}
-        </div>
+          </>
+        ))}
 
-        {/* <div
-        ref={(el) =>
-          el && el.scrollIntoView({ behavior: "smooth", block: "end" })
-        }
-      /> */}
+        {canLoadPreviousLogs && (
+          <div className="py-4">
+            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+              Load older entries
+            </Button>
+          </div>
+        )}
+        {!canLoadPreviousLogs && (
+          <div className="text-muted-foreground py-4 text-sm">
+            There are no older entries to display.
+          </div>
+        )}
       </div>
-    </ScrollAreaResizeObserver>
+    )
   );
 }
 
-function EventItem({
+function EventGroupItem({
   eventGroup,
-  isLast,
+  defaultOpen,
 }: {
   eventGroup: EventGroup;
-  isLast: boolean;
+  defaultOpen: boolean;
 }) {
   const header = eventGroup.header;
   const ReasonIcon = getReasonIcon(header.reason);
   const reasonColor = getReasonColor(header.reason);
   const action = header.action;
-  const [isOpen, setIsOpen] = useState(isLast);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  const isClickable = eventGroup.logs.length > 0 || header.details;
+  const isClickable = eventGroup.events.length > 0;
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
   return (
-    <div className="relative sm:pl-6">
-      <div className="absolute left-0 top-1.5">
-        <div className="flex items-center justify-around pl-0.5 pt-1.5 sm:pt-0">
-          <div className="flex items-center justify-center rounded-full border-gray-200 bg-white sm:size-5">
-            <ReasonIcon className={reasonColor} />
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col">
       <div
         className={cn("group flex gap-2")}
         onClick={() => setIsOpen(!isOpen)}
@@ -104,7 +161,7 @@ function EventItem({
         tabIndex={0}
       >
         <div className="group-hover:bg-muted flex w-full items-center gap-x-3 rounded-md px-2 py-1">
-          <div className="flex min-w-[130pt] items-center gap-1">
+          <div className="flex items-center gap-1">
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform duration-300",
@@ -112,6 +169,8 @@ function EventItem({
                 isClickable ? "visible" : "invisible",
               )}
             />
+
+            <ReasonIcon className={cn(reasonColor, "size-4")} />
 
             <div className="-mx-1.5 sm:mx-0">
               <Timestamp timestamp={header.timestamp} />
@@ -130,65 +189,134 @@ function EventItem({
           </div>
         </div>
       </div>
-      {isOpen && eventGroup.logs.length > 0 && (
-        <div className="mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
-          {eventGroup.logs.map((log, index) => (
-            <LogItem key={index} log={log} />
-          ))}
-        </div>
-      )}
-
-      {isOpen && header.details && (
-        <div className="flex flex-col pt-6">
-          <MarkdownWrapper content={header.details} />
-          <div className="flex items-center gap-2 py-4">
-            <Sparkles className="size-4 text-yellow-500" />
-            <span className="text-xs italic text-gray-700">
-              This content is AI-generated and may contain errors
-            </span>
-          </div>
-        </div>
+      {isOpen && eventGroup.events.length > 0 && (
+        <Events events={eventGroup.events} />
       )}
     </div>
   );
 }
 
-function LogItem({ log }: { log: LogEvent }) {
-  const timestamp = log.timestamp.toLocaleTimeString();
-  const message = log.message;
+const LogSection = ({ events }: { events: LogEvent[] }) => {
+  return (
+    <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+      {events.map((event, index) => (
+        <LogItem key={index} log={event} />
+      ))}
+    </div>
+  );
+};
 
-  const classes = [];
+const Events = ({ events }: { events: WorkerEvent[] }) => {
+  const items: React.ReactNode[] = [];
+  let logEvents: LogEvent[] = [];
 
-  switch (log.level) {
-    case LogLevel.DEBUG:
-      classes.push("text-gray-500");
-      break;
-    case LogLevel.INFO:
-      classes.push("text-gray-400");
-      break;
-    case LogLevel.WARNING:
-      classes.push("text-yellow-500");
-      break;
-    case LogLevel.ERROR:
-      classes.push("text-red-500");
-      break;
+  events.forEach((event, index) => {
+    if (
+      event.type !== "LOG" &&
+      event.type != "LIFECYCLE" &&
+      logEvents.length > 0
+    ) {
+      items.push(<LogSection events={logEvents} />);
+      logEvents = [];
+    }
+
+    switch (event.type) {
+      case "LOG":
+        logEvents.push(event);
+        break;
+
+      case "ERROR":
+        items.push(<ErrorItem key={index} error={event} />);
+        break;
+
+      case "LIFECYCLE":
+        logEvents.push(renderLogEvent(event));
+        break;
+
+      default:
+        // ignore
+        break;
+    }
+  });
+
+  if (logEvents.length > 0) {
+    items.push(<LogSection events={logEvents} />);
+    logEvents = [];
   }
 
-  if (!log.parentLogId) {
-    classes.push("text-white");
-  }
+  return <div className="flex flex-col gap-2 pb-6">{items}</div>;
+};
+
+const Explanation = ({ explanation }: { explanation: any }) => {
+  const details = useMemo(
+    () => formatExplanation(explanation).join("\n\n"),
+    [explanation],
+  );
+  return (
+    <div className="w-full p-8">
+      <AiErrorGuide>
+        <MarkdownWrapper content={details} />
+        <div className="flex items-center gap-2 py-4">
+          <Sparkles className="size-4 text-yellow-500" />
+          <span className="text-muted-foreground text-xs italic">
+            This content is AI-generated and may contain errors.
+          </span>
+        </div>
+      </AiErrorGuide>
+    </div>
+  );
+};
+
+const ErrorItem = ({ error }: { error: ErrorEvent }) => {
+  const logEvent: LogEvent = {
+    requestId: error.requestId,
+    type: "LOG",
+    level: LogLevel.ERROR,
+    message: error.message,
+    timestamp: error.timestamp,
+    objUri: error.objUri,
+    objType: error.objType,
+  };
 
   return (
-    <div className="text-xs">
-      <div className="grid grid-cols-[8em_1fr]">
-        <span className="text-gray-600">{timestamp}</span>
-        <span className={cn("whitespace-pre pr-4", classes)}>
-          <pre>{message}</pre>
-        </span>
-      </div>
+    <div>
+      <LogSection events={[logEvent]} />
+      {error.explanation && <Explanation explanation={error.explanation} />}
     </div>
   );
-}
+};
+
+const LogItem = ({ log }: { log: LogEvent }) => {
+  const LogLine = ({ line }: { line: string }) => {
+    const timestamp = log.timestamp.toLocaleTimeString();
+
+    const classes = [];
+
+    const colors = {
+      [LogLevel.DEBUG]: [`text-gray-200`, "text-gray-200"],
+      [LogLevel.INFO]: [`text-gray-400`, "text-white"],
+      [LogLevel.WARNING]: [`text-yellow-500`, "text-yellow-200"],
+      [LogLevel.ERROR]: [`text-red-800`, "text-red-500"],
+    };
+
+    const index = !log.parentLogId ? 1 : 0;
+    classes.push(colors[log.level][index]);
+
+    return (
+      <div className="text-xs">
+        <div className="grid grid-cols-[8em_1fr]">
+          <span className="text-gray-600">{timestamp}</span>
+          <span className={cn("whitespace-pre pr-4", classes)}>
+            <pre>{line}</pre>
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const lines = log.message.trimEnd().split("\n");
+  return lines.map((line, index) => <LogLine key={index} line={line} />);
+};
 
 const getReasonIcon = (reason: EventReason) => {
   switch (reason) {
@@ -203,7 +331,7 @@ const getReasonIcon = (reason: EventReason) => {
     case EventReason.Resolved:
       return CheckCircle;
     default:
-      return Activity;
+      return Circle;
   }
 };
 
@@ -224,81 +352,109 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-function groupEventsByLifecycle(events: WorkerEvent[]) {
+const renderHeader = (event: WorkerEvent): GroupHeader => {
+  switch (event.type) {
+    case "LIFECYCLE":
+      return {
+        timestamp: event.timestamp,
+        reason: event.event.reason,
+        action: event.event.action,
+        message: event.event.message,
+      };
+
+    case "ERROR":
+      return {
+        timestamp: event.timestamp,
+        reason: EventReason.Failed,
+        action: event.body?.type ?? EventAction.Sync,
+        message: event.body?.message ?? "",
+      };
+
+    case "LOG":
+      return {
+        timestamp: event.timestamp,
+        reason: EventReason.Started,
+        action: event.level.toString(),
+        message: event.message,
+      };
+
+    default:
+      return {
+        timestamp: new Date(),
+        reason: EventReason.Started,
+        action: EventAction.Sync,
+        message: "",
+      };
+  }
+};
+
+function groupEventsByRequestId(events: WorkerEvent[]) {
   const groups: EventGroup[] = [];
 
-  let currentGroup: EventGroup | null = null;
+  let currentGroup: EventGroup = {
+    requestId: "",
+    header: {
+      timestamp: new Date(),
+      reason: EventReason.Started,
+      action: EventAction.Sync,
+      message: "",
+    },
+    events: [],
+  };
 
   for (const event of events) {
-    if (event.type === "LIFECYCLE") {
+    const currentRequestId = currentGroup.requestId;
+
+    // new group
+    if (event.requestId !== currentRequestId) {
       currentGroup = {
-        header: {
-          timestamp: event.timestamp,
-          reason: event.event.reason,
-          action: event.event.action,
-          message: event.event.message,
-        },
-        logs: [],
-      };
-
-      const messageLines = event.event.message.split("\n");
-      if (messageLines.length > 1) {
-        currentGroup.logs.push(
-          ...messageLines.map((line) => renderLogEvent(event, line)),
-        );
-      }
-
-      groups.push(currentGroup);
-    } else if (event.type === "LOG") {
-      if (currentGroup) {
-        const messageLines = event.message.trimEnd().split("\n");
-
-        // if (!event.parentLogId) {
-        //   messageLines.unshift("");
-        // }
-
-        currentGroup.logs.push(
-          ...messageLines.map((line) => ({
-            ...event,
-            message: line,
-          })),
-        );
-      } else {
-        // ignore
-      }
-    } else if (event.type === "ERROR" && event.explanation && currentGroup) {
-      const details = formatExplanation(event.explanation);
-      currentGroup.header.details = details.join("\n\n");
-    } else if (event.type === "ERROR") {
-      currentGroup = {
-        header: {
-          timestamp: event.timestamp ?? new Date(),
-          reason: EventReason.Failed,
-          action: event.body?.type ?? EventAction.Sync,
-          message: event.message,
-        },
-        logs: [],
+        requestId: event.requestId,
+        header: renderHeader(event),
+        events: [],
       };
 
       groups.push(currentGroup);
-    } else {
-      // ignore
-      console.log("ignoring event", event);
     }
+
+    switch (event.type) {
+      case "ERROR":
+        currentGroup.header.reason = EventReason.Failed;
+        currentGroup.header.message = event.message;
+        break;
+
+      case "LIFECYCLE":
+        currentGroup.header.reason = event.event.reason;
+        currentGroup.header.message = event.event.message;
+        break;
+    }
+
+    currentGroup?.events.push(event);
   }
 
   return groups;
 }
 
-const renderLogEvent = (event: WorkerEvent, line: string): LogEvent => {
+const renderLogEvent = (event: LifecycleEvent): LogEvent => {
+  const level = renderLevel(event.event.reason);
+
   return {
+    requestId: event.requestId,
     type: "LOG",
-    level: LogLevel.ERROR,
-    message: line,
+    level,
+    message: event.event.message,
     objUri: event.objUri,
     objType: event.objType,
     timestamp: event.timestamp,
   };
+};
+
+const renderLevel = (reason: EventReason): LogLevel => {
+  switch (reason) {
+    case EventReason.Failed:
+      return LogLevel.ERROR;
+    default:
+      return LogLevel.INFO;
+  }
 };
 
 const getMessageColor = (header: GroupHeader) => {

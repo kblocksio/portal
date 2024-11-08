@@ -89,16 +89,32 @@ export const ObjectFieldRenderer = ({
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
-              <Label className="text-sm font-medium">
-                {splitAndCapitalizeCamelCase(fieldName)}
-                {required && <span className="text-destructive">*</span>}
-              </Label>
-              {isObjectPopulated(objectData) && (
-                <Badge variant="secondary" className="text-xs">
-                  <Check className="mr-1 h-3 w-3" />
-                  Set
-                </Badge>
-              )}
+              <div className="relative">
+                <Label className="text-sm font-medium">
+                  {splitAndCapitalizeCamelCase(fieldName)}
+                  {required && <span className="text-destructive">*</span>}
+                </Label>
+                {isObjectPopulated(objectData) && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Check className="mr-1 h-3 w-3" />
+                    Set
+                  </Badge>
+                )}
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  required={required}
+                  value={isObjectPopulated(objectData) ? "true" : undefined}
+                  onChange={() => {}}
+                  style={{
+                    position: "absolute",
+                    opacity: 0,
+                    pointerEvents: "none",
+                    top: 0,
+                    left: 0,
+                  }}
+                />
+              </div>
             </div>
             {description && (
               <p className="text-muted-foreground pt-1 text-[0.8rem]">

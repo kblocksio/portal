@@ -8,7 +8,12 @@ const outputs = process.env.KBLOCKS_OUTPUTS;
 const name = object.metadata.name;
 
 const writeOutputs = (name) => {
-  fs.writeFileSync(outputs, JSON.stringify({ useCommand: `qkube use ${name}.quickube.sh` }));
+  const hostname = `${name}.quickube.sh`;
+  
+  fs.writeFileSync(outputs, JSON.stringify({ 
+    useCommand: `qkube use ${hostname}`,
+    hostname
+  }));
 };
 
 exports.create = async () => {

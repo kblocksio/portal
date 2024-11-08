@@ -13,6 +13,12 @@ if [ -z "$KBLOCKS_HOST" ]; then
   exit 1
 fi
 
+# Error if KBLOCKS_HOST doesn't start with http
+if [[ "$KBLOCKS_HOST" != http://* && "$KBLOCKS_HOST" != https://* ]]; then
+  echo "KBLOCKS_HOST must start with http:// or https:// (e.g. https://staging.kblocks.io)"
+  exit 1
+fi
+
 echo "KBLOCKS_CLI: $KBLOCKS_CLI"
 
 #------------------------------------------------------------------------------#
