@@ -30,7 +30,7 @@ scaling:
     targetCpuUtilization: {{ default 70 .Values.scaling.autoscaling.targetCpuUtilization }}
     targetMemoryUtilization: {{ default 70 .Values.scaling.autoscaling.targetMemoryUtilization }}
   {{- else }}
-  replicas: {{ default 2 .Values.scaling.replicas }}
+  replicas: {{ default 2 (dig "scaling" "replicas" 2 .Values) }}
   {{- end }}
 region: {{ .Values.region }}
 {{- if .Values.ingress }}
@@ -47,7 +47,6 @@ ingress:
 {{- end }}
 {{- if and .Values.ingress .Values.ingress.path }}
 port: 3000
-{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
