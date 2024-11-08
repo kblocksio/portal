@@ -38,6 +38,24 @@ type EventGroup = {
 
 const EVENT_GROUPS_SIZE = 10;
 
+const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+function formatDate(date: Date) {
+  const today = new Date();
+  const formattedDate = dateTimeFormat.format(date);
+  const isToday = today.toDateString() === date.toDateString();
+  return isToday ? `Today - ${formattedDate}` : `${formattedDate}`;
+}
+
+const TimeGroupHeader = (props: { timestamp: Date }) => {
+  const text = useMemo(() => formatDate(props.timestamp), [props.timestamp]);
+  return <p className="text-muted-foreground text-xs uppercase">{text}</p>;
+};
+
 export default function Timeline({
   events,
 }: {
@@ -67,32 +85,48 @@ export default function Timeline({
     });
   }, []);
 
+  const reversedEventGroups = useMemo(
+    () => eventGroups.slice(eventGroupIndex).reverse(),
+    [eventGroups, eventGroupIndex],
+  );
+
   return (
-    <div className="flex flex-col gap-1">
-      {eventGroups
-        .slice(eventGroupIndex)
-        .reverse()
-        .map((eventGroup, index) => (
-          <EventGroupItem
-            key={index}
-            eventGroup={eventGroup}
-            defaultOpen={index === 0}
-          />
+    reversedEventGroups.length > 0 && (
+      <div className="flex flex-col gap-1">
+        {reversedEventGroups.map((eventGroup, index) => (
+          <>
+            {(index === 0 ||
+              eventGroup.header.timestamp.getDay() !==
+                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+              <div className={cn(index !== 0 && "pt-6")}>
+                <TimeGroupHeader
+                  key={eventGroup.header.timestamp.getDate()}
+                  timestamp={eventGroup.header.timestamp}
+                />
+              </div>
+            )}
+            <EventGroupItem
+              key={index}
+              eventGroup={eventGroup}
+              defaultOpen={index === 0}
+            />
+          </>
         ))}
 
-      {canLoadPreviousLogs && (
-        <div className="py-4">
-          <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-            Load previous logs
-          </Button>
-        </div>
-      )}
-      {!canLoadPreviousLogs && (
-        <div className="text-muted-foreground py-4 text-sm">
-          There are no older log entries to display.
-        </div>
-      )}
-    </div>
+        {canLoadPreviousLogs && (
+          <div className="py-4">
+            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+              Load older entries
+            </Button>
+          </div>
+        )}
+        {!canLoadPreviousLogs && (
+          <div className="text-muted-foreground py-4 text-sm">
+            There are no older entries to display.
+          </div>
+        )}
+      </div>
+    )
   );
 }
 
@@ -182,7 +216,6 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
       event.type != "LIFECYCLE" &&
       logEvents.length > 0
     ) {
-      console.log("logEvents", logEvents);
       items.push(<LogSection events={logEvents} />);
       logEvents = [];
     }

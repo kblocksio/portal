@@ -3,7 +3,11 @@ import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createFileRoute, useRouter , useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useRouter,
+  useNavigate,
+} from "@tanstack/react-router";
 import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
@@ -194,7 +198,7 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden py-4 sm:gap-12 sm:py-8 overflow-y-hidden">
+    <div className="container mx-auto flex flex-col gap-4 overflow-x-hidden overflow-y-hidden py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
           <div className="flex items-center gap-4">
@@ -365,13 +369,15 @@ function ResourcePage() {
         <TabsContent value="logs">
           <CardContent className="h-full p-0">
             {selectedResource && (
-              <Timeline events={events} className="mt-0" />
+              <div className="pt-4 sm:pt-6">
+                <Timeline events={events} />
+              </div>
             )}
           </CardContent>
         </TabsContent>
 
         <TabsContent value="relationships">
-          <div className="flex h-[640px] flex-col gap-8">
+          <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
             <RelationshipGraph selectedResource={selectedResource} />
           </div>
         </TabsContent>
