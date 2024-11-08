@@ -14,7 +14,6 @@ import { useNavigate } from "@tanstack/react-router";
 
 export const ResourceActionsMenu = ({
   resource,
-  resourceType,
   onDeleteClick,
 }: {
   resource: Resource;

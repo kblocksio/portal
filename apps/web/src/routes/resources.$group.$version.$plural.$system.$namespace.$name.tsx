@@ -3,11 +3,7 @@ import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  createFileRoute,
-  useRouter,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Resource, ResourceContext } from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
@@ -42,7 +38,6 @@ export const Route = createFileRoute(
 
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
-  const router = useRouter();
   const navigate = useNavigate();
   const {
     resourceTypes,
@@ -126,9 +121,9 @@ function ResourcePage() {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
       setSelectedResourceId(undefined);
-      router.history.back();
+      navigate({ to: "/resources" });
     }
-  }, [selectedResource, deleteInProgress, setSelectedResourceId, router]);
+  }, [selectedResource, deleteInProgress, setSelectedResourceId, navigate]);
 
   const selectedResourceType = useMemo(
     () =>
