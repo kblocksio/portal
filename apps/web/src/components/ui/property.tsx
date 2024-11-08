@@ -11,7 +11,7 @@ export const PropertyValue = ({ children }: PropsWithChildren) => {
   const isLink = typeof children === "string" && /<a\s/i.test(children);
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center truncate">
       {isLink && <span dangerouslySetInnerHTML={{ __html: children }} />}
       {!isLink && <span className="truncate">{children}</span>}
     </div>
@@ -19,9 +19,5 @@ export const PropertyValue = ({ children }: PropsWithChildren) => {
 };
 
 const renderKey = (key: string) => {
-  return (
-    <div className="flex items-center gap-2">
-      {splitAndCapitalizeCamelCase(key)}
-    </div>
-  );
+  return <div className="truncate">{splitAndCapitalizeCamelCase(key)}</div>;
 };
