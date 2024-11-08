@@ -204,6 +204,7 @@ jobs:
           - cron-job
           - networked-workload
           - postgres
+          - private-service
           - queue
           - quickube
           - redis
