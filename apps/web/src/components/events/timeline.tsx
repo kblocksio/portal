@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
+import { AiErrorGuide } from "./ai-error-guide";
 
 type GroupHeader = {
   timestamp: Date;
@@ -214,16 +215,21 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
 };
 
 const Explanation = ({ explanation }: { explanation: any }) => {
-  const details = formatExplanation(explanation).join("\n\n");
+  const details = useMemo(
+    () => formatExplanation(explanation).join("\n\n"),
+    [explanation],
+  );
   return (
-    <div className="flex flex-col pl-2 pr-4 pt-4">
-      <MarkdownWrapper content={details} />
-      <div className="flex items-center gap-2 py-4">
-        <Sparkles className="size-4 text-yellow-500" />
-        <span className="text-xs italic text-gray-700">
-          This content is AI-generated and may contain errors
-        </span>
-      </div>
+    <div className="w-full p-8">
+      <AiErrorGuide>
+        <MarkdownWrapper content={details} />
+        <div className="flex items-center gap-2 py-4">
+          <Sparkles className="size-4 text-yellow-500" />
+          <span className="text-muted-foreground text-xs italic">
+            This content is AI-generated and may contain errors.
+          </span>
+        </div>
+      </AiErrorGuide>
     </div>
   );
 };
