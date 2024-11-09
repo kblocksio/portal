@@ -1,5 +1,3 @@
-import { Manifest } from "@kblocks/api";
-
 export interface ResourceQuery {
   group: string;
   version: string;

@@ -147,6 +147,8 @@ function EventGroupItem({
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
+  const showRawEvents = new URLSearchParams(window.location.search).get('raw') === '1';
+
   return (
     <div className="flex flex-col">
       <div
@@ -190,10 +192,30 @@ function EventGroupItem({
         </div>
       </div>
       {isOpen && eventGroup.events.length > 0 && (
-        <Events events={eventGroup.events} />
+        <>
+          {showRawEvents && <RawEvents events={eventGroup.events} />}
+          <Events events={eventGroup.events} />
+        </>
       )}
     </div>
   );
+}
+
+const RawEvents = ({ events }: { events: WorkerEvent[] }) => {
+  return (
+    <div className="flex flex-col gap-1 text-xs bg-gray-100 p-2 font-mono shadow-md rounded-sm overflow-x-auto mr-4">
+      {events.map((e, index) => (
+        <pre key={index}>{JSON.stringify(sortedKeys(e))}</pre>
+      ))}
+    </div>
+  );
+};
+
+function sortedKeys(obj: any) {
+  return Object.keys(obj).sort().reduce((acc: any, key: string) => {
+    acc[key] = obj[key];
+    return acc;
+  }, {});
 }
 
 const LogSection = ({ events }: { events: LogEvent[] }) => {
