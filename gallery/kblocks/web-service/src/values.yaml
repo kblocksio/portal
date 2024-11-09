@@ -1,9 +1,9 @@
 instanceTypes:
   Micro:
-    cpu: "500m"
-    memory: "128Mi"
+    cpu: "100m"
+    memory: "256Mi"
   Small:
-    cpu: "1"
+    cpu: "200m"
     memory: "256Mi"
   Medium:
     cpu: "2"
