@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { SignIn } from "@/components/sign-in.js";
+import { SignIn } from "@/components/sign-in";
 import { getUser, rejectUser } from "@/lib/backend";
 import { isUserWhitelisted } from "./whitelist";
 import { ComingSoon } from "@/components/coming-soon";
