@@ -74,7 +74,7 @@ export const UserProvider = (props: PropsWithChildren) => {
 
   return (
     <>
-      {/* {isLoading && (
+      {isLoading && (
         <div className="bg-background flex min-h-screen flex-col items-center justify-center">
           <Loader2 className="text-primary h-16 w-16 animate-spin" />
           <h2 className="text-foreground mt-4 text-2xl font-semibold">
@@ -84,12 +84,12 @@ export const UserProvider = (props: PropsWithChildren) => {
             Checking authentication status...
           </p>
         </div>
-      )} */}
-      {true && <ErrorPage />}
-      {/* {!isLoading && !error && !user && <SignIn />}
+      )}
+      {error && <ErrorPage />}
+      {!isLoading && !error && !user && <SignIn />}
       {user && (
         <Context.Provider value={user}>{props.children}</Context.Provider>
-      )} */}
+      )}
     </>
   );
 };
