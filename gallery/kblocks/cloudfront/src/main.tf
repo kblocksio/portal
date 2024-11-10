@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
   default_cache_behavior {
     target_origin_id       = "S3Origin"
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
     compress              = true
     min_ttl               = 0
     default_ttl           = 300
