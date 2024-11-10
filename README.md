@@ -209,7 +209,7 @@ cd portal
 export REPO=$PWD
 ```
 
-Install kind and create a kind cluster:
+Install kind (v0.25.0 or above) and create a kind cluster:
 
 ```sh
 kind create cluster
