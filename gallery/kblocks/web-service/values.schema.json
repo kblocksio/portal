@@ -32,6 +32,10 @@
             "default": "staging.quickube.sh",
             "description": "Hostname to use for this endpoint"
           },
+          "rewrite": {
+            "type": "string",
+            "description": "Rewrite rules for the URL path"
+          },
           "tls": {
             "type": "object",
             "required": ["secret", "hosts"],
