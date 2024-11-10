@@ -228,13 +228,15 @@ $REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 Then, install the gallery blocks so they would refer to the local backend:
 
 ```sh
-KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 $REPO/gallery/install-blocks.sh
+cd $REPO/gallery
+KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
 ```
 
 Then, install the portal in kind mode:
 
 ```sh
-$REPO/install.sh kind
+cd $REPO
+./install.sh kind
 ```
 
 Next, modify your `/etc/hosts` file to include the following line:
@@ -243,7 +245,7 @@ Next, modify your `/etc/hosts` file to include the following line:
 127.0.0.1 localhost.kblocks.io
 ```
 
-Now the portal should be available at https://localhost.kblocks.io.
+Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
 That's it. Have fun!
 
