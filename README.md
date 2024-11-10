@@ -94,20 +94,11 @@ Clone the repositories:
 ```sh
 git clone git@github.com:winglang/portal
 cd portal
-export PORTAL=$PWD
+export REPO=$PWD
 cd ..
 ```
 
-And clone the gallery repository:
-
-```sh
-git clone git@github.com:winglang/kblocks-gallery
-cd kblocks-gallery
-export GALLERY=$PWD
-cd ..
-```
-
-We will use `$PORTAL` and `$GALLERY` to refer to these directories throughout this document.
+We will use `$REPO` to refer to the portal repository directory on your local system.
 
 ### Installing Secrets
 
@@ -116,6 +107,8 @@ clusters.
 
 Configuration and secrets are all managed together in `.env` files that can be downloaded from a [1Password secret] and
 stored in Kubernetes secrets within the clusters. These secrets are referenced by pods.
+
+#### Download secrets from 1Password
 
 First, let's create a directory for our secrets:
 
@@ -132,7 +125,10 @@ following files:
 
 * `kblocks-gallery.env` - environment for kblocks-gallery
 * `portal.env` - environment for portal-backend
-* `kblocks_io.key` and `kblocks_io.pem` - SSL certificates for kblocks.io
+* `kblocks_io.key` - SSL certificate private key
+* `kblocks_io.pem` - SSL certificate public key
+
+#### Install secrets
 
 And we are ready to install the secrets:
 
@@ -140,7 +136,7 @@ And we are ready to install the secrets:
 
     ```sh
     qkube use kblocks-demo.quickube.sh
-    KBLOCKS_SYSTEM_ID=demo $GALLERY/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+    KBLOCKS_SYSTEM_ID=demo $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
     ```
 
 3. We will also install the **gallery secrets** to the `portal-backend.quickube.sh` cluster as well
@@ -148,20 +144,20 @@ And we are ready to install the secrets:
 
     ```sh
     qkube use portal-backend.quickube.sh
-    KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $GALLERY/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+    KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
     ```
 
 4. Install the **backend secrets** to the `portal-backend.quickube.sh` (these are needed by the
    backend service to operate):
 
     ```sh
-    $PORTAL/scripts/install-secrets.sh $SECRETS/portal.env
+    $REPO/scripts/install-secrets.sh $SECRETS/portal.env
     ```
 
 5. Finally, we need to install the SSL certificates to the portal backend cluster as well:
 
     ```sh
-    $PORTAL/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
+    $REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
     ```
 
 At this point we should have the two clusters ready for installing the blocks and backend service.
@@ -205,25 +201,45 @@ qkube use kblocks-demo.quickube.sh
 
 If you want to test the portal locally, you can use `kind` to setup the environment.
 
-Install kind, and setup all of the secrets and certs as described in the previous section.
-Then, install the blocks so they would refer to the local backend:
+Clone this repository and set `$REPO` to point to the directory:
 
 ```sh
-cd $GALLERY
-KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
+git clone git@github.com:winglang/portal
+cd portal
+export REPO=$PWD
+```
+
+Install kind and create a kind cluster:
+
+```sh
+kind create cluster
+```
+
+Follow [this section](#download-secrets-from-1password) to download a local copy of the portal secrets.
+
+Setup all of the secrets and certs to your kind cluster:
+
+```sh
+KBLOCKS_SYSTEM_ID=local $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+$REPO/scripts/install-secrets.sh $SECRETS/portal.env
+$REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
+```
+
+Then, install the gallery blocks so they would refer to the local backend:
+
+```sh
+KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 $REPO/gallery/install-blocks.sh
 ```
 
 Then, install the portal in kind mode:
 
 ```sh
-cd $PORTAL
-./install.sh kind
+$REPO/install.sh kind
 ```
 
-Next, modify the `/etc/hosts` file to include the following line:
+Next, modify your `/etc/hosts` file to include the following line:
 
 ```
-
 127.0.0.1 localhost.kblocks.io
 ```
 
