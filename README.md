@@ -209,10 +209,10 @@ cd portal
 export REPO=$PWD
 ```
 
-Install kind (v0.25.0 or above) and create a kind cluster:
+Install kind (v0.25.0 or above). Then, create a kind cluster:
 
 ```sh
-kind create cluster
+$REPO/scripts/reinstall-kind.sh
 ```
 
 Follow [this section](#download-secrets-from-1password) to download a local copy of the portal secrets.
