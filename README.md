@@ -210,7 +210,7 @@ Then, install the blocks so they would refer to the local backend:
 
 ```sh
 cd $GALLERY
-KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local ./install-blocks.sh
+KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
 ```
 
 Then, install the portal in kind mode:
@@ -223,6 +223,7 @@ cd $PORTAL
 Next, modify the `/etc/hosts` file to include the following line:
 
 ```
+
 127.0.0.1 localhost.kblocks.io
 ```
 
