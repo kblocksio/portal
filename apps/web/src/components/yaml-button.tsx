@@ -24,7 +24,7 @@ export default function YamlButton({
   object: any;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const yamlString = dump(object);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -36,26 +36,33 @@ export default function YamlButton({
             Copy & paste to add this into a Kubernetes manifest
           </p>
         </DialogDescription>
-        <div className="overflow-auto rounded border">
-          <div className="relative">
-            <CopyButton text={yamlString} className="absolute top-2 right-2 z-10"/>
-            <SyntaxHighlighter
-              language="yaml"
-              style={docco}
-              customStyle={{
-                fontSize: "14px",
-                padding: "16px",
-                // backgroundColor: "transparent",
-              }}
-            >
-            {yamlString}
-            </SyntaxHighlighter>
-          </div>
-        </div>
+        <YamlView object={object} />
       </DialogContent>
     </Dialog>
   );
 }
+
+export const YamlView = ({ object }: { object: any }) => {
+  const yamlString = dump(object);
+
+  return (
+    <div className="overflow-auto rounded border">
+      <div className="relative">
+        <CopyButton text={yamlString} className="absolute top-2 right-2 z-10"/>
+        <SyntaxHighlighter
+          language="yaml"
+          style={docco}
+          customStyle={{
+            fontSize: "14px",
+            padding: "16px",
+          }}
+        >
+          {yamlString}
+        </SyntaxHighlighter>
+      </div>
+    </div>
+  );
+};
 
 const CopyButton = ({
   text,

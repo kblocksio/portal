@@ -27,6 +27,8 @@ import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
+import { YamlView } from "@/components/yaml-button";
+import { cloneDeep } from "lodash";
 
 const DEFAULT_TAB = "details";
 
@@ -53,7 +55,7 @@ function ResourcePage() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash && ["details", "logs", "relationships"].includes(hash)) {
+      if (hash && ["details", "logs", "relationships", "yaml"].includes(hash)) {
         setActiveTab(hash);
       } else {
         window.location.hash = DEFAULT_TAB;
@@ -74,9 +76,13 @@ function ResourcePage() {
     name,
   });
 
+  const numberOfRelationships = useMemo(() => {
+    return Object.keys(relationships).length;
+  }, [relationships]);
+
   const ownerResourceURI = useMemo((): string | null => {
     // Wait until relationships is populated
-    if (!relationships || Object.keys(relationships).length === 0) {
+    if (!relationships || numberOfRelationships === 0) {
       return null;
     }
     const rels = relationships[objUri];
@@ -90,7 +96,7 @@ function ResourcePage() {
       }
     });
     return owner;
-  }, [Object.keys(relationships).length, objUri]);
+  }, [relationships, numberOfRelationships, objUri]);
 
   const [lastEventCount, setLastEventCount] = useState(
     Object.keys(eventsPerObject?.[objUri] ?? {}).length,
@@ -186,11 +192,28 @@ function ResourcePage() {
         name: selectedResource.metadata.name,
       },
     ]);
-  }, [selectedResource, setBreadcrumbs, ownerResourceURI]);
+  }, [selectedResource, setBreadcrumbs, ownerResourceURI, objects]);
+
+  const yamlObject = useMemo(() => {
+    const obj: any = cloneDeep(selectedResource ?? {});
+    delete obj.metadata.managedFields;
+    delete obj.status?.lastStateHash;
+    delete obj.objUri;
+    delete obj.objType;
+    return {
+      apiVersion: `${obj.apiVersion}`,
+      kind: obj.kind,
+      metadata: obj.metadata,
+      status: obj.status,
+      ...obj,
+    };
+  }, [selectedResource]);
 
   if (!selectedResource || !selectedResourceType) {
     return null;
   }
+
+
 
   return (
     <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
@@ -278,6 +301,12 @@ function ResourcePage() {
             className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Relationships
+          </TabsTrigger>
+          <TabsTrigger
+            value="yaml"
+            className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            YAML
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
@@ -375,6 +404,11 @@ function ResourcePage() {
           <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
             <RelationshipGraph selectedResource={selectedResource} />
           </div>
+        </TabsContent>
+        <TabsContent value="yaml">
+          <CardContent className="h-full p-0">
+            <YamlView object={yamlObject} />
+          </CardContent>
         </TabsContent>
       </Tabs>
 
