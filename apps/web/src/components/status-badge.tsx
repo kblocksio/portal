@@ -8,7 +8,7 @@ import {
 } from "./ui/tooltip";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { getResourceReadyCondition } from "./components-utils";
+import { findCondition } from "./components-utils";
 
 const variants = cva("", {
   variants: {
@@ -48,11 +48,13 @@ export const StatusBadge = ({
     throw new Error("merge and type cannot be used together");
   }
 
-  const readyCondition = getResourceReadyCondition(obj, type);
+  const condition = findCondition(obj, type);
 
-  const reason = readyCondition?.reason as StatusReason;
+  console.log({condition});
 
-  const getStatusContent = (reason: StatusReason) => {
+  const reason = condition?.reason;
+
+  const getStatusContent = (reason: string) => {
     switch (reason) {
       case StatusReason.Completed:
         return (
@@ -67,6 +69,7 @@ export const StatusBadge = ({
             className={cn(variants({ size }), "animate-spin text-yellow-500")}
           />
         );
+      case "failure":
       case StatusReason.Error:
         return (
           <div className={cn(variants({ size }), "rounded-full bg-red-500")} />
@@ -74,16 +77,13 @@ export const StatusBadge = ({
 
       case StatusReason.Pending:
         return (
-          <div
-            className={cn(
-              variants({ size }),
-              "animate-pulse rounded-full border-2 border-gray-300",
-            )}
+          <Loader2
+            className={cn(variants({ size }), "animate-spin text-yellow-600")}
           />
         );
 
       default:
-        if (readyCondition?.status === "True") {
+        if (condition?.status === "True") {
           return (
             <div
               className={cn(variants({ size }), "rounded-full bg-green-500")}
@@ -99,7 +99,7 @@ export const StatusBadge = ({
     }
   };
 
-  const statusContent = getStatusContent(reason);
+  const statusContent = getStatusContent(reason ?? "unknown");
 
   const wrapper = (
     <div className="ml-1 inline-block transition-transform duration-200 hover:scale-125">
@@ -107,23 +107,23 @@ export const StatusBadge = ({
     </div>
   );
 
-  return readyCondition?.message ? (
+  const message = condition?.message ?? `${type}`;
+
+  return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
           {wrapper}
           {showMessage && (
-            <span className="ml-2">{readyCondition?.message}</span>
+            <span className="ml-2">{message}</span>
           )}
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {showMessage ? `${type}?` : (readyCondition?.reason ?? `${type}?`)}
+            {showMessage ? `${type}?` : (condition?.reason ?? `${type}?`)}
           </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  ) : (
-    wrapper
   );
 };

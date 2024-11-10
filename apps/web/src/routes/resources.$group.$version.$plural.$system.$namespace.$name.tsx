@@ -196,7 +196,7 @@ function ResourcePage() {
 
   const yamlObject = useMemo(() => {
     const obj: any = cloneDeep(selectedResource ?? {});
-    delete obj.metadata.managedFields;
+    delete obj.metadata?.managedFields;
     delete obj.status?.lastStateHash;
     delete obj.objUri;
     delete obj.objType;

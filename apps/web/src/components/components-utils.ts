@@ -7,7 +7,7 @@ export const chooseColor = (key: string, palette: string[]): string => {
   return palette[index];
 };
 
-export const getResourceReadyCondition = (obj: ApiObject, type: string | undefined): Condition | undefined => {
+export const findCondition = (obj: ApiObject, type: string | undefined): Condition | undefined => {
   const conditions = obj.status?.conditions ?? [];
 
   // if no type is provided, merge all statuses - the logic is simple - if all statuses are True, the resource is ready
@@ -40,7 +40,7 @@ export const getResourceReadyCondition = (obj: ApiObject, type: string | undefin
 };
 
 export const getResourceStatusReason = (obj: ApiObject, type: string | undefined) => {
-  const readyCondition = getResourceReadyCondition(obj, type);
+  const readyCondition = findCondition(obj, type);
   return readyCondition?.reason as StatusReason;
 };
 
