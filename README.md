@@ -168,7 +168,7 @@ Our backend uses the `Workload` block for deployment )(yes, we eat our own dogfo
 we need to install this block to the cluster:
 
 ```sh
-cd $GALLERY
+cd $REPO/gallery
 qkube use portal-backend.quickube.sh
 ./install-blocks.sh kblocks/workload
 ```
@@ -176,7 +176,7 @@ qkube use portal-backend.quickube.sh
 Once `Workload` is installed, we can install the backend itself:
 
 ```sh
-cd $PORTAL
+cd $REPO
 ./install.sh dev
 ```
 
@@ -185,14 +185,14 @@ cd $PORTAL
 Next, let's install *all* the blocks to the demo cluster:
 
 ```sh
-cd $GALLERY
+cd $REPO/gallery
 qkube use kblocks-demo.quickube.sh
 ./install-blocks.sh
 ```
 
 > If you wish to only install a single block, you can do it like this:
 > ```sh
-> cd $GALLERY
+> cd $REPO/gallery
 > qkube use kblocks-demo.quickube.sh
 > ./install-blocks.sh kblocks/cron-job
 > ```
