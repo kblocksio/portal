@@ -49,9 +49,6 @@ export const StatusBadge = ({
   }
 
   const condition = findCondition(obj, type);
-
-  console.log({condition});
-
   const reason = condition?.reason;
 
   const getStatusContent = (reason: string) => {

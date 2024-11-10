@@ -1,11 +1,11 @@
 import {
-  Activity,
   XCircle,
   CheckCircle,
   RefreshCw,
   ChevronRight,
   Sparkles,
   Circle,
+  Loader2,
 } from "lucide-react";
 import {
   ErrorEvent,
@@ -138,8 +138,8 @@ function EventGroupItem({
   defaultOpen: boolean;
 }) {
   const header = eventGroup.header;
-  const ReasonIcon = getReasonIcon(header.reason);
-  const reasonColor = getReasonColor(header.reason);
+  const reasonIcon = getReasonIcon(header.reason);
+  
   const action = header.action;
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -172,7 +172,7 @@ function EventGroupItem({
               )}
             />
 
-            <ReasonIcon className={cn(reasonColor, "size-4")} />
+            {reasonIcon}
 
             <div className="-mx-1.5 sm:mx-0">
               <Timestamp timestamp={header.timestamp} />
@@ -341,19 +341,21 @@ const LogItem = ({ log }: { log: LogEvent }) => {
 };
 
 const getReasonIcon = (reason: EventReason) => {
+  const reasonColor = getReasonColor(reason);
+
   switch (reason) {
     case EventReason.Started:
-      return Activity;
+      return <Loader2 className={cn(reasonColor, "size-4 animate-spin")} />;
     case EventReason.Succeeded:
-      return CheckCircle;
+      return <CheckCircle className={cn(reasonColor, "size-4")} />;
     case EventReason.Failed:
-      return XCircle;
+      return <XCircle className={cn(reasonColor, "size-4")} />;
     case EventReason.Resolving:
-      return RefreshCw;
+      return <RefreshCw className={cn(reasonColor, "size-4")} />;
     case EventReason.Resolved:
-      return CheckCircle;
+      return <CheckCircle className={cn(reasonColor, "size-4")} />;
     default:
-      return Circle;
+      return <Circle className={cn(reasonColor, "size-4")} />;
   }
 };
 
@@ -374,7 +376,7 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-const renderHeader = (event: WorkerEvent): GroupHeader => {
+const renderHeader = (event: WorkerEvent): Partial<GroupHeader> => {
   switch (event.type) {
     case "LIFECYCLE":
       return {
@@ -388,25 +390,17 @@ const renderHeader = (event: WorkerEvent): GroupHeader => {
       return {
         timestamp: event.timestamp,
         reason: EventReason.Failed,
-        action: event.body?.type ?? EventAction.Sync,
         message: event.body?.message ?? "",
       };
 
     case "LOG":
       return {
         timestamp: event.timestamp,
-        reason: EventReason.Started,
-        action: event.level.toString(),
         message: event.message,
       };
 
     default:
-      return {
-        timestamp: new Date(),
-        reason: EventReason.Started,
-        action: EventAction.Sync,
-        message: "",
-      };
+      return {};
   }
 };
 
@@ -431,7 +425,10 @@ function groupEventsByRequestId(events: WorkerEvent[]) {
     if (event.requestId !== currentRequestId) {
       currentGroup = {
         requestId: event.requestId,
-        header: renderHeader(event),
+        header: {
+          ...currentGroup.header,
+          ...renderHeader(event),
+        },
         events: [],
       };
 

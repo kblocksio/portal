@@ -332,7 +332,6 @@ export const ResourceProvider = ({
       return;
     }
 
-    console.log("new event:", lastJsonMessage);
     setPreviousMessage(lastJsonMessage);
     addEvent(lastJsonMessage);
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
@@ -369,6 +368,7 @@ export const ResourceProvider = ({
     handlePatchMessage,
     addNotifications,
     addEvent,
+    previousMessage,
   ]);
 
   // make sure to close the websocket when the component is unmounted
