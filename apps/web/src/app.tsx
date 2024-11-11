@@ -47,7 +47,7 @@ export function AppLayout() {
             </div>
           </header>
           <ScrollAreaResizeObserver>
-            <main className="grow sm:px-6 lg:px-8 px-0">
+            <main className="grow px-4 sm:px-6 lg:px-8">
               <div className="mx-auto w-full max-w-screen-2xl py-4">
                 <ErrorBoundary
                   fallbackRender={(props) => (

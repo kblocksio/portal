@@ -288,7 +288,7 @@ function ResourcePage() {
           </div>
         </div>
 
-        <div className="rounded-sm p-2">
+        <div className="py-2">
           <div className="flex">
             <div className="grid w-full grid-flow-col grid-rows-[auto_1fr] gap-x-2 gap-y-2 sm:w-auto sm:gap-x-12">
               <p className="text-muted-foreground text-xs leading-none">
