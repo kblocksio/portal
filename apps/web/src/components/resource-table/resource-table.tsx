@@ -41,6 +41,8 @@ import {
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
 
+const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
+
 const useColumns = () => {
   const { resourceTypes, relationships, objects } = useContext(ResourceContext);
 
@@ -267,7 +269,7 @@ export const ResourceTable = (props: {
 }) => {
   const columns = useColumns();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<ColumnSort[]>([]);
+  const [sorting, setSorting] = useState(defaultSorting);
 
   const table = useReactTable({
     data: props.resources,
