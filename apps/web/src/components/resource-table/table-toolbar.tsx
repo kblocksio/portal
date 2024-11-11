@@ -21,7 +21,7 @@ export function ResourceTableToolbar<TData>({
   const navigate = useNavigate();
   const isFiltered = table.getState().columnFilters.length > 0;
 
-  const { systems, namespaces, kinds } = useContext(ResourceContext);
+  const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
 
   const newResourceButton = (
     <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
@@ -98,6 +98,16 @@ export function ResourceTableToolbar<TData>({
                 value: namespace,
               }))}
             />
+          )}
+
+          {table.getColumn("projects") && (
+            <DataTableFacetedFilter
+              column={table.getColumn("projects")}
+              title="Projects"
+              options={[{ metadata: { name: "$unassigned" }, title: "(unassigned)" },...projects].map(project => ({
+                label: project.title ?? project.metadata.name,
+                value: project.metadata.name
+              }))} />
           )}
 
           {isFiltered && (

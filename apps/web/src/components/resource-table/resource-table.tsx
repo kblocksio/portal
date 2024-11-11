@@ -40,11 +40,13 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
+import { ProjectLink } from "../project-link";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
 const useColumns = () => {
-  const { resourceTypes, relationships, objects } = useContext(ResourceContext);
+  const { resourceTypes, relationships, objects, projects } =
+    useContext(ResourceContext);
 
   return useMemo<ColumnDef<Resource>[]>(() => {
     return [
@@ -163,7 +165,6 @@ const useColumns = () => {
           return namespaceA.localeCompare(namespaceB);
         },
       },
-
       {
         accessorKey: "children",
         header: (props) => (
@@ -203,7 +204,72 @@ const useColumns = () => {
           );
         },
       },
+      {
+        accessorKey: "projects",
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Projects" />
+        ),
+        cell: (props) => {
+          const prjs = projects.filter((p) =>
+            (p.objects ?? []).includes(props.row.original.objUri),
+          );
 
+          if (prjs.length === 0) {
+            return null;
+          }
+
+          if (prjs.length === 1) {
+            return (
+              <span className="truncate">
+                <ProjectLink project={prjs[0]} />
+              </span>
+            );
+          }
+
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    {prjs.length} Projects
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-2 items-start">
+                    {prjs.map((p) => (
+                      <ProjectLink key={p.metadata.name} project={p} />
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+        filterFn: (row, columnId, selectedProjects) => {
+          const prjs = projects.filter((p) => (p.objects ?? []).includes(row.original.objUri));
+          if (selectedProjects.includes("$unassigned")) {
+            if (prjs.length === 0) {
+              return true;
+            }
+          }
+
+
+          
+          for (const p of selectedProjects) {
+            if (prjs.find(pp => pp.metadata.name === p)) {
+              return true;
+            }
+          }
+
+          return false;
+        },
+        sortingFn: (rowA, rowB) => {
+          const prjsA = projects.filter((p) => (p.objects ?? []).includes(rowA.original.objUri));
+          const prjsB = projects.filter((p) => (p.objects ?? []).includes(rowB.original.objUri));
+          return JSON.stringify(prjsA).localeCompare(JSON.stringify(prjsB));
+        }
+
+      },
       {
         accessorKey: "lastUpdated",
         header: (props) => (
@@ -259,7 +325,7 @@ const useColumns = () => {
         ),
       },
     ];
-  }, [resourceTypes, objects, relationships]);
+  }, [resourceTypes, objects, relationships, projects]);
 };
 
 export const ResourceTable = (props: {
@@ -355,7 +421,7 @@ const ResourceTableRow = memo(
         className="cursor-pointer"
         onClick={() => {
           const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
-          navigate({ to: `/resources/${resourceDetailsUri}` });
+          navigate({ to: `/resources/${resourceDetailsUri}#details` });
         }}
       >
         {children}
