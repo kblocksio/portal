@@ -2,6 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
+import { useLocation } from "@tanstack/react-router";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -87,6 +88,12 @@ const SidebarProvider = React.forwardRef<
       },
       [setOpenProp, open],
     );
+
+    // Close the sidebar (in small devices) when the location changes.
+    const location = useLocation();
+    React.useEffect(() => {
+      setOpenMobile(false);
+    }, [location.pathname]);
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
