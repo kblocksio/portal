@@ -24,10 +24,15 @@ function Resources() {
 
   const allResources = useMemo(() => {
     return Object.values(objects).filter((r) => {
-      if (r.kind === "Block") {
+
+      if (r.objType === "kblocks.io/v1/blocks") {
         return false;
       }
 
+      if (r.objType === "kblocks.io/v1/projects") {
+        return false;
+      }
+      
       // don't show resources that are children of other resources
       if (r.metadata?.ownerReferences?.length) {
         return false;

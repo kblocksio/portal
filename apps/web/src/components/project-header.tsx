@@ -1,6 +1,6 @@
 import { Project } from "@/resource-context";
 import { getIconComponent } from "@/lib/get-icon";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "./ui/button";
 import { MoreVertical } from "lucide-react";
@@ -64,7 +64,9 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="text-destructive" onSelect={() => {}}>
+            <DropdownMenuItem className="text-destructive" onSelect={() => {
+              console.log("TODO: implement DELETE");
+            }}>
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -274,7 +274,7 @@ function ResourcePage() {
                   Redeploy
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
-                  Read
+                  Refresh State
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

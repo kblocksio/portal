@@ -53,7 +53,7 @@ export const ResourceActionsMenu = ({
             setIsReapplyOpen(true);
           }}
         >
-          Reapply
+          Redeploy
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={(e) => {
@@ -61,7 +61,7 @@ export const ResourceActionsMenu = ({
             setIsReadOpen(true);
           }}
         >
-          Read
+          Refresh State
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-destructive"
@@ -70,7 +70,7 @@ export const ResourceActionsMenu = ({
             setIsDeleteOpen(true);
           }}
         >
-          Delete...
+          Delete
         </DropdownMenuItem>
 
         <ProjectsMenu objUri={resource.objUri} />
