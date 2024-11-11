@@ -53,7 +53,7 @@ export const ProjectItems = ({ objUri }: { objUri: string }) => {
         onClick={(e) => e.stopPropagation()}
         key={project.metadata.name}
       >
-        {project.metadata.name}
+        {project.title ?? project.metadata.name}
       </DropdownMenuCheckboxItem>
     );
   });

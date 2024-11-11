@@ -2,6 +2,7 @@ import { ObjectMetadata } from "@repo/shared";
 import { InstancePicker } from "./instance-picker";
 import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";
+import { TextAreaPicker } from "./textarea-picker";
 
 export const resolvePickerField = ({
   pickerType,
@@ -79,6 +80,18 @@ export const resolvePickerField = ({
           setFormData={updateFormData}
           objectMetadata={objectMetadata}
           path={path}
+        />
+      );
+    }
+    case "textarea": {
+      return (
+        <TextAreaPicker
+          fieldName={fieldName}
+          required={required}
+          description={description}
+          hideField={hideField}
+          onChange={handleChange}
+          value={value}
         />
       );
     }

@@ -2,21 +2,17 @@
   "type": "object",
   "required": [],
   "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the project"
+    },
     "description": {
       "type": "string",
       "description": "The description of the project"
     },
-    "gitops": {
-      "type": "boolean",
-      "description": "Whether the project is associated with a GitOps application. If GitOps is enabled, resources can only be created via a commit to the GitOps manifest and not directly via the portal."
-    },
     "icon": {
       "type": "string",
-      "description": "The icon of the project. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon."
-    },
-    "title": {
-      "type": "string",
-      "description": "The title of the project"
+      "description": "The icon of the project. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon.\n\n@ui kblocks.io/textarea"
     },
     "objects": {
       "type": "array",

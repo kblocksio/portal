@@ -238,7 +238,7 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
       event.type != "LIFECYCLE" &&
       logEvents.length > 0
     ) {
-      items.push(<LogSection events={logEvents} />);
+      items.push(<LogSection key={items.length} events={logEvents} />);
       logEvents = [];
     }
 
@@ -248,7 +248,7 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
         break;
 
       case "ERROR":
-        items.push(<ErrorItem key={index} error={event} />);
+        items.push(<ErrorItem key={items.length} error={event} />);
         break;
 
       case "LIFECYCLE":
@@ -262,7 +262,7 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
   });
 
   if (logEvents.length > 0) {
-    items.push(<LogSection events={logEvents} />);
+    items.push(<LogSection key={items.length} events={logEvents} />);
     logEvents = [];
   }
 

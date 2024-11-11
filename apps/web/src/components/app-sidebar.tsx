@@ -14,7 +14,7 @@ import {
   SidebarMenuSubButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, PlusIcon } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -26,8 +26,10 @@ import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
+import { Button } from "./ui/button";
 
 export const AppSidebar = () => {
+  const navigate = useNavigate();
   const { resourceTypes, categories, projects } = useContext(ResourceContext);
   const location = useLocation();
   const platformSideBarItems = useMemo(() => {
@@ -39,39 +41,12 @@ export const AppSidebar = () => {
         isActive: true,
       },
       {
-        title: "Catalog",
-        url: "/catalog",
-        icon: "heroicon://shopping-cart",
-        items: Object.keys(categories).map((category) => ({
-          title: categories[category].title,
-          url: "#",
-          items: Object.keys(resourceTypes)
-            .filter((resourceTypeKey) =>
-              resourceTypes[resourceTypeKey].categories?.includes(category),
-            )
-            .map((resourceTypeKey) => ({
-              title: resourceTypes[resourceTypeKey].kind,
-              url: `/catalog/${resourceTypeKey}`,
-              icon: resourceTypes[resourceTypeKey].icon,
-            })),
-        })),
-      },
-      {
         title: "Resources",
         url: "/resources",
         icon: "heroicon://list-bullet",
       },
-      {
-        title: "Projects",
-        icon: "heroicon://briefcase",
-        items: projects.map((project) => ({
-          title: project.title ?? project.metadata.name,
-          url: `/projects/${project.metadata.name}`,
-          icon: project.icon ?? "heroicon://folder",
-        })),
-      },
     ];
-  }, [resourceTypes, categories, projects]);
+  }, []);
 
   return (
     <Sidebar collapsible="icon">
@@ -87,6 +62,71 @@ export const AppSidebar = () => {
                 key={item.title}
                 item={item}
                 isActive={location.pathname === item.url}
+              />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex w-full items-center justify-between">
+              <span>Projects</span>
+              <Button
+                variant="ghost"
+                className="self-end p-0 hover:bg-transparent"
+                onClick={() =>
+                  navigate({
+                    to: "/resources/new/$group/$version/$plural",
+                    params: {
+                      group: "kblocks.io",
+                      version: "v1",
+                      plural: "projects",
+                    },
+                  })
+                }
+              >
+                <PlusIcon className="size-2" />
+              </Button>
+            </div>
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {projects.map((project) => (
+              <SidebarItem
+                key={project.metadata.name}
+                item={{
+                  title: project.title ?? project.metadata.name,
+                  url: `/projects/${project.metadata.name}`,
+                  icon: project.icon ?? "heroicon://folder",
+                }}
+                isActive={
+                  location.pathname === `/projects/${project.metadata.name}`
+                }
+              />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Catalog</SidebarGroupLabel>
+          <SidebarMenu>
+            {Object.keys(categories).map((category) => (
+              <SidebarItem
+                isActive={false}
+                key={category}
+                item={{
+                  title: categories[category].title,
+                  url: "#",
+                  icon: categories[category].icon,
+                  items: Object.keys(resourceTypes)
+                    .filter((resourceTypeKey) =>
+                      resourceTypes[resourceTypeKey].categories?.includes(
+                        category,
+                      ),
+                    )
+                    .map((resourceTypeKey) => ({
+                      title: resourceTypes[resourceTypeKey].kind,
+                      url: `/catalog/${resourceTypeKey}`,
+                      icon: resourceTypes[resourceTypeKey].icon,
+                    })),
+                }}
               />
             ))}
           </SidebarMenu>
@@ -114,7 +154,7 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
     ) {
       setIsOpen(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, item.url]);
 
   const isAnySubItemActive = useMemo(
     () => item.items?.some((subItem: any) => location.pathname === subItem.url),

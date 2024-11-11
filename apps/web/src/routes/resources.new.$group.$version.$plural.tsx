@@ -4,9 +4,8 @@ import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { useCreateResource } from "@/create-resource-context";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { ObjectMetadata } from "@repo/shared";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useEffect, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
   component: CreateResourcePage,

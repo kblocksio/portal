@@ -61,7 +61,7 @@ export const ResourceActionsMenu = ({
             setIsReadOpen(true);
           }}
         >
-          Refresh
+          Read
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-destructive"

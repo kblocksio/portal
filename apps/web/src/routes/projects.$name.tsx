@@ -30,7 +30,7 @@ function ProjectPage() {
   }, [setBreadcrumbs, project])
 
   return (
-    <div className="flex flex-col gap-4 py-4 pt-0 sm:gap-12 sm:py-8">
+    <div className="flex flex-col gap-10 pt-8">
       {project && <ProjectHeader selectedProject={project} />}
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (

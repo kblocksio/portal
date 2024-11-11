@@ -1,62 +1,74 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "@repo/shared";
-import { useFetch } from "@/hooks/use-fetch";
-import { getUserInitials } from "@/lib/user-initials";
 import { Project } from "@/resource-context";
+import { getIconComponent } from "@/lib/get-icon";
+import { useMemo } from "react";
+
+import { Button } from "./ui/button";
+import { MoreVertical } from "lucide-react";
+import { parseBlockUri } from "@kblocks/api";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuContent,
+} from "./ui/dropdown-menu";
 
 export interface ProjectHeaderProps {
-  selectedProject: Project | null;
+  selectedProject: Project;
 }
 
-const colors = [
-  "bg-red-500",
-  "bg-blue-500",
-  "bg-green-500",
-  "bg-yellow-500",
-  "bg-purple-500",
-  "bg-pink-500",
-  "bg-indigo-500",
-  "bg-teal-500",
-];
-
 export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
-  const { data: users } = useFetch<User[]>("/api/users");
+  const navigate = useNavigate();
+  const Icon = useMemo(
+    () =>
+      getIconComponent({ icon: selectedProject.icon ?? "heroicon://folder" }),
+    [selectedProject],
+  );
+
+  const { group, version, plural, system, namespace, name } = parseBlockUri(
+    selectedProject.objUri,
+  );
 
   return (
-    <div className="flex flex-col items-start justify-between md:flex-row">
+    <div className="flex justify-between flex-row items-start space-y-0">
       <div className="flex-1 space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
-          {selectedProject ? selectedProject.title ?? selectedProject.metadata.name : ""}
+          <div className="flex items-center gap-4">
+            {Icon && <Icon className="h-8 w-8" />}
+            {selectedProject.title ?? selectedProject.metadata.name}
+          </div>
         </h1>
-        <p className="text-md text-muted-foreground">
-          {selectedProject ? selectedProject.description : ""}
+        <p className="text-md text-muted-foreground max-h-10 min-h-10">
+          {selectedProject.description}
         </p>
       </div>
-      { /* hide team */ }
-      {false && <Team users={users ?? []} />}
-    </div>
-  );
-};
 
-const Team = ({ users }: { users: User[] }) => {
-  return (
-    <div className="w-full md:w-auto">
-      <div className="grid grid-cols-4 gap-0">
-        {(users ?? []).map((user, index) => (
-          <div key={index} className="relative">
-            <Avatar className="border-background h-12 w-12 border-2">
-              <AvatarImage
-                alt={`@${user.user_metadata.full_name}`}
-                src={user.user_metadata.avatar_url}
-              />
-              <AvatarFallback
-                className={`${colors[index % colors.length]} text-primary-foreground text-xs`}
-              >
-                {getUserInitials(user.user_metadata.full_name)}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        ))}
+      <div className="flex space-x-2">
+        <Button
+          variant="secondary"
+          onClick={() =>
+            navigate({
+              to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
+            })
+          }
+        >
+          Edit...
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary">
+              <div className="-mx-2">
+                <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="text-destructive" onSelect={() => {}}>
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

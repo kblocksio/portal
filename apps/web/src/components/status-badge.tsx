@@ -112,7 +112,7 @@ export const StatusBadge = ({
         <TooltipTrigger>
           {wrapper}
           {showMessage && (
-            <span className="ml-2">{message}</span>
+            <span className="ml-2 text-sm">{message}</span>
           )}
         </TooltipTrigger>
         <TooltipContent>

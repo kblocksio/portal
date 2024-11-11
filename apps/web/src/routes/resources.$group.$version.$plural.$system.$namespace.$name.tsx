@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, MoreVertical } from "lucide-react";
+import { ChevronsUpDown, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Resource, ResourceContext } from "@/resource-context";
@@ -13,6 +13,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteResourceDialog } from "@/components/delete-resource";
@@ -29,7 +30,7 @@ import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
 import { cloneDeep } from "lodash";
-import { ProjectItems, ProjectsMenu } from "@/components/projects-menu";
+import { ProjectItems } from "@/components/projects-menu";
 
 const DEFAULT_TAB = "details";
 
@@ -215,13 +216,11 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
+    <div className="container mx-auto flex flex-col gap-8 pt-8">
+      <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
+        <div className="flex items-start gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative">
-              {Icon && <Icon className={`h-10 w-10 ${iconColor}`} />}
-            </div>
+            {Icon && <Icon className={`h-10 w-10 pt-1 ${iconColor}`} />}
             <div className="flex min-w-0 flex-col">
               <h1 className="truncate text-2xl font-bold">
                 {selectedResource.metadata.name}
@@ -232,54 +231,55 @@ function ResourcePage() {
               </p>
             </div>
           </div>
-          <div className="flex space-x-2">
+        </div>
+        <div className="flex space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Projects
+                <ChevronsUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <ProjectItems objUri={selectedResource.objUri} />
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Projects
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <ProjectItems objUri={selectedResource.objUri} />
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              navigate({
+                to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
+              })
+            }
+          >
+            Edit...
+          </Button>
 
-            <Button
-              variant="default"
-              onClick={() =>
-                navigate({
-                  to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
-                })
-              }
-            >
-              Edit...
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <div className="-mx-2">
-                    <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
-                  Reapply
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
-                  Refresh
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-destructive"
-                  onSelect={() => setIsDeleteOpen(true)}
-                >
-                  Delete...
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <div className="-mx-2">
+                  <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
+                Redeploy
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
+                Read
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onSelect={() => setIsDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -291,7 +291,7 @@ function ResourcePage() {
           window.location.hash = value;
         }}
       >
-        <TabsList className="border-border h-auto w-full justify-start rounded-none border-b bg-transparent p-0">
+        <TabsList className="border-border h-auto w-full justify-start rounded-none border-b bg-transparent">
           <TabsTrigger
             value="details"
             className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"

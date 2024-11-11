@@ -1,29 +1,26 @@
-import { Project, ResourceContext } from "@/resource-context";
+import { ResourceContext } from "@/resource-context";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useContext, useMemo } from "react";
 import { useAppContext } from "@/app-context";
 
-import { ProjectHeader } from "@/components/project-header";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getIconComponent } from "@/lib/get-icon";
 export const Route = createFileRoute("/resources/")({
   component: Resources,
 });
 
-export const ResourcePageProject: Project = {
-  apiVersion: "kblocks.io/v1",
-  kind: "Project",
-  metadata: {
-    name: "Resources",
-  },
+export const meta = {
   description:
     "Here is a comprehensive list of resources associated with your account. You can manage these resources, view their status, edit, update, delete, check logs, and access detailed information, relationships, and other useful insight",
-  icon: "LayoutDashboard",
+  icon: "heroicon://list-bullet",
 };
 
 function Resources() {
   const { resourceTypes, objects } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
+
+  const Icon = getIconComponent({ icon: meta.icon });
 
   const allResources = useMemo(() => {
     return Object.values(objects).filter((r) => {
@@ -45,8 +42,21 @@ function Resources() {
   }, [setBreadcrumbs]);
 
   return (
-    <div className="flex flex-col gap-4 py-4 pt-0 sm:gap-12 sm:py-8">
-      <ProjectHeader selectedProject={ResourcePageProject} />
+    <div className="flex flex-col gap-10 py-2 pt-8">
+      <div className="flex flex-col items-start justify-between md:flex-row">
+        <div className="flex-1 space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight">
+            <div className="flex items-center gap-4">
+              {Icon && <Icon className="h-8 w-8" />}
+              Resources
+            </div>
+          </h1>
+          <p className="text-md text-muted-foreground max-h-10 min-h-10">
+            {meta.description}
+          </p>
+        </div>
+      </div>
+
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />
