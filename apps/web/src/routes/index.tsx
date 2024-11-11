@@ -19,7 +19,7 @@ function Index() {
     <div className="container mx-auto flex flex-col gap-4">
       <div className="fixed inset-0 -z-10">
         <img src="/images/wallpaper.webp" alt="wallpaper" className="w-full h-full object-cover opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent h-[900px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent h-[1500px]" />
       </div>
       <MarkdownWrapper content={platformMd} />
 
