@@ -108,7 +108,7 @@ function EditResourcePage() {
             description={selectedResourceType?.description || ""}
             resourceType={selectedResourceType}
           />
-          <div className="flex h-full flex-col space-y-4 overflow-hidden p-2">
+          <div className="flex h-full flex-col space-y-4">
             <ResourceForm
               resourceType={selectedResourceType}
               initialValues={selectedResource}

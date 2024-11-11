@@ -35,7 +35,7 @@ export const ObjectFieldForm = ({
               onSave(formData);
             }
           }}
-          className="ml-2 mr-2 space-y-6"
+          className="space-y-6"
         >
           <div className="pb-2">
             <FormFields

@@ -79,7 +79,7 @@ export const ResourceForm = ({
 
   return (
     <form
-      className="flex h-full flex-col overflow-hidden"
+      className="flex h-full flex-col"
       style={{
         marginBlockEnd: "0px",
       }}
@@ -89,9 +89,9 @@ export const ResourceForm = ({
         handleSubmit(meta, formData);
       }}
     >
-      <div className="ml-2 mr-2 space-y-4 pb-4">
+      <div className="space-y-4 pb-4">
         <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
+          <div className="col-span-3 space-y-2 sm:col-span-1">
             <Label
               htmlFor="name"
               className={`${initialValues ? "opacity-50" : ""}`}
@@ -107,9 +107,10 @@ export const ResourceForm = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               ref={nameInputRef}
+              data-1p-ignore
             />
           </div>
-          <div className="space-y-2">
+          <div className="col-span-3 space-y-2 sm:col-span-1">
             <Label
               htmlFor="namespace"
               className={`${initialValues ? "opacity-50" : ""}`}
@@ -126,8 +127,11 @@ export const ResourceForm = ({
               onChange={(e) => setNamespace(e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="system">
+          <div className="col-span-3 space-y-2 sm:col-span-1">
+            <Label
+              htmlFor="system"
+              className={`${initialValues ? "opacity-50" : ""}`}
+            >
               Cluster
               <span className="text-destructive">*</span>
             </Label>

@@ -20,16 +20,18 @@ export const NamespaceBadge = ({ namespace }: { namespace: string }) => {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger className="inline-block min-w-0">
           <Badge
             variant="outline"
-            className={`px-1.5 py-0.5 text-xs ${chooseColor(namespace, namespaceColors)}`}
+            className={`w-full px-1.5 py-0.5 text-xs ${chooseColor(namespace, namespaceColors)}`}
           >
-            {namespace}
+            <span className="truncate">{namespace}</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Namespace: <span className="font-bold">{namespace}</span></p>
+          <p>
+            Namespace: <span className="font-bold">{namespace}</span>
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

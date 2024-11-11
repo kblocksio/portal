@@ -30,7 +30,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
   );
 
   return (
-    <div className="flex justify-between flex-row items-start space-y-0">
+    <div className="flex flex-row items-start justify-between space-y-0">
       <div className="flex-1 space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
           <div className="flex items-center gap-4">
@@ -38,7 +38,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
             {selectedProject.title ?? selectedProject.metadata.name}
           </div>
         </h1>
-        <p className="text-md text-muted-foreground max-h-10 min-h-10">
+        <p className="text-md text-muted-foreground min-h-10">
           {selectedProject.description}
         </p>
       </div>
@@ -52,7 +52,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
             })
           }
         >
-          Edit...
+          Edit
         </Button>
 
         <DropdownMenu>
