@@ -133,7 +133,7 @@ export const ObjectFieldRenderer = ({
           </Button>
         </div>
       ) : (
-        <div className="ml-2 mr-2 space-y-6">
+        <div className="space-y-6">
           {objectProperties
             ? Object.keys(objectProperties).map((key) => (
                 <FieldRenderer

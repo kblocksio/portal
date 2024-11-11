@@ -207,7 +207,7 @@ export const ResourceTypeWizard = ({
           </DialogTitle>
         </DialogHeader>
         <form
-          className="flex h-full flex-col space-y-4 overflow-hidden"
+          className="flex h-full flex-col space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
             handleGenerate();

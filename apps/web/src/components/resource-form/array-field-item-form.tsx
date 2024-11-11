@@ -38,7 +38,7 @@ export const ArrayFieldItemForm = ({
   return (
     <div className="w-full">
       <div className="p-1">
-        <div className="ml-2 mr-2 space-y-6">
+        <div className="space-y-6">
           {type === "object" || type === "array" ? (
             <FieldRenderer
               objectMetadata={objectMetadata}

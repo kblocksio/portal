@@ -29,7 +29,7 @@ export const CopyToClipboardButton = ({
       )}
     >
       {children}
-      <Icon className="-mr-1 ml-2 size-4 shrink-0 grow-0 sm:hidden sm:group-hover/copy:inline-block" />
+      <Icon className="-mr-1 ml-2 hidden size-4 shrink-0 grow-0 group-hover/copy:inline-block" />
       <div className="grow"></div>
     </button>
   );

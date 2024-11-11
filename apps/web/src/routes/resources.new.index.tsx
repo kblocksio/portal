@@ -61,7 +61,7 @@ function CreateNewResourceCatalog() {
         searchQuery={searchQuery}
         handleSearch={handleSearch}
       />
-      <div className="w-full gap-4 overflow-auto p-2">
+      <div className="w-full gap-4">
         <ResourceCatalog
           categories={categories}
           filtereResources={filtereResources}

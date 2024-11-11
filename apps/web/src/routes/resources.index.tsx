@@ -51,7 +51,7 @@ function Resources() {
               Resources
             </div>
           </h1>
-          <p className="text-md text-muted-foreground max-h-10 min-h-10">
+          <p className="text-md text-muted-foreground min-h-10">
             {meta.description}
           </p>
         </div>

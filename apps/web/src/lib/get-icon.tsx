@@ -4,6 +4,7 @@ import * as OutlineHeroIcons from "@heroicons/react/24/outline";
 import * as SolidHeroIcons from "@heroicons/react/24/solid";
 import type { Colors } from "./colors.ts";
 import React from "react";
+import { cn } from "./utils.ts";
 
 /**
  *  Supprts 3 types of icons:
@@ -62,11 +63,11 @@ export const getIconColors = (options: {
       ? (options.color as Colors)
       : "slate";
 
-  const chosenColor = [
+  const chosenColor = cn([
     colors[color].default,
     options.darkenOnGroupHover && colors[color].groupHover,
     options.forceDarken && colors[color].forceDarken,
-  ];
+  ]);
 
   return chosenColor;
 };

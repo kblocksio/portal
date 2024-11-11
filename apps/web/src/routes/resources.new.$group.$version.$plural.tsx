@@ -79,7 +79,7 @@ function CreateResourcePage() {
             description={resourceType?.description || ""}
             resourceType={resourceType}
           />
-          <div className="flex h-full flex-col space-y-4 overflow-hidden p-2">
+          <div className="flex h-full flex-col space-y-4">
             <ResourceForm
               resourceType={resourceType}
               isLoading={isLoading}

@@ -46,7 +46,7 @@ export const SystemSelector = ({
             disabled && "cursor-not-allowed",
           )}
         >
-          {value || "Select a cluster"}
+          <span className="truncate">{value || "Select a cluster"}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

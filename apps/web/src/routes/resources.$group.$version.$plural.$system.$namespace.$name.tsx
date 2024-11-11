@@ -26,7 +26,6 @@ import { useAppContext } from "@/app-context";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
-import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
 import { cloneDeep } from "lodash";
@@ -60,7 +59,10 @@ function ResourcePage() {
       if (hash && ["details", "logs", "relationships", "yaml"].includes(hash)) {
         setActiveTab(hash);
       } else {
-        window.location.hash = DEFAULT_TAB;
+        const url = new URL(window.location.toString());
+        url.hash = DEFAULT_TAB;
+        location.replace(url);
+
         setActiveTab(DEFAULT_TAB);
       }
     };
@@ -216,70 +218,112 @@ function ResourcePage() {
   }
 
   return (
-    <div className="container mx-auto flex flex-col gap-8 pt-8">
-      <div className="flex flex-col justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
-        <div className="flex items-start gap-4">
-          <div className="flex items-center gap-4">
-            {Icon && <Icon className={`h-10 w-10 pt-1 ${iconColor}`} />}
-            <div className="flex min-w-0 flex-col">
-              <h1 className="truncate text-2xl font-bold">
-                {selectedResource.metadata.name}
-              </h1>
-              <p className="text-muted-foreground truncate text-sm leading-none">
-                {selectedResourceType?.group}/{selectedResourceType?.version}.
-                {selectedResourceType?.kind}
-              </p>
+    <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-8 sm:py-8">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col justify-between gap-x-4 space-y-4 sm:flex-row sm:items-center sm:space-y-0">
+          <div className="flex w-full shrink flex-col gap-6 truncate">
+            <div className="flex items-center gap-4 truncate">
+              <div className="relative">
+                {Icon && <Icon className={`size-12 ${iconColor}`} />}
+              </div>
+              <div className="flex min-w-0 flex-col truncate">
+                <p className="text-muted-foreground truncate text-sm leading-none">
+                  {selectedResourceType?.group}/{selectedResourceType?.version}.
+                  {selectedResourceType?.kind}
+                </p>
+                <h1 className="truncate text-2xl font-bold">
+                  {selectedResource.metadata.name}
+                </h1>
+              </div>
             </div>
           </div>
+
+          <div className="flex shrink-0 space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  Projects
+                  <ChevronsUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <ProjectItems objUri={selectedResource.objUri} />
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="secondary"
+              onClick={() =>
+                navigate({
+                  to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
+                })
+              }
+            >
+              Edit
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary">
+                  <div className="-mx-2">
+                    <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
+                  Redeploy
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
+                  Read
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onSelect={() => setIsDeleteOpen(true)}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                Projects
-                <ChevronsUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <ProjectItems objUri={selectedResource.objUri} />
-            </DropdownMenuContent>
-          </DropdownMenu>
 
-          <Button
-            variant="secondary"
-            onClick={() =>
-              navigate({
-                to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,
-              })
-            }
-          >
-            Edit...
-          </Button>
+        <div className="rounded-sm p-2">
+          <div className="flex">
+            <div className="grid w-full grid-flow-col grid-rows-[auto_1fr] gap-x-2 gap-y-2 sm:w-auto sm:gap-x-12">
+              <p className="text-muted-foreground text-xs leading-none">
+                Status
+              </p>
+              <div className="flex flex-col items-start gap-1 text-xs sm:text-sm">
+                {selectedResource.status?.conditions?.map((condition) => (
+                  <StatusBadge
+                    key={condition.type}
+                    obj={selectedResource}
+                    showMessage
+                    type={condition.type}
+                  />
+                ))}
+              </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
-                <div className="-mx-2">
-                  <MoreVertical className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setIsReapplyOpen(true)}>
-                Redeploy
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setIsReadOpen(true)}>
-                Read
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                onSelect={() => setIsDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <p className="text-muted-foreground text-xs leading-none">
+                Namespace
+              </p>
+              <div className="flex truncate text-xs sm:text-sm">
+                {selectedResource.metadata.namespace && (
+                  <NamespaceBadge
+                    namespace={selectedResource.metadata.namespace}
+                  />
+                )}
+              </div>
+
+              <p className="text-muted-foreground text-xs leading-none">
+                Cluster
+              </p>
+              <div className="flex truncate text-xs sm:text-sm">
+                <SystemBadge blockUri={selectedResource.objUri} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -288,10 +332,12 @@ function ResourcePage() {
         className="w-full"
         onValueChange={(value) => {
           setActiveTab(value);
-          window.location.hash = value;
+          const url = new URL(window.location.toString());
+          url.hash = value;
+          location.assign(url);
         }}
       >
-        <TabsList className="border-border h-auto w-full justify-start rounded-none border-b bg-transparent">
+        <TabsList className="border-border h-auto w-full justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
           <TabsTrigger
             value="details"
             className="data-[state=active]:border-primary rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -322,48 +368,11 @@ function ResourcePage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="details">
-          <CardContent className="flex flex-col gap-8">
-            {/* Status */}
-            <div className="w-full">
-              <div className="pb-4 pt-4 sm:pt-6">
-                <CardTitle>Status</CardTitle>
-              </div>
-
-              <div className="grid auto-rows-[28px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                <PropertyKey>Status</PropertyKey>
-                <PropertyValue>
-                  <div className="flex gap-2">
-                    {selectedResource.status?.conditions?.map((condition) => (
-                      <StatusBadge
-                        key={condition.type}
-                        obj={selectedResource}
-                        showMessage
-                        type={condition.type}
-                      />
-                    ))}
-                  </div>
-                </PropertyValue>
-
-                <PropertyKey>Namespace</PropertyKey>
-                <PropertyValue>
-                  {selectedResource.metadata.namespace && (
-                    <NamespaceBadge
-                      namespace={selectedResource.metadata.namespace}
-                    />
-                  )}
-                </PropertyValue>
-
-                <PropertyKey>Cluster</PropertyKey>
-                <PropertyValue>
-                  <SystemBadge blockUri={selectedResource.objUri} />
-                </PropertyValue>
-              </div>
-            </div>
-
+          <div className="flex flex-col gap-8">
             {/* Properties */}
             {Object.keys(properties).length > 0 && (
               <div className="w-full">
-                <div className="pb-4 sm:pt-6">
+                <div className="pb-4 pt-4 sm:pt-6">
                   <CardTitle>Properties</CardTitle>
                 </div>
                 <div className="grid auto-rows-[32px] grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
@@ -400,7 +409,7 @@ function ResourcePage() {
                 <ResourceTable resources={children} showActions={false} />
               </div>
             )}
-          </CardContent>
+          </div>
         </TabsContent>
         <TabsContent value="logs">
           <CardContent className="h-full p-0">

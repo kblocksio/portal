@@ -22,7 +22,7 @@ export const ResourceTypeCard = ({
     <Card
       tabIndex={onCardClick ? 0 : -1}
       className={cn(
-        "flex flex-col rounded-md shadow-sm sm:w-[300px]",
+        "flex w-full flex-col rounded-md shadow-sm md:w-[300px]",
         onCardClick && "hover:bg-muted cursor-pointer",
       )}
       onClick={(e) => {

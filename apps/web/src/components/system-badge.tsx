@@ -27,21 +27,21 @@ export const SystemBadge = ({ blockUri }: SystemBadgeProps) => {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className={`px-1.5 py-0.5 text-xs ${chooseColor(
-                block.system,
-                clusterColors,
-              )}`}
-            >
-              {block.system}
-            </Badge>
-          </div>
+        <TooltipTrigger className="inline-block min-w-0">
+          <Badge
+            variant="outline"
+            className={`w-full px-1.5 py-0.5 text-xs ${chooseColor(
+              block.system,
+              clusterColors,
+            )}`}
+          >
+            <span className="truncate">{block.system}</span>
+          </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Cluster: <span className="font-bold">{block.system}</span></p>
+          <p>
+            Cluster: <span className="font-bold">{block.system}</span>
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
