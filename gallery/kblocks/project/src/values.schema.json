@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "The description of the project"
+    },
+    "gitops": {
+      "type": "boolean",
+      "description": "Whether the project is associated with a GitOps application. If GitOps is enabled, resources can only be created via a commit to the GitOps manifest and not directly via the portal."
+    },
+    "icon": {
+      "type": "string",
+      "description": "The icon of the project. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon."
+    },
+    "title": {
+      "type": "string",
+      "description": "The title of the project"
+    },
+    "objects": {
+      "type": "array",
+      "description": "An array of block URIs",
+      "items": {
+        "type": "string",
+        "description": "The URI of the block"
+      }
+    }
+  }
+}

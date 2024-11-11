@@ -6,13 +6,6 @@ export interface ResourceQuery {
   name?: string;
 }
 
-export type Project = {
-  label: string;
-  value: string;
-  description: string;
-  icon: string;
-};
-
 export type Repository = {
   id: number;
   full_name: string;

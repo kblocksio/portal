@@ -15,6 +15,7 @@ import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as ResourcesIndexImport } from './routes/resources.index'
 import { Route as CatalogIndexImport } from './routes/catalog.index'
+import { Route as ProjectsNameImport } from './routes/projects.$name'
 import { Route as ResourcesNewIndexImport } from './routes/resources.new.index'
 import { Route as CatalogGroupVersionPluralImport } from './routes/catalog.$group.$version.$plural'
 import { Route as ResourcesNewGroupVersionPluralImport } from './routes/resources.new.$group.$version.$plural'
@@ -44,6 +45,12 @@ const ResourcesIndexRoute = ResourcesIndexImport.update({
 const CatalogIndexRoute = CatalogIndexImport.update({
   id: '/catalog/',
   path: '/catalog/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProjectsNameRoute = ProjectsNameImport.update({
+  id: '/projects/$name',
+  path: '/projects/$name',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -96,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminImport
+      parentRoute: typeof rootRoute
+    }
+    '/projects/$name': {
+      id: '/projects/$name'
+      path: '/projects/$name'
+      fullPath: '/projects/$name'
+      preLoaderRoute: typeof ProjectsNameImport
       parentRoute: typeof rootRoute
     }
     '/catalog/': {
@@ -155,6 +169,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/projects/$name': typeof ProjectsNameRoute
   '/catalog': typeof CatalogIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/resources/new': typeof ResourcesNewIndexRoute
@@ -167,6 +182,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/projects/$name': typeof ProjectsNameRoute
   '/catalog': typeof CatalogIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/resources/new': typeof ResourcesNewIndexRoute
@@ -180,6 +196,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/projects/$name': typeof ProjectsNameRoute
   '/catalog/': typeof CatalogIndexRoute
   '/resources/': typeof ResourcesIndexRoute
   '/resources/new/': typeof ResourcesNewIndexRoute
@@ -194,6 +211,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/projects/$name'
     | '/catalog'
     | '/resources'
     | '/resources/new'
@@ -205,6 +223,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/projects/$name'
     | '/catalog'
     | '/resources'
     | '/resources/new'
@@ -216,6 +235,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/projects/$name'
     | '/catalog/'
     | '/resources/'
     | '/resources/new/'
@@ -229,6 +249,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ProjectsNameRoute: typeof ProjectsNameRoute
   CatalogIndexRoute: typeof CatalogIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
   ResourcesNewIndexRoute: typeof ResourcesNewIndexRoute
@@ -241,6 +262,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ProjectsNameRoute: ProjectsNameRoute,
   CatalogIndexRoute: CatalogIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
   ResourcesNewIndexRoute: ResourcesNewIndexRoute,
@@ -266,6 +288,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/admin",
+        "/projects/$name",
         "/catalog/",
         "/resources/",
         "/resources/new/",
@@ -280,6 +303,9 @@ export const routeTree = rootRoute
     },
     "/admin": {
       "filePath": "admin.tsx"
+    },
+    "/projects/$name": {
+      "filePath": "projects.$name.tsx"
     },
     "/catalog/": {
       "filePath": "catalog.index.tsx"

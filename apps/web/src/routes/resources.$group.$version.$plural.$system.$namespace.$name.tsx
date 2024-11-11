@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreVertical } from "lucide-react";
+import { ChevronDown, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Resource, ResourceContext } from "@/resource-context";
@@ -29,6 +29,7 @@ import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
 import { cloneDeep } from "lodash";
+import { ProjectItems, ProjectsMenu } from "@/components/projects-menu";
 
 const DEFAULT_TAB = "details";
 
@@ -213,8 +214,6 @@ function ResourcePage() {
     return null;
   }
 
-
-
   return (
     <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-12 sm:py-8">
       <div className="flex flex-col gap-4">
@@ -234,6 +233,19 @@ function ResourcePage() {
             </div>
           </div>
           <div className="flex space-x-2">
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  Projects
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <ProjectItems objUri={selectedResource.objUri} />
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
               variant="default"
               onClick={() =>

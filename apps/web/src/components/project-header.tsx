@@ -1,7 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Project, User } from "@repo/shared";
+import { User } from "@repo/shared";
 import { useFetch } from "@/hooks/use-fetch";
 import { getUserInitials } from "@/lib/user-initials";
+import { Project } from "@/resource-context";
 
 export interface ProjectHeaderProps {
   selectedProject: Project | null;
@@ -25,7 +26,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
     <div className="flex flex-col items-start justify-between md:flex-row">
       <div className="flex-1 space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
-          {selectedProject ? selectedProject.label : ""}
+          {selectedProject ? selectedProject.title ?? selectedProject.metadata.name : ""}
         </h1>
         <p className="text-md text-muted-foreground">
           {selectedProject ? selectedProject.description : ""}

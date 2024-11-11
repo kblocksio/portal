@@ -28,20 +28,20 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ResourceContext } from "@/resource-context";
 
 export const AppSidebar = () => {
-  const { resourceTypes, categories } = useContext(ResourceContext);
+  const { resourceTypes, categories, projects } = useContext(ResourceContext);
   const location = useLocation();
   const platformSideBarItems = useMemo(() => {
     return [
       {
         title: "Home",
         url: "/",
-        icon: "Home",
+        icon: "heroicon://home-modern",
         isActive: true,
       },
       {
         title: "Catalog",
         url: "/catalog",
-        icon: "Blocks",
+        icon: "heroicon://shopping-cart",
         items: Object.keys(categories).map((category) => ({
           title: categories[category].title,
           url: "#",
@@ -59,11 +59,19 @@ export const AppSidebar = () => {
       {
         title: "Resources",
         url: "/resources",
-        icon: "LayoutDashboard",
+        icon: "heroicon://list-bullet",
       },
-
+      {
+        title: "Projects",
+        icon: "heroicon://briefcase",
+        items: projects.map((project) => ({
+          title: project.title ?? project.metadata.name,
+          url: `/projects/${project.metadata.name}`,
+          icon: project.icon ?? "heroicon://folder",
+        })),
+      },
     ];
-  }, [resourceTypes, categories]);
+  }, [resourceTypes, categories, projects]);
 
   return (
     <Sidebar collapsible="icon">

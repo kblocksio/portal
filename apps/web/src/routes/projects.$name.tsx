@@ -1,52 +1,37 @@
-import { Project, ResourceContext } from "@/resource-context";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useContext, useMemo } from "react";
-import { useAppContext } from "@/app-context";
+import { ResourceContext } from '@/resource-context'
+import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useContext, useMemo } from 'react'
+import { useAppContext } from '@/app-context'
 
-import { ProjectHeader } from "@/components/project-header";
-import { ResourceTable } from "@/components/resource-table/resource-table";
-import { Skeleton } from "@/components/ui/skeleton";
-export const Route = createFileRoute("/resources/")({
-  component: Resources,
-});
+import { ProjectHeader } from '@/components/project-header'
+import { ResourceTable } from '@/components/resource-table/resource-table'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export const ResourcePageProject: Project = {
-  apiVersion: "kblocks.io/v1",
-  kind: "Project",
-  metadata: {
-    name: "Resources",
-  },
-  description:
-    "Here is a comprehensive list of resources associated with your account. You can manage these resources, view their status, edit, update, delete, check logs, and access detailed information, relationships, and other useful insight",
-  icon: "LayoutDashboard",
-};
+export const Route = createFileRoute('/projects/$name')({
+  component: ProjectPage,
+})
 
-function Resources() {
-  const { resourceTypes, objects } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
+function ProjectPage() {
+  const { resourceTypes, objects, projects } = useContext(ResourceContext)
+  const { setBreadcrumbs } = useAppContext()
+  const { name } = Route.useParams();
+
+  const project = useMemo(() => {
+    return projects.find((p) => p.metadata.name === name);
+  }, [projects, name]);
 
   const allResources = useMemo(() => {
-    return Object.values(objects).filter((r) => {
-      if (r.kind === "Block") {
-        return false;
-      }
-
-      // don't show resources that are children of other resources
-      if (r.metadata?.ownerReferences?.length) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [objects]);
+    console.log(project?.objects);
+    return (project?.objects ?? []).map((uri) => objects[uri]);
+  }, [objects, project])
 
   useEffect(() => {
-    setBreadcrumbs([{ name: "Resources" }]);
-  }, [setBreadcrumbs]);
+    setBreadcrumbs([{ name: 'Projects' }, { name: project?.metadata.name ?? '' }])
+  }, [setBreadcrumbs, project])
 
   return (
     <div className="flex flex-col gap-4 py-4 pt-0 sm:gap-12 sm:py-8">
-      <ProjectHeader selectedProject={ResourcePageProject} />
+      {project && <ProjectHeader selectedProject={project} />}
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />
@@ -57,7 +42,7 @@ function Resources() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
 const LoadingSkeleton = () => {
@@ -88,5 +73,5 @@ const LoadingSkeleton = () => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}

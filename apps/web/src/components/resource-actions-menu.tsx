@@ -11,7 +11,7 @@ import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
 import { Resource, ResourceType } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
-
+import { ProjectsMenu } from "./projects-menu";
 export const ResourceActionsMenu = ({
   resource,
   onDeleteClick,
@@ -72,6 +72,9 @@ export const ResourceActionsMenu = ({
         >
           Delete...
         </DropdownMenuItem>
+
+        <ProjectsMenu objUri={resource.objUri} />
+
         <DeleteResourceDialog
           resource={resource}
           isOpen={isDeleteOpen}
@@ -103,3 +106,4 @@ export const ResourceActionsMenu = ({
     </DropdownMenu>
   );
 };
+

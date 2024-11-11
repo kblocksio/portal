@@ -71,7 +71,15 @@ export interface ResourceContextValue {
   loadEvents: (objUri: string) => void;
   categories: Record<string, Category>;
   relationships: Record<string, Record<string, Relationship>>;
+  projects: Array<Project>;
 }
+
+export type Project = Resource & {
+  description?: string;
+  objects?: string[];
+  icon?: string;
+  title?: string;
+};
 
 export const ResourceContext = createContext<ResourceContextValue>({
   resourceTypes: {},
@@ -86,6 +94,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   categories: {},
   loadEvents: () => {},
   relationships: {},
+  projects: [],
 });
 
 export function urlForResource(blockUri: BlockUriComponents) {
@@ -103,7 +112,6 @@ export const ResourceProvider = ({
   >({});
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [objects, setObjects] = useState<Record<string, Resource>>({});
-
   const [selectedResourceId, setSelectedResourceId] = useState<
     SelectedResourceId | undefined
   >(undefined);
@@ -417,9 +425,14 @@ export const ResourceProvider = ({
     [addEvent],
   );
 
+  const projects = useMemo(() => {
+    return Object.values(objects).filter((obj) => obj.objType === "kblocks.io/v1/projects");
+  }, [objects]);
+
   const value: ResourceContextValue = {
     resourceTypes,
     objects,
+    projects,
     loadEvents,
     systems,
     namespaces,
