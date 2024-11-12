@@ -262,6 +262,13 @@ cd $REPO/gallery
 ./install-blocks.sh
 ```
 
+Then, build the portal:
+
+```sh
+npm install
+npm run build
+```
+
 Then, install the portal to your local cluster.
 
 ```sh
