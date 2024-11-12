@@ -15,11 +15,12 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.1.0",
+    "@types/request": "^2.48.12",
     "cookie": "^0.6.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@kblocks/api": "^0.4.26",
+    "@kblocks/api": "^0.4.60",
     "@kubernetes/client-node": "^0.22.1",
     "@octokit/core": "^6.1.2",
     "@supabase/ssr": "^0.5.1",

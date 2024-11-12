@@ -31,7 +31,7 @@ export async function kubernetesRequest(
   await kc.applyToRequest(req);
 
   return new Promise((resolve, reject) => {
-    request.get(req, (err, res, body) => {
+    request.get(req, (err: any, res: request.Response, body: any) => {
       if (err) {
         return reject(err);
       }
