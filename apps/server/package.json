@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "dotenv -- tsx src/index.ts --watch",
     "build": "tsc",
     "prod": "tsx src/index.ts"
   },
@@ -16,6 +17,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.1.0",
     "cookie": "^0.6.0",
+    "supabase": "^1.219.2",
     "typescript": "^5.5.4"
   },
   "dependencies": {
