@@ -11,6 +11,7 @@ metadata:
 repository: {{ .Values.source.fromRepository.repository }}
 branch: {{ .Values.source.fromRepository.branch }}
 rootDirectory: {{ .Values.source.fromRepository.rootDirectory }}
+dockerFilePath: {{ .Values.source.fromRepository.dockerFilePath }}
 deploy:
   field: source.fromImage.image
   blockUri: "acme.com/v1/cronjobs/{{ .Values.kblocks.system }}/{{ .Release.Namespace }}/{{ .Release.Name }}"

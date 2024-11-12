@@ -8,6 +8,12 @@ set -eu
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
 KBLOCKS_HOST="${KBLOCKS_HOST:-}"
 
+context=$(kubectl config current-context)
+
+if [ -z "$KBLOCKS_HOST" ] && [ "$context" == "kind-kind" ]; then
+  KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001
+fi
+
 if [ -z "$KBLOCKS_HOST" ]; then
   echo "KBLOCKS_HOST is not set (e.g. https://staging.kblocks.io)"
   exit 1

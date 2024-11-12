@@ -33,21 +33,17 @@ scaling:
   replicas: {{ default 2 (dig "scaling" "replicas" 2 .Values) }}
   {{- end }}
 region: {{ .Values.region }}
-{{- if .Values.ingress }}
 ingress:
-  path: {{ .Values.ingress.path }}
-  host: {{ .Values.ingress.host }}
-  rewrite: {{ .Values.ingress.rewrite }}
-  {{- if .Values.ingress.tls }}
+  path: {{ .Values.path }}
+  host: {{ .Values.host }}
+  rewrite: {{ .Values.rewrite }}
+  {{- if .Values.tls }}
   tls:
-    secret: {{ .Values.ingress.tls.secret }}
+    secret: {{ .Values.tls.secret }}
     hosts: 
-      {{- toYaml .Values.ingress.tls.hosts | nindent 6 }}
+      {{- toYaml .Values.tls.hosts | nindent 6 }}
   {{- end }}
-{{- end }}
-{{- if and .Values.ingress .Values.ingress.path }}
-port: 3000
-{{- end }}
+port: {{ default 3000 .Values.port }}
 {{- end }}
 {{- end }}
 {{- end }}

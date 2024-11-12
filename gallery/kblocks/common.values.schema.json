@@ -20,7 +20,7 @@
           "Large"
         ],
         "default": "Small",
-        "description": "The instance type to use for the service.\n\n@ui kblocks.io/instance-picker: {\"Micro\":{\"cpu\":0.5,\"memory\":128,\"storage\":1},\"Small\":{\"cpu\":1,\"memory\":256,\"storage\":1},\"Medium\":{\"cpu\":2,\"memory\":512,\"storage\":2},\"Large\":{\"cpu\":4,\"memory\":1024,\"storage\":2}}"
+        "description": "The instance type to use for the service.\n\n@ui kblocks.io/instance-picker: {\"Micro\":{\"cpu\":0.1,\"memory\":256,\"storage\":1},\"Small\":{\"cpu\":0.2,\"memory\":256,\"storage\":1},\"Medium\":{\"cpu\":2,\"memory\":512,\"storage\":2},\"Large\":{\"cpu\":4,\"memory\":1024,\"storage\":2}}"
     },
     "autoscaling": {
         "type": "object",
@@ -253,7 +253,8 @@
     "githubDockerImage": {
         "type": "object",
         "required": [
-            "repository"
+            "repository",
+            "dockerFilePath"
         ],
         "properties": {
             "repository": {
@@ -268,6 +269,11 @@
             "rootDirectory": {
                 "type": "string",
                 "description": "If set, Kblocks runs commands from this directory instead of the repository root. Additionally, code changes outside of this directory do not trigger an auto-deploy. Most commonly used with a monorepo."
+            },
+            "dockerFilePath": {
+                "type": "string",
+                "description": "You must have a Dockerfile in this repository and set the path to it here.",
+                "default": "Dockerfile"
             },
             "advanced": {
                 "type": "object",

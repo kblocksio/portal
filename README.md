@@ -213,7 +213,13 @@ export REPO=$PWD
 
 ### 2. Install `kind`
 
-Install kind (v0.25.0 or above). Then, create a kind cluster:
+Install kind (v0.25.0 or above):
+
+```sh
+brew install kind
+```
+
+Then, make sure Docker is running and create a kind cluster:
 
 ```sh
 cd $REPO
@@ -253,7 +259,7 @@ Then, install the gallery blocks so they would refer to the local backend:
 
 ```sh
 cd $REPO/gallery
-KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
+./install-blocks.sh
 ```
 
 Then, install the portal to your local cluster.
