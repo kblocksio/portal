@@ -71,12 +71,31 @@ export const OneOfPicker = ({
     label: splitAndCapitalizeCamelCase(key),
   }));
 
+  // only update initial value if it's not set
+  useEffect(() => {
+    if (value) {
+      const selectedOptionPath = path ? `${path}.${value}` : value;
+      const currentData = getDataByPath(formData, selectedOptionPath);
+
+      // Only update if there's no data set at this path
+      if (currentData === undefined || currentData === null) {
+        const updatedFormData = updateDataByPath(
+          formData,
+          selectedOptionPath,
+          {},
+        );
+        setFormData(updatedFormData);
+      }
+    }
+  }, [value, path, formData, setFormData]);
+
   const details = React.useMemo(() => {
     if (!value) {
       return null;
     }
 
     let newFormData = formData;
+    // clear all other fields of this oneof
     for (const other of Object.keys(properties).filter((k) => k !== value)) {
       const otherPath = path ? `${path}.${other}` : other;
       newFormData = updateDataByPath(newFormData, otherPath, undefined);
@@ -115,20 +134,6 @@ export const OneOfPicker = ({
     value,
   ]);
 
-  useEffect(() => {
-    if (value === null) {
-      setFormData(updateDataByPath(formData, path, undefined));
-    } else {
-      const selectedOptionPath = path ? `${path}.${value}` : value;
-      const updatedFormData = updateDataByPath(
-        formData,
-        selectedOptionPath,
-        {}, // initial value
-      );
-      setFormData(updatedFormData);
-    }
-  }, [value]);
-
   return (
     <Field
       hideField={hideField}
@@ -161,6 +166,7 @@ export const OneOfPicker = ({
                 <CommandItem
                   onSelect={() => {
                     setValue(null); // Clears the current selection
+                    setFormData(updateDataByPath(formData, path, undefined));
                     setOpen(false);
                   }}
                 >
@@ -177,6 +183,15 @@ export const OneOfPicker = ({
                     key={option.value}
                     onSelect={() => {
                       setValue(option.value);
+                      const selectedOptionPath = path
+                        ? `${path}.${option.value}`
+                        : option.value;
+                      const updatedFormData = updateDataByPath(
+                        formData,
+                        selectedOptionPath,
+                        {}, // initial value
+                      );
+                      setFormData(updatedFormData);
                       setOpen(false);
                     }}
                   >
