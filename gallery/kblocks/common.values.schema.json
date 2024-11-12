@@ -24,18 +24,8 @@
     },
     "autoscaling": {
         "type": "object",
-        "required": ["enabled"],
         "description": "Autoscaling configuration",
         "properties": {
-            "enabled": {
-                "type": "string",
-                "default": "No",
-                "enum": [
-                    "Yes",
-                    "No"
-                ],
-                "description": "Whether autoscaling is enabled."
-            },
             "minReplicas": {
                 "type": "number",
                 "default": 2,

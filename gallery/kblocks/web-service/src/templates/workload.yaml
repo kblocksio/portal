@@ -23,7 +23,7 @@ env:
   {{- end }}
 {{- end }}
 scaling:  
-  {{- if and .Values.scaling .Values.scaling.autoscaling (eq .Values.scaling.autoscaling.enabled "Yes") }}
+  {{- if and .Values.scaling .Values.scaling.autoscaling }}
   autoscaling:
     minReplicas: {{ default 2 .Values.scaling.autoscaling.minReplicas }}
     maxReplicas: {{ default 5 .Values.scaling.autoscaling.maxReplicas }}
