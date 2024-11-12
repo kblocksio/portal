@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: private
+---
+
+apiVersion: kblocks.io/v1
+kind: Project
+metadata:
+  name: private-service-demo
+  namespace: default
+title: Private Service Demo
+icon: Briefcase
+description: >-
+  A demo application that shows how Kblocks can be used to run a private service that is only accessible from the cluster
+objects:
+- kblocks://acme.com/v1/privateservices/local/private/private-service-demo
+
+---
+
+apiVersion: acme.com/v1
+kind: PrivateService
+metadata:
+  name: private-service-demo
+  namespace: private
+instanceType: Small
+port: 5678
+source:
+  fromImage:
+    image: hashicorp/http-echo
+
+
+
