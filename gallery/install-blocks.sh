@@ -4,6 +4,8 @@
 # if no kblock is provided, all kblocks will be installed
 #------------------------------------------------------------------------------#
 set -eu
+dir=$(cd $(dirname $0) && pwd)
+cd $dir
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
 KBLOCKS_HOST="${KBLOCKS_HOST:-}"

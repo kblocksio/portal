@@ -1,0 +1,10 @@
+apiVersion: v2
+name: simpleapp-block
+description: An example block implemented using Helm
+type: application
+version: 0.1.0
+
+# dependencies:
+#   - name: postgresql
+#     repository: https://charts.bitnami.com/bitnami
+#     version: 15.5.20
