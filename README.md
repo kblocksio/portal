@@ -256,11 +256,11 @@ cd $REPO/gallery
 KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
 ```
 
-Then, install the portal in kind mode:
+Then, install the portal to your local cluster.
 
 ```sh
 cd $REPO
-./install.sh kind
+./install.sh
 ```
 
 ### 5. Modify your `/etc/hosts` file

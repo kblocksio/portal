@@ -1,13 +1,5 @@
 #!/bin/bash
 set -eu
-
-env=${1:-}
-
-if [ -z "$env" ]; then
-  echo "Error: env variable is required"
-  exit 1
-fi
-
 context=$(kubectl config current-context)
 
 if [ "$context" == "kind-kind" ]; then
@@ -20,5 +12,7 @@ else
   export PORTAL_INGRESS_HOST=staging.kblocks.io
   export PORTAL_REDIS_ENABLED=false
 fi
+
+echo "Installing to $context"
 
 skaffold run
