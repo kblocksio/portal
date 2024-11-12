@@ -249,10 +249,6 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 ./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 ```
 
-> Don't be alarmed if you see errors like `Error from server (NotFound): secrets “kblocks-secrets” not found`.
-> This is because the script attempts to delete existing secrets if they are already installed, and you are
-> installing from scratch.
-
 ### 4. Install blocks gallery
 
 Then, install the gallery blocks so they would refer to the local backend:

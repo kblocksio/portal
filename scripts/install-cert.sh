@@ -11,5 +11,5 @@ if [ -z "$key" ] || [ -z "$cert" ]; then
   exit 1
 fi
 
-kubectl delete secret kblocks-tls -n default || true
+kubectl delete secret kblocks-tls -n default 2>/dev/null || true
 kubectl create secret tls kblocks-tls --key=$key --cert=$cert -n default
