@@ -286,6 +286,12 @@ Next, modify your `/etc/hosts` file to include the following line:
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
+NOTE: The local installation is not using qkube, so don't expect to find the cluster when running `qkube ls`.
+- To make sure that kubectl is using the right cluster, run `kubectl config current-context`. and make sure
+it points to `kind-kind`.
+- To switch to the staging cluster, run `qkube use staging.quickube.sh`.
+- To switch back to the local cluster, run `kubectl config use-context kind-kind`.
+
 
 
 That's it. Have fun!
