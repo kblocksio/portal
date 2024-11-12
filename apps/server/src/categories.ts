@@ -47,4 +47,12 @@ export const categories: Record<string, Category> = {
     color: "amber",
     docslink: "https://docs.kblocks.io/categories/cicd",
   },
+  demo: {
+    title: "Demo",
+    description:
+      "Demo is a category for showcasing Kblocks in action. It includes examples of how to use Kblocks to build various types of applications.",
+    icon: "heroicon://presentation-chart-line",
+    color: "red",
+    docslink: "https://docs.kblocks.io/categories/demo",
+  },
 };
