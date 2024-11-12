@@ -213,7 +213,13 @@ export REPO=$PWD
 
 ### 2. Install `kind`
 
-Install kind (v0.25.0 or above). Then, create a kind cluster:
+Install kind (v0.25.0 or above):
+
+```sh
+brew install kind
+```
+
+Then, make sure Docker is running and create a kind cluster:
 
 ```sh
 cd $REPO
