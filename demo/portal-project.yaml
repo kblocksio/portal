@@ -1,0 +1,9 @@
+apiVersion: kblocks.io/v1
+kind: Project
+metadata:
+  name: portal
+description: This project includes the resources used to deploy the Kblocks Portal itself
+icon: Eye
+objects:
+  - kblocks://acme.com/v1/workloads/local/default/portal-backend
+  - kblocks://acme.com/v1/workloads/local/default/portal-frontend

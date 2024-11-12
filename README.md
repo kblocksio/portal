@@ -249,10 +249,6 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 ./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 ```
 
-> Don't be alarmed if you see errors like `Error from server (NotFound): secrets “kblocks-secrets” not found`.
-> This is because the script attempts to delete existing secrets if they are already installed, and you are
-> installing from scratch.
-
 ### 4. Install blocks gallery
 
 Then, install the gallery blocks so they would refer to the local backend:
@@ -260,6 +256,13 @@ Then, install the gallery blocks so they would refer to the local backend:
 ```sh
 cd $REPO/gallery
 ./install-blocks.sh
+```
+
+Then, build the portal:
+
+```sh
+npm install
+npm run build
 ```
 
 Then, install the portal to your local cluster.
@@ -279,6 +282,22 @@ Next, modify your `/etc/hosts` file to include the following line:
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
+### 6. Deploy demo resources
+
+Next, we will add a bunch of resources that we use for our demo:
+
+```sh
+cd demo
+kubectl apply -f .
+```
+
+### Switching between local and staging
+
+NOTE: The local installation is not using qkube, so don't expect to find the cluster when running `qkube ls`.
+- To make sure that kubectl is using the right cluster, run `kubectl config current-context`. and make sure
+it points to `kind-kind`.
+- To switch to the staging cluster, run `qkube use staging.quickube.sh`.
+- To switch back to the local cluster, run `kubectl config use-context kind-kind`.
 
 
 That's it. Have fun!

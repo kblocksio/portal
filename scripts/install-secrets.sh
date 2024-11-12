@@ -12,5 +12,5 @@ if [ -z "$envfile" ]; then
 fi
 
 secret="kblocks-api-secrets"
-kubectl delete secret "$secret" || true
+kubectl delete secret "$secret" 2> /dev/null || true
 kubectl create secret generic "$secret" --from-env-file="$envfile"

@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: voting
+---
+apiVersion: kblocks.io/v1
+kind: Project
+metadata:
+  name: voting
+  namespace: default
+title: Voting App Demo
+icon: Hand
+description: >-
+  A demo application that shows how Kblocks can be used to deploy a web
+  application with a frontend, a database and a backend
+objects:
+- kblocks://acme.com/v1/staticsites/local/voting/voting-results-website
+- kblocks://acme.com/v1/staticsites/local/voting/voting-casting-website
+- kblocks://acme.com/v1/postgreses/local/voting/voting-db
+- kblocks://acme.com/v1/networkedworloads/local/voting/voting-backend-web-service
+- kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-casting-website-static-site-autobuild
+- kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-results-website-static-site-autobuild
+- kblocks://acme.com/v1/buckets/local/voting/voting-results-website-static-site-bucket
+- kblocks://acme.com/v1/buckets/local/voting/voting-casting-website-static-site-bucket
+- kblocks://acme.com/v1/cloudfronts/local/voting/voting-results-website-static-site-cloudfront
+- kblocks://acme.com/v1/cloudfronts/local/voting/voting-casting-website-static-site-cloudfront
+
+---
+apiVersion: acme.com/v1
+kind: Postgres
+metadata:
+  name: voting-db
+  namespace: voting
+---
+apiVersion: acme.com/v1
+kind: WebService
+metadata:
+  name: voting-backend
+  namespace: voting
+
+environmentVariables:
+  POSTGRES_DB:
+    value: "${ref://postgres.acme.com/voting-db/database}"
+  POSTGRES_HOST:
+    value: "${ref://postgres.acme.com/voting-db/host}"
+  POSTGRES_PASSWORD:
+    fromSecret:
+      key: "${ref://postgres.acme.com/voting-db/passwordKey}"
+      optional: false
+      secretName: "${ref://postgres.acme.com/voting-db/passwordSecret}"
+  POSTGRES_PORT:
+    value: "${ref://postgres.acme.com/voting-db/port}"
+  POSTGRES_USER:
+    value: "${ref://postgres.acme.com/voting-db/user}"
+route: /api
+port: 3000
+instanceType: Micro
+scaling:
+  autoscaling:
+    enabled: 'Yes'
+    maxReplicas: 5
+    minReplicas: 2
+    targetCpuUtilization: 70
+    targetMemoryUtilization: 70
+  replicas: 2
+source:
+  fromImage:
+    image: wingcloudbot/votes-backend:e970fce597a7a16d1a4285657ddaa3dee6bf3b82
+---
+apiVersion: acme.com/v1
+kind: StaticSite
+metadata:
+  name: voting-casting-website
+  namespace: voting
+
+branch: main
+buildCommand: npm run build
+environmentVariables:
+  VITE_SERVER_URL:
+    value: http://localhost.kblocks.io
+language: Node
+outputDirectory: dist
+repository: superacme/votes-casting-app
+rootDirectory: .
+---
+apiVersion: acme.com/v1
+kind: StaticSite
+metadata:
+  name: voting-results-website
+  namespace: voting
+
+branch: main
+buildCommand: npm run build
+environmentVariables:
+  VITE_SERVER_URL:
+    value: http://localhost.kblocks.io
+language: Node
+outputDirectory: dist
+repository: superacme/votes-results-app
+rootDirectory: .
