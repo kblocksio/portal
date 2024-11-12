@@ -17,42 +17,41 @@
         "description": "The Docker image or GitHub repository to use for the web service.\n@ui kblocks.io/one-of",
         "$ref": "#/$defs/commonDefs/source"
       },
-      "ingress": {
+      "path": {
+        "type": "string",
+        "default": "/",
+        "description": "Ingress path for this web service."
+      },
+      "port": {
+        "type": "number",
+        "default": 3000,
+        "description": "Port to use for this endpoint"
+      },
+      "host": {
+        "type": "string",
+        "enum": ["staging.quickube.sh"],
+        "default": "staging.quickube.sh",
+        "description": "Hostname to use for this endpoint"
+      },
+      "rewrite": {
+        "type": "string",
+        "description": "Rewrite rules for the URL path"
+      },
+      "tls": {
         "type": "object",
-        "required": ["path"],
+        "required": ["secret", "hosts"],
         "properties": {
-          "path": {
+          "secret": {
             "type": "string",
-            "default": "/",
-            "description": "Ingress path for this web service."
+            "description": "Secret name containing the TLS certificate and key to use for this web service"
           },
-          "host": {
-            "type": "string",
-            "enum": ["staging.quickube.sh"],
-            "default": "staging.quickube.sh",
-            "description": "Hostname to use for this endpoint"
-          },
-          "rewrite": {
-            "type": "string",
-            "description": "Rewrite rules for the URL path"
-          },
-          "tls": {
-            "type": "object",
-            "required": ["secret", "hosts"],
-            "properties": {
-              "secret": {
-                "type": "string",
-                "description": "Secret name containing the TLS certificate and key to use for this web service"
-              },
-              "hosts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Hostnames to use for this certificate",
-                "default": ["acme.com"]
-              }
-            }
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Hostnames to use for this certificate",
+            "default": ["acme.com"]
           }
         }
       },

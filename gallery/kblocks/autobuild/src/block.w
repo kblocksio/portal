@@ -13,6 +13,9 @@ pub struct AutoBuildSpec {
   /// The root directory of the repository to build. If not specified, the root directory will be used.
   rootDirectory: str?;
 
+  /// The path to the Dockerfile in the repository. If not specified, "Dockerfile" will be used.
+  dockerFilePath: str?;
+
   /// The name of the image to push to the registry. If not specified, the repository name will be used.
   imageName: str?;
 
@@ -45,7 +48,7 @@ pub class AutoBuild {
     let password = #"${{ secrets.DOCKER_PASSWORD }}";
     let githubSha = #"${{ github.sha }}";
     let rootDirectory = spec.rootDirectory ?? ".";
-
+    let dockerFilePath = spec.dockerFilePath ?? "Dockerfile";
     let steps = MutArray<Json> [
       {
         "name": "Checkout code",
@@ -73,6 +76,7 @@ pub class AutoBuild {
         "with": {
           "push": true,
           "context": "{rootDirectory}",
+          "dockerfile": "{dockerFilePath}",
           "platforms": "linux/amd64,linux/arm64",
           "tags": "{username}/{imageName}:{githubSha}"
         }
