@@ -14,11 +14,18 @@ spec:
           containers:
           - name: main
             image: {{ .Values.source.fromImage.image }}
-            command:
-              {{- range .Values.command }}
-            - {{ . }}
-              {{- end }}
+            {{- if .Values.source.fromImage.advanced.dockerCommand }}
+            {{- if kindIs "string" .Values.source.fromImage.advanced.dockerCommand }}
+            command: 
+              - {{ .Values.source.fromImage.advanced.dockerCommand }}
+            {{- else }}
+            command: {{ .Values.source.fromImage.advanced.dockerCommand }}
+            {{- end }}
+            {{- end }}
           restartPolicy: OnFailure
+  successfulJobsHistoryLimit: {{ .Values.successfulJobsHistoryLimit | default 3 }}
+  failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit | default 3 }}
+  concurrencyPolicy: {{ .Values.concurrencyPolicy | default "Forbid" }}
 {{- end }}
 {{- end }}
 {{- end }}
