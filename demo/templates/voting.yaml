@@ -7,7 +7,7 @@ apiVersion: kblocks.io/v1
 kind: Project
 metadata:
   name: voting
-  namespace: default
+  namespace: voting
 title: Voting App Demo
 icon: Hand
 description: >-
@@ -37,7 +37,6 @@ kind: WebService
 metadata:
   name: voting-backend
   namespace: voting
-
 environmentVariables:
   POSTGRES_DB:
     value: "${ref://postgres.acme.com/voting-db/database}"
@@ -77,7 +76,7 @@ branch: main
 buildCommand: npm run build
 environmentVariables:
   VITE_SERVER_URL:
-    value: http://localhost.kblocks.io
+    value: http://{{ .Values.host }}
 language: Node
 outputDirectory: dist
 repository: superacme/votes-casting-app
@@ -93,7 +92,7 @@ branch: main
 buildCommand: npm run build
 environmentVariables:
   VITE_SERVER_URL:
-    value: http://localhost.kblocks.io
+    value: http://{{ .Values.host }}
 language: Node
 outputDirectory: dist
 repository: superacme/votes-results-app
