@@ -211,6 +211,7 @@ jobs:
           - static-site
           - topic
           - github-workflow
+          - argo-app
           - web-service
           - project
           - workload          

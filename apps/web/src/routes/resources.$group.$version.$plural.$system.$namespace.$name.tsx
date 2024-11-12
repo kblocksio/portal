@@ -252,7 +252,7 @@ function ResourcePage() {
             </DropdownMenu>
 
             <Button
-              variant="secondary"
+              variant="default"
               onClick={() =>
                 navigate({
                   to: `/resources/edit/${group}/${version}/${plural}/${system}/${namespace}/${name}`,

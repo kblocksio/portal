@@ -2,6 +2,7 @@ apiVersion: kblocks.io/v1
 kind: Project
 metadata:
   name: portal
+title: Kblocks Portal
 description: This project includes the resources used to deploy the Kblocks Portal itself
 icon: Eye
 objects:

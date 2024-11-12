@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["image", "port"],
+  "properties": {
+    "image": {
+      "type": "string",
+      "description": "The docker image to run"
+    },
+    "port": {
+      "type": "number",
+      "description": "The port to expose the application on"
+    },
+    "echoText": {
+      "type": "string",
+      "description": "The text to echo"
+    }
+  }
+}

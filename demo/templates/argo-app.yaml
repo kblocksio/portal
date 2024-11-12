@@ -1,0 +1,7 @@
+apiVersion: acme.com/v1
+kind: ArgoApp
+metadata:
+  name: hello-gitops
+  namespace: default
+path: .
+repository: superacme/hello-gitops

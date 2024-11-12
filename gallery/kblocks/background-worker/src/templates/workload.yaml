@@ -23,9 +23,8 @@ scaling:
     targetCpuUtilization: {{ default 70 .Values.scaling.autoscaling.targetCpuUtilization }}
     targetMemoryUtilization: {{ default 70 .Values.scaling.autoscaling.targetMemoryUtilization }}
   {{- else }}
-  replicas: {{ default 2 (dig "scaling" "replicas" 2 .Values) }}
+  replicas: {{ if and .Values.scaling (hasKey .Values.scaling "replicas") }}{{ .Values.scaling.replicas }}{{ else }}2{{ end }}
   {{- end }}
-region: {{ .Values.region }}
 {{- if .Values.ingress }}
 ingress:
   path: {{ .Values.ingress.path }}

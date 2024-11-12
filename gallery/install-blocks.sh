@@ -4,13 +4,15 @@
 # if no kblock is provided, all kblocks will be installed
 #------------------------------------------------------------------------------#
 set -eu
+dir=$(cd $(dirname $0) && pwd)
+cd $dir
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
 KBLOCKS_HOST="${KBLOCKS_HOST:-}"
 
 context=$(kubectl config current-context)
 
-if [ -z "$KBLOCKS_HOST" ] && [ "$context" == "kind-kind" ]; then
+if [ "$context" == "kind-kind" ]; then
   KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001
 fi
 
@@ -25,6 +27,7 @@ if [[ "$KBLOCKS_HOST" != http://* && "$KBLOCKS_HOST" != https://* ]]; then
   exit 1
 fi
 
+echo "KBLOCKS_HOST: $KBLOCKS_HOST"
 echo "KBLOCKS_CLI: $KBLOCKS_CLI"
 
 #------------------------------------------------------------------------------#

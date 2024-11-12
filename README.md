@@ -208,6 +208,7 @@ Clone this repository and set `$REPO` to point to the directory:
 ```sh
 git clone git@github.com:winglang/portal
 cd portal
+npm install
 export REPO=$PWD
 ```
 
@@ -222,7 +223,6 @@ brew install kind
 Then, make sure Docker is running and create a kind cluster:
 
 ```sh
-cd $REPO
 ./scripts/reinstall-kind.sh
 ```
 
@@ -243,7 +243,6 @@ Now, download all the secret files from the [1Password secret] to the secrets di
 Setup all of the secrets and certs to your kind cluster:
 
 ```sh
-cd $REPO
 KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
 ./scripts/install-secrets.sh $SECRETS/portal.env
 ./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
@@ -254,41 +253,49 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 Then, install the gallery blocks so they would refer to the local backend:
 
 ```sh
-cd $REPO/gallery
-./install-blocks.sh
+./gallery/install-blocks.sh
 ```
 
 Then, build the portal:
 
 ```sh
-npm install
 npm run build
 ```
 
-Then, install the portal to your local cluster.
+### 5. Install the portal frontend and backend
+
+First, we need to wait and make sure all blocks are running:
 
 ```sh
-cd $REPO
+kubectl get pods -n kblocks
+```
+
+Wait for all pods to be READY.
+
+Then, install the portal to your local cluster. This script will build your frontend and backend and then install them to your cluster.
+
+```sh
 ./install.sh
 ```
 
-### 5. Modify your `/etc/hosts` file
+### 6. Modify your `/etc/hosts` file
 
 Next, modify your `/etc/hosts` file to include the following line:
 
 ```
 127.0.0.1 localhost.kblocks.io
+127.0.0.1 argo.localhost.kblocks.io
 ```
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
 ### 6. Deploy demo resources
 
-Next, we will add a bunch of resources that we use for our demo:
+Next, we will add a bunch of resources that we use for our demo, including ArgoCD:
 
 ```sh
 cd demo
-kubectl apply -f .
+./install.sh
 ```
 
 ### Switching between local and staging
