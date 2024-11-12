@@ -197,9 +197,11 @@ qkube use kblocks-demo.quickube.sh
 > ./install-blocks.sh kblocks/cron-job
 > ```
 
-## Local kind installation
+## Local installation
 
 If you want to test the portal locally, you can use `kind` to setup the environment.
+
+### 1. Clone Repository
 
 Clone this repository and set `$REPO` to point to the directory:
 
@@ -209,21 +211,43 @@ cd portal
 export REPO=$PWD
 ```
 
+### 2. Install `kind`
+
 Install kind (v0.25.0 or above). Then, create a kind cluster:
 
 ```sh
-$REPO/scripts/reinstall-kind.sh
+cd $REPO
+./scripts/reinstall-kind.sh
 ```
 
-Follow [this section](#download-secrets-from-1password) to download a local copy of the portal secrets.
+### 3. Download and install secrets
+
+Create a directory for the secrets:
+
+```sh
+mkdir $HOME/kblocks-demo-secrets
+cd $HOME/kblocks-demo-secrets
+export SECRETS=$PWD
+```
+
+We will refer to this directory as `$SECRETS` throughout the document.
+
+Now, download all the secret files from the [1Password secret] to the secrets directory. 
 
 Setup all of the secrets and certs to your kind cluster:
 
 ```sh
-KBLOCKS_SYSTEM_ID=local $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
-$REPO/scripts/install-secrets.sh $SECRETS/portal.env
-$REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
+cd $REPO
+KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+./scripts/install-secrets.sh $SECRETS/portal.env
+./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 ```
+
+> Don't be alarmed if you see errors like `Error from server (NotFound): secrets “kblocks-secrets” not found`.
+> This is because the script attempts to delete existing secrets if they are already installed, and you are
+> installing from scratch.
+
+### 4. Install blocks gallery
 
 Then, install the gallery blocks so they would refer to the local backend:
 
@@ -239,6 +263,8 @@ cd $REPO
 ./install.sh kind
 ```
 
+### 5. Modify your `/etc/hosts` file
+
 Next, modify your `/etc/hosts` file to include the following line:
 
 ```
@@ -246,6 +272,8 @@ Next, modify your `/etc/hosts` file to include the following line:
 ```
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
+
+
 
 That's it. Have fun!
 
