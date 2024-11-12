@@ -29,10 +29,6 @@
       },
       "environmentVariables": {
         "$ref": "#/$defs/commonDefs/environmentVariables"
-      },
-      "region": {
-        "$ref": "#/$defs/commonDefs/region",
-        "description": "The region to deploy the private service. Your services in the same [region](https://kblocks.io/docs/regions) can communicate over a [private network](https://kblocks.io/docs/private-network)."
       }
     }
   }

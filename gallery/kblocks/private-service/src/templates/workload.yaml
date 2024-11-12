@@ -25,7 +25,6 @@ scaling:
   {{- else }}
   replicas: {{ if and .Values.scaling (hasKey .Values.scaling "replicas") }}{{ .Values.scaling.replicas }}{{ else }}2{{ end }}
   {{- end }}
-region: {{ .Values.region }}
 port: {{ default 3000 .Values.port }}
 {{- end }}
 {{- end }}

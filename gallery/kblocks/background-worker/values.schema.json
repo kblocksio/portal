@@ -8,7 +8,6 @@
     },
     "type": "object",
     "required": [
-      "region",
       "instanceType",
       "source"
     ],
@@ -25,10 +24,6 @@
       },
       "scaling": {
         "$ref": "#/$defs/commonDefs/scaling"
-      },
-      "region": {
-        "$ref": "#/$defs/commonDefs/region",
-        "description": "The region to deploy the background worker. Your services in the same [region](https://kblocks.io/docs/regions) can communicate over a [private network](https://kblocks.io/docs/private-network).",
       }
     }
   }
