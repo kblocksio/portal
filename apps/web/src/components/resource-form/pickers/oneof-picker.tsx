@@ -76,7 +76,6 @@ export const OneOfPicker = ({
     if (value) {
       const selectedOptionPath = path ? `${path}.${value}` : value;
       const currentData = getDataByPath(formData, selectedOptionPath);
-
       // Only update if there's no data set at this path
       if (currentData === undefined || currentData === null) {
         const updatedFormData = updateDataByPath(
@@ -84,6 +83,7 @@ export const OneOfPicker = ({
           selectedOptionPath,
           {},
         );
+
         setFormData(updatedFormData);
       }
     }
@@ -186,11 +186,21 @@ export const OneOfPicker = ({
                       const selectedOptionPath = path
                         ? `${path}.${option.value}`
                         : option.value;
-                      const updatedFormData = updateDataByPath(
+                      let updatedFormData = updateDataByPath(
                         formData,
                         selectedOptionPath,
                         {}, // initial value
                       );
+                      for (const other of Object.keys(properties).filter(
+                        (k) => k === value,
+                      )) {
+                        const otherPath = path ? `${path}.${other}` : other;
+                        updatedFormData = updateDataByPath(
+                          updatedFormData,
+                          otherPath,
+                          undefined,
+                        );
+                      }
                       setFormData(updatedFormData);
                       setOpen(false);
                     }}
