@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name: main
-            source: {{ .Values.source.fromImage.image }}
+            image: {{ .Values.source.fromImage.image }}
             command:
               {{- range .Values.command }}
             - {{ . }}
