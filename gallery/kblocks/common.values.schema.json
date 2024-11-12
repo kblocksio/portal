@@ -253,9 +253,7 @@
     "githubDockerImage": {
         "type": "object",
         "required": [
-            "repository",
-            "dockerFilePath"
-        ],
+            "repository"        ],
         "properties": {
             "repository": {
                 "type": "string",
