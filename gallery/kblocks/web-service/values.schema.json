@@ -10,36 +10,35 @@
     "required": [
       "instanceType",
       "source",
-      "ingress"
+      "route"
     ],
     "properties": {
       "source": {
         "description": "The Docker image or GitHub repository to use for the web service.\n@ui kblocks.io/one-of",
         "$ref": "#/$defs/commonDefs/source"
       },
-      "path": {
-        "type": "string",
-        "default": "/",
-        "description": "Ingress path for this web service."
-      },
       "port": {
         "type": "number",
         "default": 3000,
-        "description": "Port to use for this endpoint"
+        "description": "The internal HTTP port the container listens on."
       },
-      "host": {
+      "route": {
         "type": "string",
-        "enum": ["staging.quickube.sh"],
-        "default": "staging.quickube.sh",
-        "description": "Hostname to use for this endpoint"
+        "default": "/my-awesome-service",
+        "description": "The HTTP/HTTPS route to associate with this web service. All requests to this route will be routed to this service."
       },
       "rewrite": {
         "type": "string",
-        "description": "Rewrite rules for the URL path"
+        "description": "Optionally rewrite the URL path to a different path when requests are routed to this service. For example, say the route is `/api/v2` and the rewrite is `/api`, then requests to `/api/v2/users` will be rewritten to `/api/users`."
+      },
+      "host": {
+        "type": "string",
+        "description": "Host name to use for this endpoint"
       },
       "tls": {
         "type": "object",
         "required": ["secret", "hosts"],
+        "description": "TLS configuration for this web service. If provided, the web service will be exposed over HTTPS.",
         "properties": {
           "secret": {
             "type": "string",
@@ -50,8 +49,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Hostnames to use for this certificate",
-            "default": ["acme.com"]
+            "description": "Hostnames to use for this certificate"
           }
         }
       },
@@ -63,10 +61,6 @@
       },
       "environmentVariables": {
         "$ref": "#/$defs/commonDefs/environmentVariables"
-      },
-      "region": {
-        "$ref": "#/$defs/commonDefs/region",
-        "description": "The region to deploy the web service. Your services in the same [region](https://kblocks.io/docs/regions) can communicate over a [private network](https://kblocks.io/docs/private-network)."
       }
     }
   }
