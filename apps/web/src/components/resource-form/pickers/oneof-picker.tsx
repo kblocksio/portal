@@ -5,6 +5,7 @@ import { FieldRenderer } from "../field-renderer";
 import { Field } from "../form-field";
 import { updateDataByPath } from "../utils";
 import { useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Command,
   CommandList,
@@ -61,7 +62,7 @@ export const OneOfPicker = ({
         return key;
       }
     }
-    return Object.keys(properties)[0] || null;
+    return null;
   });
 
   const [open, setOpen] = React.useState(false);
@@ -89,13 +90,12 @@ export const OneOfPicker = ({
     }
   }, [value, path, formData, setFormData]);
 
-  const details = React.useMemo(() => {
+  const details = useMemo(() => {
     if (!value) {
-      return null;
+      return <AnimatePresence mode="wait"></AnimatePresence>;
     }
 
     let newFormData = formData;
-    // clear all other fields of this oneof
     for (const other of Object.keys(properties).filter((k) => k !== value)) {
       const otherPath = path ? `${path}.${other}` : other;
       newFormData = updateDataByPath(newFormData, otherPath, undefined);
@@ -109,19 +109,30 @@ export const OneOfPicker = ({
     const selectedPath = path ? `${path}.${key}` : key;
 
     return (
-      <Card className="rounded-md px-4 pb-0 pt-4 shadow-sm">
-        <FieldRenderer
-          path={selectedPath}
-          hideField={hideField}
-          objectMetadata={objectMetadata}
-          required={selectedSchema.required}
-          schema={selectedSchema}
-          formData={newFormData}
-          updateFormData={setFormData}
-          inline={true}
-          fieldName={fieldName}
-        />
-      </Card>
+      <AnimatePresence mode="wait">
+        {/* Animate exit before entering new content */}
+        <motion.div
+          key={value} // Unique key triggers exit and enter animations on value change
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ height: { duration: 0.4 }, opacity: { duration: 0.2 } }}
+        >
+          <Card className="rounded-md px-4 pb-0 pt-4 shadow-sm">
+            <FieldRenderer
+              path={selectedPath}
+              hideField={hideField}
+              objectMetadata={objectMetadata}
+              required={selectedSchema.required}
+              schema={selectedSchema}
+              formData={newFormData}
+              updateFormData={setFormData}
+              inline={true}
+              fieldName={fieldName}
+            />
+          </Card>
+        </motion.div>
+      </AnimatePresence>
     );
   }, [
     formData,
