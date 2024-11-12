@@ -253,7 +253,7 @@ Then, install the gallery blocks so they would refer to the local backend:
 
 ```sh
 cd $REPO/gallery
-KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001 ./install-blocks.sh
+./install-blocks.sh
 ```
 
 Then, install the portal to your local cluster.
