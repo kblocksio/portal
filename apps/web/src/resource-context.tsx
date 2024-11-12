@@ -150,6 +150,7 @@ export const ResourceProvider = ({
 
   useEffect(() => {
     if (categoriesData) {
+      console.log("categoriesData", categoriesData);
       setCategories(categoriesData);
     }
   }, [categoriesData]);
@@ -426,7 +427,9 @@ export const ResourceProvider = ({
   );
 
   const projects = useMemo(() => {
-    return Object.values(objects).filter((obj) => obj.objType === "kblocks.io/v1/projects");
+    return Object.values(objects).filter(
+      (obj) => obj.objType === "kblocks.io/v1/projects",
+    );
   }, [objects]);
 
   const value: ResourceContextValue = {
