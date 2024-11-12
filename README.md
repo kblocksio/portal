@@ -288,7 +288,7 @@ Next, we will add a bunch of resources that we use for our demo:
 
 ```sh
 cd demo
-kubectl apply -f .
+./install.sh
 ```
 
 ### Switching between local and staging
