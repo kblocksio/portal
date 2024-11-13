@@ -175,10 +175,6 @@ async function storeEvent(event: kblocks.WorkerEvent) {
     return saveObject(event.objUri, event.object as kblocks.ApiObject);
   }
 
-  if (event.type === "PATCH") {
-    return patchObject(event.objUri, event.patch);
-  }
-
   // store all other events
   return store(event.objUri, event);
 }
