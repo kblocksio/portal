@@ -14,16 +14,16 @@ description: >-
   A demo application that shows how Kblocks can be used to deploy a web
   application with a frontend, a database and a backend
 objects:
-- kblocks://acme.com/v1/staticsites/local/voting/voting-results-website
-- kblocks://acme.com/v1/staticsites/local/voting/voting-casting-website
-- kblocks://acme.com/v1/postgreses/local/voting/voting-db
-- kblocks://acme.com/v1/networkedworloads/local/voting/voting-backend-web-service
-- kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-casting-website-static-site-autobuild
-- kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-results-website-static-site-autobuild
-- kblocks://acme.com/v1/buckets/local/voting/voting-results-website-static-site-bucket
-- kblocks://acme.com/v1/buckets/local/voting/voting-casting-website-static-site-bucket
-- kblocks://acme.com/v1/cloudfronts/local/voting/voting-results-website-static-site-cloudfront
-- kblocks://acme.com/v1/cloudfronts/local/voting/voting-casting-website-static-site-cloudfront
+  - kblocks://acme.com/v1/staticsites/local/voting/voting-results-website
+  - kblocks://acme.com/v1/staticsites/local/voting/voting-casting-website
+  - kblocks://acme.com/v1/postgreses/local/voting/voting-db
+  - kblocks://acme.com/v1/networkedworloads/local/voting/voting-backend-web-service
+  - kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-casting-website-static-site-autobuild
+  - kblocks://acme.com/v1/autobuildstaticsites/local/voting/voting-results-website-static-site-autobuild
+  - kblocks://acme.com/v1/buckets/local/voting/voting-results-website-static-site-bucket
+  - kblocks://acme.com/v1/buckets/local/voting/voting-casting-website-static-site-bucket
+  - kblocks://acme.com/v1/cloudfronts/local/voting/voting-results-website-static-site-cloudfront
+  - kblocks://acme.com/v1/cloudfronts/local/voting/voting-casting-website-static-site-cloudfront
 
 ---
 apiVersion: acme.com/v1
@@ -56,7 +56,6 @@ port: 3000
 instanceType: Micro
 scaling:
   autoscaling:
-    enabled: 'Yes'
     maxReplicas: 5
     minReplicas: 2
     targetCpuUtilization: 70
