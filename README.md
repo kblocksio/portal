@@ -245,6 +245,7 @@ Create a directory for the secrets:
 mkdir $HOME/kblocks-demo-secrets
 cd $HOME/kblocks-demo-secrets
 export SECRETS=$PWD
+cd $REPO
 ```
 
 We will refer to this directory as `$SECRETS` throughout the document.
@@ -261,7 +262,7 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 
 ### (Optional) Preload images
 
-If you have pulled these images into your local docker, you may now load them into your kind cluster
+If you have pulled these images into your local docker (using `docker pull`), you may now load them into your kind cluster
 
 ```sh
 kind load docker-image wingcloudbot/kblocks-worker:0.4.60
