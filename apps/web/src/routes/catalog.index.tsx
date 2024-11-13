@@ -4,8 +4,8 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
-import { useCreateResource } from "@/create-resource-context";
 import { useAppContext } from "@/app-context";
+import { getIconComponent } from "@/lib/get-icon";
 
 export const Route = createFileRoute("/catalog/")({
   component: Catalog,
@@ -14,8 +14,9 @@ export const Route = createFileRoute("/catalog/")({
 function Catalog() {
   const { resourceTypes, categories } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
-  const { handleCreateOrEdit } = useCreateResource();
   const navigate = useNavigate();
+
+  const Icon = getIconComponent({ icon: "heroicon://magnifying-glass" });
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -57,7 +58,12 @@ function Catalog() {
       <div className="flex flex-col gap-4 pb-8 pt-8">
         <div className="flex flex-col items-start justify-between md:flex-row">
           <div className="flex-1 space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight">Catalog</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              <div className="flex items-center gap-4">
+                {Icon && <Icon className="h-8 w-8" />}
+                Catalog
+              </div>
+            </h1>
             <p className="text-md text-muted-foreground">
               These are the resource types available in the platform.
             </p>

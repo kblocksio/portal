@@ -41,6 +41,11 @@ export const AppSidebar = () => {
         isActive: true,
       },
       {
+        title: "Catalog",
+        url: "/catalog",
+        icon: "heroicon://magnifying-glass",
+      },
+      {
         title: "Resources",
         url: "/resources",
         icon: "heroicon://list-bullet",
