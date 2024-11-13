@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
@@ -41,6 +41,7 @@ import {
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
 import { ProjectLink } from "../project-link";
+import { useLocalStorage } from "@/hooks/use-localstorage";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
@@ -337,8 +338,17 @@ export const ResourceTable = (props: {
   showActions?: boolean;
 }) => {
   const columns = useColumns();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState(defaultSorting);
+
+  const location = useLocation();
+
+  const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
+    JSON.stringify([location.pathname, "columnFilters"]),
+    [],
+  );
+  const [sorting, setSorting] = useLocalStorage(
+    JSON.stringify([location.pathname, "sorting"]),
+    defaultSorting,
+  );
 
   const table = useReactTable({
     data: props.resources,
