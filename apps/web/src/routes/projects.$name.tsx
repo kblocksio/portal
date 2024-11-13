@@ -1,19 +1,19 @@
-import { ResourceContext } from '@/resource-context'
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useContext, useMemo } from 'react'
-import { useAppContext } from '@/app-context'
+import { ResourceContext } from "@/resource-context";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useContext, useMemo } from "react";
+import { useAppContext } from "@/app-context";
 
-import { ProjectHeader } from '@/components/project-header'
-import { ResourceTable } from '@/components/resource-table/resource-table'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ProjectHeader } from "@/components/project-header";
+import { ResourceTable } from "@/components/resource-table/resource-table";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const Route = createFileRoute('/projects/$name')({
+export const Route = createFileRoute("/projects/$name")({
   component: ProjectPage,
-})
+});
 
 function ProjectPage() {
-  const { resourceTypes, objects, projects } = useContext(ResourceContext)
-  const { setBreadcrumbs } = useAppContext()
+  const { resourceTypes, objects, projects } = useContext(ResourceContext);
+  const { setBreadcrumbs } = useAppContext();
   const { name } = Route.useParams();
 
   const project = useMemo(() => {
@@ -21,13 +21,15 @@ function ProjectPage() {
   }, [projects, name]);
 
   const allResources = useMemo(() => {
-    console.log(project?.objects);
-    return (project?.objects ?? []).map((uri) => objects[uri]);
-  }, [objects, project])
+    return (project?.objects ?? []).map((uri) => objects[uri]).filter(Boolean);
+  }, [objects, project]);
 
   useEffect(() => {
-    setBreadcrumbs([{ name: 'Projects' }, { name: project?.metadata.name ?? '' }])
-  }, [setBreadcrumbs, project])
+    setBreadcrumbs([
+      { name: "Projects" },
+      { name: project?.metadata.name ?? "" },
+    ]);
+  }, [setBreadcrumbs, project]);
 
   return (
     <div className="flex flex-col gap-10 pt-8">
@@ -42,7 +44,7 @@ function ProjectPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 const LoadingSkeleton = () => {
@@ -73,5 +75,5 @@ const LoadingSkeleton = () => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
