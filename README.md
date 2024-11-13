@@ -201,7 +201,18 @@ qkube use kblocks-demo.quickube.sh
 
 If you want to test the portal locally, you can use `kind` to setup the environment.
 
-### 1. Clone Repository
+### 0. Docker settings
+
+Go to Docker Desktop settings and under **Resources** set:
+
+* CPU limit: 10
+* Memory limit: 20GB
+* Swap: 3GB
+* Virtual disk limit: 800GB
+
+Thank you.
+
+### 1. Clone repository
 
 Clone this repository and set `$REPO` to point to the directory:
 
