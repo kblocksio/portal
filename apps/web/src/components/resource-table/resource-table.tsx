@@ -235,7 +235,7 @@ const useColumns = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <div className="flex flex-col gap-2 items-start">
+                  <div className="flex flex-col items-start gap-2">
                     {prjs.map((p) => (
                       <ProjectLink key={p.metadata.name} project={p} />
                     ))}
@@ -246,17 +246,17 @@ const useColumns = () => {
           );
         },
         filterFn: (row, columnId, selectedProjects) => {
-          const prjs = projects.filter((p) => (p.objects ?? []).includes(row.original.objUri));
+          const prjs = projects.filter((p) =>
+            (p.objects ?? []).includes(row.original.objUri),
+          );
           if (selectedProjects.includes("$unassigned")) {
             if (prjs.length === 0) {
               return true;
             }
           }
 
-
-          
           for (const p of selectedProjects) {
-            if (prjs.find(pp => pp.metadata.name === p)) {
+            if (prjs.find((pp) => pp.metadata.name === p)) {
               return true;
             }
           }
@@ -264,11 +264,14 @@ const useColumns = () => {
           return false;
         },
         sortingFn: (rowA, rowB) => {
-          const prjsA = projects.filter((p) => (p.objects ?? []).includes(rowA.original.objUri));
-          const prjsB = projects.filter((p) => (p.objects ?? []).includes(rowB.original.objUri));
+          const prjsA = projects.filter((p) =>
+            (p.objects ?? []).includes(rowA.original.objUri),
+          );
+          const prjsB = projects.filter((p) =>
+            (p.objects ?? []).includes(rowB.original.objUri),
+          );
           return JSON.stringify(prjsA).localeCompare(JSON.stringify(prjsB));
-        }
-
+        },
       },
       {
         accessorKey: "lastUpdated",
@@ -414,6 +417,10 @@ const ResourceTableRow = memo(
     children: React.ReactNode;
   }) => {
     const navigate = useNavigate();
+
+    if (!resource) {
+      return null;
+    }
 
     return (
       <TableRow
