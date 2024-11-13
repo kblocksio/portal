@@ -259,21 +259,20 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 ./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 ```
 
-### 4. Install blocks gallery
-
-Then, install the gallery blocks so they would refer to the local backend:
+### 4. Install the Workload block
 
 ```sh
-./gallery/install-blocks.sh
+cd gallery
+./install-blocks.sh kblocks/workload
 ```
 
-Then, build the portal:
+### 5. Install the portal frontend and backend
+
+Build the portal:
 
 ```sh
 npm run build
 ```
-
-### 5. Install the portal frontend and backend
 
 First, we need to wait and make sure all blocks are running:
 
@@ -291,16 +290,31 @@ Then, install the portal to your local cluster. This script will build your fron
 
 ### 6. Modify your `/etc/hosts` file
 
-Next, modify your `/etc/hosts` file to include the following line:
+Next, modify your `/etc/hosts` file to include the following lines:
 
 ```
 127.0.0.1 localhost.kblocks.io
 127.0.0.1 argo.localhost.kblocks.io
+127.0.0.1 voting.localhost.kblocks.io
 ```
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
-### 6. Deploy demo resources
+### 7. Install blocks gallery
+
+Then, install the gallery blocks so they would refer to the local backend:
+
+```sh
+./gallery/install-blocks.sh
+```
+
+### 8. Deploy demo resources
+
+First, we need to wait and make sure all blocks are running:
+
+```sh
+kubectl get pods -n kblocks
+```
 
 Next, we will add a bunch of resources that we use for our demo, including ArgoCD:
 
@@ -316,7 +330,6 @@ NOTE: The local installation is not using qkube, so don't expect to find the clu
 it points to `kind-kind`.
 - To switch to the staging cluster, run `qkube use staging.quickube.sh`.
 - To switch back to the local cluster, run `kubectl config use-context kind-kind`.
-
 
 That's it. Have fun!
 
