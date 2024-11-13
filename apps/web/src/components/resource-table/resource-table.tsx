@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
@@ -41,6 +41,7 @@ import {
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
 import { ProjectLink } from "../project-link";
+import { useLocalStorage } from "@/hooks/use-localstorage";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
@@ -235,7 +236,7 @@ const useColumns = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <div className="flex flex-col gap-2 items-start">
+                  <div className="flex flex-col items-start gap-2">
                     {prjs.map((p) => (
                       <ProjectLink key={p.metadata.name} project={p} />
                     ))}
@@ -246,17 +247,17 @@ const useColumns = () => {
           );
         },
         filterFn: (row, columnId, selectedProjects) => {
-          const prjs = projects.filter((p) => (p.objects ?? []).includes(row.original.objUri));
+          const prjs = projects.filter((p) =>
+            (p.objects ?? []).includes(row.original.objUri),
+          );
           if (selectedProjects.includes("$unassigned")) {
             if (prjs.length === 0) {
               return true;
             }
           }
 
-
-          
           for (const p of selectedProjects) {
-            if (prjs.find(pp => pp.metadata.name === p)) {
+            if (prjs.find((pp) => pp.metadata.name === p)) {
               return true;
             }
           }
@@ -264,11 +265,14 @@ const useColumns = () => {
           return false;
         },
         sortingFn: (rowA, rowB) => {
-          const prjsA = projects.filter((p) => (p.objects ?? []).includes(rowA.original.objUri));
-          const prjsB = projects.filter((p) => (p.objects ?? []).includes(rowB.original.objUri));
+          const prjsA = projects.filter((p) =>
+            (p.objects ?? []).includes(rowA.original.objUri),
+          );
+          const prjsB = projects.filter((p) =>
+            (p.objects ?? []).includes(rowB.original.objUri),
+          );
           return JSON.stringify(prjsA).localeCompare(JSON.stringify(prjsB));
-        }
-
+        },
       },
       {
         accessorKey: "lastUpdated",
@@ -334,8 +338,17 @@ export const ResourceTable = (props: {
   showActions?: boolean;
 }) => {
   const columns = useColumns();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState(defaultSorting);
+
+  const location = useLocation();
+
+  const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
+    JSON.stringify([location.pathname, "columnFilters"]),
+    [],
+  );
+  const [sorting, setSorting] = useLocalStorage(
+    JSON.stringify([location.pathname, "sorting"]),
+    defaultSorting,
+  );
 
   const table = useReactTable({
     data: props.resources,
