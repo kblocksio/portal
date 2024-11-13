@@ -34,7 +34,8 @@ async function connection() {
   try {
     await client.ping();
   } catch (error) {
-    console.error("Redis connection lost. Reconnecting...");
+    console.error("Ping failed:", error);
+    await client.disconnect();
     await client.connect();
   }
 
