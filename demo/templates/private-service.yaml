@@ -8,7 +8,7 @@ icon: Briefcase
 description: >-
   A demo application that shows how Kblocks can be used to run a private service that is only accessible from the cluster
 objects:
-- kblocks://acme.com/v1/privateservices/local/private/private-service-demo
+- kblocks://acme.com/v1/privateservices/local/default/private-service-demo
 
 ---
 

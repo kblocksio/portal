@@ -8,7 +8,7 @@ icon: Clock
 description: >-
   A demo application that shows how Kblocks can be used to run a Cron job
 objects:
-- kblocks://acme.com/v1/cronjobs/local/cron/my-cron-demo
+- kblocks://acme.com/v1/cronjobs/local/default/my-cron-demo
 
 ---
 
