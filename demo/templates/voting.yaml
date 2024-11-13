@@ -12,12 +12,6 @@ objects:
   - kblocks://acme.com/v1/staticsites/local/default/voting-casting-website
   - kblocks://acme.com/v1/postgreses/local/default/voting-db
   - kblocks://acme.com/v1/networkedworloads/local/default/voting-backend-web-service
-  - kblocks://acme.com/v1/autobuildstaticsites/local/default/voting-casting-website-static-site-autobuild
-  - kblocks://acme.com/v1/autobuildstaticsites/local/default/voting-results-website-static-site-autobuild
-  - kblocks://acme.com/v1/buckets/local/default/voting-results-website-static-site-bucket
-  - kblocks://acme.com/v1/buckets/local/default/voting-casting-website-static-site-bucket
-  - kblocks://acme.com/v1/cloudfronts/local/default/voting-results-website-static-site-cloudfront
-  - kblocks://acme.com/v1/cloudfronts/local/default/voting-casting-website-static-site-cloudfront
 
 ---
 apiVersion: acme.com/v1
