@@ -150,7 +150,6 @@ export const ResourceProvider = ({
 
   useEffect(() => {
     if (categoriesData) {
-      console.log("categoriesData", categoriesData);
       setCategories(categoriesData);
     }
   }, [categoriesData]);

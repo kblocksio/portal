@@ -1,6 +1,7 @@
 import * as k8s from "@kubernetes/client-node";
 import * as request from "request";
 import { config } from "dotenv";
+import { Response as RequestResponse } from 'request'
 
 config({ path: `.env.${process.env.NODE_ENV ?? "dev"}` });
 
@@ -11,10 +12,10 @@ kc.loadFromDefault();
 export async function kubernetesRequest(
   pathname: string,
   options?: request.Options & Omit<request.Options, "url" | "uri">,
-): Promise<Response> {
+): Promise<RequestResponse> {
   const cluster = kc.getCurrentCluster();
   if (!cluster) {
-    return new Response("No cluster found", { status: 500 });
+    throw new Error("No cluster found");
   }
 
   const server = cluster.server;
@@ -31,14 +32,18 @@ export async function kubernetesRequest(
   await kc.applyToRequest(req);
 
   return new Promise((resolve, reject) => {
-    request.get(req, (err: any, res: request.Response, body: any) => {
+    request.get(req, (
+      err: Error | null, 
+      res: RequestResponse, 
+      body: any
+    ) => {
       if (err) {
         return reject(err);
       }
       if (res.statusCode !== 200) {
         return reject(new Error(`${res.statusMessage} ${url}`));
       }
-      return resolve(new Response(body));
+      return resolve(res);
     });
   });
 }

@@ -77,7 +77,7 @@ pub class NetworkedWorkload {
       serviceAccount: api.newServiceAccount(spec),
     );
 
-    d.addContainer(api.newContainer(spec));
+    let c = d.addContainer(api.newContainer(spec));
 
     let var route = spec.ingress?.path;
 
