@@ -76,7 +76,7 @@ branch: main
 buildCommand: npm run build
 environmentVariables:
   VITE_SERVER_URL:
-    value: http://voting.localhost.kblocks.io
+    value: https://voting.localhost.kblocks.io
 language: Node
 outputDirectory: dist
 repository: superacme/votes-casting-app
@@ -92,7 +92,7 @@ branch: main
 buildCommand: npm run build
 environmentVariables:
   VITE_SERVER_URL:
-    value: http://voting.localhost.kblocks.io
+    value: https://voting.localhost.kblocks.io
 language: Node
 outputDirectory: dist
 repository: superacme/votes-results-app

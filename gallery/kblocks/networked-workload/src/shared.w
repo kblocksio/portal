@@ -207,7 +207,7 @@ pub class Util {
             failureThreshold: 3,
             periodSeconds: cdk8s.Duration.seconds(10),
             successThreshold: 1,
-            timeoutSeconds: cdk8s.Duration.seconds(60),
+            timeoutSeconds: cdk8s.Duration.minutes(50),
           );
         } else {
           return nil;
@@ -223,7 +223,7 @@ pub class Util {
               failureThreshold: 3,
               periodSeconds: cdk8s.Duration.seconds(10),
               successThreshold: 1,
-              timeoutSeconds: cdk8s.Duration.seconds(60),
+              timeoutSeconds: cdk8s.Duration.minutes(50),
             );
           } else {
             return nil;
