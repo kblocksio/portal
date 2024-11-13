@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "dotenv -e .env.staging -- vite --open",
+    "dev": "dotenv -e .env -- vite --open",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "typecheck": "tsc",
     "storybook": "storybook dev -p 6006",
