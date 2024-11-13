@@ -9,8 +9,9 @@ spec:
     schema: ./src/values.schema.json
     description: An example block implemented using Helm
     group: acme.com
+    icon: Simple
     categories: 
-      - workloads
+      - demo
     version: v1
     kind: SimpleApp
     plural: simpleapps

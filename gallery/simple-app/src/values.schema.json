@@ -10,9 +10,9 @@
       "type": "number",
       "description": "The port to expose the application on"
     },
-    "echoText": {
+    "myField": {
       "type": "string",
-      "description": "The text to echo"
+      "description": "My field"
     }
   }
 }
