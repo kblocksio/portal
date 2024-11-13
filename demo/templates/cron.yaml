@@ -2,21 +2,17 @@ apiVersion: kblocks.io/v1
 kind: Project
 metadata:
   name: cron
-  namespace: default
 title: Cron Job Demo
 icon: Clock
 description: >-
   A demo application that shows how Kblocks can be used to run a Cron job
 objects:
-- kblocks://acme.com/v1/cronjobs/local/default/my-cron-demo
-
+  - kblocks://acme.com/v1/cronjobs/local/default/my-cron-demo
 ---
-
 apiVersion: acme.com/v1
 kind: CronJob
 metadata:
   name: my-cron-demo
-  namespace: default
 instanceType: Small
 region: us-east-1
 schedule: '* * * * *'

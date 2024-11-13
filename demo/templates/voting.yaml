@@ -2,7 +2,6 @@ apiVersion: kblocks.io/v1
 kind: Project
 metadata:
   name: voting
-  namespace: default
 title: Voting App Demo
 icon: Hand
 description: >-
@@ -25,13 +24,11 @@ apiVersion: acme.com/v1
 kind: Postgres
 metadata:
   name: voting-db
-  namespace: default
 ---
 apiVersion: acme.com/v1
 kind: WebService
 metadata:
   name: voting-backend
-  namespace: default
 environmentVariables:
   POSTGRES_DB:
     value: "${ref://postgres.acme.com/voting-db/database}"
@@ -65,8 +62,6 @@ apiVersion: acme.com/v1
 kind: StaticSite
 metadata:
   name: voting-casting-website
-  namespace: default
-
 branch: main
 buildCommand: npm run build
 environmentVariables:
@@ -81,8 +76,6 @@ apiVersion: acme.com/v1
 kind: StaticSite
 metadata:
   name: voting-results-website
-  namespace: default
-
 branch: main
 buildCommand: npm run build
 environmentVariables:
