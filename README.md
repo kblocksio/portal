@@ -271,6 +271,8 @@ cd gallery
 Build the portal:
 
 ```sh
+cd ..
+npm install
 npm run build
 ```
 
