@@ -204,7 +204,17 @@ pub class Util {
         if let readiness = spec.readiness {
           return k8s.Probe.fromCommand(readiness);
         } else {
-          return nil;
+          if let port = spec.port {
+            return k8s.Probe.fromTcpSocket(
+              port: spec.port,
+              failureThreshold: 3,
+              periodSeconds: cdk8s.Duration.seconds(10),
+              successThreshold: 1,
+              timeoutSeconds: cdk8s.Duration.seconds(60),
+            );
+          } else {
+            return nil;
+          }
         }
       }(),
       resources: {
