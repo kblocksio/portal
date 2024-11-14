@@ -75,32 +75,27 @@ export function DeleteResourceDialog({
           <AlertDialogTitle>
             Are you sure you want to delete the following resources?
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            <div className="flex flex-col gap-4">
-              <ul className="space-y-1">
-                {resources.map((resource) => {
-                  const Icon = resourceTypes[resource.objType]?.iconComponent;
-                  return (
-                    <li
-                      key={resource.objUri}
-                      className="flex items-center gap-2"
-                    >
-                      {Icon && <Icon className="size-4" />}
-                      <span className="text-foreground">
-                        {resource.metadata.namespace &&
-                          `${resource.metadata.namespace}/`}
-                        {resource.metadata.name}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p>
-                This action cannot be undone. This will permanently delete the
-                resources and remove their data from the cluster.
-              </p>
-            </div>
-          </AlertDialogDescription>
+          <div className="flex flex-col gap-4 text-sm">
+            <ul className="space-y-1">
+              {resources.map((resource) => {
+                const Icon = resourceTypes[resource.objType]?.iconComponent;
+                return (
+                  <li key={resource.objUri} className="flex items-center gap-2">
+                    {Icon && <Icon className="size-4" />}
+                    <span className="text-foreground">
+                      {resource.metadata.namespace &&
+                        `${resource.metadata.namespace}/`}
+                      {resource.metadata.name}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              resources and remove their data from the cluster.
+            </AlertDialogDescription>
+          </div>
           {deleteError && (
             <div className="mt-4 flex items-start rounded-md border border-red-200 bg-red-50 p-4">
               <AlertCircle className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />
