@@ -265,9 +265,9 @@ KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kb
 If you have pulled these images into your local docker (using `docker pull`), you may now load them into your kind cluster
 
 ```sh
-kind load docker-image wingcloudbot/kblocks-worker:0.4.60
-kind load docker-image wingcloudbot/kblocks-control:0.4.60
-kind load docker-image wingcloudbot/kblocks-operator:0.4.60
+kind load docker-image wingcloudbot/kblocks-worker:0.4.68
+kind load docker-image wingcloudbot/kblocks-control:0.4.68
+kind load docker-image wingcloudbot/kblocks-operator:0.4.68
 ```
 
 ### 4. Install the Workload block
