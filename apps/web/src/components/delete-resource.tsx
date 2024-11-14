@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { deleteResource } from "@/lib/backend";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -11,17 +11,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource } from "@/resource-context";
+import { Resource, ResourceContext } from "@/resource-context";
 
 interface DeleteResourceDialogProps {
-  resource: Resource;
+  resources: Resource[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;
 }
 
 export function DeleteResourceDialog({
-  resource,
+  resources,
   isOpen,
   onClose,
   onDeleteClick,
@@ -38,7 +38,9 @@ export function DeleteResourceDialog({
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      await deleteResource(resource.objUri);
+      await Promise.all(
+        resources.map((resource) => deleteResource(resource.objUri)),
+      );
       onClose();
     } catch (error: any) {
       setDeleteError(
@@ -57,6 +59,8 @@ export function DeleteResourceDialog({
     }
   };
 
+  const { resourceTypes } = useContext(ResourceContext);
+
   return (
     <AlertDialog
       open={open}
@@ -69,16 +73,33 @@ export function DeleteResourceDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Are you sure you want to delete{" "}
-            <span className="font-mono">
-              {resource.metadata.namespace && `${resource.metadata.namespace}/`}
-              {resource.metadata.name}
-            </span>
-            ?
+            Are you sure you want to delete the following resources?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            resource and remove its data from the cluster.
+            <div className="flex flex-col gap-4">
+              <ul className="space-y-1">
+                {resources.map((resource) => {
+                  const Icon = resourceTypes[resource.objType]?.iconComponent;
+                  return (
+                    <li
+                      key={resource.objUri}
+                      className="flex items-center gap-2"
+                    >
+                      {Icon && <Icon className="size-4" />}
+                      <span className="text-foreground">
+                        {resource.metadata.namespace &&
+                          `${resource.metadata.namespace}/`}
+                        {resource.metadata.name}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p>
+                This action cannot be undone. This will permanently delete the
+                resources and remove their data from the cluster.
+              </p>
+            </div>
           </AlertDialogDescription>
           {deleteError && (
             <div className="mt-4 flex items-start rounded-md border border-red-200 bg-red-50 p-4">

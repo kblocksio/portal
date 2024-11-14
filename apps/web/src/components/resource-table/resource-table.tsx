@@ -7,6 +7,8 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   flexRender,
+  RowSelectionState,
+  Row,
 } from "@tanstack/react-table";
 import { memo, useContext, useMemo, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "@/resource-context";
@@ -26,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
@@ -42,6 +44,8 @@ import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ResourceLink } from "../resource-link";
 import { ProjectLink } from "../project-link";
 import { useLocalStorage } from "@/hooks/use-localstorage";
+import { Checkbox } from "../ui/checkbox";
+import { Link } from "../ui/link";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
@@ -51,6 +55,22 @@ const useColumns = () => {
 
   return useMemo<ColumnDef<Resource>[]>(() => {
     return [
+      {
+        accessorKey: "selection",
+        cell: (props) => (
+          <div className="flex items-center gap-1.5">
+            <Checkbox
+              onClick={(e) => e.stopPropagation()}
+              checked={props.row.getIsSelected()}
+              disabled={!props.row.getCanSelect()}
+              // indeterminate={props.row.getIsSomeSelected()}
+              onCheckedChange={props.row.getToggleSelectedHandler()}
+            />
+          </div>
+        ),
+        size: 0,
+        header: () => <></>,
+      },
       {
         accessorKey: "status",
         cell: (props) => (
@@ -108,8 +128,13 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Name" />
         ),
         cell: (props) => (
-          <div className="whitespace-nowrap font-medium">
-            {props.row.original.metadata.name}
+          <div className="whitespace-nowrap">
+            <Link
+              className="font-medium hover:underline"
+              to={`/resources/${props.row.original.objUri.replace("kblocks://", "")}`}
+            >
+              {props.row.original.metadata.name}
+            </Link>
           </div>
         ),
         filterFn: (row, columnId, filterValue) => {
@@ -350,15 +375,20 @@ export const ResourceTable = (props: {
     defaultSorting,
   );
 
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const table = useReactTable({
     data: props.resources,
     columns,
     state: {
       columnFilters,
       sorting,
+      rowSelection,
     },
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -395,7 +425,7 @@ export const ResourceTable = (props: {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <ResourceTableRow key={row.id} resource={row.original}>
+              <ResourceTableRow key={row.id} resource={row.original} row={row}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -421,25 +451,17 @@ export const ResourceTable = (props: {
 const ResourceTableRow = memo(
   ({
     resource,
+    row,
     children,
   }: {
     resource: Resource;
+    row: Row<Resource>;
     children: React.ReactNode;
   }) => {
-    const navigate = useNavigate();
-
-    if (!resource) {
-      return null;
-    }
-
     return (
       <TableRow
         key={resource.objUri}
-        className="cursor-pointer"
-        onClick={() => {
-          const resourceDetailsUri = resource.objUri.replace("kblocks://", "");
-          navigate({ to: `/resources/${resourceDetailsUri}#details` });
-        }}
+        data-state={row.getIsSelected() ? "selected" : undefined}
       >
         {children}
       </TableRow>
