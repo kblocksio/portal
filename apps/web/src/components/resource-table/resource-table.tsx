@@ -58,18 +58,27 @@ const useColumns = () => {
       {
         accessorKey: "selection",
         cell: (props) => (
-          <div className="flex items-center gap-1.5">
-            <Checkbox
-              onClick={(e) => e.stopPropagation()}
-              checked={props.row.getIsSelected()}
-              disabled={!props.row.getCanSelect()}
-              // indeterminate={props.row.getIsSomeSelected()}
-              onCheckedChange={props.row.getToggleSelectedHandler()}
-            />
-          </div>
+          <Checkbox
+            checked={props.row.getIsSelected()}
+            disabled={!props.row.getCanSelect()}
+            onCheckedChange={props.row.getToggleSelectedHandler()}
+          />
         ),
         size: 0,
-        header: () => <></>,
+        header: (props) => (
+          <Checkbox
+            checked={
+              props.table.getIsAllRowsSelected()
+                ? true
+                : props.table.getIsSomeRowsSelected()
+                  ? "indeterminate"
+                  : false
+            }
+            onCheckedChange={(checked) =>
+              props.table.toggleAllRowsSelected(checked === true)
+            }
+          />
+        ),
       },
       {
         accessorKey: "status",

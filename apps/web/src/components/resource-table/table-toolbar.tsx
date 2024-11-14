@@ -148,7 +148,10 @@ export function ResourceTableToolbar({
               <Button
                 variant="outline"
                 size="sm"
-                disabled={table.getIsSomeRowsSelected() === false}
+                disabled={
+                  table.getIsSomeRowsSelected() === false &&
+                  table.getIsAllRowsSelected() === false
+                }
               >
                 Actions
                 <ChevronDown className="-mr-1.5 size-4" />
@@ -174,9 +177,12 @@ export function ResourceTableToolbar({
       <DeleteResourceDialog
         resources={table.getSelectedRowModel().rows.map((row) => row.original)}
         isOpen={isDeleteOpen}
-        onClose={() => {
+        onDeleteClick={() => {
           setIsDeleteOpen(false);
           table.resetRowSelection();
+        }}
+        onClose={() => {
+          setIsDeleteOpen(false);
         }}
       />
     </div>
