@@ -4,10 +4,14 @@ import { CircleCheck, CircleX } from "lucide-react";
 import { Link } from "@/components/ui/link";
 
 export const appToast = {
-  success: (message: string, options?: ToastOptions) =>
-    toast.success(<span className="truncate">{message}</span>, options),
-  error: (message: string, options?: ToastOptions) =>
-    toast.error(<span className="truncate">{message}</span>, options),
+  success: (message: string, options?: ToastOptions) => {
+    toast.dismiss(); // Dismiss any active toast
+    return toast.success(<span className="truncate">{message}</span>, options);
+  },
+  error: (message: string, options?: ToastOptions) => {
+    toast.dismiss(); // Dismiss any active toast
+    return toast.error(<span className="truncate">{message}</span>, options);
+  },
 };
 
 export const AppToaster = () => {
