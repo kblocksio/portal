@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuContent,
 } from "./ui/dropdown-menu";
+import { DeleteProjectDialog } from "./delete-project";
 
 export interface ProjectHeaderProps {
   selectedProject: Project;
@@ -28,6 +29,8 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
   const { group, version, plural, system, namespace, name } = parseBlockUri(
     selectedProject.objUri,
   );
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   return (
     <div className="flex flex-row items-start justify-between space-y-0">
@@ -64,14 +67,26 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="text-destructive" onSelect={() => {
-              console.log("TODO: implement DELETE");
-            }}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onSelect={() => {
+                setIsDeleteOpen(true);
+              }}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <DeleteProjectDialog
+        resources={[selectedProject]}
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          navigate({ to: "/" });
+        }}
+      />
     </div>
   );
 };
