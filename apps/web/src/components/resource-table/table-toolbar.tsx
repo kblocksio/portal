@@ -1,6 +1,6 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
-import { useContext } from "react";
-import { ResourceContext } from "@/resource-context";
+import { useContext, useState } from "react";
+import { Resource, ResourceContext } from "@/resource-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
@@ -9,25 +9,30 @@ import { getIconComponent } from "@/lib/get-icon";
 import { useNavigate } from "@tanstack/react-router";
 
 import { ScrollArea } from "../ui/scroll-area";
-export interface ResourceTableToolbarProps<TData> {
-  table: TanstackTable<TData>;
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { DeleteResourceDialog } from "../delete-resource";
+
+export interface ResourceTableToolbarProps {
+  table: TanstackTable<Resource>;
   showActions?: boolean;
 }
 
-export function ResourceTableToolbar<TData>({
+export function ResourceTableToolbar({
   table,
   showActions = true,
-}: ResourceTableToolbarProps<TData>) {
+}: ResourceTableToolbarProps) {
   const navigate = useNavigate();
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
 
-  const newResourceButton = (
-    <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
-      New Resource...
-    </Button>
-  );
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 md:flex-nowrap">
@@ -43,7 +48,16 @@ export function ResourceTableToolbar<TData>({
           />
         </div>
 
-        {showActions && <div className="md:hidden">{newResourceButton}</div>}
+        {showActions && (
+          <div className="md:hidden">
+            <Button
+              size="sm"
+              onClick={() => navigate({ to: "/resources/new" })}
+            >
+              New Resource
+            </Button>
+          </div>
+        )}
       </div>
 
       <ScrollArea className="w-full" orientation="horizontal">
@@ -104,10 +118,14 @@ export function ResourceTableToolbar<TData>({
             <DataTableFacetedFilter
               column={table.getColumn("projects")}
               title="Projects"
-              options={[{ metadata: { name: "$unassigned" }, title: "(unassigned)" },...projects].map(project => ({
+              options={[
+                { metadata: { name: "$unassigned" }, title: "(unassigned)" },
+                ...projects,
+              ].map((project) => ({
                 label: project.title ?? project.metadata.name,
-                value: project.metadata.name
-              }))} />
+                value: project.metadata.name,
+              }))}
+            />
           )}
 
           {isFiltered && (
@@ -124,12 +142,49 @@ export function ResourceTableToolbar<TData>({
       </ScrollArea>
 
       {showActions && (
-        <div className="hidden sm:block">
+        <div className="hidden items-center gap-2 md:flex">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={
+                  table.getIsSomeRowsSelected() === false &&
+                  table.getIsAllRowsSelected() === false
+                }
+              >
+                Actions
+                <ChevronDown className="-mr-1.5 size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onSelect={() => {
+                  setIsDeleteOpen(true);
+                }}
+              >
+                Delete...
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
-            New Resource...
+            New Resource
           </Button>
         </div>
       )}
+
+      <DeleteResourceDialog
+        resources={table.getSelectedRowModel().rows.map((row) => row.original)}
+        isOpen={isDeleteOpen}
+        onDeleteClick={() => {
+          setIsDeleteOpen(false);
+          table.resetRowSelection();
+        }}
+        onClose={() => {
+          setIsDeleteOpen(false);
+        }}
+      />
     </div>
   );
 }

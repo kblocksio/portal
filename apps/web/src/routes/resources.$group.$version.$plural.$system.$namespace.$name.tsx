@@ -434,7 +434,7 @@ function ResourcePage() {
       </Tabs>
 
       <DeleteResourceDialog
-        resource={selectedResource}
+        resources={[selectedResource]}
         isOpen={isDeleteOpen}
         onDeleteClick={() => {
           setDeleteInProgress(true);

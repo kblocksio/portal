@@ -40,6 +40,16 @@ export const ResourceActionsMenu = ({
         <DropdownMenuItem
           onSelect={() => {
             navigate({
+              to: `/resources/${resource.objUri.replace("kblocks://", "")}`,
+            });
+            closeMenu();
+          }}
+        >
+          View
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            navigate({
               to: `/resources/edit/${resource.objUri.replace("kblocks://", "")}`,
             });
             closeMenu();
@@ -76,7 +86,7 @@ export const ResourceActionsMenu = ({
         <ProjectsMenu objUri={resource.objUri} />
 
         <DeleteResourceDialog
-          resource={resource}
+          resources={[resource]}
           isOpen={isDeleteOpen}
           onDeleteClick={() => {
             onDeleteClick?.();
@@ -106,4 +116,3 @@ export const ResourceActionsMenu = ({
     </DropdownMenu>
   );
 };
-
