@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    costCenter: {{ .Values.costCenter }}
 spec:
   replicas: 1
   selector:
@@ -11,6 +13,7 @@ spec:
   template:
     metadata:
       labels:
+        costCenter: {{ .Values.costCenter }}
         app: {{ .Release.Name }}
     spec:
       containers:

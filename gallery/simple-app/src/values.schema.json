@@ -10,9 +10,9 @@
       "type": "number",
       "description": "The port to expose the application on"
     },
-    "myField": {
+    "costCenter": {
       "type": "string",
-      "description": "My field"
+      "description": "The name of the application"
     }
   }
 }
