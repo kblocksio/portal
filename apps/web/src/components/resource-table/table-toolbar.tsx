@@ -13,10 +13,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
+import { ProjectsMenu } from "../projects-menu";
 
 export interface ResourceTableToolbarProps {
   table: TanstackTable<Resource>;
@@ -158,12 +160,20 @@ export function ResourceTableToolbar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <ProjectsMenu
+                objUris={table
+                  .getSelectedRowModel()
+                  .rows.map((row) => row.original.objUri)}
+              />
+
+              <DropdownMenuSeparator />
+
               <DropdownMenuItem
                 onSelect={() => {
                   setIsDeleteOpen(true);
                 }}
               >
-                Delete...
+                <span className="text-destructive">Delete...</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

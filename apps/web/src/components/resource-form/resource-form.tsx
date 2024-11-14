@@ -161,7 +161,7 @@ export const ResourceForm = ({
           </div>
         </div>
       </div>
-      <div className="relative m-0 flex-1 overflow-y-auto border-t p-0">
+      <div className="relative m-0 flex-1 border-t p-0">
         <div className="pointer-events-none sticky left-0 right-0 top-0 h-6 bg-gradient-to-b from-white to-transparent"></div>
         <FieldRenderer
           objectMetadata={metadataObject}
