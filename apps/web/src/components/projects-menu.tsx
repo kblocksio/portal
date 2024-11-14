@@ -10,32 +10,35 @@ import { Project, ResourceContext } from "@/resource-context";
 import { createResource } from "@/lib/backend";
 import { parseBlockUri } from "@kblocks/api";
 
-export const ProjectsMenu = ({ objUri }: { objUri: string }) => {
+export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>Add to Project</DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          <ProjectItems objUri={objUri} />
+          <ProjectItems objUris={objUris} />
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
   );
 };
 
-export const ProjectItems = ({ objUri }: { objUri: string }) => {
+export const ProjectItems = ({ objUris }: { objUris: string[] }) => {
   const { projects, resourceTypes } = useContext(ResourceContext);
 
-  const isChecked = useCallback((project: Project) => {
-    return project.objects?.includes(objUri);
-  }, [objUri]);
+  const isChecked = useCallback(
+    (project: Project) => {
+      return project.objects?.some((o) => objUris.includes(o));
+    },
+    [objUris],
+  );
 
   const handleCheckedChange = (project: Project, checked: boolean) => {
     const objects = project.objects ?? [];
-    project.objects = objects.filter((o) => o !== objUri);
-    
+    project.objects = objects.filter((o) => !objUris.includes(o));
+
     if (checked) {
-      project.objects = [...objects, objUri];
+      project.objects = [...objects, ...objUris];
     }
 
     const { system } = parseBlockUri(project.objUri);

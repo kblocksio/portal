@@ -83,7 +83,7 @@ export const ResourceActionsMenu = ({
           Delete
         </DropdownMenuItem>
 
-        <ProjectsMenu objUri={resource.objUri} />
+        <ProjectsMenu objUris={[resource.objUri]} />
 
         <DeleteResourceDialog
           resources={[resource]}

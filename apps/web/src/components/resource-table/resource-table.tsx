@@ -10,7 +10,7 @@ import {
   RowSelectionState,
   Row,
 } from "@tanstack/react-table";
-import { memo, useContext, useMemo, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useState } from "react";
 import { Resource, ResourceContext, ResourceType } from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
@@ -385,6 +385,9 @@ export const ResourceTable = (props: {
   );
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  useEffect(() => {
+    setRowSelection({});
+  }, [location.pathname]);
 
   const table = useReactTable({
     data: props.resources,
@@ -403,8 +406,7 @@ export const ResourceTable = (props: {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const rows = useMemo(() => table.getFilteredRowModel().rows, [table]);
-  const emptyTable = useMemo(() => rows.length === 0, [rows]);
+  const emptyTable = table.getFilteredRowModel().rows.length === 0;
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
@@ -449,7 +451,7 @@ export const ResourceTable = (props: {
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
           <p className="text-muted-foreground">
-            No resources found for selected filters
+            No resources found for the selected filters
           </p>
         </div>
       )}
