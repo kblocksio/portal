@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "dotenv -- tsx src/index.ts --watch",
+    "dev": "tsx scripts/dev.mts --clear-screen=false",
     "build": "tsc",
     "prod": "tsx src/index.ts"
   },
@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.14.1",
+    "@dotenvx/dotenvx": "^1.24.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.1.0",

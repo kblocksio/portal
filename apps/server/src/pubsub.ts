@@ -5,7 +5,7 @@ import { ControlCommand, WorkerEvent } from "@kblocks/api";
 import { handleEvent } from "./storage";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
-const REDIS_HOST = getEnv("REDIS_HOST");
+// const REDIS_HOST = getEnv("REDIS_HOST");
 const REDIS_PREFIX = process.env.REDIS_PREFIX;
 const EVENTS_CHANNEL = (() => {
   if (REDIS_PREFIX) {
@@ -14,20 +14,15 @@ const EVENTS_CHANNEL = (() => {
   return "events";
 })();
 
-const config = {
+const publishClient = createClient({
+  url: process.env.REDIS_URL,
   password: REDIS_PASSWORD,
-  socket: {
-    host: REDIS_HOST,
-    port: 18284,
-  },
-};
-
-const publishClient = createClient(config);
+});
 publishClient.connect().catch(console.error);
 
 const events = new EventEmitter();
 
-const subscribeClient = createClient(config);
+const subscribeClient = publishClient.duplicate();
 
 subscribeClient
   .connect()

@@ -13,7 +13,8 @@ if (!VITE_BACKEND_ENDPOINT) {
   throw new Error("VITE_BACKEND_ENDPOINT is not set");
 }
 
-const BACKEND_URL = `https://${VITE_BACKEND_ENDPOINT}`;
+// const BACKEND_URL = `https://${VITE_BACKEND_ENDPOINT}`;
+const BACKEND_URL = `http://${VITE_BACKEND_ENDPOINT}`;
 
 export const signInUrl = `${BACKEND_URL}/api/auth/sign-in`;
 

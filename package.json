@@ -11,6 +11,7 @@
     "@kblocks/cli": "^0.4.68",
     "@quickube/cli": "^0.47.0",
     "@types/request": "^2.48.12",
+    "concurrently": "^9.1.0",
     "eslint": "^8.57.1",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
