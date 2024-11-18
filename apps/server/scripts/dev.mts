@@ -36,7 +36,7 @@ try {
       },
       {
         name: "web",
-        prefixColor: "purple",
+        prefixColor: "magenta",
         command: "npx vite --open",
         cwd: "../web",
       },
