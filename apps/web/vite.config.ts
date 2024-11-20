@@ -1,18 +1,10 @@
-import { defineConfig, optimizeDeps } from "vite";
+import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import reactPlugin from "@vitejs/plugin-react";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import { plugin as mdPlugin, Mode } from "vite-plugin-markdown";
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    TanStackRouterVite(),
-    reactPlugin(),
-    tsconfigPaths(),
-    mdPlugin({
-      mode: [Mode.HTML, Mode.MARKDOWN],
-    }),
-  ],
+  plugins: [TanStackRouterVite(), reactPlugin(), tsconfigPaths()],
   assetsInclude: ["**/*.md"],
   optimizeDeps: {
     include: ["lucide-react"],
