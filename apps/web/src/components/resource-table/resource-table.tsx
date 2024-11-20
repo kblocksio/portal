@@ -11,7 +11,12 @@ import {
   Row,
 } from "@tanstack/react-table";
 import { memo, useContext, useEffect, useMemo, useState } from "react";
-import { Resource, ResourceContext, ResourceType } from "@/resource-context";
+import {
+  Resource,
+  ResourceContext,
+  ResourceType,
+  type Project,
+} from "@/resource-context";
 import { DataTableColumnHeader } from "./column-header";
 import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
@@ -49,11 +54,15 @@ import { Link } from "../ui/link";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
-const useColumns = () => {
-  const { resourceTypes, relationships, objects, projects } =
-    useContext(ResourceContext);
+type ExtendedResource = Resource & {
+  iconComponent?: React.ComponentType<{ className?: string }>;
+  rels: Resource[];
+  prjs: Project[];
+  resourceType: ResourceType;
+};
 
-  return useMemo<ColumnDef<Resource>[]>(() => {
+const useColumns = () => {
+  return useMemo<ColumnDef<ExtendedResource>[]>(() => {
     return [
       {
         accessorKey: "selection",
@@ -116,10 +125,11 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Kind" />
         ),
         cell: (props) => {
-          const Icon = resourceTypes[props.row.original.objType]?.iconComponent;
           return (
             <div className="flex items-center gap-1.5">
-              {Icon && <Icon className="h-4 w-4" />}
+              {props.row.original.iconComponent && (
+                <props.row.original.iconComponent className="h-4 w-4" />
+              )}
               {props.row.original.kind}
             </div>
           );
@@ -175,7 +185,6 @@ const useColumns = () => {
           return systemA.localeCompare(systemB);
         },
       },
-
       {
         accessorKey: "namespace",
         header: (props) => (
@@ -206,13 +215,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Children" />
         ),
         cell: (props) => {
-          const rels = Object.entries(
-            relationships[props.row.original.objUri] ?? {},
-          )
-            .filter(([, rel]) => rel.type === "child")
-            .map(([relUri]) => objects[relUri]);
-
-          if (rels.length === 0) {
+          if (props.row.original.rels.length === 0) {
             return null;
           }
           return (
@@ -220,12 +223,12 @@ const useColumns = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" className="h-0">
-                    <div>{rels.length} Children</div>
+                    <div>{props.row.original.rels.length} Children</div>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <div className="flex flex-col gap-2">
-                    {rels.map((r) => {
+                    {props.row.original.rels.map((r) => {
                       return (
                         <div key={r.objUri}>
                           <ResourceLink resource={r} />
@@ -245,10 +248,7 @@ const useColumns = () => {
           <DataTableColumnHeader column={props.column} title="Projects" />
         ),
         cell: (props) => {
-          const prjs = projects.filter((p) =>
-            (p.objects ?? []).includes(props.row.original.objUri),
-          );
-
+          const prjs = props.row.original.prjs;
           if (prjs.length === 0) {
             return null;
           }
@@ -281,17 +281,14 @@ const useColumns = () => {
           );
         },
         filterFn: (row, columnId, selectedProjects) => {
-          const prjs = projects.filter((p) =>
-            (p.objects ?? []).includes(row.original.objUri),
-          );
           if (selectedProjects.includes("$unassigned")) {
-            if (prjs.length === 0) {
+            if (row.original.prjs.length === 0) {
               return true;
             }
           }
 
           for (const p of selectedProjects) {
-            if (prjs.find((pp) => pp.metadata.name === p)) {
+            if (row.original.prjs.find((pp) => pp.metadata.name === p)) {
               return true;
             }
           }
@@ -299,13 +296,9 @@ const useColumns = () => {
           return false;
         },
         sortingFn: (rowA, rowB) => {
-          const prjsA = projects.filter((p) =>
-            (p.objects ?? []).includes(rowA.original.objUri),
+          return JSON.stringify(rowA.original.prjs).localeCompare(
+            JSON.stringify(rowB.original.prjs),
           );
-          const prjsB = projects.filter((p) =>
-            (p.objects ?? []).includes(rowB.original.objUri),
-          );
-          return JSON.stringify(prjsA).localeCompare(JSON.stringify(prjsB));
         },
       },
       {
@@ -346,7 +339,7 @@ const useColumns = () => {
           return (
             <ResourceOutputs
               resource={props.row.original}
-              resourceType={resourceTypes[props.row.original.objType]}
+              resourceType={props.row.original.resourceType}
             />
           );
         },
@@ -358,12 +351,12 @@ const useColumns = () => {
         cell: (props) => (
           <ResourceActionsMenu
             resource={props.row.original}
-            resourceType={resourceTypes[props.row.original.objType]}
+            resourceType={props.row.original.resourceType}
           />
         ),
       },
     ];
-  }, [resourceTypes, objects, relationships, projects]);
+  }, []);
 };
 
 export const ResourceTable = (props: {
@@ -389,8 +382,27 @@ export const ResourceTable = (props: {
     setRowSelection({});
   }, [location.pathname]);
 
+  const { resourceTypes, relationships, objects, projects } =
+    useContext(ResourceContext);
+
+  const resources = useMemo(() => {
+    return props.resources.map<ExtendedResource>((resource) => {
+      return {
+        ...resource,
+        iconComponent: resourceTypes[resource.objType]?.iconComponent,
+        rels: Object.entries(relationships[resource.objUri] ?? {})
+          .filter(([, rel]) => rel.type === "child")
+          .map(([relUri]) => objects[relUri]),
+        prjs: projects.filter((p) =>
+          (p.objects ?? []).includes(resource.objUri),
+        ),
+        resourceType: resourceTypes[resource.objType],
+      };
+    });
+  }, [props.resources, resourceTypes, relationships, projects, objects]);
+
   const table = useReactTable({
-    data: props.resources,
+    data: resources,
     columns,
     state: {
       columnFilters,

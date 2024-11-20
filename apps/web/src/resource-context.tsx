@@ -290,7 +290,10 @@ export const ResourceProvider = ({
         }
       }
 
-      return prev;
+      // DO NOT REMOVE!!
+      // Here we use the spread syntax to shallow copy the relationships object.
+      // This is necessary to trigger a re-render.
+      return { ...prev };
     });
   }, [resolvePluralFromKind, objects, resolveOwnerUri]);
 
