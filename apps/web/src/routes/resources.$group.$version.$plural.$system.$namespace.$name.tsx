@@ -247,7 +247,7 @@ function ResourcePage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <ProjectItems objUri={selectedResource.objUri} />
+                <ProjectItems objUris={[selectedResource.objUri]} />
               </DropdownMenuContent>
             </DropdownMenu>
 

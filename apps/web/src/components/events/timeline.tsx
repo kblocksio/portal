@@ -16,7 +16,7 @@ import {
   LogLevel,
   WorkerEvent,
 } from "@kblocks/api";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
@@ -94,7 +94,7 @@ export default function Timeline({
     reversedEventGroups.length > 0 && (
       <div className="flex flex-col gap-1">
         {reversedEventGroups.map((eventGroup, index) => (
-          <>
+          <Fragment key={index}>
             {(index === 0 ||
               eventGroup.header.timestamp.getDay() !==
                 reversedEventGroups[index - 1].header.timestamp.getDay()) && (
@@ -110,7 +110,7 @@ export default function Timeline({
               eventGroup={eventGroup}
               defaultOpen={index === 0}
             />
-          </>
+          </Fragment>
         ))}
 
         {canLoadPreviousLogs && (
@@ -139,7 +139,7 @@ function EventGroupItem({
 }) {
   const header = eventGroup.header;
   const reasonIcon = getReasonIcon(header.reason);
-  
+
   const action = header.action;
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -147,7 +147,8 @@ function EventGroupItem({
   const messageColor = getMessageColor(header);
   const message = formatMessage(header.message);
 
-  const showRawEvents = new URLSearchParams(window.location.search).get('raw') === '1';
+  const showRawEvents =
+    new URLSearchParams(window.location.search).get("raw") === "1";
 
   return (
     <div className="flex flex-col">
@@ -203,7 +204,7 @@ function EventGroupItem({
 
 const RawEvents = ({ events }: { events: WorkerEvent[] }) => {
   return (
-    <div className="flex flex-col gap-1 text-xs bg-gray-100 p-2 font-mono shadow-md rounded-sm overflow-x-auto mr-4">
+    <div className="mr-4 flex flex-col gap-1 overflow-x-auto rounded-sm bg-gray-100 p-2 font-mono text-xs shadow-md">
       {events.map((e, index) => (
         <pre key={index}>{JSON.stringify(sortedKeys(e))}</pre>
       ))}
@@ -212,10 +213,12 @@ const RawEvents = ({ events }: { events: WorkerEvent[] }) => {
 };
 
 function sortedKeys(obj: any) {
-  return Object.keys(obj).sort().reduce((acc: any, key: string) => {
-    acc[key] = obj[key];
-    return acc;
-  }, {});
+  return Object.keys(obj)
+    .sort()
+    .reduce((acc: any, key: string) => {
+      acc[key] = obj[key];
+      return acc;
+    }, {});
 }
 
 const LogSection = ({ events }: { events: LogEvent[] }) => {
