@@ -6,6 +6,7 @@ import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { markdownOverrides } from "@/lib/markdown-overides";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import remarkGfm from "remark-gfm";
 import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 export const MarkdownWrapper = ({
@@ -21,7 +22,7 @@ export const MarkdownWrapper = ({
     <Markdown
       className={"pb-2"}
       rehypePlugins={[rehypeRaw]}
-      children={content}
+      remarkPlugins={[remarkGfm]}
       components={{
         ...markdownOverrides,
         ...componentsOverrides,
@@ -59,7 +60,6 @@ export const MarkdownWrapper = ({
               <SyntaxHighlighter
                 {...rest}
                 PreTag="div"
-                children={String(children).replace(/\n$/, "")}
                 language={match[1]}
                 style={ghcolors}
                 customStyle={{
@@ -68,7 +68,9 @@ export const MarkdownWrapper = ({
                   overflow: "auto",
                   border: "none",
                 }}
-              />
+              >
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
             </div>
           ) : (
             <code
@@ -80,6 +82,8 @@ export const MarkdownWrapper = ({
           );
         },
       }}
-    />
+    >
+      {content}
+    </Markdown>
   );
 };
