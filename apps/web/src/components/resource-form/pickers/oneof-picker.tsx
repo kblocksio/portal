@@ -82,7 +82,7 @@ export const OneOfPicker = ({
         const updatedFormData = updateDataByPath(
           formData,
           selectedOptionPath,
-          {},
+          undefined,
         );
 
         setFormData(updatedFormData);
@@ -200,7 +200,7 @@ export const OneOfPicker = ({
                       let updatedFormData = updateDataByPath(
                         formData,
                         selectedOptionPath,
-                        {}, // initial value
+                        undefined, // initial value
                       );
                       for (const other of Object.keys(properties).filter(
                         (k) => k === value,
