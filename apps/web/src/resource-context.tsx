@@ -5,19 +5,24 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import useWebSocket from "react-use-websocket";
+import Emittery from "emittery";
 import { useFetch } from "./hooks/use-fetch";
 import {
   ObjectEvent,
   PatchEvent,
+  ErrorEvent,
   ApiObject,
   WorkerEvent,
   parseBlockUri,
   Manifest,
   formatBlockUri,
   BlockUriComponents,
+  type LogEvent,
+  type LifecycleEvent,
 } from "@kblocks/api";
 import { isEqual } from "lodash";
 import { request } from "./lib/backend";
@@ -72,6 +77,7 @@ export interface ResourceContextValue {
   categories: Record<string, Category>;
   relationships: Record<string, Record<string, Relationship>>;
   projects: Array<Project>;
+  emitter: Emittery;
 }
 
 export type Project = Resource & {
@@ -95,6 +101,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   loadEvents: () => {},
   relationships: {},
   projects: [],
+  emitter: new Emittery(),
 });
 
 export function urlForResource(blockUri: BlockUriComponents) {
@@ -412,20 +419,13 @@ export const ResourceProvider = ({
     };
   }, [objects]);
 
+  const [emitter] = useState(() => new Emittery());
+
   const loadEvents = useCallback(
     (objUri: string) => {
-      const uri = parseBlockUri(objUri);
-      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-      const fetchEvents = async () => {
-        const response = await request("GET", eventsUrl);
-
-        for (const event of response.events) {
-          addEvent(event);
-        }
-      };
-      fetchEvents();
+      emitter.emit(`loadEvents:${objUri}`, objUri);
     },
-    [addEvent],
+    [emitter],
   );
 
   const projects = useMemo(() => {
@@ -448,6 +448,7 @@ export const ResourceProvider = ({
     setSelectedResourceId,
     categories,
     relationships,
+    emitter,
   };
 
   return (
@@ -464,4 +465,44 @@ export type OwnerReference = {
   uid?: string;
   blockOwnerDeletion?: boolean;
   controller?: boolean;
+};
+
+export type WorkerEventTimestampString = {
+  timestamp: string;
+} & (
+  | Omit<ObjectEvent, "timestamp">
+  | Omit<LogEvent, "timestamp">
+  | Omit<LifecycleEvent, "timestamp">
+  | Omit<ErrorEvent, "timestamp">
+);
+
+export const useObjectEvents = (
+  objUri: string,
+  callback: (events: WorkerEventTimestampString[]) => void,
+) => {
+  const { emitter } = useContext(ResourceContext);
+
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+
+  const eventsUrl = useMemo(() => {
+    const uri = parseBlockUri(objUri);
+    return `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+  }, [objUri]);
+
+  const fetchEvents = useCallback(async () => {
+    const response = await request("GET", eventsUrl);
+
+    callbackRef.current(response.events);
+  }, [eventsUrl]);
+
+  useEffect(() => {
+    fetchEvents();
+    const unsubscribe = emitter.on(`loadEvents:${objUri}`, async () => {
+      fetchEvents();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [emitter, eventsUrl, fetchEvents, objUri]);
 };

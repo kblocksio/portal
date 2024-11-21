@@ -4,7 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronsUpDown, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Resource, ResourceContext } from "@/resource-context";
+import {
+  Resource,
+  ResourceContext,
+  useObjectEvents,
+  type WorkerEventTimestampString,
+} from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -42,13 +47,8 @@ export const Route = createFileRoute(
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const {
-    resourceTypes,
-    objects,
-    eventsPerObject,
-    setSelectedResourceId,
-    relationships,
-  } = useContext(ResourceContext);
+  const { resourceTypes, objects, setSelectedResourceId, relationships } =
+    useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
   const [activeTab, setActiveTab] = useState("details");
@@ -102,19 +102,24 @@ function ResourcePage() {
     return owner;
   }, [relationships, numberOfRelationships, objUri]);
 
-  const [lastEventCount, setLastEventCount] = useState(
-    Object.keys(eventsPerObject?.[objUri] ?? {}).length,
-  );
+  const [lastEventCount, setLastEventCount] = useState<number>();
+  const [showLogsBadge, setShowLogsBadge] = useState(false);
 
-  const events = useMemo(
-    () => Object.values(eventsPerObject[objUri] ?? {}),
-    [eventsPerObject, objUri],
-  );
+  const [events, setEvents] = useState<WorkerEventTimestampString[]>([]);
+  useObjectEvents(objUri, (events) => {
+    setEvents(events);
+    setLastEventCount(events.length);
 
-  const showLogsBadge = useMemo(
-    () => events.length > lastEventCount,
-    [events, lastEventCount],
-  );
+    if (lastEventCount === undefined) {
+      return;
+    }
+
+    if (activeTab === "logs") {
+      return;
+    }
+
+    setShowLogsBadge(events.length > lastEventCount);
+  });
 
   const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
 
@@ -346,7 +351,7 @@ function ResourcePage() {
           </TabsTrigger>
           <TabsTrigger
             value="logs"
-            onClick={() => setLastEventCount(events.length)}
+            onClick={() => setShowLogsBadge(false)}
             className="data-[state=active]:border-primary relative flex items-center gap-2 rounded-none border-b-2 border-transparent px-4 pb-2 pt-1 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Logs
