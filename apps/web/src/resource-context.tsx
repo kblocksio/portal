@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import useWebSocket from "react-use-websocket";
@@ -13,12 +14,15 @@ import { useFetch } from "./hooks/use-fetch";
 import {
   ObjectEvent,
   PatchEvent,
+  ErrorEvent,
   ApiObject,
   WorkerEvent,
   parseBlockUri,
   Manifest,
   formatBlockUri,
   BlockUriComponents,
+  type LogEvent,
+  type LifecycleEvent,
 } from "@kblocks/api";
 import { isEqual } from "lodash";
 import { request } from "./lib/backend";
@@ -473,11 +477,31 @@ export type OwnerReference = {
   controller?: boolean;
 };
 
+// ObjectEvent
+// | LogEvent
+// | LifecycleEvent
+// | ErrorEvent;
+
+// export type WorkerEventTimestampString = Omit<WorkerEvent, "timestamp"> & {
+//   timestamp: string;
+// };
+export type WorkerEventTimestampString = {
+  timestamp: string;
+} & (
+  | Omit<ObjectEvent, "timestamp">
+  | Omit<LogEvent, "timestamp">
+  | Omit<LifecycleEvent, "timestamp">
+  | Omit<ErrorEvent, "timestamp">
+);
+
 export const useObjectEvents = (
   objUri: string,
-  callback: (events: WorkerEvent[]) => void,
+  callback: (events: WorkerEventTimestampString[]) => void,
 ) => {
   const { emitter } = useContext(ResourceContext);
+
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
   const eventsUrl = useMemo(() => {
     const uri = parseBlockUri(objUri);
@@ -487,8 +511,8 @@ export const useObjectEvents = (
   const fetchEvents = useCallback(async () => {
     const response = await request("GET", eventsUrl);
 
-    callback(response.events);
-  }, [eventsUrl, callback]);
+    callbackRef.current(response.events);
+  }, [eventsUrl]);
 
   useEffect(() => {
     fetchEvents();

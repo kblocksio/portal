@@ -14,7 +14,6 @@ import {
   LifecycleEvent,
   LogEvent,
   LogLevel,
-  WorkerEvent,
 } from "@kblocks/api";
 import { useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { cn } from "@/lib/utils";
@@ -22,6 +21,7 @@ import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
+import type { WorkerEventTimestampString } from "@/resource-context";
 
 type GroupHeader = {
   timestamp: Date;
@@ -32,7 +32,7 @@ type GroupHeader = {
 
 type EventGroup = {
   header: GroupHeader;
-  events: WorkerEvent[];
+  events: WorkerEventTimestampString[];
   requestId: string;
 };
 
@@ -59,7 +59,7 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
 export default function Timeline({
   events,
 }: {
-  events: WorkerEvent[];
+  events: WorkerEventTimestampString[];
   className?: string;
 }) {
   const [eventGroupIndex, setEventGroupIndex] = useState<number>();
@@ -202,7 +202,7 @@ function EventGroupItem({
   );
 }
 
-const RawEvents = ({ events }: { events: WorkerEvent[] }) => {
+const RawEvents = ({ events }: { events: WorkerEventTimestampString[] }) => {
   return (
     <div className="mr-4 flex flex-col gap-1 overflow-x-auto rounded-sm bg-gray-100 p-2 font-mono text-xs shadow-md">
       {events.map((e, index) => (
@@ -231,11 +231,11 @@ const LogSection = ({ events }: { events: LogEvent[] }) => {
   );
 };
 
-const Events = ({ events }: { events: WorkerEvent[] }) => {
+const Events = ({ events }: { events: WorkerEventTimestampString[] }) => {
   const items: React.ReactNode[] = [];
   let logEvents: LogEvent[] = [];
 
-  events.forEach((event, index) => {
+  events.forEach((event) => {
     if (
       event.type !== "LOG" &&
       event.type != "LIFECYCLE" &&
@@ -245,17 +245,35 @@ const Events = ({ events }: { events: WorkerEvent[] }) => {
       logEvents = [];
     }
 
+    const timestamp = new Date(event.timestamp);
+
     switch (event.type) {
       case "LOG":
-        logEvents.push(event);
+        logEvents.push({
+          ...event,
+          timestamp,
+        });
         break;
 
       case "ERROR":
-        items.push(<ErrorItem key={items.length} error={event} />);
+        items.push(
+          <ErrorItem
+            key={items.length}
+            error={{
+              ...event,
+              timestamp,
+            }}
+          />,
+        );
         break;
 
       case "LIFECYCLE":
-        logEvents.push(renderLogEvent(event));
+        logEvents.push(
+          renderLogEvent({
+            ...event,
+            timestamp,
+          }),
+        );
         break;
 
       default:
@@ -379,11 +397,13 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-const renderHeader = (event: WorkerEvent): Partial<GroupHeader> => {
+const renderHeader = (
+  event: WorkerEventTimestampString,
+): Partial<GroupHeader> => {
   switch (event.type) {
     case "LIFECYCLE":
       return {
-        timestamp: event.timestamp,
+        timestamp: new Date(event.timestamp),
         reason: event.event.reason,
         action: event.event.action,
         message: event.event.message,
@@ -391,14 +411,14 @@ const renderHeader = (event: WorkerEvent): Partial<GroupHeader> => {
 
     case "ERROR":
       return {
-        timestamp: event.timestamp,
+        timestamp: new Date(event.timestamp),
         reason: EventReason.Failed,
         message: event.body?.message ?? "",
       };
 
     case "LOG":
       return {
-        timestamp: event.timestamp,
+        timestamp: new Date(event.timestamp),
         message: event.message,
       };
 
@@ -407,7 +427,7 @@ const renderHeader = (event: WorkerEvent): Partial<GroupHeader> => {
   }
 };
 
-function groupEventsByRequestId(events: WorkerEvent[]) {
+function groupEventsByRequestId(events: WorkerEventTimestampString[]) {
   const groups: EventGroup[] = [];
 
   let currentGroup: EventGroup = {

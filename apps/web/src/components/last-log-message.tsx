@@ -1,11 +1,13 @@
 import { ChevronRightIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useObjectEvents } from "@/resource-context";
+import {
+  useObjectEvents,
+  type WorkerEventTimestampString,
+} from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
-import { WorkerEvent } from "@kblocks/api";
 
 const useLatestEvent = (objUri: string) => {
-  const [latestEvent, setLatestEvent] = useState<WorkerEvent>();
+  const [latestEvent, setLatestEvent] = useState<WorkerEventTimestampString>();
   useObjectEvents(
     objUri,
     useCallback((events) => {
@@ -15,7 +17,7 @@ const useLatestEvent = (objUri: string) => {
   return latestEvent;
 };
 
-const formatEventMessage = (event: WorkerEvent) => {
+const formatEventMessage = (event: WorkerEventTimestampString) => {
   switch (event.type) {
     case "LOG":
       return event.message;
