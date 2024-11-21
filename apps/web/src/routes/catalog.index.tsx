@@ -86,7 +86,7 @@ function Catalog() {
           categories={categories}
           filtereResources={filteredResourceTypes}
           onResourceCreateClick={handleOnResourceCreateClick}
-          isLoading={false}
+          isLoading={!searchQuery && Object.keys(resourceTypes).length === 0}
           onCardClick={handleOnCardClick}
         />
       </div>

@@ -25,6 +25,7 @@ export const ResourceCatalog = ({
   onResourceCreateClick,
   categories,
   onCardClick,
+  isLoading,
 }: ResourceCatalogProps) => {
   const typesForCategories = useMemo(() => {
     return Object.keys(categories).map((category) => ({
@@ -35,11 +36,17 @@ export const ResourceCatalog = ({
     }));
   }, [filtereResources, categories]);
 
-  return filtereResources.length === 0 ? (
+  return isLoading ? (
     <div className="flex flex-wrap gap-4">
       {Array.from({ length: 5 }).map((_, index) => (
         <ResourceCardSkeleton key={index} />
       ))}
+    </div>
+  ) : filtereResources.length === 0 ? (
+    <div className="flex h-16 items-center justify-center">
+      <p className="text-muted-foreground">
+        No resource types found for your search
+      </p>
     </div>
   ) : (
     <div className="flex flex-col gap-12">
