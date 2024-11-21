@@ -51,6 +51,7 @@
     "d3-force": "^3.0.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
+    "emittery": "^1.0.3",
     "framer-motion": "^11.11.10",
     "isbot": "^4.1.0",
     "linkify-html": "^4.1.3",

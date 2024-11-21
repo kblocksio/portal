@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import useWebSocket from "react-use-websocket";
+import Emittery from "emittery";
 import { useFetch } from "./hooks/use-fetch";
 import {
   ObjectEvent,
@@ -72,6 +73,7 @@ export interface ResourceContextValue {
   categories: Record<string, Category>;
   relationships: Record<string, Record<string, Relationship>>;
   projects: Array<Project>;
+  emitter: Emittery;
 }
 
 export type Project = Resource & {
@@ -95,6 +97,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   loadEvents: () => {},
   relationships: {},
   projects: [],
+  emitter: new Emittery(),
 });
 
 export function urlForResource(blockUri: BlockUriComponents) {
@@ -412,20 +415,23 @@ export const ResourceProvider = ({
     };
   }, [objects]);
 
+  const [emitter] = useState(() => new Emittery());
+
   const loadEvents = useCallback(
     (objUri: string) => {
-      const uri = parseBlockUri(objUri);
-      const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-      const fetchEvents = async () => {
-        const response = await request("GET", eventsUrl);
-
-        for (const event of response.events) {
-          addEvent(event);
-        }
-      };
-      fetchEvents();
+      // console.log("loadEvents", objUri);
+      emitter.emit(`loadEvents:${objUri}`, objUri);
+      // const uri = parseBlockUri(objUri);
+      // const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+      // const fetchEvents = async () => {
+      //   const response = await request("GET", eventsUrl);
+      //   for (const event of response.events) {
+      //     addEvent(event);
+      //   }
+      // };
+      // fetchEvents();
     },
-    [addEvent],
+    [emitter],
   );
 
   const projects = useMemo(() => {
@@ -448,6 +454,7 @@ export const ResourceProvider = ({
     setSelectedResourceId,
     categories,
     relationships,
+    emitter,
   };
 
   return (
@@ -464,4 +471,32 @@ export type OwnerReference = {
   uid?: string;
   blockOwnerDeletion?: boolean;
   controller?: boolean;
+};
+
+export const useObjectEvents = (
+  objUri: string,
+  callback: (events: WorkerEvent[]) => void,
+) => {
+  const { emitter } = useContext(ResourceContext);
+
+  const eventsUrl = useMemo(() => {
+    const uri = parseBlockUri(objUri);
+    return `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
+  }, [objUri]);
+
+  const fetchEvents = useCallback(async () => {
+    const response = await request("GET", eventsUrl);
+
+    callback(response.events);
+  }, [eventsUrl, callback]);
+
+  useEffect(() => {
+    fetchEvents();
+    const unsubscribe = emitter.on(`loadEvents:${objUri}`, async () => {
+      fetchEvents();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [emitter, eventsUrl, fetchEvents, objUri]);
 };
