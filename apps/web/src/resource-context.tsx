@@ -423,17 +423,7 @@ export const ResourceProvider = ({
 
   const loadEvents = useCallback(
     (objUri: string) => {
-      // console.log("loadEvents", objUri);
       emitter.emit(`loadEvents:${objUri}`, objUri);
-      // const uri = parseBlockUri(objUri);
-      // const eventsUrl = `/api/resources/${uri.group}/${uri.version}/${uri.plural}/${uri.system}/${uri.namespace}/${uri.name}/events`;
-      // const fetchEvents = async () => {
-      //   const response = await request("GET", eventsUrl);
-      //   for (const event of response.events) {
-      //     addEvent(event);
-      //   }
-      // };
-      // fetchEvents();
     },
     [emitter],
   );
@@ -477,14 +467,6 @@ export type OwnerReference = {
   controller?: boolean;
 };
 
-// ObjectEvent
-// | LogEvent
-// | LifecycleEvent
-// | ErrorEvent;
-
-// export type WorkerEventTimestampString = Omit<WorkerEvent, "timestamp"> & {
-//   timestamp: string;
-// };
 export type WorkerEventTimestampString = {
   timestamp: string;
 } & (
