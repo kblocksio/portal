@@ -2,3 +2,28 @@
 @import "@fontsource-variable/inter/standard.css";
 @import "@fontsource-variable/inter/standard-italic.css";
 @import "@fontsource-variable/roboto-mono/index.css";
+
+.scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(156 163 175);  /* Using a specific gray color */
+  border: 4px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+}
+
+.scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175) transparent;
+}
