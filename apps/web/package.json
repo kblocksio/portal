@@ -76,6 +76,7 @@
     "swagger-ui-react": "^5.17.14",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.4",
+    "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.0.0",
     "zod": "^3.23.8"

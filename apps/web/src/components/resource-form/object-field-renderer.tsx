@@ -154,7 +154,7 @@ export const ObjectFieldRenderer = ({
         open={showObjectModal}
         onOpenChange={(open: boolean) => setShowObjectModal(open)}
       >
-        <DialogContent className="sm:max-w-[800px]">
+        <DialogContent className="scrollbar max-h-[80vh] overflow-y-auto sm:max-w-[800px]">
           <DialogHeader className="mb-1 border-b border-gray-200 pb-4">
             <DialogTitle className="text-lg">
               {splitAndCapitalizeCamelCase(fieldName ?? "")}
