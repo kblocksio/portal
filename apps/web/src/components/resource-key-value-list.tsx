@@ -109,7 +109,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent side="right" className="ml-2">
-              <JsonView value={value} />
+              <JsonView value={value} className="max-h-[80vh] overflow-auto" />
             </PopoverContent>
           </Popover>
         );
