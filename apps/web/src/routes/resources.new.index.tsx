@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { WizardSearchHeader } from "@/components/wizard-search-header";
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
-import { AppContext, useAppContext } from "@/app-context";
+import { useAppContext } from "@/app-context";
 
 export const Route = createFileRoute("/resources/new/")({
   component: CreateNewResourceCatalog,

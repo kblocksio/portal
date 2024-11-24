@@ -187,7 +187,9 @@ function EventGroupItem({
           <div className="flex items-center gap-1 truncate">
             <div className="size-4 sm:hidden"></div>
             <span className={cn(messageColor, "grow truncate sm:grow-0")}>
-              <pre className="truncate font-sans">{message}</pre>
+              <pre className="truncate font-sans" title={message}>
+                {message}
+              </pre>
             </span>
           </div>
         </div>
