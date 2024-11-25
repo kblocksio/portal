@@ -109,16 +109,12 @@ export const StatusBadge = ({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger className="cursor-default">
           {wrapper}
-          {showMessage && (
-            <span className="ml-2 text-sm">{message}</span>
-          )}
+          {showMessage && <span className="ml-2 text-sm">{message}</span>}
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {showMessage ? `${type}?` : (condition?.reason ?? `${type}?`)}
-          </p>
+          <p>{showMessage ? `${type}?` : (condition?.reason ?? `${type}?`)}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
