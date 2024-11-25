@@ -347,6 +347,16 @@ VITE_WS_URL=ws://localhost:3001/api/events
 VITE_SKIP_AUTH=true
 ```
 
+And also the `apps/server/.env` file with these `REDIS_*` variables:
+
+```
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=pass1234
+```
+
+You can always copy their related `.env.example` files to `.env` and modify the values as needed.
+
 Now run the dev script at the root of the repository:
 
 ```sh
