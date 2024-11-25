@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "dotenv -- tsx watch src/index.ts",
+    "dev": "dotenv -- tsx watch src/index.ts --clear-screen=false",
     "build": "tsc",
     "prod": "tsx src/index.ts"
   },
