@@ -2,7 +2,7 @@ name: Build
 
 permissions:
   contents: read
-  pull-requests: write 
+  pull-requests: write
 
 on:
   workflow_dispatch:
@@ -50,8 +50,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
 
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
@@ -62,7 +62,7 @@ jobs:
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
-      
+
       - name: Docker Login
         uses: docker/login-action@v3
         with:
@@ -172,7 +172,8 @@ jobs:
       - name: Skaffold run
         id: run
         run: |
-          export VITE_BACKEND_ENDPOINT="${{ steps.qkube.outputs.kblocks-host }}"
+          export VITE_BACKEND_URL="https://${{ steps.qkube.outputs.kblocks-host }}"
+          export VITE_WS_URL="wss://${{ steps.qkube.outputs.kblocks-host }}/api/events"
           export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_REDIS_ENABLED=false
           # TODO: Remove this step
@@ -215,7 +216,7 @@ jobs:
           - argo-app
           - web-service
           - project
-          - workload          
+          - workload
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -226,8 +227,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
 
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
@@ -238,7 +239,7 @@ jobs:
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node_modules-
-  
+
       - name: Install Dependencies
         run: npm install
 
@@ -253,7 +254,7 @@ jobs:
       - name: Switch clusters
         run: |
           npx qkube use ${{ needs.build.outputs.qkube-name }}
-  
+
       - name: Install gallery blocks
         working-directory: gallery
         env:

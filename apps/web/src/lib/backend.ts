@@ -7,13 +7,7 @@ import {
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 import { ResourceType } from "@/resource-context";
 
-// if VITE_BACKEND_ENDPOINT is not set, use the current origin
-const VITE_BACKEND_ENDPOINT = import.meta.env.VITE_BACKEND_ENDPOINT;
-if (!VITE_BACKEND_ENDPOINT) {
-  throw new Error("VITE_BACKEND_ENDPOINT is not set");
-}
-
-const BACKEND_URL = `https://${VITE_BACKEND_ENDPOINT}`;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const signInUrl = `${BACKEND_URL}/api/auth/sign-in`;
 
