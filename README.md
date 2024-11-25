@@ -339,6 +339,16 @@ cd demo
 
 ### 9. Run the dev script
 
+If you didn't do it already, update the `apps/web/.env` file with the following:
+
+```
+VITE_BACKEND_URL=http://localhost:3001
+VITE_WS_URL=ws://localhost:3001/api/events
+VITE_SKIP_AUTH=true
+```
+
+Now run the dev script at the root of the repository:
+
 ```sh
 npm run dev
 ```
