@@ -18,7 +18,7 @@ const config = {
   password: REDIS_PASSWORD,
   socket: {
     host: REDIS_HOST,
-    port: REDIS_PORT ? Number(REDIS_PORT) : undefined,
+    port: REDIS_PORT ? Number(REDIS_PORT) : 18284,
   },
 };
 
