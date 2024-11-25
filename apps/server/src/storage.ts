@@ -5,7 +5,7 @@ import { slackNotify } from "./slack-notify";
 
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
-const REDIS_PORT = getEnv("REDIS_PORT");
+const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_PREFIX = process.env.REDIS_PREFIX;
 const objPrefix = (() => {
   if (REDIS_PREFIX) {
@@ -18,7 +18,7 @@ const config = {
   password: REDIS_PASSWORD,
   socket: {
     host: REDIS_HOST,
-    port: Number(REDIS_PORT),
+    port: REDIS_PORT ? Number(REDIS_PORT) : undefined,
   },
 };
 
