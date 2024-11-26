@@ -13,7 +13,7 @@ import { parseBlockUri } from "@kblocks/api";
 export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Add to Project</DropdownMenuSubTrigger>
+      <DropdownMenuSubTrigger>Project</DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           <ProjectItems objUris={objUris} />
