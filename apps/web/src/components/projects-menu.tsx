@@ -9,11 +9,18 @@ import {
 import { Project, ResourceContext } from "@/resource-context";
 import { createResource } from "@/lib/backend";
 import { parseBlockUri } from "@kblocks/api";
-
+import { cn } from "@/lib/utils";
 export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
+  const { projects } = useContext(ResourceContext);
+
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Add to Project</DropdownMenuSubTrigger>
+      <DropdownMenuSubTrigger
+        disabled={!projects || projects.length === 0}
+        className={cn(!projects || (projects.length === 0 && "opacity-50"))}
+      >
+        Project
+      </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           <ProjectItems objUris={objUris} />
