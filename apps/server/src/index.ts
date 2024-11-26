@@ -9,7 +9,7 @@ import {
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
-import { createServerSupabase } from "./supabase.js";
+import { createServerSupabase, privateSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
@@ -512,7 +512,7 @@ app.get("/api/auth/callback/github", async (req, res) => {
     );
   }
 
-  const { error } = await supabase.from("user_ghtokens").upsert([
+  const { error } = await privateSupabase.from("user_ghtokens").upsert([
     {
       user_id: user.data.user.id,
       access_token: tokens.access_token,

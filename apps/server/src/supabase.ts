@@ -4,12 +4,19 @@ import {
   serializeCookieHeader,
 } from "@supabase/ssr";
 
+import { createClient } from "@supabase/supabase-js";
+
 import type { Request, Response } from "express";
 import type { Database } from "./supabase.types";
 import { getEnv } from "./util";
 
 const SUPABASE_URL = getEnv("SUPABASE_URL");
 const SUPABASE_SERVICE_KEY = getEnv("SUPABASE_SERVICE_KEY");
+
+export const privateSupabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_KEY,
+);
 
 export const createServerSupabase = (req: Request, res: Response) => {
   return createServerClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
@@ -22,9 +29,6 @@ export const createServerSupabase = (req: Request, res: Response) => {
           res.append("Set-Cookie", serializeCookieHeader(name, value, options)),
         );
       },
-    },
-    db: {
-      schema: "private",
     },
   });
 };

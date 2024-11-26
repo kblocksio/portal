@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { createServerSupabase } from "./supabase";
+import { createServerSupabase, privateSupabase } from "./supabase";
 import { refreshToken } from "./github";
 
 export function getEnv(key: string): string {
@@ -18,7 +18,7 @@ export async function getUserAccessToken(req: Request, res: Response) {
     throw new Error("User is not signed in to Supabase");
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await privateSupabase
     .from("user_ghtokens")
     .select("access_token, refresh_token, expires_at")
     .eq("user_id", user.data.user.id)
@@ -41,23 +41,25 @@ export async function getUserAccessToken(req: Request, res: Response) {
     refreshToken: data.refresh_token,
   });
 
-  const { error: upsertError } = await supabase.from("user_ghtokens").upsert([
-    {
-      user_id: user.data.user.id,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expires_in: tokens.expires_in,
-      refresh_token_expires_in: tokens.refresh_token_expires_in,
-      token_type: tokens.token_type,
-      scope: tokens.scope,
-      expires_at: new Date(
-        new Date().getTime() + tokens.expires_in * 1000,
-      ).toISOString(),
+  const { error: upsertError } = await privateSupabase
+    .from("user_ghtokens")
+    .upsert([
+      {
+        user_id: user.data.user.id,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_in: tokens.expires_in,
+        refresh_token_expires_in: tokens.refresh_token_expires_in,
+        token_type: tokens.token_type,
+        scope: tokens.scope,
+        expires_at: new Date(
+          new Date().getTime() + tokens.expires_in * 1000,
+        ).toISOString(),
         refresh_token_expires_at: new Date(
           new Date().getTime() + tokens.refresh_token_expires_in * 1000,
         ).toISOString(),
-    },
-  ]);
+      },
+    ]);
 
   if (upsertError) {
     console.error("Error upserting access token to Supabase", upsertError);

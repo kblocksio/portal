@@ -1,5 +1,6 @@
 ## Generate Supabase Types
 
+npx supabase gen types typescript --local > src/supabase.types.ts
 npx supabase gen types typescript --local --schema private > src/supabase.types.ts
 
 ## Other scripts
