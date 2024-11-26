@@ -72,17 +72,17 @@ skaffold dev
 
 Hosting:
 
-* Frontend is hosted in Vercel.
-* Backend is deployed on a quickube cluster by the name of `portal-backend.quickube.sh`.
-* Block gallery ([source](https://github.com/winglang/kblocks-gallery)) is deployed on a quickube cluster by the name of `kblocks-demo.quickube.sh`.
+- Frontend is hosted in Vercel.
+- Backend is deployed on a quickube cluster by the name of `portal-backend.quickube.sh`.
+- Block gallery ([source](https://github.com/winglang/kblocks-gallery)) is deployed on a quickube cluster by the name of `kblocks-demo.quickube.sh`.
 
 We use [DNSimple](https://dnsimple.com/a/137210/domains/kblocks.io):
 
-* The root `A` record (`kblocks.io`) points to Vercel
-* The subdomain `api.kblocks.io` has a CNAME that points to `portal-backend.quickube.sh`.
-* Vercel rewrites all requests to `kblocks.io/api` to `api.kblocks.io/api`, so we don't need CORS.
+- The root `A` record (`kblocks.io`) points to Vercel
+- The subdomain `api.kblocks.io` has a CNAME that points to `portal-backend.quickube.sh`.
+- Vercel rewrites all requests to `kblocks.io/api` to `api.kblocks.io/api`, so we don't need CORS.
 
-***Do I need to modify the DNS records if I provision a new cluster?*** Probably not. Technically,
+**_Do I need to modify the DNS records if I provision a new cluster?_** Probably not. Technically,
 if a new cluster is provisioned, there is no need to change any DNS configuration as long as the
 cluster name is `portal-backend.quickube.sh`. If you change it, then the CNAME needs to be updated
 accordingly (bear in mind DNS propagation and cache).
@@ -123,10 +123,10 @@ We will refer to this directory as `$SECRETS` throughout the document.
 Now, download all the secret files from the [1Password secret] to this directory. We expect the
 following files:
 
-* `kblocks-gallery.env` - environment for kblocks-gallery
-* `portal.env` - environment for portal-backend
-* `kblocks_io.key` - SSL certificate private key
-* `kblocks_io.pem` - SSL certificate public key
+- `kblocks-gallery.env` - environment for kblocks-gallery
+- `portal.env` - environment for portal-backend
+- `kblocks_io.key` - SSL certificate private key
+- `kblocks_io.pem` - SSL certificate public key
 
 #### Install secrets
 
@@ -134,31 +134,31 @@ And we are ready to install the secrets:
 
 1. Install the **gallery secrets** to the `kblocks-demo.quickube.sh` cluster:
 
-    ```sh
-    qkube use kblocks-demo.quickube.sh
-    KBLOCKS_SYSTEM_ID=demo $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
-    ```
+   ```sh
+   qkube use kblocks-demo.quickube.sh
+   KBLOCKS_SYSTEM_ID=demo $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+   ```
 
-3. We will also install the **gallery secrets** to the `portal-backend.quickube.sh` cluster as well
+2. We will also install the **gallery secrets** to the `portal-backend.quickube.sh` cluster as well
    because our backend needs the `Workload` block:
 
-    ```sh
-    qkube use portal-backend.quickube.sh
-    KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
-    ```
+   ```sh
+   qkube use portal-backend.quickube.sh
+   KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+   ```
 
-4. Install the **backend secrets** to the `portal-backend.quickube.sh` (these are needed by the
+3. Install the **backend secrets** to the `portal-backend.quickube.sh` (these are needed by the
    backend service to operate):
 
-    ```sh
-    $REPO/scripts/install-secrets.sh $SECRETS/portal.env
-    ```
+   ```sh
+   $REPO/scripts/install-secrets.sh $SECRETS/portal.env
+   ```
 
-5. Finally, we need to install the SSL certificates to the portal backend cluster as well:
+4. Finally, we need to install the SSL certificates to the portal backend cluster as well:
 
-    ```sh
-    $REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
-    ```
+   ```sh
+   $REPO/scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
+   ```
 
 At this point we should have the two clusters ready for installing the blocks and backend service.
 
@@ -182,7 +182,7 @@ cd $REPO
 
 ### Block Gallery Installation
 
-Next, let's install *all* the blocks to the demo cluster:
+Next, let's install _all_ the blocks to the demo cluster:
 
 ```sh
 cd $REPO/gallery
@@ -191,6 +191,7 @@ qkube use kblocks-demo.quickube.sh
 ```
 
 > If you wish to only install a single block, you can do it like this:
+>
 > ```sh
 > cd $REPO/gallery
 > qkube use kblocks-demo.quickube.sh
@@ -205,10 +206,10 @@ If you want to test the portal locally, you can use `kind` to setup the environm
 
 Go to Docker Desktop settings and under **Resources** set:
 
-* CPU limit: 10
-* Memory limit: 20GB
-* Swap: 3GB
-* Virtual disk limit: 800GB
+- CPU limit: 10
+- Memory limit: 20GB
+- Swap: 3GB
+- Virtual disk limit: 800GB
 
 Thank you.
 
@@ -250,7 +251,7 @@ cd $REPO
 
 We will refer to this directory as `$SECRETS` throughout the document.
 
-Now, download all the secret files from the [1Password secret] to the secrets directory. 
+Now, download all the secret files from the [1Password secret] to the secrets directory.
 
 Setup all of the secrets and certs to your kind cluster:
 
@@ -336,11 +337,42 @@ cd demo
 ./install.sh
 ```
 
+### 9. Run the dev script
+
+If you didn't do it already, update the `apps/web/.env` file with the following:
+
+```
+VITE_BACKEND_URL=http://localhost:3001
+VITE_WS_URL=ws://localhost:3001/api/events
+VITE_SKIP_AUTH=true
+```
+
+And also the `apps/server/.env` file with these `REDIS_*` variables:
+
+```
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=pass1234
+```
+
+You can always copy their related `.env.example` files to `.env` and modify the values as needed.
+
+Now run the dev script at the root of the repository:
+
+```sh
+npm run dev
+```
+
+This will start the backend and frontend locally, and also forward the Redis ports from the kind cluster.
+
+Now, you can visit http://localhost:5173.
+
 ### Switching between local and staging
 
 NOTE: The local installation is not using qkube, so don't expect to find the cluster when running `qkube ls`.
+
 - To make sure that kubectl is using the right cluster, run `kubectl config current-context`. and make sure
-it points to `kind-kind`.
+  it points to `kind-kind`.
 - To switch to the staging cluster, run `qkube use staging.quickube.sh`.
 - To switch back to the local cluster, run `kubectl config use-context kind-kind`.
 

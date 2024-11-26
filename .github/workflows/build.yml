@@ -172,7 +172,9 @@ jobs:
       - name: Skaffold run
         id: run
         run: |
-          export VITE_BACKEND_ENDPOINT="${{ steps.qkube.outputs.kblocks-host }}"
+          export VITE_BACKEND_URL="https://${{ steps.qkube.outputs.kblocks-host }}"
+          export VITE_WS_URL="wss://${{ steps.qkube.outputs.kblocks-host }}/api/events"
+          export VITE_SKIP_AUTH=true
           export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_REDIS_ENABLED=false
           # TODO: Remove this step
