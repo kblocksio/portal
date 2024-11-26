@@ -4,152 +4,92 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+          extensions?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
-      organization_members: {
-        Row: {
-          organization_id: string
-          role: string | null
-          user_id: string
-        }
-        Insert: {
-          organization_id: string
-          role?: string | null
-          user_id: string
-        }
-        Update: {
-          organization_id?: string
-          role?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "Organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Organizations: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-        }
-        Relationships: []
-      }
-      Projects: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-          organization: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Projects_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "Organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Roles: {
-        Row: {
-          created_at: string
-          id: number
-          name: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Relationships: []
-      }
       user_ghtokens: {
         Row: {
-          access_token: string | null
-          expires_at: string | null
-          expires_in: number | null
-          refresh_token: string | null
-          refresh_token_expires_in: number | null
-          scope: string | null
-          token_type: string | null
-          user_id: string
-        }
+          access_token: string;
+          created_at: string;
+          expires_at: string;
+          expires_in: number;
+          refresh_token: string;
+          refresh_token_expires_in: number;
+          scope: string;
+          token_type: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          access_token?: string | null
-          expires_at?: string | null
-          expires_in?: number | null
-          refresh_token?: string | null
-          refresh_token_expires_in?: number | null
-          scope?: string | null
-          token_type?: string | null
-          user_id: string
-        }
+          access_token: string;
+          created_at?: string;
+          expires_at: string;
+          expires_in: number;
+          refresh_token: string;
+          refresh_token_expires_in: number;
+          scope: string;
+          token_type: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          access_token?: string | null
-          expires_at?: string | null
-          expires_in?: number | null
-          refresh_token?: string | null
-          refresh_token_expires_in?: number | null
-          scope?: string | null
-          token_type?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-    }
+          access_token?: string;
+          created_at?: string;
+          expires_at?: string;
+          expires_in?: number;
+          refresh_token?: string;
+          refresh_token_expires_in?: number;
+          scope?: string;
+          token_type?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -162,7 +102,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -170,11 +110,11 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -185,17 +125,17 @@ export type TablesInsert<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -206,17 +146,17 @@ export type TablesUpdate<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -229,14 +169,14 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof PublicSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof Database;
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
@@ -244,4 +184,4 @@ export type CompositeTypes<
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;

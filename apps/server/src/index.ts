@@ -31,6 +31,7 @@ import { categories } from "./categories";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
+const GITHUB_CLIENT_ID = getEnv("GITHUB_CLIENT_ID");
 
 const port = process.env.PORT ?? 3001;
 
@@ -167,52 +168,61 @@ app.get("/api/types", async (_, res) => {
   return res.status(200).json(result);
 });
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
 
-  const obj = await getObject(objUri);
-  if (!obj) {
-    return res.status(404).json({ error: `Block ${objUri} not found` });
-  }
-  
-  return res.status(200).json(obj);
-});
+    const obj = await getObject(objUri);
+    if (!obj) {
+      return res.status(404).json({ error: `Block ${objUri} not found` });
+    }
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
-  return res.status(200).json({ objUri, logs } as GetLogsResponse);
-});
+    return res.status(200).json(obj);
+  },
+);
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const events = await loadEvents(objUri);
-  return res.status(200).json({ objUri, events } as GetEventsResponse);
-});
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
+    return res.status(200).json({ objUri, logs } as GetLogsResponse);
+  },
+);
+
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/events",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const events = await loadEvents(objUri);
+    return res.status(200).json({ objUri, events } as GetEventsResponse);
+  },
+);
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
@@ -226,7 +236,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   }
 
   const obj = req.body as ApiObject;
-  
+
   const objUri = formatBlockUri({
     group,
     version,
@@ -252,7 +262,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
         reason: "Pending",
         message: "Pending",
         lastTransitionTime: new Date().toISOString(),
-      }
+      },
     ],
   };
 
@@ -346,7 +356,8 @@ app.delete(
   "/api/resources/:group/:version/:plural/:system/:namespace/:name",
   async (req, res) => {
     const { group, version, plural, system, namespace, name } = req.params;
-    const force = req.query["force"] !== undefined && req.query["force"] !== "false";
+    const force =
+      req.query["force"] !== undefined && req.query["force"] !== "false";
 
     const objUri = formatBlockUri({
       group,
@@ -464,15 +475,13 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
     return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${supabaseError}`);
   }
 
-  console.log("client_id", process.env.GITHUB_CLIENT_ID);
-
   if (NON_PRIMARY_ENVIRONMENT) {
     console.log("non-primary environment, skipping additional github auth");
     return res.redirect(303, `${WEBSITE_ORIGIN}/`);
   }
 
   const url = new URL("https://github.com/login/oauth/authorize");
-  url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
+  url.searchParams.append("client_id", GITHUB_CLIENT_ID!);
   url.searchParams.append("scope", "repo, org:read");
   url.searchParams.append(
     "redirect_uri",

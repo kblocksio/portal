@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "dotenv -- tsx watch src/index.ts --clear-screen=false",
+    "dev": "tsx scripts/dev.mts",
     "build": "tsc",
     "prod": "tsx src/index.ts"
   },
@@ -12,9 +12,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.25.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.1.0",
+    "concurrently": "^9.1.0",
     "cookie": "^0.6.0",
     "dotenv": "^16.4.5",
     "tsx": "^4.19.2",
@@ -34,6 +36,7 @@
     "json-schema-to-zod": "^2.4.1",
     "octokit": "^4.0.2",
     "redis": "^4.7.0",
+    "supabase": "^1.223.10",
     "zod": "^3.23.8"
   },
   "optionalDependencies": {
