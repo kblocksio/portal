@@ -47,7 +47,7 @@ export const RepoPicker = memo(function RepoPicker({
   useEffect(() => {
     setSelectedInstallationLogin(
       (currentInstallationLogin) =>
-        currentInstallationLogin ?? installations?.[0].account.login,
+        currentInstallationLogin ?? installations?.[0]?.account.login,
     );
   }, [installations]);
 
@@ -189,9 +189,11 @@ export const RepoPicker = memo(function RepoPicker({
             </SelectContent>
           </Select>
         </div>
-        <div className="text-muted-foreground mb-4 mt-0 ml-2 text-xs">
+        <div className="text-muted-foreground mb-4 ml-2 mt-0 text-xs">
           <p className="text-xs">
-            {"Can't find the repository you're looking for? You may need to adjust your GitHub App installation. "}
+            {
+              "Can't find the repository you're looking for? You may need to adjust your GitHub App installation. "
+            }
             <a
               href="https://github.com/apps/kblocks-io/installations/new"
               target="_blank"
