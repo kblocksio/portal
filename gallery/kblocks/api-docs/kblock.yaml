@@ -6,7 +6,7 @@ spec:
   engine: custom
   definition:
     readme: ./README.md
-    schema: ./values.schema.json
+    schema: ./src/values.schema.json
     description: Generates Open API documentation from a GitHub repository.
     group: acme.com
     version: v1
