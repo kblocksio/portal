@@ -506,6 +506,11 @@ app.get("/api/auth/callback/github", async (req, res) => {
   }
 
   const tokens = await exchangeCodeForTokens(code.toString());
+  if ("error" in tokens) {
+    return res.redirect(
+      `${WEBSITE_ORIGIN}/auth-error?error=${tokens.error.message}`,
+    );
+  }
 
   const { error } = await supabase.from("user_ghtokens").upsert([
     {
@@ -519,12 +524,18 @@ app.get("/api/auth/callback/github", async (req, res) => {
       expires_at: new Date(
         new Date().getTime() + tokens.expires_in * 1000,
       ).toISOString(),
+      refresh_token_expires_at: new Date(
+        new Date().getTime() + tokens.refresh_token_expires_in * 1000,
+      ).toISOString(),
     },
   ]);
 
   if (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    console.error("supabase error", error);
+    console.log("supabase error (log)", error);
+    return res
+      .status(500)
+      .json({ message: "Server error (supabase)", error: { ...error } });
   }
 
   const next = (req.query.next ?? "/").toString();

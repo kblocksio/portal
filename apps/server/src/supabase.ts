@@ -23,5 +23,8 @@ export const createServerSupabase = (req: Request, res: Response) => {
         );
       },
     },
+    db: {
+      schema: "private",
+    },
   });
 };

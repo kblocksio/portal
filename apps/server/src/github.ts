@@ -9,6 +9,8 @@ export interface GithubTokens {
   scope: string;
 }
 
+export type GithubTokensResponse = GithubTokens | { error: Error };
+
 export const exchangeCodeForTokens = async (code: string) => {
   const response = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -24,7 +26,7 @@ export const exchangeCodeForTokens = async (code: string) => {
   });
   if (!response.ok) {
     console.error(response.status, response.statusText, await response.text());
-    throw new Error("Failed to exchange code for tokens");
+    return { error: new Error("Failed to exchange code for tokens") };
   }
   const data = await response.json();
   return data as GithubTokens;
