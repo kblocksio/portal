@@ -34,7 +34,7 @@ subscribeClient
   .connect()
   .then(() => {
     subscribeClient.subscribe(EVENTS_CHANNEL, (message) => {
-      console.log("Received message:", message);
+      // console.log("Received message:", message);
       events.emit("event", message);
     });
   })

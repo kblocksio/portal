@@ -1,7 +1,6 @@
 import concurrently from "concurrently";
 
 process.on("SIGINT", () => {
-  console.log("Gracefully shutting down...");
   process.exit(0);
 });
 

@@ -53,6 +53,9 @@ export async function getUserAccessToken(req: Request, res: Response) {
       expires_at: new Date(
         new Date().getTime() + tokens.expires_in * 1000,
       ).toISOString(),
+        refresh_token_expires_at: new Date(
+          new Date().getTime() + tokens.refresh_token_expires_in * 1000,
+        ).toISOString(),
     },
   ]);
 
