@@ -1,0 +1,18 @@
+apiVersion: kblocks.io/v1
+kind: Block
+spec:
+  engine: noop
+  definition:
+    readme: ./README.md
+    schema: ./src/values.schema.json
+    description: A kubernetes cluster
+    group: kblocks.io
+    version: v1
+    kind: Cluster
+    categories:
+      - environments
+    plural: clusters
+    icon: Boxes
+    singular: cluster
+metadata:
+  name: clusters.kblocks.io

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The id of the cluster"
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the cluster"
+    },
+    "icon": {
+      "type": "string",
+      "description": "The icon of the cluster. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon.\n\n@ui kblocks.io/textarea"
+    },
+    "backendUrl": {
+      "type": "string",
+      "description": "The API backend URL to use for the cluster"
+    },
+    "apiKey": {
+      "type": "string",
+      "description": "The API key to use for the cluster"
+    },
+    "access": {
+      "type": "string",
+      "enum": ["read_only", "read_write"],
+      "default": "read_only",
+      "description": "The access level to the cluster"
+    }
+  }
+}
