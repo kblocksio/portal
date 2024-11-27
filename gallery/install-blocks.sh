@@ -32,10 +32,30 @@ install_kblock() {
     cd $dir
     name=$(basename $dir)
     echo "Installing block: $PWD..."
+
+    if [ -n "${KBLOCKS_HOST}" ]; then
+      KBLOCKS_HOST_OPTION="-e KBLOCKS_HOST=\"${KBLOCKS_HOST}\""
+    else
+      KBLOCKS_HOST_OPTION=""
+    fi
+
+    if [ -n "${KBLOCKS_API_KEY}" ]; then
+      KBLOCKS_API_KEY_OPTION="-e KBLOCKS_API_KEY=\"${KBLOCKS_API_KEY}\""
+    else
+      KBLOCKS_API_KEY_OPTION=""
+    fi
+
+    if [ -n "${KBLOCKS_STORAGE_PREFIX}" ]; then
+      KBLOCKS_STORAGE_PREFIX_OPTION="-e KBLOCKS_STORAGE_PREFIX=\"${KBLOCKS_STORAGE_PREFIX}\""
+    else
+      KBLOCKS_STORAGE_PREFIX_OPTION=""
+    fi
+
+    # Now run the command with the options included conditionally
     $KBLOCKS_CLI install \
-      -e KBLOCKS_HOST="${KBLOCKS_HOST}" \
-      -e KBLOCKS_API_KEY="${KBLOCKS_API_KEY}" \
-      -e KBLOCKS_STORAGE_PREFIX="${KBLOCKS_STORAGE_PREFIX}" \
+      $KBLOCKS_HOST_OPTION \
+      $KBLOCKS_API_KEY_OPTION \
+      $KBLOCKS_STORAGE_PREFIX_OPTION \
       -n kblocks \
       --release-name $name
   )
