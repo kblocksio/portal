@@ -207,7 +207,7 @@ export const ImportGHRepo = ({
           Can't find the repository you're looking for? You may need to adjust
           your GitHub App installation.{" "}
           <a
-            href="https://github.com/apps/kblocks-io/installations/new"
+            href={import.meta.env.VITE_GITHUB_APP_INSTALLATION_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
