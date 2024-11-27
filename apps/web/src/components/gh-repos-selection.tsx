@@ -8,6 +8,7 @@ import { Skeleton } from "./ui/skeleton.js";
 import { Checkbox } from "./ui/checkbox.js";
 import { Loader, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils.js";
+import { ManageGitHubInstallation } from "./gh-manage-installation.js";
 
 export interface ImportGHRepoProps {
   singleSelection?: boolean;
@@ -202,19 +203,8 @@ export const ImportGHRepo = ({
           )}
         </div>
       </div>
-      <div className="text-muted-foreground mb-4 mt-4 text-sm">
-        <p>
-          Can't find the repository you're looking for? You may need to adjust
-          your GitHub App installation.{" "}
-          <a
-            href={import.meta.env.VITE_GITHUB_APP_INSTALLATION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            Manage GitHub App installation
-          </a>
-        </p>
+      <div className="mb-4 mt-4 text-sm">
+        <ManageGitHubInstallation />
       </div>
       <div className="flex justify-between">
         {handleBack && (

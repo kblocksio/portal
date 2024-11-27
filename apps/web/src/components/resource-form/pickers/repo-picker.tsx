@@ -9,9 +9,9 @@ import {
 } from "../../ui/select";
 import { Github, Loader2 } from "lucide-react";
 import { useFetch } from "@/hooks/use-fetch";
-import { linkVariants } from "@/components/ui/link";
 import { Field } from "../form-field";
 import { InputField } from "../input-field";
+import { ManageGitHubInstallation } from "@/components/gh-manage-installation";
 
 interface RepoPickerProps {
   initialValue?: string;
@@ -189,20 +189,8 @@ export const RepoPicker = memo(function RepoPicker({
             </SelectContent>
           </Select>
         </div>
-        <div className="text-muted-foreground mb-4 ml-2 mt-0 text-xs">
-          <p className="text-xs">
-            {
-              "Can't find the repository you're looking for? You may need to adjust your GitHub App installation. "
-            }
-            <a
-              href={import.meta.env.VITE_GITHUB_APP_INSTALLATION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={linkVariants({ variant: "default" })}
-            >
-              Manage GitHub App installation
-            </a>
-          </p>
+        <div className="mb-4 ml-2 mt-0 text-xs">
+          <ManageGitHubInstallation />
         </div>
       </div>
     </Field>
