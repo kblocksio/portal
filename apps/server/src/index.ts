@@ -66,48 +66,6 @@ app.ws("/api/events", (ws) => {
   });
 });
 
-app.ws("/api/control/:group/:version/:plural", async (ws, req) => {
-  const { group, version, plural } = req.params;
-  const { system: sys, system_id } = req.query as unknown as {
-    system?: string;
-    system_id?: string;
-  };
-
-  const system = sys ?? system_id;
-
-  if (!group || !version || !plural || !system) {
-    console.error(
-      "Invalid control connection request. Missing one of group, version, plural, system query params.",
-    );
-    console.log("Query params:", req.query);
-    return ws.close();
-  }
-
-  const resourceType = `${group}/${version}/${plural}`;
-  console.log(`control connection: ${resourceType} for ${system}`);
-
-  const { unsubscribe } = await pubsub.subscribeToControlRequests(
-    { system, group, version, plural },
-    (message) => {
-      console.log(`sending control message to ${resourceType}:`, message);
-      ws.send(message);
-    },
-  );
-
-  ws.on("close", () => {
-    console.log(
-      `control connection closed: ${resourceType} for system ${system}`,
-    );
-    unsubscribe();
-  });
-});
-
-// publish an event to the events stream (called by workers)
-app.post("/api/events", async (req, res) => {
-  await pubsub.publishEvent(req.body);
-  return res.sendStatus(200);
-});
-
 app.get("/api/resources", async (_, res) => {
   const objects: ObjectEvent[] = [];
 

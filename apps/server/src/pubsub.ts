@@ -8,11 +8,23 @@ const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
 const REDIS_HOST = getEnv("REDIS_HOST");
 const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_PREFIX = process.env.REDIS_PREFIX;
-const EVENTS_CHANNEL = (() => {
+const APP_EVENTS_CHANNEL = (() => {
   if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}:events`;
+    return `${REDIS_PREFIX}app-events`;
   }
-  return "events";
+  return "app-events";
+})();
+const KBLOCKS_EVENTS_CHANNEL = (() => {
+  if (REDIS_PREFIX) {
+    return `${REDIS_PREFIX}kblocks-events`;
+  }
+  return "kblocks-events";
+})();
+const KBLOCKS_CONTROL_CHANNEL = (() => {
+  if (REDIS_PREFIX) {
+    return `${REDIS_PREFIX}kblocks-control`;
+  }
+  return "kblocks-control";
 })();
 
 const config = {
@@ -33,9 +45,12 @@ const subscribeClient = createClient(config);
 subscribeClient
   .connect()
   .then(() => {
-    subscribeClient.subscribe(EVENTS_CHANNEL, (message) => {
-      console.log("Received message:", message);
+    subscribeClient.subscribe(APP_EVENTS_CHANNEL, (message) => {
+      console.log("Received app message:", message);
       events.emit("event", message);
+    });
+    subscribeClient.subscribe(KBLOCKS_EVENTS_CHANNEL, async (message) => {
+      await publishEvent(JSON.parse(message));
     });
   })
   .catch(console.error);
@@ -46,7 +61,7 @@ export async function publishEvent(event: WorkerEvent) {
   await handleEvent(event);
 
   try {
-    await publishClient.publish(EVENTS_CHANNEL, JSON.stringify(event));
+    await publishClient.publish(APP_EVENTS_CHANNEL, JSON.stringify(event));
   } catch (error) {
     console.warn("Error publishing message", error);
   }
@@ -58,26 +73,6 @@ export async function subscribeToEvents(callback: (event: string) => void) {
 
 export async function unsubscribeFromEvents(callback: (event: string) => void) {
   events.removeListener("event", callback);
-}
-
-export async function subscribeToControlRequests(
-  {
-    system,
-    group,
-    version,
-    plural,
-  }: { system: string; group: string; version: string; plural: string },
-  callback: (event: string) => void,
-) {
-  const channel = createChannelFor(system, group, version, plural);
-  await subscribeClient.subscribe(channel, callback);
-
-  return {
-    unsubscribe: () => {
-      console.log(`unsubscribing from ${channel}`);
-      subscribeClient.unsubscribe(channel);
-    },
-  };
 }
 
 export async function publishControlRequest(
@@ -100,5 +95,5 @@ function createChannelFor(
   version: string,
   plural: string,
 ) {
-  return `create:${system}/${group}/${version}/${plural}`;
+  return `${KBLOCKS_CONTROL_CHANNEL}:${group}/${version}/${plural}/${system}`;
 }

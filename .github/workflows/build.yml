@@ -154,7 +154,7 @@ jobs:
       - name: Install the Workload block (needed for the portal)
         working-directory: gallery
         env:
-          KBLOCKS_HOST: https://${{ steps.qkube.outputs.kblocks-host }}
+          KBLOCKS_STORAGE_PREFIX: ${{ env.ENV_NAME }}
         run: ./install-blocks.sh ./kblocks/workload
 
       - name: Build and push backend
@@ -261,5 +261,5 @@ jobs:
       - name: Install gallery blocks
         working-directory: gallery
         env:
-          KBLOCKS_HOST: https://${{ needs.build.outputs.kblocks-host }}
+          KBLOCKS_STORAGE_PREFIX: ${{ env.ENV_NAME }}
         run: ./install-blocks.sh ./kblocks/${{ matrix.block }}

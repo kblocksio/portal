@@ -161,17 +161,6 @@ export async function setSlackThread(objUri: string, thread: string) {
   await redis.set(key, thread);
 }
 
-async function patchObject(objUri: string, patch: kblocks.ApiObject) {
-  const obj = await getObject(objUri);
-  if (!obj) {
-    console.warn(`Object not found: ${objUri}`);
-    return;
-  }
-
-  const newObj = { ...obj, ...patch };
-  return saveObject(objUri, newObj);
-}
-
 async function storeEvent(event: kblocks.WorkerEvent) {
   if (event.type === "OBJECT") {
     return saveObject(event.objUri, event.object as kblocks.ApiObject);

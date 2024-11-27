@@ -10,7 +10,7 @@
   },
   "author": "ainvoner",
   "dependencies": {
-    "@kblocks/api": "0.4.60",
+    "@kblocks/api": "0.5.6",
     "@supabase/supabase-js": "^2.45.4"
   }
 }

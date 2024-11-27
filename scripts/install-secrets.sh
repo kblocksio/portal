@@ -14,3 +14,5 @@ fi
 secret="kblocks-api-secrets"
 kubectl delete secret "$secret" 2> /dev/null || true
 kubectl create secret generic "$secret" --from-env-file="$envfile"
+kubectl delete secret "$secret" -n kblocks 2> /dev/null || true
+kubectl create secret generic "$secret" -n kblocks --from-env-file="$envfile"
