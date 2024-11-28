@@ -35,6 +35,7 @@ export const RelationshipGraph = memo(function RelationshipGraph({
               <Icon className={cn(big ? "size-10" : "size-5")} />
             </div>
           ),
+          circle: big,
         },
         id: srcUri,
         type: "node",
