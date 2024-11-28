@@ -14,7 +14,7 @@ spec:
     readme: ./README.md
     categories:
       - workloads
-    schema: ./values.schema.json
+    schema: ./src/values.schema.json
     icon: >
       <svg width="800px" height="800px" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <title>queue-solid</title>

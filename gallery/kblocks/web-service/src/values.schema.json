@@ -3,7 +3,7 @@
     "$id": "https://example.com/cron-schema.json",
     "$defs": {
       "commonDefs": {
-        "$ref": "../common.values.schema.json"
+        "$ref": "../../common.values.schema.json"
       }
     },
     "type": "object",

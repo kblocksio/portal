@@ -135,7 +135,7 @@ const useColumns = () => {
           );
         },
         filterFn: (row, columnId, filterValue) => {
-          return row.original.kind.includes(filterValue);
+          return filterValue.includes(row.original.kind);
         },
         sortingFn: (rowA, rowB) => {
           return rowA.original.kind.localeCompare(rowB.original.kind);
