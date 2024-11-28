@@ -1,28 +1,8 @@
 import * as kblocks from "@kblocks/api";
-import { createClient } from "redis";
-import { getEnv } from "./util";
 import { slackNotify } from "./slack-notify";
+import { createRedisClient, objPrefix } from "./redis.js";
 
-const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
-const REDIS_HOST = getEnv("REDIS_HOST");
-const REDIS_PORT = process.env.REDIS_PORT;
-const REDIS_PREFIX = process.env.REDIS_PREFIX;
-const objPrefix = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}:obj:`;
-  }
-  return "obj:";
-})();
-
-const config = {
-  password: REDIS_PASSWORD,
-  socket: {
-    host: REDIS_HOST,
-    port: REDIS_PORT ? Number(REDIS_PORT) : 18284,
-  },
-};
-
-const client = createClient(config);
+const client = createRedisClient();
 
 client.connect().catch((e) => {
   console.error(`Error connecting to Redis: ${e.message}`);

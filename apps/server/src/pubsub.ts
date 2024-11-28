@@ -1,46 +1,14 @@
-import { createClient } from "redis";
-import { getEnv } from "./util";
 import { EventEmitter } from "stream";
 import { ControlCommand, WorkerEvent } from "@kblocks/api";
+import { createRedisClient, APP_EVENTS_CHANNEL, KBLOCKS_CONTROL_CHANNEL } from "./redis.js";
 import { handleEvent } from "./storage";
 
-const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
-const REDIS_HOST = getEnv("REDIS_HOST");
-const REDIS_PORT = process.env.REDIS_PORT;
-const REDIS_PREFIX = process.env.REDIS_PREFIX;
-const APP_EVENTS_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}app-events`;
-  }
-  return "app-events";
-})();
-const KBLOCKS_EVENTS_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}kblocks-events`;
-  }
-  return "kblocks-events";
-})();
-const KBLOCKS_CONTROL_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}kblocks-control`;
-  }
-  return "kblocks-control";
-})();
-
-const config = {
-  password: REDIS_PASSWORD,
-  socket: {
-    host: REDIS_HOST,
-    port: REDIS_PORT ? Number(REDIS_PORT) : 18284,
-  },
-};
-
-const publishClient = createClient(config);
+const publishClient = createRedisClient();
 publishClient.connect().catch(console.error);
 
 const events = new EventEmitter();
 
-const subscribeClient = createClient(config);
+const subscribeClient = createRedisClient();
 
 subscribeClient
   .connect()

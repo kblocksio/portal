@@ -140,7 +140,7 @@ jobs:
           echo "$PORTAL_ENV_FILE" > .portal.env
           sed -i '/WEBSITE_ORIGIN/d' .portal.env
           echo "WEBSITE_ORIGIN=https://${KBLOCKS_HOST}" >> .portal.env
-          echo "REDIS_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
+          echo "KBLOCKS_STORAGE_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
           echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
           ./scripts/install-secrets.sh .portal.env
 

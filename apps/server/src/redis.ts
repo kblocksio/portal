@@ -1,34 +1,40 @@
 import { createClient } from "redis";
 import { getEnv } from "./util";
 
-const REDIS_PASSWORD = getEnv("REDIS_PASSWORD");
-const REDIS_HOST = getEnv("REDIS_HOST");
-const REDIS_PORT = process.env.REDIS_PORT;
-const REDIS_PREFIX = process.env.REDIS_PREFIX;
+const KBLOCKS_API_KEY = getEnv("KBLOCKS_API_KEY");
+const KBLOCKS_PUBSUB_HOST = getEnv("KBLOCKS_PUBSUB_HOST");
+const KBLOCKS_PUBSUB_PORT = process.env.KBLOCKS_PUBSUB_PORT;
+const KBLOCKS_STORAGE_PREFIX = process.env.KBLOCKS_STORAGE_PREFIX;
 export const APP_EVENTS_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}app-events`;
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}app-events`;
   }
   return "app-events";
 })();
 export const KBLOCKS_EVENTS_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}kblocks-events`;
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}kblocks-events`;
   }
   return "kblocks-events";
 })();
 export const KBLOCKS_CONTROL_CHANNEL = (() => {
-  if (REDIS_PREFIX) {
-    return `${REDIS_PREFIX}kblocks-control`;
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}kblocks-control`;
   }
   return "kblocks-control";
 })();
+export const objPrefix = (() => {
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}:obj:`;
+  }
+  return "obj:";
+})();
 
 const config = {
-  password: REDIS_PASSWORD,
+  password: KBLOCKS_API_KEY,
   socket: {
-    host: REDIS_HOST,
-    port: REDIS_PORT ? Number(REDIS_PORT) : 18284,
+    host: KBLOCKS_PUBSUB_HOST,
+    port: KBLOCKS_PUBSUB_PORT ? Number(KBLOCKS_PUBSUB_PORT) : 18284,
   },
 };
 
