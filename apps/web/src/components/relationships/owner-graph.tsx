@@ -29,6 +29,7 @@ export type OwnerNodeData = {
   name: string;
   description: string;
   icon: React.ReactNode;
+  circle?: boolean;
 };
 
 export type OwnerNode = ReactFlowNode<OwnerNodeData, "node">;
@@ -38,7 +39,9 @@ const OwnerNode = memo(function OwnerNode(props: NodeProps<OwnerNode>) {
     <div className="relative">
       <div
         className={cn(
-          "bg-background rounded border p-3 shadow-md",
+          "bg-background border p-3 shadow-md",
+          !props.data.circle && "rounded",
+          props.data.circle && "rounded-full",
           props.selected && "border-blue-400",
         )}
       >
