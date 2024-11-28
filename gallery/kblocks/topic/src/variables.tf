@@ -9,3 +9,9 @@ variable "region" {
   default     = null
   nullable    = true
 }
+
+variable "encrypted" {
+  description = "Whether the SNS topic should be encrypted. Defaults to false."
+  type        = bool
+  default     = false
+}

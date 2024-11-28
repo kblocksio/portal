@@ -16,7 +16,7 @@ spec:
       - workloads
     schema: ./src/values.schema.json
     icon: >
-      <svg fill="#000000" height="800px" width="800px" version="1.1" id="XMLID_96_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+      <svg fill="#000000" height="800px" width="800px" version="1.1" id="XMLID_96_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
         viewBox="0 0 24 24" xml:space="preserve">
       <g id="schedule-play">
         <g>
@@ -28,14 +28,10 @@ spec:
           <path d="M16,14.5c0.1,0,0,6,0,6l5-3L16,14.5z"/>
         </g>
       </g>
-      </svg>    
+      </svg>
     color: sky
   operator:
     envSecrets:
-      TF_BACKEND_BUCKET: kblocks-secrets
-      TF_BACKEND_REGION: kblocks-secrets
-      TF_BACKEND_KEY: kblocks-secrets
-      TF_BACKEND_DYNAMODB: kblocks-secrets
       AWS_DEFAULT_REGION: kblocks-secrets
       AWS_ACCESS_KEY_ID: kblocks-secrets
       AWS_SECRET_ACCESS_KEY: kblocks-secrets
