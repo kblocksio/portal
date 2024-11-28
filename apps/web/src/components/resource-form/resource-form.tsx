@@ -77,6 +77,8 @@ export const ResourceForm = ({
     return obj;
   }, [metadataObject, formData, resourceType]);
 
+  const isEnvironmentResourceType = resourceType.group === "kblocks.io";
+
   return (
     <form
       className="flex h-full flex-col"
@@ -116,14 +118,16 @@ export const ResourceForm = ({
               className={`${initialValues ? "opacity-50" : ""}`}
             >
               Namespace
-              <span className="text-destructive">*</span>
+              {!isEnvironmentResourceType && (
+                <span className="text-destructive">*</span>
+              )}
             </Label>
             <Input
-              required
+              required={!isEnvironmentResourceType}
               id="namespace"
               placeholder="Namespace"
-              disabled={!!initialValues}
-              value={namespace}
+              disabled={!!initialValues || isEnvironmentResourceType}
+              value={isEnvironmentResourceType ? "environment" : namespace}
               onChange={(e) => setNamespace(e.target.value)}
             />
           </div>
@@ -133,21 +137,23 @@ export const ResourceForm = ({
               className={`${initialValues ? "opacity-50" : ""}`}
             >
               Cluster
-              <span className="text-destructive">*</span>
+              {!isEnvironmentResourceType && (
+                <span className="text-destructive">*</span>
+              )}
             </Label>
             <div className="relative">
               <SystemSelector
                 resourceType={resourceType}
-                disabled={!!initialValues}
-                value={system}
+                disabled={!!initialValues || isEnvironmentResourceType}
+                value={isEnvironmentResourceType ? "environment" : system}
                 onChange={(value) => setSystem(value)}
-                required={true}
+                required={!isEnvironmentResourceType}
               />
               <input
                 type="text"
                 tabIndex={-1}
-                required
-                value={system}
+                required={!isEnvironmentResourceType}
+                value={isEnvironmentResourceType ? "environment" : system}
                 onChange={() => {}}
                 style={{
                   position: "absolute",

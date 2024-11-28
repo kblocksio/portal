@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  ReactNode,
-  useContext,
-} from "react";
+import React, { createContext, useState, ReactNode, useContext } from "react";
 import { Project } from "@repo/shared";
 
 export interface BreadcrumbItem {
@@ -27,7 +22,6 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
-  
 
   return (
     <AppContext.Provider

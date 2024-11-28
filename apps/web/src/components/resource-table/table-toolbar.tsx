@@ -23,11 +23,16 @@ import { ProjectsMenu } from "../projects-menu";
 export interface ResourceTableToolbarProps {
   table: TanstackTable<Resource>;
   showActions?: boolean;
+  customNewResourceAction?: {
+    label: string;
+    navigate: () => void;
+  };
 }
 
 export function ResourceTableToolbar({
   table,
   showActions = true,
+  customNewResourceAction,
 }: ResourceTableToolbarProps) {
   const navigate = useNavigate();
   const isFiltered = table.getState().columnFilters.length > 0;
@@ -54,9 +59,16 @@ export function ResourceTableToolbar({
           <div className="md:hidden">
             <Button
               size="sm"
-              onClick={() => navigate({ to: "/resources/new" })}
+              onClick={() => {
+                if (customNewResourceAction) {
+                  customNewResourceAction.navigate();
+                } else {
+                  setOrigin(undefined);
+                  navigate({ to: "/resources/new" });
+                }
+              }}
             >
-              New Resource
+              {customNewResourceAction?.label ?? "New Resource"}
             </Button>
           </div>
         )}
@@ -178,8 +190,19 @@ export function ResourceTableToolbar({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button size="sm" onClick={() => navigate({ to: "/resources/new" })}>
-            New Resource
+          <Button
+            size="sm"
+            onClick={() => {
+              if (customNewResourceAction) {
+                customNewResourceAction.navigate();
+              } else {
+                navigate({
+                  to: "/resources/new",
+                });
+              }
+            }}
+          >
+            {customNewResourceAction?.label ?? "New Resource"}
           </Button>
         </div>
       )}

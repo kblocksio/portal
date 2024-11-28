@@ -14,6 +14,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
+import { LocationProvider } from "./location-context.js";
 
 export function App({ children }: { children: React.ReactNode }) {
   return (
@@ -64,7 +65,9 @@ export function AppLayout() {
                     </div>
                   )}
                 >
-                  <Outlet />
+                  <LocationProvider>
+                    <Outlet />
+                  </LocationProvider>
                 </ErrorBoundary>
               </div>
             </main>

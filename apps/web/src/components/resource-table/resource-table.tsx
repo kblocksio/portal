@@ -150,7 +150,12 @@ const useColumns = () => {
           <div className="whitespace-nowrap">
             <Link
               className="font-medium hover:underline"
-              to={`/resources/${props.row.original.objUri.replace("kblocks://", "")}`}
+              to={
+                `/resources/${props.row.original.objUri.replace(
+                  "kblocks://",
+                  "",
+                )}` as any
+              }
             >
               {props.row.original.metadata.name}
             </Link>
@@ -363,6 +368,10 @@ export const ResourceTable = (props: {
   resources: Resource[];
   className?: string;
   showActions?: boolean;
+  customNewResourceAction?: {
+    label: string;
+    navigate: () => void;
+  };
 }) => {
   const columns = useColumns();
 
@@ -422,8 +431,11 @@ export const ResourceTable = (props: {
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
-      <ResourceTableToolbar table={table} showActions={props.showActions} />
-
+      <ResourceTableToolbar
+        table={table}
+        showActions={props.showActions}
+        customNewResourceAction={props.customNewResourceAction}
+      />
       <div className={cn("rounded-md border bg-white", props.className)}>
         <Table className="w-full">
           <TableHeader>
