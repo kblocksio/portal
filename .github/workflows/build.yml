@@ -124,10 +124,12 @@ jobs:
         working-directory: gallery
         env:
           KBLOCKS_GALLERY_ENV_FILE: ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }}
+          KBLOCKS_CLUSTER_ENV_FILE: ${{ secrets.KBLOCKS_CLUSTER_ENV_FILE }}
         run: |
           echo "$KBLOCKS_GALLERY_ENV_FILE" > .gallery.env
+          echo "$KBLOCKS_CLUSTER_ENV_FILE" > .cluster.env
           export KBLOCKS_SYSTEM_ID="${{ steps.qkube.outputs.kblocks-host }}"
-          ./scripts/install-gallery-secrets.sh .gallery.env
+          ./scripts/install-kblocks-secrets.sh .gallery.env .cluster.env
 
       - name: Install portal secrets
         env:

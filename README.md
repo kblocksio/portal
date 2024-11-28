@@ -124,6 +124,7 @@ Now, download all the secret files from the [1Password secret] to this directory
 following files:
 
 - `kblocks-gallery.env` - environment for kblocks-gallery
+- `kblocks-cluster.env` - environment for kblocks-cluster
 - `portal.env` - environment for portal-backend
 - `kblocks_io.key` - SSL certificate private key
 - `kblocks_io.pem` - SSL certificate public key
@@ -132,19 +133,19 @@ following files:
 
 And we are ready to install the secrets:
 
-1. Install the **gallery secrets** to the `kblocks-demo.quickube.sh` cluster:
+1. Install the **kblocks secrets** to the `kblocks-demo.quickube.sh` cluster:
 
    ```sh
    qkube use kblocks-demo.quickube.sh
-   KBLOCKS_SYSTEM_ID=demo $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+   KBLOCKS_SYSTEM_ID=demo $REPO/gallery/scripts/install-kblocks-secrets.sh $SECRETS/kblocks-gallery.env $SECRETS/kblocks-cluster.env
    ```
 
-2. We will also install the **gallery secrets** to the `portal-backend.quickube.sh` cluster as well
+2. We will also install the **kblocks secrets** to the `portal-backend.quickube.sh` cluster as well
    because our backend needs the `Workload` block:
 
    ```sh
    qkube use portal-backend.quickube.sh
-   KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $REPO/gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+   KBLOCKS_SYSTEM_ID=portal-backend.quickube.sh $REPO/gallery/scripts/install-kblocks-secrets.sh $SECRETS/kblocks-gallery.env $SECRETS/kblocks-cluster.env
    ```
 
 3. Install the **backend secrets** to the `portal-backend.quickube.sh` (these are needed by the
@@ -256,7 +257,7 @@ Now, download all the secret files from the [1Password secret] to the secrets di
 Setup all of the secrets and certs to your kind cluster:
 
 ```sh
-KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-gallery-secrets.sh $SECRETS/kblocks-gallery.env
+KBLOCKS_SYSTEM_ID=local ./gallery/scripts/install-kblocks-secrets.sh $SECRETS/kblocks-gallery.env $SECRETS/kblocks-cluster.env
 ./scripts/install-secrets.sh $SECRETS/portal.env
 ./scripts/install-cert.sh $SECRETS/kblocks_io.key $SECRETS/kblocks_io.pem
 ```

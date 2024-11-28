@@ -8,18 +8,18 @@ dir=$(cd $(dirname $0) && pwd)
 cd $dir
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
-KBLOCKS_HOST="${KBLOCKS_HOST:-}"
+KBLOCKS_PUBSUB_HOST="${KBLOCKS_PUBSUB_HOST:-}"
 KBLOCKS_API_KEY="${KBLOCKS_API_KEY:-}"
 KBLOCKS_STORAGE_PREFIX="${KBLOCKS_STORAGE_PREFIX:-}"
 
 context=$(kubectl config current-context)
 
 if [ "$context" == "kind-kind" ]; then
-  KBLOCKS_HOST=portal-redis.default.svc.cluster.local
+  KBLOCKS_PUBSUB_HOST=portal-redis.default.svc.cluster.local
   KBLOCKS_API_KEY="pass1234"
 fi
 
-echo "KBLOCKS_HOST: $KBLOCKS_HOST"
+echo "KBLOCKS_PUBSUB_HOST: $KBLOCKS_PUBSUB_HOST"
 echo "KBLOCKS_STORAGE_PREFIX: $KBLOCKS_STORAGE_PREFIX"
 echo "KBLOCKS_CLI: $KBLOCKS_CLI"
 
@@ -33,10 +33,10 @@ install_kblock() {
     name=$(basename $dir)
     echo "Installing block: $PWD..."
 
-    if [ -n "${KBLOCKS_HOST}" ]; then
-      KBLOCKS_HOST_OPTION="-e KBLOCKS_HOST=${KBLOCKS_HOST}"
+    if [ -n "${KBLOCKS_PUBSUB_HOST}" ]; then
+      KBLOCKS_PUBSUB_HOST_OPTION="-e KBLOCKS_PUBSUB_HOST=${KBLOCKS_PUBSUB_HOST}"
     else
-      KBLOCKS_HOST_OPTION=""
+      KBLOCKS_PUBSUB_HOST_OPTION=""
     fi
 
     if [ -n "${KBLOCKS_API_KEY}" ]; then
@@ -53,7 +53,7 @@ install_kblock() {
 
     # Now run the command with the options included conditionally
     $KBLOCKS_CLI install \
-      $KBLOCKS_HOST_OPTION \
+      $KBLOCKS_PUBSUB_HOST_OPTION \
       $KBLOCKS_API_KEY_OPTION \
       $KBLOCKS_STORAGE_PREFIX_OPTION \
       -n kblocks \

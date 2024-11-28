@@ -13,6 +13,7 @@ import { createServerSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
+import { startStreamListener } from "./stream";
 import {
   ApiObject,
   blockTypeFromUri,
@@ -33,6 +34,8 @@ const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
 
 const port = process.env.PORT ?? 3001;
+
+startStreamListener();
 
 const { app } = expressWs(express());
 

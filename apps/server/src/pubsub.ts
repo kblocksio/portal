@@ -49,9 +49,6 @@ subscribeClient
       console.log("Received app message:", message);
       events.emit("event", message);
     });
-    subscribeClient.subscribe(KBLOCKS_EVENTS_CHANNEL, async (message) => {
-      await publishEvent(JSON.parse(message));
-    });
   })
   .catch(console.error);
 
@@ -86,7 +83,7 @@ export async function publishControlRequest(
 ) {
   const channel = createChannelFor(system, group, version, plural);
   console.log(`publishing control message to ${channel}:`, command);
-  await publishClient.publish(channel, JSON.stringify(command));
+  await publishClient.xAdd(channel, "*", { message: JSON.stringify(command) });
 }
 
 function createChannelFor(
