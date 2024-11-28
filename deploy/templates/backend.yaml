@@ -21,9 +21,9 @@ envFrom:
   - secretName: {{ $secretName }}
 {{- if .Values.redis.enabled }}
 env:
-  REDIS_HOST:
+  KBLOCKS_PUBSUB_HOST:
     value: "portal-redis.default.svc.cluster.local"
-  REDIS_PASSWORD:
+  KBLOCKS_API_KEY:
     value: "pass1234"
 {{- end }}
 allowCluster:

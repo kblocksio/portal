@@ -124,10 +124,12 @@ jobs:
         working-directory: gallery
         env:
           KBLOCKS_GALLERY_ENV_FILE: ${{ secrets.KBLOCKS_GALLERY_ENV_FILE }}
+          KBLOCKS_CLUSTER_ENV_FILE: ${{ secrets.KBLOCKS_CLUSTER_ENV_FILE }}
         run: |
           echo "$KBLOCKS_GALLERY_ENV_FILE" > .gallery.env
+          echo "$KBLOCKS_CLUSTER_ENV_FILE" > .cluster.env
           export KBLOCKS_SYSTEM_ID="${{ steps.qkube.outputs.kblocks-host }}"
-          ./scripts/install-gallery-secrets.sh .gallery.env
+          ./scripts/install-kblocks-secrets.sh .gallery.env .cluster.env
 
       - name: Install portal secrets
         env:
@@ -138,7 +140,7 @@ jobs:
           echo "$PORTAL_ENV_FILE" > .portal.env
           sed -i '/WEBSITE_ORIGIN/d' .portal.env
           echo "WEBSITE_ORIGIN=https://${KBLOCKS_HOST}" >> .portal.env
-          echo "REDIS_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
+          echo "KBLOCKS_STORAGE_PREFIX=${{ env.ENV_NAME }}" >> .portal.env
           echo "NON_PRIMARY_ENVIRONMENT=true" >> .portal.env
           ./scripts/install-secrets.sh .portal.env
 
@@ -154,7 +156,7 @@ jobs:
       - name: Install the Workload block (needed for the portal)
         working-directory: gallery
         env:
-          KBLOCKS_HOST: https://${{ steps.qkube.outputs.kblocks-host }}
+          KBLOCKS_STORAGE_PREFIX: ${{ env.ENV_NAME }}
         run: ./install-blocks.sh ./kblocks/workload
 
       - name: Build and push backend
@@ -261,5 +263,5 @@ jobs:
       - name: Install gallery blocks
         working-directory: gallery
         env:
-          KBLOCKS_HOST: https://${{ needs.build.outputs.kblocks-host }}
+          KBLOCKS_STORAGE_PREFIX: ${{ env.ENV_NAME }}
         run: ./install-blocks.sh ./kblocks/${{ matrix.block }}

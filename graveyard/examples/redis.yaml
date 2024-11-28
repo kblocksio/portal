@@ -21,7 +21,7 @@ metadata:
 #   - mykey
 #   - "Hello, Redis!"
 # env:
-#   REDIS_PASSWORD:
+#   KBLOCKS_API_KEY:
 #     fromSecret:
 #       secretName: ${ref://redis.acme.com/my-redis/passwordSecret}
 #       key: ${ref://redis.acme.com/my-redis/passwordKey}
