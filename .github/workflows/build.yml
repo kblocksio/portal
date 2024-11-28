@@ -171,10 +171,6 @@ jobs:
           build-args: |
             ENV=prod
 
-      - name: Delete workload dist directory
-        run: |
-          rm -rf gallery/kblocks/workload/dist
-
       - name: Skaffold run
         id: run
         run: |
