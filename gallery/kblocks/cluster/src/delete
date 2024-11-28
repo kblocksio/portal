@@ -1,0 +1,3 @@
+const { deleteUser } = require("./commands.cjs");
+
+deleteUser();

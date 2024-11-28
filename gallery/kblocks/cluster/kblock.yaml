@@ -1,7 +1,7 @@
 apiVersion: kblocks.io/v1
 kind: Block
 spec:
-  engine: noop
+  engine: custom
   definition:
     readme: ./README.md
     schema: ./src/values.schema.json
@@ -14,5 +14,7 @@ spec:
     plural: clusters
     icon: Boxes
     singular: cluster
+    outputs:
+      - command
 metadata:
   name: clusters.kblocks.io
