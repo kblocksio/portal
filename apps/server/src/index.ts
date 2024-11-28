@@ -475,19 +475,7 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
     return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${supabaseError}`);
   }
 
-  if (NON_PRIMARY_ENVIRONMENT) {
-    console.log("non-primary environment, skipping additional github auth");
-    return res.redirect(303, `${WEBSITE_ORIGIN}/`);
-  }
-
-  const url = new URL("https://github.com/login/oauth/authorize");
-  url.searchParams.append("client_id", GITHUB_CLIENT_ID!);
-  url.searchParams.append("scope", "repo, org:read");
-  url.searchParams.append(
-    "redirect_uri",
-    `${WEBSITE_ORIGIN}/api/auth/callback/github`,
-  );
-  return res.redirect(url.toString());
+  return res.redirect(303, `${WEBSITE_ORIGIN}/`);
 });
 
 app.get("/api/auth/callback/github", async (req, res) => {
@@ -545,12 +533,23 @@ app.get("/api/auth/callback/github", async (req, res) => {
 app.get("/api/github/installations", async (req, res) => {
   try {
     const octokit = await getUserOctokit(req, res);
+    if (!octokit) {
+      return res.status(200).json({
+        githubAppInstalled: false,
+        installations: [],
+      });
+    }
     const { data: installations } =
       await octokit.rest.apps.listInstallationsForAuthenticatedUser({
         page: 0,
         per_page: 100,
       });
-    return res.status(200).json(installations.installations);
+    return res.status(200).json({
+      githubAppInstalled: true,
+      // @ts-ignore-error
+      login: installations.installations[0]?.account?.login!,
+      installations: installations.installations,
+    });
   } catch (error) {
     console.error("error getting installations", error);
     if ((error as any).status === 401) {
@@ -566,6 +565,9 @@ app.get("/api/github/repositories", async (req, res) => {
     return res.status(400).json({ error: "Installation ID is required" });
   }
   const octokit = await getUserOctokit(req, res);
+  if (!octokit) {
+    return res.status(401).json({ message: "User is not signed in" });
+  }
   const { data: repositories } =
     await octokit.rest.apps.listInstallationReposForAuthenticatedUser({
       installation_id,

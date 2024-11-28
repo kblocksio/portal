@@ -10,23 +10,38 @@ export function getEnv(key: string): string {
   return value;
 }
 
-export async function getUserAccessToken(req: Request, res: Response) {
+export async function getUserAccessToken(
+  req: Request,
+  res: Response,
+): Promise<{
+  accessToken: string | undefined;
+}> {
   const supabase = createServerSupabase(req, res);
   const user = await supabase.auth.getUser();
   if (!user.data.user) {
     console.error("User is not signed in to Supabase", user.error?.message);
-    throw new Error("User is not signed in to Supabase");
+    return {
+      accessToken: undefined,
+    };
   }
 
   const { data, error } = await privateSupabase
     .from("user_ghtokens")
     .select("access_token, refresh_token, expires_at")
     .eq("user_id", user.data.user.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !data.refresh_token || !data.access_token) {
+  if (error) {
     console.error("Error getting access token from Supabase", error);
-    throw error;
+    return {
+      accessToken: undefined,
+    };
+  }
+
+  if (!data?.refresh_token || !data?.access_token) {
+    return {
+      accessToken: undefined,
+    };
   }
 
   // If the access token is not expired, return it.
@@ -70,8 +85,14 @@ export async function getUserAccessToken(req: Request, res: Response) {
   };
 }
 
-export async function getUserOctokit(req: Request, res: Response) {
+export async function getUserOctokit(
+  req: Request,
+  res: Response,
+): Promise<InstanceType<typeof Octokit> | undefined> {
   const { accessToken } = await getUserAccessToken(req, res);
+  if (!accessToken) {
+    return undefined;
+  }
   const { Octokit } = await import("octokit");
   return new Octokit({ auth: accessToken });
 }

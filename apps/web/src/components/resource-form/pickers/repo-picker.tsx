@@ -1,4 +1,4 @@
-import { Installation, Repository } from "@repo/shared";
+import { Repository } from "@repo/shared";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
   Select,
@@ -7,11 +7,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Github, Loader2 } from "lucide-react";
+import { ExternalLink, Github, Loader2 } from "lucide-react";
 import { useFetch } from "@/hooks/use-fetch";
 import { Field } from "../form-field";
-import { InputField } from "../input-field";
 import { ManageGitHubInstallation } from "@/components/gh-manage-installation";
+import { useGitHubInstallations } from "@/hooks/use-github-installations";
+import { linkVariants } from "@/components/ui/link";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface RepoPickerProps {
   initialValue?: string;
@@ -40,19 +43,18 @@ export const RepoPicker = memo(function RepoPicker({
     () => initialValue?.split("/")?.[0] ?? defaultValue?.split("/")?.[0],
   );
 
-  const { data: installations, isLoading: isLoadingInstallations } = useFetch<
-    Installation[]
-  >("/api/github/installations");
+  const { data: installations, isLoading: isLoadingInstallations } =
+    useGitHubInstallations();
 
   useEffect(() => {
     setSelectedInstallationLogin(
       (currentInstallationLogin) =>
-        currentInstallationLogin ?? installations?.[0]?.account.login,
+        currentInstallationLogin ?? installations?.login,
     );
   }, [installations]);
 
   const selectedInstallationId = useMemo(() => {
-    return installations?.find(
+    return installations?.installations?.find(
       (installation) =>
         installation.account.login === selectedInstallationLogin,
     )?.id;
@@ -98,26 +100,8 @@ export const RepoPicker = memo(function RepoPicker({
     return isLoadingInstallations || isLoadingRepositories;
   }, [isLoadingInstallations, isLoadingRepositories]);
 
-  if (import.meta.env.VITE_SKIP_AUTH) {
-    return (
-      <Field
-        fieldName={fieldName}
-        description={description}
-        hideField={hideField}
-        required={required}
-      >
-        <InputField
-          required={required}
-          placeholder="Enter repository name (GitHub integration is disabled in DEV mode)"
-          type="text"
-          value={initialValue ?? ""}
-          onChange={(value) => {
-            handleOnSelection?.(value as string);
-          }}
-        />
-      </Field>
-    );
-  }
+  const [chosenRepositoryFullName] = useState(() => initialValue);
+  const [changeEnabled, setChangeEnabled] = useState(false);
 
   return (
     <Field
@@ -127,71 +111,102 @@ export const RepoPicker = memo(function RepoPicker({
       required={required}
     >
       <div className="ml-0 mr-0 flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-2">
-          <Select
-            disabled={isLoadingInstallations}
-            value={selectedInstallationLogin}
-            onValueChange={(installationLogin) =>
-              setSelectedInstallationLogin(installationLogin)
-            }
-          >
-            <SelectTrigger className="w-full">
-              {isLoadingInstallations ? (
-                <div className="flex items-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Loading...</span>
-                </div>
-              ) : (
-                <SelectValue placeholder="Select an organization" />
+        {chosenRepositoryFullName && !changeEnabled && (
+          <div className="bg-muted text-foreground flex items-center gap-2 rounded-md p-2 text-sm">
+            <Github className="text-muted-foreground ml-2 h-4 w-4" />
+            <a
+              href={`https://github.com/${chosenRepositoryFullName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                linkVariants({ variant: "default" }),
+                "inline-flex items-center gap-1",
               )}
-            </SelectTrigger>
-            <SelectContent>
-              {installations?.map((installation) => (
-                <SelectItem
-                  key={installation.account.login}
-                  value={installation.account.login}
-                >
-                  <div className="flex items-center">
-                    <Github className="mr-2 h-4 w-4" />
-                    {installation.account.login}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            >
+              {chosenRepositoryFullName}
+              <ExternalLink className="size-4" />
+            </a>
+            <div className="grow"></div>
+            <Button variant="outline" onClick={() => setChangeEnabled(true)}>
+              Change
+            </Button>
+          </div>
+        )}
 
-          <Select
-            disabled={isLoading}
-            value={selectedRepositoryFullName}
-            onValueChange={(repositoryFullName) =>
-              setSelectedRepositoryFullName(repositoryFullName)
-            }
-          >
-            <SelectTrigger className="w-full">
-              {isLoading ? (
-                <div className="flex items-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Loading repositories...</span>
-                </div>
-              ) : (
-                <SelectValue placeholder="Select a repository" />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              {repositories?.map((repo) => (
-                <SelectItem key={repo.full_name} value={repo.full_name}>
-                  <div className="flex items-center">
-                    <Github className="mr-2 h-4 w-4" />
-                    {repo.full_name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="mb-4 ml-2 mt-0 text-xs">
-          <ManageGitHubInstallation />
-        </div>
+        {changeEnabled &&
+          installations &&
+          installations.installations.length > 0 && (
+            <div className="flex items-center justify-between gap-2">
+              <Select
+                disabled={isLoadingInstallations}
+                value={selectedInstallationLogin}
+                onValueChange={(installationLogin) =>
+                  setSelectedInstallationLogin(installationLogin)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  {isLoadingInstallations ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Loading...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Select an organization" />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {installations?.installations?.map((installation) => (
+                    <SelectItem
+                      key={installation.account.login}
+                      value={installation.account.login}
+                    >
+                      <div className="flex items-center">
+                        <Github className="mr-2 h-4 w-4" />
+                        {installation.account.login}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                disabled={isLoading}
+                value={selectedRepositoryFullName}
+                onValueChange={(repositoryFullName) =>
+                  setSelectedRepositoryFullName(repositoryFullName)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  {isLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Loading repositories...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Select a repository" />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {repositories?.map((repo) => (
+                    <SelectItem key={repo.full_name} value={repo.full_name}>
+                      <div className="flex items-center">
+                        <Github className="mr-2 h-4 w-4" />
+                        {repo.full_name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+        {changeEnabled && installations && (
+          <div className="mb-4 ml-2 mt-0 text-xs">
+            <ManageGitHubInstallation
+              githubAppInstalled={installations.githubAppInstalled}
+            />
+          </div>
+        )}
       </div>
     </Field>
   );

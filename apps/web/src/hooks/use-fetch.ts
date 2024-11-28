@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
-import useSWR from "swr";
+import useSWR, { type Fetcher, type SWRConfiguration } from "swr";
 import { get } from "@/lib/backend";
 
 export function useFetch<T = unknown>(
   initialUrl: string,
   initialParams?: Record<string, string>,
   immediate = true,
+  options?: SWRConfiguration<T, Error, Fetcher<T>>,
 ) {
   const [url, setUrl] = useState(initialUrl);
   const [params, setParams] = useState(initialParams);
@@ -27,6 +28,7 @@ export function useFetch<T = unknown>(
     },
     {
       revalidateOnFocus: false,
+      ...options,
     },
   );
 
