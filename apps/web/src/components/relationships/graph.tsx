@@ -1,11 +1,9 @@
 import { memo, useContext, useMemo } from "react";
 import { Box } from "lucide-react";
 import { OwnerGraph, OwnerNode } from "./owner-graph";
-import {
-  Resource,
-  ResourceContext,
-} from "@/resource-context";
+import { Resource, ResourceContext } from "@/resource-context";
 import { Edge, MarkerType } from "@xyflow/react";
+import { cn } from "@/lib/utils";
 
 export const RelationshipGraph = memo(function RelationshipGraph({
   selectedResource,
@@ -19,7 +17,7 @@ export const RelationshipGraph = memo(function RelationshipGraph({
     const edges: Edge[] = [];
     const visited = new Set<string>();
 
-    const addRels = (srcUri: string) => {
+    const addRels = (srcUri: string, big?: boolean) => {
       if (visited.has(srcUri)) {
         return;
       }
@@ -32,7 +30,11 @@ export const RelationshipGraph = memo(function RelationshipGraph({
         data: {
           name: obj.metadata.name,
           description: type?.kind,
-          icon: <Icon className="size-5" />,
+          icon: (
+            <div className={cn(big && "p-2")}>
+              <Icon className={cn(big ? "size-10" : "size-5")} />
+            </div>
+          ),
         },
         id: srcUri,
         type: "node",
@@ -61,7 +63,7 @@ export const RelationshipGraph = memo(function RelationshipGraph({
     };
 
     if (selectedResource) {
-      addRels(selectedResource.objUri);
+      addRels(selectedResource.objUri, true);
     } else {
       for (const objUri of Object.keys(objects)) {
         addRels(objUri);
