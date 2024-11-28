@@ -48,8 +48,6 @@ app.use(
   }),
 );
 
-console.log("express-ws, will you work?");
-
 app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, kblocks backend!" });
 });
@@ -143,7 +141,7 @@ app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async
   if (!obj) {
     return res.status(404).json({ error: `Block ${objUri} not found` });
   }
-  
+
   return res.status(200).json(obj);
 });
 
@@ -187,7 +185,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   }
 
   const obj = req.body as ApiObject;
-  
+
   const objUri = formatBlockUri({
     group,
     version,

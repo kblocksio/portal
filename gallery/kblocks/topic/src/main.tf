@@ -1,6 +1,6 @@
 resource "aws_sns_topic" "my_topic" {
   name = var.topicName
-  # kms_master_key_id = var.encrypted ? "alias/aws/sns" : null
+  kms_master_key_id = var.encrypted ? "alias/aws/sns" : null
 }
 
 output "topicArn" {
