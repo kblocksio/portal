@@ -153,6 +153,7 @@ export const ResourceForm = ({
                 type="text"
                 tabIndex={-1}
                 required={!isEnvironmentResourceType}
+                disabled={!!initialValues || isEnvironmentResourceType}
                 value={isEnvironmentResourceType ? "environment" : system}
                 onChange={() => {}}
                 style={{
