@@ -14,12 +14,14 @@ spec:
           containers:
           - name: main
             image: {{ .Values.source.fromImage.image }}
+            {{- if .Values.source.fromImage.advanced }}
             {{- if .Values.source.fromImage.advanced.dockerCommand }}
             {{- if kindIs "string" .Values.source.fromImage.advanced.dockerCommand }}
-            command: 
+            command:
               - {{ .Values.source.fromImage.advanced.dockerCommand }}
             {{- else }}
             command: {{ .Values.source.fromImage.advanced.dockerCommand }}
+            {{- end }}
             {{- end }}
             {{- end }}
           restartPolicy: OnFailure
