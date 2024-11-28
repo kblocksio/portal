@@ -1,11 +1,20 @@
 const Redis = require("ioredis");
 const crypto = require("crypto");
+const fs = require("fs");
+
+console.log("KBLOCKS_OBJECT", process.env.KBLOCKS_OBJECT);
+console.log("KBLOCKS_OUTPUTS", process.env.KBLOCKS_OUTPUTS);
+console.log("KBLOCKS_API_KEY", process.env.KBLOCKS_API_KEY);
+console.log("KBLOCKS_PUBSUB_HOST", process.env.KBLOCKS_PUBSUB_HOST);
+console.log("KBLOCKS_PUBSUB_PORT", process.env.KBLOCKS_PUBSUB_PORT);
 
 const object = JSON.parse(fs.readFileSync(process.env.KBLOCKS_OBJECT, "utf8"));
 const outputs = process.env.KBLOCKS_OUTPUTS;
 const adminPassword = process.env.KBLOCKS_API_KEY;
 const redisHost = process.env.KBLOCKS_PUBSUB_HOST;
 const redisPort = process.env.KBLOCKS_PUBSUB_PORT;
+
+const clusterId = object.metadata.name;
 
 function generatePassword(length = 16) {
   return crypto.randomBytes(length).toString("base64").slice(0, length);
@@ -36,7 +45,6 @@ async function createRedisUser(redis, username, password) {
 
 exports.create = async () => {
   const password = generatePassword();
-  const clusterId = object.metadata.name;
   // Connect to the Redis server
   const redis = new Redis({
     host: redisHost,
@@ -52,21 +60,23 @@ exports.create = async () => {
     writeOutputs(password, command);
   } catch (error) {
     console.error("Error creating cluster:", error);
+    writeOutputs("");
   } finally {
     redis.disconnect();
   }
 };
 
 exports.deleteUser = async () => {
-  const clusterId = object.metadata.name;
   const redis = new Redis({
     host: redisHost,
     port: redisPort,
     adminPassword,
   });
   await redis.call("ACL", "DELUSER", clusterId);
+  writeOutputs("");
 };
 
 exports.update = async () => {
   console.log(`Cluster ${clusterId} updated successfully`);
+  writeOutputs("");
 };

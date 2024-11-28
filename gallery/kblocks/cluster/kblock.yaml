@@ -1,5 +1,7 @@
 apiVersion: kblocks.io/v1
 kind: Block
+metadata:
+  name: clusters.kblocks.io
 spec:
   engine: custom
   definition:
@@ -16,5 +18,3 @@ spec:
     singular: cluster
     outputs:
       - command
-metadata:
-  name: clusters.kblocks.io

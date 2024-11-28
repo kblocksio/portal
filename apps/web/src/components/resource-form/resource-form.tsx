@@ -25,6 +25,8 @@ export const ResourceForm = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
+  const isEnvironmentResourceType = resourceType.group === "kblocks.io";
+
   // create a clone of the schema and remove the status property (the outputs)
   const schema = useMemo(() => {
     const result = cloneDeep(resourceType.schema);
@@ -33,7 +35,12 @@ export const ResourceForm = ({
   }, [resourceType]);
 
   const [formData, setFormData] = useState<any>(initialValues ?? {});
-  const [system, setSystem] = useState(initialMeta?.system ?? "");
+  const [system, setSystem] = useState(
+    initialMeta?.system ??
+      (isEnvironmentResourceType
+        ? resourceType.systems.values().next().value
+        : ""),
+  );
   const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
   );
@@ -76,8 +83,6 @@ export const ResourceForm = ({
 
     return obj;
   }, [metadataObject, formData, resourceType]);
-
-  const isEnvironmentResourceType = resourceType.group === "kblocks.io";
 
   return (
     <form
@@ -127,7 +132,7 @@ export const ResourceForm = ({
               id="namespace"
               placeholder="Namespace"
               disabled={!!initialValues || isEnvironmentResourceType}
-              value={isEnvironmentResourceType ? "environment" : namespace}
+              value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
             />
           </div>
@@ -145,7 +150,7 @@ export const ResourceForm = ({
               <SystemSelector
                 resourceType={resourceType}
                 disabled={!!initialValues || isEnvironmentResourceType}
-                value={isEnvironmentResourceType ? "environment" : system}
+                value={system}
                 onChange={(value) => setSystem(value)}
                 required={!isEnvironmentResourceType}
               />
@@ -154,7 +159,7 @@ export const ResourceForm = ({
                 tabIndex={-1}
                 required={!isEnvironmentResourceType}
                 disabled={!!initialValues || isEnvironmentResourceType}
-                value={isEnvironmentResourceType ? "environment" : system}
+                value={system}
                 onChange={() => {}}
                 style={{
                   position: "absolute",
