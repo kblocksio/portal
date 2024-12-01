@@ -13,3 +13,8 @@ instanceTypes:
     memory: "1024Mi"
 
 instanceType: "Small"
+source:
+  fromImage:
+    image: your-image-name:tag
+
+route: "/my-awesome-service"

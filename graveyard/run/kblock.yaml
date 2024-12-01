@@ -20,10 +20,6 @@ spec:
     envConfigMaps:
       SLACK_CHANNEL: slack-config
       AWS_DEFAULT_REGION: tf-backend-config
-      TF_BACKEND_BUCKET: tf-backend-config
-      TF_BACKEND_REGION: tf-backend-config
-      TF_BACKEND_KEY: tf-backend-config
-      TF_BACKEND_DYNAMODB: tf-backend-config
       KBLOCKS_SYSTEM_ID: system-config
     envSecrets:
       SLACK_API_TOKEN: slack-token

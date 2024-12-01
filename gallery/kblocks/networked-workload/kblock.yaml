@@ -25,10 +25,6 @@ spec:
     description: A Kubernetes Custom Resource Definition (CRD) for managing workloads that are connected to a network (private or public).
   operator:
     envSecrets:
-      TF_BACKEND_BUCKET: kblocks-secrets
-      TF_BACKEND_REGION: kblocks-secrets
-      TF_BACKEND_KEY: kblocks-secrets
-      TF_BACKEND_DYNAMODB: kblocks-secrets
       AWS_DEFAULT_REGION: kblocks-secrets
       AWS_ACCESS_KEY_ID: kblocks-secrets
       AWS_SECRET_ACCESS_KEY: kblocks-secrets
