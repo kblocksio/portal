@@ -37,6 +37,7 @@ function keyForSlackThread(blockUri: string) {
 
 async function saveObject(blockUri: string, obj: kblocks.ApiObject | {}) {
   if (Object.keys(obj).length === 0) {
+    await deleteEvents(blockUri);
     return deleteObject(blockUri);
   }
 
@@ -121,6 +122,13 @@ export async function loadEvents(
   }
 
   return values.map((value) => JSON.parse(value));
+}
+
+export async function deleteEvents(objUri: string) {
+  const redis = await connection();
+
+  const key = keyForEvents(objUri);
+  await redis.del(key);
 }
 
 export async function getSlackThread(
