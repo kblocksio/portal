@@ -79,10 +79,10 @@ function CreateResourcePage() {
 
       // go to the resource page
       navigate({
-        to: "/resources",
+        to: `/${firstPathSegment}`,
       });
     },
-    [resourceType, handleCreateOrEdit, navigate],
+    [resourceType, handleCreateOrEdit, navigate, firstPathSegment],
   );
 
   return (

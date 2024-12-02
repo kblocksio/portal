@@ -15,6 +15,15 @@
       "enum": ["read_only", "read_write"],
       "default": "read_only",
       "description": "The access level to the cluster"
+    },
+    "status": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The generated command to create the cluster.\n@ui kblocks.io/markdown",
+          "type": "string"
+        }
+      }
     }
   }
 }

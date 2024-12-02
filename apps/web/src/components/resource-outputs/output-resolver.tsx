@@ -3,6 +3,7 @@ import SwaggerUIComponent from "./components/swagger-ui";
 import HiddenComponent from "./components/hidden-component";
 import { Shell } from "../resource-form/pickers/shell";
 import { PropertyKey, PropertyValue } from "../ui/property";
+import { MarkdownWrapper } from "../markdown";
 
 export const resolveOutputField = ({
   schema,
@@ -29,6 +30,16 @@ export const resolveOutputField = ({
           <PropertyKey>{key}</PropertyKey>
           <PropertyValue>
             <Shell value={value} />
+          </PropertyValue>
+        </>
+      );
+    }
+    case "markdown": {
+      return (
+        <>
+          <PropertyKey>{key}</PropertyKey>
+          <PropertyValue>
+            <MarkdownWrapper content={value} />
           </PropertyValue>
         </>
       );

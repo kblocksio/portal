@@ -91,10 +91,16 @@ function EditResourcePage() {
 
       // go to the resource page
       navigate({
-        to: "/resources",
+        to: `/${firstPathSegment}`,
       });
     },
-    [selectedResource, selectedResourceType, handleCreateOrEdit, navigate],
+    [
+      selectedResource,
+      selectedResourceType,
+      handleCreateOrEdit,
+      navigate,
+      firstPathSegment,
+    ],
   );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {

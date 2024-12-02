@@ -14,5 +14,7 @@ spec:
     plural: projects
     icon: FolderOpenDot
     singular: project
+    outputs:
+      - command
 metadata:
   name: projects.kblocks.io
