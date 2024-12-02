@@ -14,6 +14,14 @@ else
   export PORTAL_REDIS_ENABLED=false
 fi
 
+echo "Install system blocks required by the portal"
+(
+  cd gallery
+  ./install-blocks.sh kblocks/workload
+  ./install-blocks.sh kblocks/project
+  #TODO (ainvoner): ./install-blocks.sh kblocks/cluster
+)
+
 echo "Installing to $context"
 
 skaffold run
