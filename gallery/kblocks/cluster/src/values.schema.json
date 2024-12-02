@@ -6,10 +6,6 @@
       "type": "string",
       "description": "The description of the cluster"
     },
-    "icon": {
-      "type": "string",
-      "description": "The icon of the cluster. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon.\n\n@ui kblocks.io/textarea"
-    },
     "access": {
       "type": "string",
       "enum": ["read_only", "read_write"],
