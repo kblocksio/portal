@@ -31,15 +31,6 @@ spec:
       AWS_SECRET_ACCESS_KEY:
         key: ORG_AWS_SECRET_ACCESS_KEY
         secret: kblocks-secrets
-      TF_BACKEND_BUCKET:
-        key: ORG_TF_BACKEND_BUCKET
-        secret: kblocks-secrets
-      TF_BACKEND_REGION:
-        key: TF_BACKEND_REGION
-        secret: kblocks-secrets
-      TF_BACKEND_KEY:
-        key: TF_BACKEND_KEY
-        secret: kblocks-secrets
       OPENAI_API_KEY:
         key: OPENAI_API_KEY
         secret: kblocks-secrets

@@ -8,26 +8,22 @@ dir=$(cd $(dirname $0) && pwd)
 cd $dir
 
 KBLOCKS_CLI=${KBLOCKS_CLI:-"npx kb"}
-KBLOCKS_HOST="${KBLOCKS_HOST:-}"
+KBLOCKS_PUBSUB_HOST="${KBLOCKS_PUBSUB_HOST:-}"
+KBLOCKS_API_KEY="${KBLOCKS_API_KEY:-}"
+KBLOCKS_STORAGE_PREFIX="${KBLOCKS_STORAGE_PREFIX:-}"
+KBLOCKS_ACCESS="${KBLOCKS_ACCESS:-}"
 
 context=$(kubectl config current-context)
 
 if [ "$context" == "kind-kind" ]; then
-  KBLOCKS_HOST=http://portal-backend.default.svc.cluster.local:3001
+  KBLOCKS_PUBSUB_HOST=portal-redis.default.svc.cluster.local
+  KBLOCKS_API_KEY="pass1234"
+  KBLOCKS_ACCESS="write"
 fi
 
-if [ -z "$KBLOCKS_HOST" ]; then
-  echo "KBLOCKS_HOST is not set (e.g. https://staging.kblocks.io)"
-  exit 1
-fi
-
-# Error if KBLOCKS_HOST doesn't start with http
-if [[ "$KBLOCKS_HOST" != http://* && "$KBLOCKS_HOST" != https://* ]]; then
-  echo "KBLOCKS_HOST must start with http:// or https:// (e.g. https://staging.kblocks.io)"
-  exit 1
-fi
-
-echo "KBLOCKS_HOST: $KBLOCKS_HOST"
+echo "KBLOCKS_PUBSUB_HOST: $KBLOCKS_PUBSUB_HOST"
+echo "KBLOCKS_STORAGE_PREFIX: $KBLOCKS_STORAGE_PREFIX"
+echo "KBLOCKS_ACCESS: $KBLOCKS_ACCESS"
 echo "KBLOCKS_CLI: $KBLOCKS_CLI"
 
 #------------------------------------------------------------------------------#
@@ -39,10 +35,37 @@ install_kblock() {
     cd $dir
     name=$(basename $dir)
     echo "Installing block: $PWD..."
+
+    if [ -n "${KBLOCKS_PUBSUB_HOST}" ]; then
+      KBLOCKS_PUBSUB_HOST_OPTION="-e KBLOCKS_PUBSUB_HOST=${KBLOCKS_PUBSUB_HOST}"
+    else
+      KBLOCKS_PUBSUB_HOST_OPTION=""
+    fi
+
+    if [ -n "${KBLOCKS_API_KEY}" ]; then
+      KBLOCKS_API_KEY_OPTION="-e KBLOCKS_API_KEY=${KBLOCKS_API_KEY}"
+    else
+      KBLOCKS_API_KEY_OPTION=""
+    fi
+
+    if [ -n "${KBLOCKS_STORAGE_PREFIX}" ]; then
+      KBLOCKS_STORAGE_PREFIX_OPTION="-e KBLOCKS_STORAGE_PREFIX=${KBLOCKS_STORAGE_PREFIX}"
+    else
+      KBLOCKS_STORAGE_PREFIX_OPTION=""
+    fi
+
+    if [ -n "${KBLOCKS_ACCESS}" ]; then
+      KBLOCKS_ACCESS_OPTION="-e KBLOCKS_ACCESS=${KBLOCKS_ACCESS}"
+    else
+      KBLOCKS_ACCESS_OPTION=""
+    fi
+
+    # Now run the command with the options included conditionally
     $KBLOCKS_CLI install \
-      -e KBLOCKS_API="${KBLOCKS_HOST}/api" \
-      -e KBLOCKS_EVENTS_URL="${KBLOCKS_HOST}/api/events" \
-      -e KBLOCKS_CONTROL_URL="${KBLOCKS_HOST}/api/control" \
+      $KBLOCKS_PUBSUB_HOST_OPTION \
+      $KBLOCKS_API_KEY_OPTION \
+      $KBLOCKS_STORAGE_PREFIX_OPTION \
+      $KBLOCKS_ACCESS_OPTION \
       -n kblocks \
       --release-name $name
   )

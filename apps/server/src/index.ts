@@ -13,6 +13,7 @@ import { createServerSupabase, privateSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
+import { startStreamListener } from "./stream";
 import {
   ApiObject,
   blockTypeFromUri,
@@ -35,6 +36,8 @@ const GITHUB_CLIENT_ID = getEnv("GITHUB_CLIENT_ID");
 
 const port = process.env.PORT ?? 3001;
 
+startStreamListener();
+
 const { app } = expressWs(express());
 
 app.use(express.json({ limit: "50mb" }));
@@ -45,8 +48,6 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   }),
 );
-
-console.log("express-ws, will you work?");
 
 app.get("/", async (_, res) => {
   return res.status(200).json({ message: "Hello, kblocks backend!" });
@@ -65,48 +66,6 @@ app.ws("/api/events", (ws) => {
     console.log("/api/events client disconnected");
     pubsub.unsubscribeFromEvents(callback);
   });
-});
-
-app.ws("/api/control/:group/:version/:plural", async (ws, req) => {
-  const { group, version, plural } = req.params;
-  const { system: sys, system_id } = req.query as unknown as {
-    system?: string;
-    system_id?: string;
-  };
-
-  const system = sys ?? system_id;
-
-  if (!group || !version || !plural || !system) {
-    console.error(
-      "Invalid control connection request. Missing one of group, version, plural, system query params.",
-    );
-    console.log("Query params:", req.query);
-    return ws.close();
-  }
-
-  const resourceType = `${group}/${version}/${plural}`;
-  console.log(`control connection: ${resourceType} for ${system}`);
-
-  const { unsubscribe } = await pubsub.subscribeToControlRequests(
-    { system, group, version, plural },
-    (message) => {
-      console.log(`sending control message to ${resourceType}:`, message);
-      ws.send(message);
-    },
-  );
-
-  ws.on("close", () => {
-    console.log(
-      `control connection closed: ${resourceType} for system ${system}`,
-    );
-    unsubscribe();
-  });
-});
-
-// publish an event to the events stream (called by workers)
-app.post("/api/events", async (req, res) => {
-  await pubsub.publishEvent(req.body);
-  return res.sendStatus(200);
 });
 
 app.get("/api/resources", async (_, res) => {
@@ -181,10 +140,13 @@ app.get(
       name,
     });
 
-    const obj = await getObject(objUri);
-    if (!obj) {
-      return res.status(404).json({ error: `Block ${objUri} not found` });
-    }
+  const obj = await getObject(objUri);
+  if (!obj) {
+    return res.status(404).json({ error: `Block ${objUri} not found` });
+  }
+
+  return res.status(200).json(obj);
+});
 
     return res.status(200).json(obj);
   },

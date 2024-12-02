@@ -1,0 +1,2 @@
+port: 8080
+image: your-image-name:tag
