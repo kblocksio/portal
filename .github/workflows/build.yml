@@ -26,6 +26,9 @@ concurrency:
 
 env:
   NODE_VERSION: "20.17.0"
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+  SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
   # Environment name:
   # 1. If event is push AND branch is main → returns staging
   # 2. If event is push AND any other branch → returns the branch name (github.ref_name)
@@ -52,6 +55,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
           cache-dependency-path: "package-lock.json"
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
@@ -168,6 +175,12 @@ jobs:
           cache-to: type=inline
           build-args: |
             ENV=prod
+
+      - run: supabase link --project-ref $SUPABASE_PROJECT_ID
+        working-directory: apps/server
+
+      - run: supabase db push
+        working-directory: apps/server
 
       - name: Skaffold run
         id: run
