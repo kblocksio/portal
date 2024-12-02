@@ -126,28 +126,32 @@ export const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
-            {Object.keys(categories).map((category) => (
-              <SidebarItem
-                isActive={false}
-                key={category}
-                item={{
-                  title: categories[category].title,
-                  url: "#",
-                  icon: categories[category].icon,
-                  items: Object.keys(nonSystemResourceTypes)
-                    .filter((resourceTypeKey) =>
-                      nonSystemResourceTypes[
-                        resourceTypeKey
-                      ].categories?.includes(category),
-                    )
-                    .map((resourceTypeKey) => ({
-                      title: nonSystemResourceTypes[resourceTypeKey].kind,
-                      url: `/catalog/${resourceTypeKey}`,
-                      icon: nonSystemResourceTypes[resourceTypeKey].icon,
-                    })),
-                }}
-              />
-            ))}
+            {Object.keys(categories).map((category) => {
+              const items = Object.keys(nonSystemResourceTypes)
+                .filter((resourceTypeKey) =>
+                    nonSystemResourceTypes[resourceTypeKey].categories?.includes(category),
+                )
+                .map((resourceTypeKey) => ({
+                  title: nonSystemResourceTypes[resourceTypeKey].kind,
+                  url: `/catalog/${resourceTypeKey}`,
+                  icon: nonSystemResourceTypes[resourceTypeKey].icon,
+                }));
+              if (items.length === 0) {
+                return null;
+              }
+              return (
+                <SidebarItem
+                  isActive={false}
+                  key={category}
+                  item={{
+                    title: categories[category].title,
+                    url: "#",
+                    icon: categories[category].icon,
+                    items,
+                  }}
+                />
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
