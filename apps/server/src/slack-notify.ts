@@ -9,7 +9,7 @@ export async function slackNotify(event: WorkerEvent) {
     return;
   }
 
-  const thread = await getSlackThread(event.objUri);
+  const thread = await getSlackThread(event.requestId);
 
   console.log(`Sending slack message ${JSON.stringify(message)} to ${slackChannel} with thread ${thread}`);
 

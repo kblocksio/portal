@@ -1,16 +1,16 @@
 #!/bin/sh
 set -euo pipefail
 
-if [ -z "${1:-}" ]; then
-  echo "Usage: $0 <cluster-ip>"
+if [ -z "${1:-}" ] || [ -z "${2:-}" ]; then
+  echo "Usage: $0 <ip> <host>"
   exit 1
 fi
 
-host=$1
+ip=$1
+host=$2
 
-echo "Adding 'kind-registry' and 'kind-control-plane' in /etc/hosts to $host"
-cat /etc/hosts | grep -v "kind-" > /tmp/hosts
-echo "$host kind-registry" >> /tmp/hosts
-echo "$host kind-control-plane" >> /tmp/hosts
+echo "Adding $host in /etc/hosts to point to $ip"
+cat /etc/hosts | grep -v "$host" > /tmp/hosts
+echo "$ip $host" >> /tmp/hosts
 sudo cp /etc/hosts /etc/hosts.bak
 sudo cp /tmp/hosts /etc/hosts

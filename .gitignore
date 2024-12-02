@@ -22,3 +22,9 @@ portal.env
 *.code-workspace
 
 target/
+
+# do not ignore all files under secrets/
+!secrets/*
+
+# in case someone downloads the file here
+git-crypt-key
