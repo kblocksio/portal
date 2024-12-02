@@ -20,9 +20,6 @@ You will need the following environment variables:
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 GITHUB_TOKEN
-KBLOCKS_SLACK_CHANNEL
-SLACK_API_TOKEN
-OPENAI_API_KEY
 ```
 
 Now, you are ready!

@@ -22,8 +22,6 @@ spec:
       AWS_DEFAULT_REGION: tf-backend-config
       KBLOCKS_SYSTEM_ID: system-config
     envSecrets:
-      SLACK_API_TOKEN: slack-token
-      OPENAI_API_KEY: openai-token
       AWS_ACCESS_KEY_ID: aws-credentials
       AWS_SECRET_ACCESS_KEY: aws-credentials
       GITHUB_TOKEN: github-token
