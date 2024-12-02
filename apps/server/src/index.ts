@@ -140,13 +140,10 @@ app.get(
       name,
     });
 
-  const obj = await getObject(objUri);
-  if (!obj) {
-    return res.status(404).json({ error: `Block ${objUri} not found` });
-  }
-
-  return res.status(200).json(obj);
-});
+    const obj = await getObject(objUri);
+    if (!obj) {
+      return res.status(404).json({ error: `Block ${objUri} not found` });
+    }
 
     return res.status(200).json(obj);
   },
