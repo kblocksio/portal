@@ -125,7 +125,6 @@ jobs:
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
       - name: Install gallery secrets
-        working-directory: gallery
         run: |
           export KBLOCKS_SYSTEM_ID="${{ steps.qkube.outputs.kblocks-host }}"
           ./scripts/install-kblocks-secrets.sh ./secrets/kblocks-gallery.env ./secrets/kblocks-cluster.env
