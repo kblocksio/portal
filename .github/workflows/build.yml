@@ -29,6 +29,8 @@ env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
   SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
   SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+  GITHUB_CLIENT_ID: ${{ secrets.KBLOCKS_GITHUB_CLIENT_ID }}
+  GITHUB_CLIENT_SECRET: ${{ secrets.KBLOCKS_GITHUB_CLIENT_SECRET }}
   # Environment name:
   # 1. If event is push AND branch is main → returns staging
   # 2. If event is push AND any other branch → returns the branch name (github.ref_name)
