@@ -13,7 +13,6 @@ import Emittery from "emittery";
 import { useFetch } from "./hooks/use-fetch";
 import {
   ObjectEvent,
-  PatchEvent,
   ErrorEvent,
   ApiObject,
   WorkerEvent,
@@ -62,11 +61,9 @@ export type Relationship = {
 export interface ResourceContextValue {
   // objType -> ResourceType
   resourceTypes: Record<string, ResourceType>;
-  // objUri -> Record<timestamp, LogEvent>
   handleObjectMessages: (messages: ObjectEvent[]) => void;
   selectedResourceId: SelectedResourceId | undefined;
   setSelectedResourceId: (resourceId: SelectedResourceId | undefined) => void;
-  objects: Record<string, Resource>;
   systems: string[];
   namespaces: string[];
   kinds: string[];
@@ -75,7 +72,10 @@ export interface ResourceContextValue {
   categories: Record<string, Category>;
   relationships: Record<string, Record<string, Relationship>>;
   projects: Array<Project>;
-  clusters: Array<Cluster>;
+  // objUri -> Resource
+  resources: Record<string, Resource>;
+  // objUri -> Cluster
+  clusters: Record<string, Cluster>;
   emitter: Emittery;
 }
 
@@ -100,7 +100,6 @@ export const ResourceContext = createContext<ResourceContextValue>({
   handleObjectMessages: () => {},
   selectedResourceId: undefined,
   setSelectedResourceId: () => {},
-  objects: {},
   systems: [],
   namespaces: [],
   kinds: [],
@@ -109,7 +108,8 @@ export const ResourceContext = createContext<ResourceContextValue>({
   loadEvents: () => {},
   relationships: {},
   projects: [],
-  clusters: [],
+  resources: {},
+  clusters: {},
   emitter: new Emittery(),
 });
 
@@ -219,7 +219,7 @@ export const ResourceProvider = ({
           const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
           const systems = prev[key]?.systems ?? new Set();
           systems.add(system);
-  
+
           return {
             ...prev,
             [key]: {
@@ -235,7 +235,9 @@ export const ResourceProvider = ({
           // if the object is deleted, remove the resource type
           const plural = name.split(".")[0];
           const group = name.split(".")[1];
-          const key = Object.keys(prev).find((k) => k.includes(plural) && k.includes(group));
+          const key = Object.keys(prev).find(
+            (k) => k.includes(plural) && k.includes(group),
+          );
           if (key) {
             delete prev[key];
           }
@@ -323,22 +325,6 @@ export const ResourceProvider = ({
     });
   }, [resolvePluralFromKind, objects, resolveOwnerUri]);
 
-  const handlePatchMessage = useCallback((message: PatchEvent) => {
-    const { objUri, patch } = message;
-
-    setObjects((prev) => {
-      if (!prev[objUri]) {
-        return prev;
-      }
-
-      const newObject = { ...prev[objUri], ...patch };
-      return {
-        ...prev,
-        [objUri]: newObject,
-      };
-    });
-  }, []);
-
   const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
@@ -349,7 +335,7 @@ export const ResourceProvider = ({
     const eventKey = `${timestamp.toISOString()}.${event.objUri}`;
 
     // ignore OBJECT and PATCH events because they are handled by the respective handlers
-    if (event.type === "OBJECT" || event.type === "PATCH") {
+    if (event.type === "OBJECT") {
       return;
     }
 
@@ -377,9 +363,6 @@ export const ResourceProvider = ({
       case "OBJECT":
         handleObjectMessage(lastJsonMessage as ObjectEvent);
         break;
-      case "PATCH":
-        handlePatchMessage(lastJsonMessage as PatchEvent);
-        break;
       case "ERROR":
         addNotifications([
           {
@@ -402,7 +385,6 @@ export const ResourceProvider = ({
   }, [
     lastJsonMessage,
     handleObjectMessage,
-    handlePatchMessage,
     addNotifications,
     addEvent,
     previousMessage,
@@ -454,14 +436,46 @@ export const ResourceProvider = ({
   }, [objects]);
 
   const clusters = useMemo(() => {
-    return Object.values(objects).filter(
+    const clusters = Object.values(objects).filter(
       (obj) => obj.objType === "kblocks.io/v1/clusters",
+    );
+    return clusters.reduce(
+      (acc, cluster) => {
+        acc[cluster.objUri] = cluster;
+        return acc;
+      },
+      {} as Record<string, Cluster>,
     );
   }, [objects]);
 
+  // resources are all objects except projects and clusters
+  const resources = useMemo(() => {
+    const resources: Record<string, Resource> = {};
+    const filteredObjects = Object.values(objects).filter((obj) => {
+      const { system } = parseBlockUri(obj.objUri);
+      const cluster = Object.values(clusters).find(
+        (c) => c.metadata?.name === system,
+      );
+      // if the cluster is not found, it means the cluster is not connected, do not show the resource
+      if (!cluster) {
+        return false;
+      }
+      // if the resource is a project or a cluster, do not show it
+      return (
+        obj.objType !== "kblocks.io/v1/projects" &&
+        obj.objType !== "kblocks.io/v1/clusters" &&
+        obj.objType !== "kblocks.io/v1/blocks"
+      );
+    });
+    for (const obj of filteredObjects) {
+      resources[obj.objUri] = obj;
+    }
+    return resources;
+  }, [objects, projects, clusters]);
+
   const value: ResourceContextValue = {
     resourceTypes,
-    objects,
+    resources,
     projects,
     clusters,
     loadEvents,

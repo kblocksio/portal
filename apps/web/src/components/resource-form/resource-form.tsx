@@ -50,7 +50,9 @@ export const ResourceForm = ({
 
   const isReadOnlyCluster = useMemo(() => {
     if (isEnvironmentResourceType) return false;
-    const cluster = clusters.find((c) => c.metadata.name === system);
+    const cluster = Object.values(clusters).find(
+      (c) => c.metadata.name === system,
+    );
     return cluster?.access === "read_only";
   }, [isEnvironmentResourceType, clusters, system]);
 

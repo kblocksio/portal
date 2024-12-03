@@ -1,4 +1,4 @@
-import React, { useContext, useCallback } from "react";
+import React, { useContext, useCallback, useMemo } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { LinkIcon } from "lucide-react";
@@ -27,7 +27,13 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
   data,
   resourceObjUri,
 }) => {
-  const { objects } = useContext(ResourceContext);
+  const { resources, clusters } = useContext(ResourceContext);
+  const objects = useMemo(() => {
+    return {
+      ...resources,
+      ...clusters,
+    };
+  }, [resources, clusters]);
   const renderValue = useCallback(
     (value: any) => {
       if (typeof value === "string") {

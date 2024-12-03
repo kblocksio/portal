@@ -44,12 +44,12 @@ function Clusters() {
           description="These are the clusters available in the platform."
           Icon={Icon}
         />
-        {clusters.length === 0 ? (
+        {Object.values(clusters).length === 0 ? (
           <ClustersEmptyState handleAddCluster={handleAddCluster} />
         ) : (
           <div className="flex flex-col gap-4">
             <ResourceTable
-              resources={clusters}
+              resources={Object.values(clusters)}
               showActions={false}
               customNewResourceAction={{
                 label: "Add Cluster",

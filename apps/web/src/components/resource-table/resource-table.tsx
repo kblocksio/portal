@@ -54,7 +54,7 @@ import { Link } from "../ui/link";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
-type ExtendedResource = Resource & {
+export type ExtendedResource = Resource & {
   iconComponent?: React.ComponentType<{ className?: string }>;
   rels: Resource[];
   prjs: Project[];
@@ -392,10 +392,17 @@ export const ResourceTable = (props: {
     setRowSelection({});
   }, [location.pathname]);
 
-  const { resourceTypes, relationships, objects, projects } =
+  const { resourceTypes, relationships, resources, clusters, projects } =
     useContext(ResourceContext);
 
-  const resources = useMemo(() => {
+  const objects = useMemo(() => {
+    return {
+      ...resources,
+      ...clusters,
+    };
+  }, [resources, clusters]);
+
+  const resourceItems = useMemo(() => {
     return props.resources.map<ExtendedResource>((resource) => {
       return {
         ...resource,
@@ -412,7 +419,7 @@ export const ResourceTable = (props: {
   }, [props.resources, resourceTypes, relationships, projects, objects]);
 
   const table = useReactTable({
-    data: resources,
+    data: resourceItems,
     columns,
     state: {
       columnFilters,

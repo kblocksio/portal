@@ -10,7 +10,15 @@ export const RelationshipGraph = memo(function RelationshipGraph({
 }: {
   selectedResource?: Resource;
 }) {
-  const { relationships, objects, resourceTypes } = useContext(ResourceContext);
+  const { relationships, resources, clusters, resourceTypes } =
+    useContext(ResourceContext);
+
+  const objects = useMemo(() => {
+    return {
+      ...resources,
+      ...clusters,
+    };
+  }, [resources, clusters]);
 
   const { nodes, edges } = useMemo(() => {
     const nodes: OwnerNode[] = [];

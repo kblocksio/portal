@@ -19,9 +19,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
 import { ProjectsMenu } from "../projects-menu";
+import { ExtendedResource } from "./resource-table";
 
 export interface ResourceTableToolbarProps {
-  table: TanstackTable<Resource>;
+  table: TanstackTable<ExtendedResource>;
   showActions?: boolean;
   showCreateNew?: boolean;
   customNewResourceAction?: {

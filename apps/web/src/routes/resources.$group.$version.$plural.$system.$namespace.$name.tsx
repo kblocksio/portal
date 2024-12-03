@@ -47,12 +47,23 @@ export const Route = createFileRoute(
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const { resourceTypes, objects, setSelectedResourceId, relationships } =
-    useContext(ResourceContext);
+  const {
+    resourceTypes,
+    resources,
+    clusters,
+    setSelectedResourceId,
+    relationships,
+  } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
   const [activeTab, setActiveTab] = useState("details");
 
+  const objects = useMemo(() => {
+    return {
+      ...resources,
+      ...clusters,
+    };
+  }, [resources, clusters]);
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);

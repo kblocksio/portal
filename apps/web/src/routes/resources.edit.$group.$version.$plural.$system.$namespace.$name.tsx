@@ -18,11 +18,18 @@ export const Route = createFileRoute(
 
 function EditResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
-  const { resourceTypes, objects } = useContext(ResourceContext);
+  const { resourceTypes, resources, clusters } = useContext(ResourceContext);
   const { handleCreateOrEdit, isLoading } = useCreateResource();
   const { setBreadcrumbs } = useAppContext();
   const navigate = useNavigate();
   const previousRoute = useContext(LocationContext);
+
+  const objects = useMemo(() => {
+    return {
+      ...resources,
+      ...clusters,
+    };
+  }, [resources, clusters]);
 
   const firstPathSegment = useMemo(() => {
     if (previousRoute?.previousRoute) {

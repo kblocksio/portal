@@ -18,33 +18,20 @@ export const meta = {
 };
 
 function Resources() {
-  const { resourceTypes, objects } = useContext(ResourceContext);
+  const { resourceTypes, resources } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
 
   const Icon = getIconComponent({ icon: meta.icon });
 
   const allResources = useMemo(() => {
-    return Object.values(objects).filter((r) => {
-      if (r.objType === "kblocks.io/v1/blocks") {
-        return false;
-      }
-
-      if (r.objType === "kblocks.io/v1/projects") {
-        return false;
-      }
-
-      if (r.objType === "kblocks.io/v1/clusters") {
-        return false;
-      }
-
+    return Object.values(resources).filter((r) => {
       // don't show resources that are children of other resources
       if (r.metadata?.ownerReferences?.length) {
         return false;
       }
-
       return true;
     });
-  }, [objects]);
+  }, [resources]);
 
   useEffect(() => {
     setBreadcrumbs([{ name: "Resources" }]);

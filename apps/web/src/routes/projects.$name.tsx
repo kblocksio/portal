@@ -12,7 +12,7 @@ export const Route = createFileRoute("/projects/$name")({
 });
 
 function ProjectPage() {
-  const { resourceTypes, objects, projects } = useContext(ResourceContext);
+  const { resourceTypes, resources, projects } = useContext(ResourceContext);
   const { setBreadcrumbs } = useAppContext();
   const { name } = Route.useParams();
 
@@ -21,8 +21,10 @@ function ProjectPage() {
   }, [projects, name]);
 
   const allResources = useMemo(() => {
-    return (project?.objects ?? []).map((uri) => objects[uri]).filter(Boolean);
-  }, [objects, project]);
+    return (project?.resources ?? [])
+      .map((uri: string) => resources[uri])
+      .filter(Boolean);
+  }, [resources, project]);
 
   useEffect(() => {
     setBreadcrumbs([
