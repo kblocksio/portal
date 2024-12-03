@@ -57,6 +57,7 @@ function ResourcePage() {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const { setBreadcrumbs } = useAppContext();
   const [activeTab, setActiveTab] = useState("details");
+  const { projects } = useContext(ResourceContext);
 
   const objects = useMemo(() => {
     return {
@@ -256,7 +257,10 @@ function ResourcePage() {
 
           <div className="flex shrink-0 space-x-2">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger
+                asChild
+                disabled={!projects || projects.length === 0}
+              >
                 <Button variant="outline">
                   Projects
                   <ChevronsUpDown className="ml-2 h-4 w-4" />

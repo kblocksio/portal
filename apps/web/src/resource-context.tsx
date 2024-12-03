@@ -477,23 +477,27 @@ export const ResourceProvider = ({
   }, [getWebSocket]);
 
   const { systems, namespaces, kinds } = useMemo(() => {
+    const availableClusters: string[] = Object.values(clusters).map(
+      (c) => c.metadata.name,
+    );
     const systems = new Set<string>();
     const namespaces = new Set<string>();
     const kinds = new Set<string>();
 
     for (const obj of Object.values(objects)) {
       const { system, namespace } = parseBlockUri(obj.objUri);
-      systems.add(system);
-      namespaces.add(namespace);
-      kinds.add(obj.kind);
+      if (availableClusters.includes(system)) {
+        systems.add(system);
+        namespaces.add(namespace);
+        kinds.add(obj.kind);
+      }
     }
-
     return {
       systems: Array.from(systems),
       namespaces: Array.from(namespaces),
       kinds: Array.from(kinds),
     };
-  }, [objects]);
+  }, [objects, clusters]);
 
   const [emitter] = useState(() => new Emittery());
 
