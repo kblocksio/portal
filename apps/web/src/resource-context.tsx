@@ -123,7 +123,7 @@ export const ResourceProvider = ({
   children: React.ReactNode;
 }) => {
   const { addNotifications } = useContext(NotificationsContext);
-  const [resourceTypes, setResourceTypes] = useState<
+  const [resourceTypesObjects, setResourceTypesObjects] = useState<
     Record<string, ResourceType>
   >({});
   const [categories, setCategories] = useState<Record<string, Category>>({});
@@ -170,6 +170,81 @@ export const ResourceProvider = ({
     }
   }, [categoriesData]);
 
+  const projects = useMemo(() => {
+    return Object.values(objects).filter(
+      (obj) => obj.objType === "kblocks.io/v1/projects",
+    );
+  }, [objects]);
+
+  const clusters = useMemo(() => {
+    const clusters = Object.values(objects).filter(
+      (obj) => obj.objType === "kblocks.io/v1/clusters",
+    );
+    return clusters.reduce(
+      (acc, cluster) => {
+        acc[cluster.objUri] = cluster;
+        return acc;
+      },
+      {} as Record<string, Cluster>,
+    );
+  }, [objects]);
+
+  // resources are all objects except projects and clusters
+  const resources = useMemo(() => {
+    const resources: Record<string, Resource> = {};
+    const filteredObjects = Object.values(objects).filter((obj) => {
+      const { system } = parseBlockUri(obj.objUri);
+      const cluster = Object.values(clusters)?.find(
+        (c) => c.metadata?.name === system,
+      );
+      // if the cluster is not found, it means the cluster is not connected, do not show the resource
+      if (!cluster) {
+        return false;
+      }
+      // if the resource is a project or a cluster, do not show it
+      return (
+        obj.objType !== "kblocks.io/v1/projects" &&
+        obj.objType !== "kblocks.io/v1/clusters" &&
+        obj.objType !== "kblocks.io/v1/blocks"
+      );
+    });
+    for (const obj of filteredObjects) {
+      resources[obj.objUri] = obj;
+    }
+    return resources;
+  }, [objects, projects, clusters]);
+
+  const resourceTypes = useMemo(() => {
+    const resourceTypes: Record<string, ResourceType> = {};
+
+    const availableClusters: string[] = Object.values(clusters).map(
+      (c) => c.metadata.name,
+    );
+    const filteredResourceTypes = Object.values(resourceTypesObjects).filter(
+      (type) => {
+        return availableClusters.some((cluster) => type.systems.has(cluster));
+      },
+    );
+    // we can't filter out the installed cluster resource type...
+    const clusterResourceTypes = resourceTypesObjects["kblocks.io/v1/clusters"];
+
+    for (const type of filteredResourceTypes) {
+      // the key should be the key of the resource type object from resourceTypesObjects
+      const key = Object.keys(resourceTypesObjects).find((k) => {
+        return resourceTypesObjects[k] === type;
+      });
+      if (key) {
+        resourceTypes[key] = type;
+      }
+    }
+    // add the cluster resource type if exists
+    if (clusterResourceTypes) {
+      resourceTypes["kblocks.io/v1/clusters"] = clusterResourceTypes;
+    }
+
+    return resourceTypes;
+  }, [resourceTypesObjects, clusters]);
+
   const resolvePluralFromKind = useCallback(
     (kind: string) => {
       for (const def of Object.values(resourceTypes)) {
@@ -213,7 +288,7 @@ export const ResourceProvider = ({
     }
 
     if (objType === "kblocks.io/v1/blocks") {
-      setResourceTypes((prev) => {
+      setResourceTypesObjects((prev) => {
         if (Object.keys(object).length > 0) {
           const block = object as BlockApiObject;
           const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
@@ -428,50 +503,6 @@ export const ResourceProvider = ({
     },
     [emitter],
   );
-
-  const projects = useMemo(() => {
-    return Object.values(objects).filter(
-      (obj) => obj.objType === "kblocks.io/v1/projects",
-    );
-  }, [objects]);
-
-  const clusters = useMemo(() => {
-    const clusters = Object.values(objects).filter(
-      (obj) => obj.objType === "kblocks.io/v1/clusters",
-    );
-    return clusters.reduce(
-      (acc, cluster) => {
-        acc[cluster.objUri] = cluster;
-        return acc;
-      },
-      {} as Record<string, Cluster>,
-    );
-  }, [objects]);
-
-  // resources are all objects except projects and clusters
-  const resources = useMemo(() => {
-    const resources: Record<string, Resource> = {};
-    const filteredObjects = Object.values(objects).filter((obj) => {
-      const { system } = parseBlockUri(obj.objUri);
-      const cluster = Object.values(clusters).find(
-        (c) => c.metadata?.name === system,
-      );
-      // if the cluster is not found, it means the cluster is not connected, do not show the resource
-      if (!cluster) {
-        return false;
-      }
-      // if the resource is a project or a cluster, do not show it
-      return (
-        obj.objType !== "kblocks.io/v1/projects" &&
-        obj.objType !== "kblocks.io/v1/clusters" &&
-        obj.objType !== "kblocks.io/v1/blocks"
-      );
-    });
-    for (const obj of filteredObjects) {
-      resources[obj.objUri] = obj;
-    }
-    return resources;
-  }, [objects, projects, clusters]);
 
   const value: ResourceContextValue = {
     resourceTypes,
