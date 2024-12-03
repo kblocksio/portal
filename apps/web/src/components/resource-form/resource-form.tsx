@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useContext } from "react";
 import { Button } from "../ui/button";
 import { FileCode, Loader2 } from "lucide-react";
 import { FieldRenderer } from "./field-renderer";
@@ -6,7 +6,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
-import { ResourceType } from "@/resource-context";
+import { ResourceContext, ResourceType } from "@/resource-context";
 import { SystemSelector } from "./system-selector";
 import cloneDeep from "lodash.clonedeep";
 import YamlButton from "../yaml-button";
@@ -25,6 +25,7 @@ export const ResourceForm = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
+  const { clusters } = useContext(ResourceContext);
   const isEnvironmentResourceType = resourceType.group === "kblocks.io";
 
   // create a clone of the schema and remove the status property (the outputs)
@@ -46,6 +47,12 @@ export const ResourceForm = ({
   );
   const [name, setName] = useState<string>(initialMeta?.name ?? "");
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const isReadOnlyCluster = useMemo(() => {
+    if (isEnvironmentResourceType) return false;
+    const cluster = clusters.find((c) => c.metadata.name === system);
+    return cluster?.access === "read_only";
+  }, [isEnvironmentResourceType, clusters, system]);
 
   // Focus on the name input when it's empty
   useEffect(() => {
@@ -200,18 +207,20 @@ export const ResourceForm = ({
             YAML
           </Button>
         </YamlButton>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {initialValues ? "Updating..." : "Creating..."}
-            </>
-          ) : initialValues ? (
-            "Update"
-          ) : (
-            "Create"
-          )}
-        </Button>
+        {!isReadOnlyCluster && (
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {initialValues ? "Updating..." : "Creating..."}
+              </>
+            ) : initialValues ? (
+              "Update"
+            ) : (
+              "Create"
+            )}
+          </Button>
+        )}
       </div>
     </form>
   );
