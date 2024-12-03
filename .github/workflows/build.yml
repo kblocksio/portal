@@ -180,10 +180,14 @@ jobs:
           build-args: |
             ENV=prod
 
-      - run: supabase link --project-ref $SUPABASE_PROJECT_ID
+      - name: Link Supabase project
+        if: env.ENV_NAME == 'staging'
+        run: supabase link --project-ref $SUPABASE_PROJECT_ID
         working-directory: apps/server
 
-      - run: supabase db push
+      - name: Push Supabase database
+        if: env.ENV_NAME == 'staging'
+        run: supabase db push
         working-directory: apps/server
 
       - name: Skaffold run
