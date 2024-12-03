@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx scripts/dev.mts",
     "build": "tsc",
-    "prod": "tsx src/index.ts"
+    "prod": "tsx src/index.ts",
+    "supabase:link:prod": "dotenv -e ../../secrets/portal.env -- supabase link --project-ref $SUPABASE_PROJECT_ID",
+    "supabase:push:prod": "dotenv -e ../../secrets/portal.env -- supabase db push"
   },
   "keywords": [],
   "author": "",
