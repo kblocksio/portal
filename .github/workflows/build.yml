@@ -84,21 +84,24 @@ jobs:
         run: |
           npm install
 
-      - name: Link Supabase project
-        run: npm run supabase:link:prod
-        working-directory: apps/server
+      # - name: Link Supabase project
+      #   run: npm run supabase:link:prod
+      #   working-directory: apps/server
 
-      - name: Push Supabase database
-        run: npm run supabase:push:prod
-        working-directory: apps/server
+      # - name: Push Supabase database
+      #   run: npm run supabase:push:prod
+      #   working-directory: apps/server
 
       # - run: npx dotenv -e ../../secrets/portal.env -- node -e "console.log(process.env.SUPABASE_PROJECT_ID);"
       #   working-directory: apps/server
-      # - run: npx dotenv -e ../../secrets/portal.env -- echo $SUPABASE_PROJECT_ID
-      #   working-directory: apps/server
+      - run: npx dotenv -e ../../secrets/portal.env -- echo "$SUPABASE_PROJECT_ID"
+        working-directory: apps/server
 
       # - run: npx @dotenvx/dotenvx run -f ../../secrets/portal.env -- echo $SUPABASE_PROJECT_ID
       #   working-directory: apps/server
+
+      - run: npx @dotenvx/dotenvx run -f ../../secrets/portal.env -- echo "$SUPABASE_PROJECT_ID"
+        working-directory: apps/server
 
       # - run: cat ../../secrets/portal.env | grep SUPABASE_PROJECT_ID
       #   working-directory: apps/server
