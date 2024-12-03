@@ -22,13 +22,13 @@ jobs:
       - run: source secrets/portal.env && echo $GITHUB_CLIENT_ID
       - run: echo $GITHUB_CLIENT_ID
 
-      # - uses: supabase/setup-cli@v1
-      #   with:
-      #     version: latest
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      # - name: Start Supabase local development setup
-      #   run: source ../../secrets/portal.env && supabase db start
-      #   working-directory: apps/server
+      - name: Start Supabase local development setup
+        run: source ../../secrets/portal.env && echo $GITHUB_CLIENT_ID && supabase db start
+        working-directory: apps/server
 
       # - name: Verify generated types are checked in
       #   run: |
