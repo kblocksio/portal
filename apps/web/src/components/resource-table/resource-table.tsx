@@ -368,6 +368,7 @@ export const ResourceTable = (props: {
   resources: Resource[];
   className?: string;
   showActions?: boolean;
+  showCreateNew?: boolean;
   customNewResourceAction?: {
     label: string;
     navigate: () => void;
@@ -434,6 +435,7 @@ export const ResourceTable = (props: {
       <ResourceTableToolbar
         table={table}
         showActions={props.showActions}
+        showCreateNew={props.showCreateNew}
         customNewResourceAction={props.customNewResourceAction}
       />
       <div className={cn("rounded-md border bg-white", props.className)}>

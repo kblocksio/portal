@@ -411,7 +411,11 @@ function ResourcePage() {
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
                 </div>
-                <ResourceTable resources={children} showActions={false} />
+                <ResourceTable
+                  resources={children}
+                  showActions={false}
+                  showCreateNew={false}
+                />
               </div>
             )}
           </div>

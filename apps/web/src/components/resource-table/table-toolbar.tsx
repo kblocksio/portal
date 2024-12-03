@@ -23,6 +23,7 @@ import { ProjectsMenu } from "../projects-menu";
 export interface ResourceTableToolbarProps {
   table: TanstackTable<Resource>;
   showActions?: boolean;
+  showCreateNew?: boolean;
   customNewResourceAction?: {
     label: string;
     navigate: () => void;
@@ -32,6 +33,7 @@ export interface ResourceTableToolbarProps {
 export function ResourceTableToolbar({
   table,
   showActions = true,
+  showCreateNew = true,
   customNewResourceAction,
 }: ResourceTableToolbarProps) {
   const navigate = useNavigate();
@@ -55,7 +57,7 @@ export function ResourceTableToolbar({
           />
         </div>
 
-        {showActions && (
+        {showCreateNew && (
           <div className="md:hidden">
             <Button
               size="sm"
@@ -154,55 +156,58 @@ export function ResourceTableToolbar({
         </div>
       </ScrollArea>
 
-      {showActions && (
+      {(showActions || showCreateNew) && (
         <div className="hidden items-center gap-2 md:flex">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={
-                  table.getIsSomeRowsSelected() === false &&
-                  table.getIsAllRowsSelected() === false
+          {showActions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    table.getIsSomeRowsSelected() === false &&
+                    table.getIsAllRowsSelected() === false
+                  }
+                >
+                  Actions
+                  <ChevronDown className="-mr-1.5 size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <ProjectsMenu
+                  objUris={table
+                    .getSelectedRowModel()
+                    .rows.map((row) => row.original.objUri)}
+                />
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setIsDeleteOpen(true);
+                  }}
+                >
+                  <span className="text-destructive">Delete...</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {showCreateNew && (
+            <Button
+              size="sm"
+              onClick={() => {
+                if (customNewResourceAction) {
+                  customNewResourceAction.navigate();
+                } else {
+                  navigate({
+                    to: "/resources/new",
+                  });
                 }
-              >
-                Actions
-                <ChevronDown className="-mr-1.5 size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <ProjectsMenu
-                objUris={table
-                  .getSelectedRowModel()
-                  .rows.map((row) => row.original.objUri)}
-              />
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                onSelect={() => {
-                  setIsDeleteOpen(true);
-                }}
-              >
-                <span className="text-destructive">Delete...</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            size="sm"
-            onClick={() => {
-              if (customNewResourceAction) {
-                customNewResourceAction.navigate();
-              } else {
-                navigate({
-                  to: "/resources/new",
-                });
-              }
-            }}
-          >
-            {customNewResourceAction?.label ?? "New Resource"}
-          </Button>
+              }}
+            >
+              {customNewResourceAction?.label ?? "New Resource"}
+            </Button>
+          )}
         </div>
       )}
 

@@ -50,6 +50,7 @@ function Clusters() {
           <div className="flex flex-col gap-4">
             <ResourceTable
               resources={clusters}
+              showActions={false}
               customNewResourceAction={{
                 label: "Add Cluster",
                 navigate: handleAddCluster,
