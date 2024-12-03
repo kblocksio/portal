@@ -9,7 +9,7 @@ import {
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
-import { createServerSupabase } from "./supabase.js";
+import { createServerSupabase, privateSupabase } from "./supabase.js";
 import expressWs from "express-ws";
 import { getEnv, getUserOctokit } from "./util";
 import * as pubsub from "./pubsub";
@@ -32,6 +32,7 @@ import { categories } from "./categories";
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
+const GITHUB_CLIENT_ID = getEnv("GITHUB_CLIENT_ID");
 
 const port = process.env.PORT ?? 3001;
 
@@ -126,52 +127,61 @@ app.get("/api/types", async (_, res) => {
   return res.status(200).json(result);
 });
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
 
-  const obj = await getObject(objUri);
-  if (!obj) {
-    return res.status(404).json({ error: `Block ${objUri} not found` });
-  }
+    const obj = await getObject(objUri);
+    if (!obj) {
+      return res.status(404).json({ error: `Block ${objUri} not found` });
+    }
 
-  return res.status(200).json(obj);
-});
+    return res.status(200).json(obj);
+  },
+);
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/logs", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
-  return res.status(200).json({ objUri, logs } as GetLogsResponse);
-});
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/logs",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const logs = (await loadEvents(objUri)).filter((e) => e.type === "LOG");
+    return res.status(200).json({ objUri, logs } as GetLogsResponse);
+  },
+);
 
-app.get("/api/resources/:group/:version/:plural/:system/:namespace/:name/events", async (req, res) => {
-  const { group, version, plural, system, namespace, name } = req.params;
-  const objUri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  const events = await loadEvents(objUri);
-  return res.status(200).json({ objUri, events } as GetEventsResponse);
-});
+app.get(
+  "/api/resources/:group/:version/:plural/:system/:namespace/:name/events",
+  async (req, res) => {
+    const { group, version, plural, system, namespace, name } = req.params;
+    const objUri = formatBlockUri({
+      group,
+      version,
+      plural,
+      system,
+      namespace,
+      name,
+    });
+    const events = await loadEvents(objUri);
+    return res.status(200).json({ objUri, events } as GetEventsResponse);
+  },
+);
 
 app.post("/api/resources/:group/:version/:plural", async (req, res) => {
   const { group, version, plural } = req.params;
@@ -211,7 +221,7 @@ app.post("/api/resources/:group/:version/:plural", async (req, res) => {
         reason: "Pending",
         message: "Pending",
         lastTransitionTime: new Date().toISOString(),
-      }
+      },
     ],
   };
 
@@ -305,7 +315,8 @@ app.delete(
   "/api/resources/:group/:version/:plural/:system/:namespace/:name",
   async (req, res) => {
     const { group, version, plural, system, namespace, name } = req.params;
-    const force = req.query["force"] !== undefined && req.query["force"] !== "false";
+    const force =
+      req.query["force"] !== undefined && req.query["force"] !== "false";
 
     const objUri = formatBlockUri({
       group,
@@ -423,21 +434,7 @@ app.get("/api/auth/callback/supabase", async (req, res) => {
     return res.redirect(`${WEBSITE_ORIGIN}/auth-error?error=${supabaseError}`);
   }
 
-  console.log("client_id", process.env.GITHUB_CLIENT_ID);
-
-  if (NON_PRIMARY_ENVIRONMENT) {
-    console.log("non-primary environment, skipping additional github auth");
-    return res.redirect(303, `${WEBSITE_ORIGIN}/`);
-  }
-
-  const url = new URL("https://github.com/login/oauth/authorize");
-  url.searchParams.append("client_id", process.env.GITHUB_CLIENT_ID!);
-  url.searchParams.append("scope", "repo, org:read");
-  url.searchParams.append(
-    "redirect_uri",
-    `${WEBSITE_ORIGIN}/api/auth/callback/github`,
-  );
-  return res.redirect(url.toString());
+  return res.redirect(303, `${WEBSITE_ORIGIN}/`);
 });
 
 app.get("/api/auth/callback/github", async (req, res) => {
@@ -456,8 +453,13 @@ app.get("/api/auth/callback/github", async (req, res) => {
   }
 
   const tokens = await exchangeCodeForTokens(code.toString());
+  if ("error" in tokens) {
+    return res.redirect(
+      `${WEBSITE_ORIGIN}/auth-error?error=${tokens.error.message}`,
+    );
+  }
 
-  const { error } = await supabase.from("user_ghtokens").upsert([
+  const { error } = await privateSupabase.from("user_ghtokens").upsert([
     {
       user_id: user.data.user.id,
       access_token: tokens.access_token,
@@ -469,12 +471,18 @@ app.get("/api/auth/callback/github", async (req, res) => {
       expires_at: new Date(
         new Date().getTime() + tokens.expires_in * 1000,
       ).toISOString(),
+      refresh_token_expires_at: new Date(
+        new Date().getTime() + tokens.refresh_token_expires_in * 1000,
+      ).toISOString(),
     },
   ]);
 
   if (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    console.error("supabase error", error);
+    console.log("supabase error (log)", error);
+    return res
+      .status(500)
+      .json({ message: "Server error (supabase)", error: { ...error } });
   }
 
   const next = (req.query.next ?? "/").toString();
@@ -484,12 +492,23 @@ app.get("/api/auth/callback/github", async (req, res) => {
 app.get("/api/github/installations", async (req, res) => {
   try {
     const octokit = await getUserOctokit(req, res);
+    if (!octokit) {
+      return res.status(200).json({
+        githubAppInstalled: false,
+        installations: [],
+      });
+    }
     const { data: installations } =
       await octokit.rest.apps.listInstallationsForAuthenticatedUser({
         page: 0,
         per_page: 100,
       });
-    return res.status(200).json(installations.installations);
+    return res.status(200).json({
+      githubAppInstalled: true,
+      // @ts-ignore-error
+      login: installations.installations[0]?.account?.login!,
+      installations: installations.installations,
+    });
   } catch (error) {
     console.error("error getting installations", error);
     if ((error as any).status === 401) {
@@ -505,6 +524,9 @@ app.get("/api/github/repositories", async (req, res) => {
     return res.status(400).json({ error: "Installation ID is required" });
   }
   const octokit = await getUserOctokit(req, res);
+  if (!octokit) {
+    return res.status(401).json({ message: "User is not signed in" });
+  }
   const { data: repositories } =
     await octokit.rest.apps.listInstallationReposForAuthenticatedUser({
       installation_id,

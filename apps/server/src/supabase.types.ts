@@ -7,128 +7,71 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      organization_members: {
-        Row: {
-          organization_id: string
-          role: string | null
-          user_id: string
-        }
-        Insert: {
-          organization_id: string
-          role?: string | null
-          user_id: string
-        }
-        Update: {
-          organization_id?: string
-          role?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "Organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Organizations: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-        }
-        Relationships: []
-      }
-      Projects: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-          organization: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Projects_organization_fkey"
-            columns: ["organization"]
-            isOneToOne: false
-            referencedRelation: "Organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      Roles: {
-        Row: {
-          created_at: string
-          id: number
-          name: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Relationships: []
-      }
       user_ghtokens: {
         Row: {
-          access_token: string | null
-          expires_at: string | null
-          expires_in: number | null
-          refresh_token: string | null
-          refresh_token_expires_in: number | null
-          scope: string | null
-          token_type: string | null
+          access_token: string
+          created_at: string
+          expires_at: string
+          expires_in: number
+          refresh_token: string
+          refresh_token_expires_at: string
+          refresh_token_expires_in: number
+          scope: string
+          token_type: string
+          updated_at: string
           user_id: string
         }
         Insert: {
-          access_token?: string | null
-          expires_at?: string | null
-          expires_in?: number | null
-          refresh_token?: string | null
-          refresh_token_expires_in?: number | null
-          scope?: string | null
-          token_type?: string | null
+          access_token: string
+          created_at?: string
+          expires_at: string
+          expires_in: number
+          refresh_token: string
+          refresh_token_expires_at: string
+          refresh_token_expires_in: number
+          scope: string
+          token_type: string
+          updated_at?: string
           user_id: string
         }
         Update: {
-          access_token?: string | null
-          expires_at?: string | null
-          expires_in?: number | null
-          refresh_token?: string | null
-          refresh_token_expires_in?: number | null
-          scope?: string | null
-          token_type?: string | null
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          expires_in?: number
+          refresh_token?: string
+          refresh_token_expires_at?: string
+          refresh_token_expires_in?: number
+          scope?: string
+          token_type?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -245,3 +188,4 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+

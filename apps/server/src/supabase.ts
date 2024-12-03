@@ -4,18 +4,19 @@ import {
   serializeCookieHeader,
 } from "@supabase/ssr";
 
+import { createClient } from "@supabase/supabase-js";
+
 import type { Request, Response } from "express";
 import type { Database } from "./supabase.types";
+import { getEnv } from "./util";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-if (!SUPABASE_URL) {
-  throw new Error("SUPABASE_URL is not set");
-}
+const SUPABASE_URL = getEnv("SUPABASE_URL");
+const SUPABASE_SERVICE_KEY = getEnv("SUPABASE_SERVICE_KEY");
 
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-if (!SUPABASE_SERVICE_KEY) {
-  throw new Error("SUPABASE_SERVICE_KEY is not set");
-}
+export const privateSupabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_KEY,
+);
 
 export const createServerSupabase = (req: Request, res: Response) => {
   return createServerClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
