@@ -30,6 +30,37 @@ import {
 } from "./storage";
 import { categories } from "./categories";
 
+import { publicProcedure, router } from "./trpc";
+import { z } from "zod";
+
+const appRouter = router({
+  listEvents: publicProcedure
+    .input(
+      z.object({
+        group: z.string(),
+        version: z.string(),
+        plural: z.string(),
+        system: z.string(),
+        namespace: z.string(),
+        name: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const objUri = formatBlockUri({
+        group: input.group,
+        version: input.version,
+        plural: input.plural,
+        system: input.system,
+        namespace: input.namespace,
+        name: input.name,
+      });
+      const events = await loadEvents(objUri);
+      return { objUri, events };
+    }),
+});
+
+export type AppRouter = typeof appRouter;
+
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
 const GITHUB_CLIENT_ID = getEnv("GITHUB_CLIENT_ID");
@@ -46,6 +77,15 @@ app.use(
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  }),
+);
+
+import * as trpcExpress from "@trpc/server/adapters/express";
+
+app.use(
+  "/trpc",
+  trpcExpress.createExpressMiddleware({
+    router: appRouter,
   }),
 );
 
