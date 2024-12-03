@@ -27,7 +27,8 @@ jobs:
           version: latest
 
       - name: Start Supabase local development setup
-        run: source ../../secrets/portal.env && echo $GITHUB_CLIENT_ID && supabase db start
+        # run: source ../../secrets/portal.env && echo $GITHUB_CLIENT_ID && supabase db start
+        run: npx dotenv -e ../../secrets/portal.env -- supabase db start
         working-directory: apps/server
 
       # - name: Verify generated types are checked in
