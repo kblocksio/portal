@@ -41,15 +41,17 @@ export function App({ children }: { children: React.ReactNode }) {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <AppProvider>
+        {children}
+        {/* <AppProvider>
           <UserProvider>
             <NotificationsProvider>
+              {children}
               <ResourceProvider>
                 <CreateResourceProvider>{children}</CreateResourceProvider>
               </ResourceProvider>
             </NotificationsProvider>
           </UserProvider>
-        </AppProvider>
+        </AppProvider> */}
       </QueryClientProvider>
     </trpc.Provider>
   );
@@ -57,49 +59,5 @@ export function App({ children }: { children: React.ReactNode }) {
 
 // Create a new Layout component that contains your app shell
 export function AppLayout() {
-  return (
-    <div className="flex min-h-screen">
-      <SidebarProvider>
-        <AppSidebar />
-        <div className="flex grow flex-col">
-          <header className="bg-background/80 sticky top-0 z-10 flex h-16 w-full items-center self-start border-b backdrop-blur transition-[height] duration-200 ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-            <div className="flex w-full items-center gap-2 px-4">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-2 h-4" />
-                <AppBreadcrumbs />
-              </div>
-              <NotificationMenu className="ml-auto" />
-            </div>
-          </header>
-          <ScrollAreaResizeObserver>
-            <main className="grow px-4 sm:px-6 lg:px-8">
-              <div className="mx-auto w-full max-w-screen-2xl py-4">
-                <ErrorBoundary
-                  fallbackRender={(props) => (
-                    <div className="pt-4">
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Unexpected Error</AlertTitle>
-                        <AlertDescription>
-                          {props.error instanceof Error
-                            ? props.error.message
-                            : "An unexpected error occurred"}
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  )}
-                >
-                  <LocationProvider>
-                    <Outlet />
-                  </LocationProvider>
-                </ErrorBoundary>
-              </div>
-            </main>
-          </ScrollAreaResizeObserver>
-        </div>
-      </SidebarProvider>
-      <AppToaster />
-    </div>
-  );
+  return <Outlet />;
 }

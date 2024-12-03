@@ -18,10 +18,10 @@ If you want to test the portal locally, you can use `kind` to setup the environm
 
 Go to Docker Desktop settings and under **Resources** set:
 
-  - CPU limit: 10
-  - Memory limit: 20GB
-  - Swap: 3GB
-  - Virtual disk limit: 800GB
+- CPU limit: 10
+- Memory limit: 20GB
+- Swap: 3GB
+- Virtual disk limit: 800GB
 
 Install kind (v0.25.0 or above):
 
@@ -75,7 +75,6 @@ Setup all of the secrets and certs to your cluster:
 
 > Replace `KBLOCKS_SYSTEM_ID` with the system id if you are installing to a non-local cluster
 
-
 ```sh
 KBLOCKS_SYSTEM_ID=local ./scripts/install-all-secrets.sh
 ```
@@ -95,7 +94,7 @@ In this step we will install the demo block gallery. It is not required to insta
 same cluster as the portal cluster.
 
 ```sh
-cd gallery && ./install-blocks.sh
+./gallery/install-blocks.sh
 ```
 
 Wait for all pods to be READY:

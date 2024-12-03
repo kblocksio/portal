@@ -1,4 +1,3 @@
-import { parseBlockUri } from "@kblocks/api";
 import { Badge } from "./ui/badge";
 import {
   Tooltip,
@@ -18,12 +17,10 @@ const clusterColors = [
 ];
 
 export interface SystemBadgeProps {
-  blockUri: string;
+  system: string;
 }
 
-export const SystemBadge = ({ blockUri }: SystemBadgeProps) => {
-  const block = parseBlockUri(blockUri);
-
+export const SystemBadge = ({ system }: SystemBadgeProps) => {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -31,16 +28,16 @@ export const SystemBadge = ({ blockUri }: SystemBadgeProps) => {
           <Badge
             variant="outline"
             className={`w-full px-1.5 py-0.5 text-xs ${chooseColor(
-              block.system,
+              system,
               clusterColors,
             )}`}
           >
-            <span className="truncate">{block.system}</span>
+            <span className="truncate">{system}</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            Cluster: <span className="font-bold">{block.system}</span>
+            Cluster: <span className="font-bold">{system}</span>
           </p>
         </TooltipContent>
       </Tooltip>

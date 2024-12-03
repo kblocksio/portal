@@ -20,6 +20,7 @@ import {
   formatBlockUri,
   Manifest,
   ObjectEvent,
+  parseBlockUri,
 } from "@kblocks/api";
 import {
   getAllObjects,
@@ -33,6 +34,23 @@ import { categories } from "./categories";
 import { publicProcedure, router } from "./trpc";
 import { z } from "zod";
 
+export type TrpcProject = {
+  objUri: string;
+};
+
+export type TrpcResource = {
+  objUri: string;
+  status: "ready";
+  kind: string;
+  name: string;
+  cluster: string;
+  namespace: string;
+  projects: TrpcProject[];
+  lastUpdated: number | undefined;
+  // children
+  icon?: string;
+};
+
 const appRouter = router({
   listEvents: publicProcedure
     .input(
@@ -45,6 +63,33 @@ const appRouter = router({
       const events = await loadEvents(objUri);
       return { objUri, events };
     }),
+  listResources: publicProcedure.query(async () => {
+    const objects = await getAllObjects();
+    return Object.entries(objects).map<TrpcResource>(([objUri, object]) => {
+      const block = parseBlockUri(objUri);
+
+      const readyCondition = object.status?.conditions?.find(
+        (c) => c.type === "Ready",
+      );
+
+      const lastUpdated =
+        readyCondition?.lastTransitionTime ?? object.metadata.creationTimestamp;
+
+      const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
+
+      return {
+        objUri,
+        status: "ready",
+        kind: object.kind,
+        name: object.metadata.name,
+        cluster: block.system,
+        namespace: object.metadata.namespace ?? "??",
+        projects: [],
+        lastUpdated: timestamp?.getTime(),
+        icon: object.spec?.definition?.icon as string | undefined,
+      };
+    });
+  }),
 });
 
 export type AppRouter = typeof appRouter;

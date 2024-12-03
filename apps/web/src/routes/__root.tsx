@@ -19,11 +19,11 @@ export const Route = createRootRoute({
     <>
       <AppLayout />
       <ScrollRestoration />
-      <Suspense>
+      {/* <Suspense>
         <div className="hidden lg:visible">
           <TanStackRouterDevtools />
         </div>
-      </Suspense>
+      </Suspense> */}
     </>
   ),
 });

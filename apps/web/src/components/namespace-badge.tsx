@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { chooseColor } from "./components-utils";
 import { Badge } from "./ui/badge";
 import {
@@ -16,7 +17,11 @@ const namespaceColors = [
   "bg-slate-100 text-slate-800",
 ];
 
-export const NamespaceBadge = ({ namespace }: { namespace: string }) => {
+export const NamespaceBadge = memo(function NamespaceBadge({
+  namespace,
+}: {
+  namespace: string;
+}) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -36,4 +41,4 @@ export const NamespaceBadge = ({ namespace }: { namespace: string }) => {
       </Tooltip>
     </TooltipProvider>
   );
-};
+});

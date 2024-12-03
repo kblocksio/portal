@@ -18,85 +18,48 @@ export const meta = {
 };
 
 function Resources() {
-  const { resourceTypes, objects } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
+  // const { resourceTypes, objects } = useContext(ResourceContext);
+  // const { setBreadcrumbs } = useAppContext();
 
-  const Icon = getIconComponent({ icon: meta.icon });
+  // const Icon = getIconComponent({ icon: meta.icon });
 
-  const allResources = useMemo(() => {
-    return Object.values(objects).filter((r) => {
-      if (r.objType === "kblocks.io/v1/blocks") {
-        return false;
-      }
+  // const allResources = useMemo(() => {
+  //   return Object.values(objects).filter((r) => {
+  //     if (r.objType === "kblocks.io/v1/blocks") {
+  //       return false;
+  //     }
 
-      if (r.objType === "kblocks.io/v1/projects") {
-        return false;
-      }
+  //     if (r.objType === "kblocks.io/v1/projects") {
+  //       return false;
+  //     }
 
-      if (r.objType === "kblocks.io/v1/clusters") {
-        return false;
-      }
+  //     if (r.objType === "kblocks.io/v1/clusters") {
+  //       return false;
+  //     }
 
-      // don't show resources that are children of other resources
-      if (r.metadata?.ownerReferences?.length) {
-        return false;
-      }
+  //     // don't show resources that are children of other resources
+  //     if (r.metadata?.ownerReferences?.length) {
+  //       return false;
+  //     }
 
-      return true;
-    });
-  }, [objects]);
+  //     return true;
+  //   });
+  // }, [objects]);
 
-  useEffect(() => {
-    setBreadcrumbs([{ name: "Resources" }]);
-  }, [setBreadcrumbs]);
+  // useEffect(() => {
+  //   setBreadcrumbs([{ name: "Resources" }]);
+  // }, [setBreadcrumbs]);
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
-      <RoutePageHeader
+      {/* <RoutePageHeader
         title="Resources"
         description={meta.description}
         Icon={Icon}
-      />
+      /> */}
       <div>
-        {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            <ResourceTable resources={allResources} />
-          </>
-        )}
+        <ResourceTable />
       </div>
     </div>
   );
 }
-
-const LoadingSkeleton = () => {
-  return (
-    <div className="space-y-8">
-      {[...Array(3)].map((_, index) => (
-        <div key={index} className="w-full">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-6 w-6" />
-              <Skeleton className="h-6 w-16" />
-            </div>
-            <div className="flex grow items-center justify-between">
-              <div className="flex grow items-center space-x-4 sm:w-auto">
-                <Skeleton className="h-4 w-4 rounded-full" />
-                <Skeleton className="h-4 w-full sm:max-w-40" />
-              </div>
-              <Skeleton className="hidden h-4 w-32 sm:block" />
-            </div>
-            <div className="flex w-full items-center justify-between">
-              <div className="flex grow items-center space-x-4 sm:w-auto">
-                <Skeleton className="h-4 w-4 rounded-full" />
-                <Skeleton className="h-4 w-full sm:max-w-40" />
-              </div>
-              <Skeleton className="hidden h-4 w-32 sm:block" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};

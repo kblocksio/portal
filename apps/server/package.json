@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
   },
   "scripts": {
     "dev": "tsx scripts/dev.mts",

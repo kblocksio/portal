@@ -9,6 +9,7 @@ import {
   flexRender,
   RowSelectionState,
   Row,
+  createColumnHelper,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -52,76 +53,83 @@ import { ProjectLink } from "../project-link";
 import { useLocalStorage } from "@/hooks/use-localstorage";
 import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
+import { trpc } from "@/trpc";
+import type { TrpcResource } from "@kblocks-portal/server";
+import { getIconComponent } from "@/lib/get-icon";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
-type ExtendedResource = Resource & {
+type ExtendedResource = TrpcResource & {
   iconComponent?: React.ComponentType<{ className?: string }>;
-  rels: Resource[];
-  prjs: Project[];
-  resourceType: ResourceType;
+  // rels: Resource[];
+  // prjs: Project[];
+  // resourceType: ResourceType;
 };
+
+const columnHelper = createColumnHelper<ExtendedResource>();
 
 const useColumns = () => {
   return useMemo<ColumnDef<ExtendedResource>[]>(() => {
     return [
-      {
-        accessorKey: "selection",
-        cell: (props) => (
-          <Checkbox
-            checked={props.row.getIsSelected()}
-            disabled={!props.row.getCanSelect()}
-            onCheckedChange={props.row.getToggleSelectedHandler()}
-          />
-        ),
-        size: 0,
-        header: (props) => (
-          <Checkbox
-            checked={
-              props.table.getIsAllRowsSelected()
-                ? true
-                : props.table.getIsSomeRowsSelected()
-                  ? "indeterminate"
-                  : false
-            }
-            onCheckedChange={(checked) =>
-              props.table.toggleAllRowsSelected(checked === true)
-            }
-          />
-        ),
-      },
-      {
-        accessorKey: "status",
+      // columnHelper.accessor("selection", {
+      //   id: "selection",
+      //   cell: (props) => (
+      //     <Checkbox
+      //       checked={props.row.getIsSelected()}
+      //       disabled={!props.row.getCanSelect()}
+      //       onCheckedChange={props.row.getToggleSelectedHandler()}
+      //     />
+      //   ),
+      //   size: 0,
+      //   header: (props) => (
+      //     <Checkbox
+      //       checked={
+      //         props.table.getIsAllRowsSelected()
+      //           ? true
+      //           : props.table.getIsSomeRowsSelected()
+      //             ? "indeterminate"
+      //             : false
+      //       }
+      //       onCheckedChange={(checked) =>
+      //         props.table.toggleAllRowsSelected(checked === true)
+      //       }
+      //     />
+      //   ),
+      // }),
+      columnHelper.accessor("status", {
+        id: "status",
         cell: (props) => (
           <div className="flex items-center gap-1.5">
-            <StatusBadge obj={props.row.original} merge />
+            {/* <StatusBadge obj={props.row.original} merge /> */}
+            {/* {props.getValue()} */}
+            <div className={cn("size-3 rounded-full bg-green-500")} />
           </div>
         ),
         size: 0,
         header: () => <></>,
-        filterFn: (row, columnId, filterValue) => {
-          const readyCondition = getReadyCondition(row.original);
-          const status =
-            readyCondition?.reason === StatusReason.Completed
-              ? "Ready"
-              : readyCondition?.reason === StatusReason.Error
-                ? "Failed"
-                : undefined;
-          return filterValue.includes(status);
-        },
-        sortingFn: (rowA, rowB) => {
-          const readyConditionA = getReadyCondition(rowA.original.obj);
-          const readyConditionB = getReadyCondition(rowB.original.obj);
+        // filterFn: (row, columnId, filterValue) => {
+        //   const readyCondition = getReadyCondition(row.original);
+        //   const status =
+        //     readyCondition?.reason === StatusReason.Completed
+        //       ? "Ready"
+        //       : readyCondition?.reason === StatusReason.Error
+        //         ? "Failed"
+        //         : undefined;
+        //   return filterValue.includes(status);
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   const readyConditionA = getReadyCondition(rowA.original.obj);
+        //   const readyConditionB = getReadyCondition(rowB.original.obj);
 
-          if (!readyConditionA?.status || !readyConditionB?.status) {
-            return 0;
-          }
+        //   if (!readyConditionA?.status || !readyConditionB?.status) {
+        //     return 0;
+        //   }
 
-          return readyConditionA.status.localeCompare(readyConditionB.status);
-        },
-      },
-      {
-        accessorKey: "kind",
+        //   return readyConditionA.status.localeCompare(readyConditionB.status);
+        // },
+      }),
+      columnHelper.accessor("kind", {
+        id: "kind",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Kind" />
         ),
@@ -131,19 +139,19 @@ const useColumns = () => {
               {props.row.original.iconComponent && (
                 <props.row.original.iconComponent className="h-4 w-4" />
               )}
-              {props.row.original.kind}
+              {props.getValue()}
             </div>
           );
         },
-        filterFn: (row, columnId, filterValue) => {
-          return filterValue.includes(row.original.kind);
-        },
-        sortingFn: (rowA, rowB) => {
-          return rowA.original.kind.localeCompare(rowB.original.kind);
-        },
-      },
-      {
-        accessorKey: "name",
+        // filterFn: (row, columnId, filterValue) => {
+        //   return filterValue.includes(row.original.kind);
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   return rowA.original.kind.localeCompare(rowB.original.kind);
+        // },
+      }),
+      columnHelper.accessor("name", {
+        id: "name",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Name" />
         ),
@@ -158,215 +166,213 @@ const useColumns = () => {
                 )}` as any
               }
             >
-              {props.row.original.metadata.name}
+              {props.getValue()}
             </Link>
           </div>
         ),
-        filterFn: (row, columnId, filterValue) => {
-          return row.original.metadata.name.includes(filterValue);
-        },
-        sortingFn: (rowA, rowB) => {
-          return rowA.original.metadata.name.localeCompare(
-            rowB.original.metadata.name,
-          );
-        },
-      },
-      {
-        accessorKey: "system",
+        // filterFn: (row, columnId, filterValue) => {
+        //   return row.original.metadata.name.includes(filterValue);
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   return rowA.original.metadata.name.localeCompare(
+        //     rowB.original.metadata.name,
+        //   );
+        // },
+      }),
+      columnHelper.accessor("cluster", {
+        id: "cluster",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
-            <SystemBadge blockUri={props.row.original.objUri} />
+            <SystemBadge system={props.getValue()} />
           </div>
         ),
-        filterFn: (row, columnId, filterValue) => {
-          const { system } = parseBlockUri(row.original.objUri);
-          return filterValue.includes(system);
-        },
-        sortingFn: (rowA, rowB) => {
-          const { system: systemA } = parseBlockUri(rowA.original.objUri);
-          const { system: systemB } = parseBlockUri(rowB.original.objUri);
-          return systemA.localeCompare(systemB);
-        },
-      },
-      {
-        accessorKey: "namespace",
+        // filterFn: (row, columnId, filterValue) => {
+        //   const { system } = parseBlockUri(row.original.objUri);
+        //   return filterValue.includes(system);
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   const { system: systemA } = parseBlockUri(rowA.original.objUri);
+        //   const { system: systemB } = parseBlockUri(rowB.original.objUri);
+        //   return systemA.localeCompare(systemB);
+        // },
+      }),
+      columnHelper.accessor("namespace", {
+        id: "namespace",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Namespace" />
         ),
         cell: (props) => (
           <div className="flex items-center gap-1.5">
-            {props.row.original.metadata.namespace && (
-              <NamespaceBadge
-                namespace={props.row.original.metadata.namespace}
-              />
-            )}
+            <NamespaceBadge namespace={props.getValue()} />
           </div>
         ),
-        filterFn: (row, columnId, filterValue) => {
-          const { namespace } = parseBlockUri(row.original.objUri);
-          return filterValue.includes(namespace);
-        },
-        sortingFn: (rowA, rowB) => {
-          const { namespace: namespaceA } = parseBlockUri(rowA.original.objUri);
-          const { namespace: namespaceB } = parseBlockUri(rowB.original.objUri);
-          return namespaceA.localeCompare(namespaceB);
-        },
-      },
-      {
-        accessorKey: "children",
-        header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Children" />
-        ),
-        cell: (props) => {
-          if (props.row.original.rels.length === 0) {
-            return null;
-          }
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className="h-0">
-                    <div>{props.row.original.rels.length} Children</div>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="flex flex-col gap-2">
-                    {props.row.original.rels.map((r) => {
-                      return (
-                        <div key={r.objUri}>
-                          <ResourceLink resource={r} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        },
-      },
-      {
-        accessorKey: "projects",
-        header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Projects" />
-        ),
-        cell: (props) => {
-          const prjs = props.row.original.prjs;
-          if (prjs.length === 0) {
-            return null;
-          }
+        // filterFn: (row, columnId, filterValue) => {
+        //   const { namespace } = parseBlockUri(row.original.objUri);
+        //   return filterValue.includes(namespace);
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   const { namespace: namespaceA } = parseBlockUri(rowA.original.objUri);
+        //   const { namespace: namespaceB } = parseBlockUri(rowB.original.objUri);
+        //   return namespaceA.localeCompare(namespaceB);
+        // },
+      }),
+      // columnHelper.accessor("children", {
+      //   id: "children",
+      //   header: (props) => (
+      //     <DataTableColumnHeader column={props.column} title="Children" />
+      //   ),
+      //   cell: (props) => {
+      //     if (props.row.original.rels.length === 0) {
+      //       return null;
+      //     }
+      //     return (
+      //       <TooltipProvider>
+      //         <Tooltip>
+      //           <TooltipTrigger asChild>
+      //             <Button variant="ghost" className="h-0">
+      //               <div>{props.row.original.rels.length} Children</div>
+      //             </Button>
+      //           </TooltipTrigger>
+      //           <TooltipContent>
+      //             <div className="flex flex-col gap-2">
+      //               {props.row.original.rels.map((r) => {
+      //                 return (
+      //                   <div key={r.objUri}>
+      //                     <ResourceLink resource={r} />
+      //                   </div>
+      //                 );
+      //               })}
+      //             </div>
+      //           </TooltipContent>
+      //         </Tooltip>
+      //       </TooltipProvider>
+      //     );
+      //   },
+      // }),
+      // columnHelper.accessor("projects", {
+      //   id: "projects",
+      //   header: (props) => (
+      //     <DataTableColumnHeader column={props.column} title="Projects" />
+      //   ),
+      //   cell: (props) => {
+      //     const prjs = props.row.original.prjs;
+      //     if (prjs.length === 0) {
+      //       return null;
+      //     }
 
-          if (prjs.length === 1) {
-            return (
-              <span className="truncate">
-                <ProjectLink project={prjs[0]} />
-              </span>
-            );
-          }
+      //     if (prjs.length === 1) {
+      //       return (
+      //         <span className="truncate">
+      //           <ProjectLink project={prjs[0]} />
+      //         </span>
+      //       );
+      //     }
 
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className="h-0">
-                    {prjs.length} Projects
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="flex flex-col items-start gap-2">
-                    {prjs.map((p) => (
-                      <ProjectLink key={p.metadata.name} project={p} />
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        },
-        filterFn: (row, columnId, selectedProjects) => {
-          if (selectedProjects.includes("$unassigned")) {
-            if (row.original.prjs.length === 0) {
-              return true;
-            }
-          }
+      //     return (
+      //       <TooltipProvider>
+      //         <Tooltip>
+      //           <TooltipTrigger asChild>
+      //             <Button variant="ghost" className="h-0">
+      //               {prjs.length} Projects
+      //             </Button>
+      //           </TooltipTrigger>
+      //           <TooltipContent>
+      //             <div className="flex flex-col items-start gap-2">
+      //               {prjs.map((p) => (
+      //                 <ProjectLink key={p.metadata.name} project={p} />
+      //               ))}
+      //             </div>
+      //           </TooltipContent>
+      //         </Tooltip>
+      //       </TooltipProvider>
+      //     );
+      //   },
+      //   filterFn: (row, columnId, selectedProjects) => {
+      //     if (selectedProjects.includes("$unassigned")) {
+      //       if (row.original.prjs.length === 0) {
+      //         return true;
+      //       }
+      //     }
 
-          for (const p of selectedProjects) {
-            if (row.original.prjs.find((pp) => pp.metadata.name === p)) {
-              return true;
-            }
-          }
+      //     for (const p of selectedProjects) {
+      //       if (row.original.prjs.find((pp) => pp.metadata.name === p)) {
+      //         return true;
+      //       }
+      //     }
 
-          return false;
-        },
-        sortingFn: (rowA, rowB) => {
-          return JSON.stringify(rowA.original.prjs).localeCompare(
-            JSON.stringify(rowB.original.prjs),
-          );
-        },
-      },
-      {
-        accessorKey: "lastUpdated",
+      //     return false;
+      //   },
+      //   sortingFn: (rowA, rowB) => {
+      //     return JSON.stringify(rowA.original.prjs).localeCompare(
+      //       JSON.stringify(rowB.original.prjs),
+      //     );
+      //   },
+      // }),
+      columnHelper.accessor("lastUpdated", {
+        id: "lastUpdated",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
         ),
-        cell: (props) => <LastUpdated resource={props.row.original} />,
-        sortingFn: (rowA, rowB) => {
-          const readyConditionA = getReadyCondition(rowA.original);
-          const readyConditionB = getReadyCondition(rowB.original);
-          const lastUpdatedA =
-            readyConditionA?.lastTransitionTime ??
-            rowA.original.metadata.creationTimestamp;
-          const lastUpdatedB =
-            readyConditionB?.lastTransitionTime ??
-            rowB.original.metadata.creationTimestamp;
-          if (!lastUpdatedA || !lastUpdatedB) {
-            return 0;
-          }
-          return lastUpdatedA.localeCompare(lastUpdatedB);
-        },
-      },
-      {
-        accessorKey: "logs",
-        header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Logs" />
-        ),
-        size: 400,
-        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
-        // enableSorting: false,
-      },
-      {
-        accessorKey: "outputs",
-        size: 0,
-        header: () => <></>,
-        cell: (props) => {
-          return (
-            <ResourceOutputs
-              resource={props.row.original}
-              resourceType={props.row.original.resourceType}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "actions",
-        size: 0,
-        header: () => <></>,
-        cell: (props) => (
-          <ResourceActionsMenu
-            resource={props.row.original}
-            resourceType={props.row.original.resourceType}
-          />
-        ),
-      },
+        cell: (props) =>
+          props.row.original.lastUpdated && (
+            <LastUpdated timestamp={props.row.original.lastUpdated} />
+          ),
+        // sortingFn: (rowA, rowB) => {
+        //   const readyConditionA = getReadyCondition(rowA.original);
+        //   const readyConditionB = getReadyCondition(rowB.original);
+        //   const lastUpdatedA =
+        //     readyConditionA?.lastTransitionTime ??
+        //     rowA.original.metadata.creationTimestamp;
+        //   const lastUpdatedB =
+        //     readyConditionB?.lastTransitionTime ??
+        //     rowB.original.metadata.creationTimestamp;
+        //   if (!lastUpdatedA || !lastUpdatedB) {
+        //     return 0;
+        //   }
+        //   return lastUpdatedA.localeCompare(lastUpdatedB);
+        // },
+      }),
+      // columnHelper.accessor("logs", {
+      //   id: "logs",
+      //   header: (props) => (
+      //     <DataTableColumnHeader column={props.column} title="Logs" />
+      //   ),
+      //   size: 400,
+      //   cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
+      //   // enableSorting: false,
+      // }),
+      // columnHelper.accessor("outputs", {
+      //   id: "outputs",
+      //   size: 0,
+      //   header: () => <></>,
+      //   cell: (props) => {
+      //     return (
+      //       <ResourceOutputs
+      //         resource={props.row.original}
+      //         resourceType={props.row.original.resourceType}
+      //       />
+      //     );
+      //   },
+      // }),
+      // columnHelper.accessor("actions", {
+      //   id: "actions",
+      //   size: 0,
+      //   header: () => <></>,
+      //   cell: (props) => (
+      //     <ResourceActionsMenu
+      //       resource={props.row.original}
+      //       resourceType={props.row.original.resourceType}
+      //     />
+      //   ),
+      // }),
     ];
   }, []);
 };
 
 export const ResourceTable = (props: {
-  resources: Resource[];
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -375,9 +381,22 @@ export const ResourceTable = (props: {
     navigate: () => void;
   };
 }) => {
+  const resources2 = trpc.listResources.useQuery();
+  const resources3 = useMemo<ExtendedResource[]>(() => {
+    return (
+      resources2.data?.map((r) => ({
+        ...r,
+        iconComponent: getIconComponent({ icon: r.icon }),
+      })) ?? []
+    );
+  }, [resources2.data]);
+  // useEffect(() => {
+  //   console.log(resources2.data?.map((r) => r.icon));
+  // }, [resources2.data]);
+
   const columns = useColumns();
 
-  const location = useLocation();
+  // const location = useLocation();
 
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     JSON.stringify([location.pathname, "columnFilters"]),
@@ -393,27 +412,27 @@ export const ResourceTable = (props: {
     setRowSelection({});
   }, [location.pathname]);
 
-  const { resourceTypes, relationships, objects, projects } =
-    useContext(ResourceContext);
+  // const { resourceTypes, relationships, objects, projects } =
+  //   useContext(ResourceContext);
 
-  const resources = useMemo(() => {
-    return props.resources.map<ExtendedResource>((resource) => {
-      return {
-        ...resource,
-        iconComponent: resourceTypes[resource.objType]?.iconComponent,
-        rels: Object.entries(relationships[resource.objUri] ?? {})
-          .filter(([, rel]) => rel.type === "child")
-          .map(([relUri]) => objects[relUri]),
-        prjs: projects.filter((p) =>
-          (p.objects ?? []).includes(resource.objUri),
-        ),
-        resourceType: resourceTypes[resource.objType],
-      };
-    });
-  }, [props.resources, resourceTypes, relationships, projects, objects]);
+  // const resources = useMemo(() => {
+  //   return props.resources.map<ExtendedResource>((resource) => {
+  //     return {
+  //       ...resource,
+  //       iconComponent: resourceTypes[resource.objType]?.iconComponent,
+  //       rels: Object.entries(relationships[resource.objUri] ?? {})
+  //         .filter(([, rel]) => rel.type === "child")
+  //         .map(([relUri]) => objects[relUri]),
+  //       prjs: projects.filter((p) =>
+  //         (p.objects ?? []).includes(resource.objUri),
+  //       ),
+  //       resourceType: resourceTypes[resource.objType],
+  //     };
+  //   });
+  // }, [props.resources, resourceTypes, relationships, projects, objects]);
 
   const table = useReactTable({
-    data: resources,
+    data: resources3,
     columns,
     state: {
       columnFilters,
@@ -444,12 +463,12 @@ export const ResourceTable = (props: {
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
-      <ResourceTableToolbar
+      {/* <ResourceTableToolbar
         table={table}
         showActions={props.showActions}
         showCreateNew={props.showCreateNew}
         customNewResourceAction={props.customNewResourceAction}
-      />
+      /> */}
       <div className={cn("rounded-md border bg-white", props.className)}>
         <div
           ref={scrollRef}
@@ -486,8 +505,7 @@ export const ResourceTable = (props: {
                   return (
                     <ResourceTableRow
                       key={row.id}
-                      resource={row.original}
-                      row={row}
+                      isSelected={row.getIsSelected()}
                       style={{
                         height: `${virtualRow.size}px`,
                         transform: `translateY(${
@@ -541,22 +559,16 @@ export const ResourceTable = (props: {
 
 const ResourceTableRow = memo(
   ({
-    resource,
-    row,
+    isSelected,
     children,
     style,
   }: {
-    resource: Resource;
-    row: Row<Resource>;
+    isSelected: boolean;
     children: React.ReactNode;
     style: React.CSSProperties;
   }) => {
     return (
-      <TableRow
-        key={resource.objUri}
-        data-state={row.getIsSelected() ? "selected" : undefined}
-        style={style}
-      >
+      <TableRow data-state={isSelected ? "selected" : undefined} style={style}>
         {children}
       </TableRow>
     );
@@ -564,57 +576,57 @@ const ResourceTableRow = memo(
 );
 ResourceTableRow.displayName = "ResourceTableRow";
 
-const ResourceOutputs = ({
-  resource,
-  resourceType,
-}: {
-  resource: Resource;
-  resourceType: ResourceType;
-}) => {
-  const outputs = getResourceOutputs(resource);
-  const [isOpen, setIsOpen] = useState(false);
+// const ResourceOutputs = ({
+//   resource,
+//   resourceType,
+// }: {
+//   resource: Resource;
+//   resourceType: ResourceType;
+// }) => {
+//   const outputs = getResourceOutputs(resource);
+//   const [isOpen, setIsOpen] = useState(false);
 
-  if (Object.keys(outputs).length === 0) {
-    return null;
-  }
+//   if (Object.keys(outputs).length === 0) {
+//     return null;
+//   }
 
-  return (
-    <div>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-0"
-                  onClick={(e) => {
-                    setIsOpen(true);
-                    e.stopPropagation();
-                  }}
-                >
-                  <CircleEllipsis className="h-4 w-4" />
-                  <span className="sr-only">Outputs</span>
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Outputs</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <PopoverContent onClick={(e) => e.stopPropagation()}>
-          <div className="flex flex-col space-y-8">
-            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <Outputs
-                outputs={outputs}
-                resourceObjUri={resource.objUri}
-                resourceType={resourceType}
-              />
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <Popover open={isOpen} onOpenChange={setIsOpen}>
+//         <TooltipProvider>
+//           <Tooltip>
+//             <TooltipTrigger asChild>
+//               <PopoverTrigger asChild>
+//                 <Button
+//                   variant="ghost"
+//                   className="h-0"
+//                   onClick={(e) => {
+//                     setIsOpen(true);
+//                     e.stopPropagation();
+//                   }}
+//                 >
+//                   <CircleEllipsis className="h-4 w-4" />
+//                   <span className="sr-only">Outputs</span>
+//                 </Button>
+//               </PopoverTrigger>
+//             </TooltipTrigger>
+//             <TooltipContent>
+//               <p>Outputs</p>
+//             </TooltipContent>
+//           </Tooltip>
+//         </TooltipProvider>
+//         <PopoverContent onClick={(e) => e.stopPropagation()}>
+//           <div className="flex flex-col space-y-8">
+//             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+//               <Outputs
+//                 outputs={outputs}
+//                 resourceObjUri={resource.objUri}
+//                 resourceType={resourceType}
+//               />
+//             </div>
+//           </div>
+//         </PopoverContent>
+//       </Popover>
+//     </div>
+//   );
+// };
