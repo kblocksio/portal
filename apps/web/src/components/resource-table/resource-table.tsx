@@ -10,7 +10,8 @@ import {
   RowSelectionState,
   Row,
 } from "@tanstack/react-table";
-import { memo, useContext, useEffect, useMemo, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Resource,
   ResourceContext,
@@ -428,6 +429,17 @@ export const ResourceTable = (props: {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const { rows } = table.getRowModel();
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 40,
+    overscan: 20,
+  });
+
   const emptyTable = table.getFilteredRowModel().rows.length === 0;
 
   return (
@@ -439,39 +451,81 @@ export const ResourceTable = (props: {
         customNewResourceAction={props.customNewResourceAction}
       />
       <div className={cn("rounded-md border bg-white", props.className)}>
-        <Table className="w-full">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) =>
-                  header.isPlaceholder ? null : (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{ width: header.getSize() }}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                    </TableHead>
-                  ),
-                )}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <ResourceTableRow key={row.id} resource={row.original} row={row}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+        <div
+          ref={scrollRef}
+          style={{
+            overflow: "auto",
+            height: "600px",
+          }}
+        >
+          <div style={{ height: `${virtualizer.getTotalSize()}px` }}>
+            <Table className="w-full">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) =>
+                      header.isPlaceholder ? null : (
+                        <TableHead
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          style={{ width: header.getSize() }}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </TableHead>
+                      ),
+                    )}
+                  </TableRow>
                 ))}
-              </ResourceTableRow>
-            ))}
-          </TableBody>
-        </Table>
+              </TableHeader>
+              <TableBody>
+                {virtualizer.getVirtualItems().map((virtualRow, index) => {
+                  const row = rows[virtualRow.index];
+                  return (
+                    <ResourceTableRow
+                      key={row.id}
+                      resource={row.original}
+                      row={row}
+                      style={{
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${
+                          virtualRow.start - index * virtualRow.size
+                        }px)`,
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </ResourceTableRow>
+                  );
+                })}
+                {/* {table.getRowModel().rows.map((row) => (
+                  <ResourceTableRow
+                    key={row.id}
+                    resource={row.original}
+                    row={row}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </ResourceTableRow>
+                ))} */}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
 
       {emptyTable && (
@@ -490,15 +544,18 @@ const ResourceTableRow = memo(
     resource,
     row,
     children,
+    style,
   }: {
     resource: Resource;
     row: Row<Resource>;
     children: React.ReactNode;
+    style: React.CSSProperties;
   }) => {
     return (
       <TableRow
         key={resource.objUri}
         data-state={row.getIsSelected() ? "selected" : undefined}
+        style={style}
       >
         {children}
       </TableRow>

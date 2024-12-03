@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   useObjectEvents,
   type WorkerEventTimestampString,
@@ -30,7 +30,11 @@ const formatEventMessage = (event: WorkerEventTimestampString) => {
   }
 };
 
-export const LastLogMessage = ({ objUri }: { objUri: string }) => {
+export const LastLogMessage = memo(function LastLogMessage({
+  objUri,
+}: {
+  objUri: string;
+}) {
   const latestEvent = useLatestEvent(objUri);
 
   const [skip, setSkip] = useState(true);
@@ -66,4 +70,4 @@ export const LastLogMessage = ({ objUri }: { objUri: string }) => {
       </AnimatePresence>
     </div>
   );
-};
+});
