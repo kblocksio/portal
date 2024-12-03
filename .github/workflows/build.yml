@@ -85,8 +85,7 @@ jobs:
           npm install
 
       - name: Link Supabase project
-        run: npx dotenv -e ../../secrets/portal.env -- npx supabase link --project-ref $SUPABASE_PROJECT_ID
-        working-directory: apps/server
+        run: npx dotenv -e secrets/portal.env -- supabase link --project-ref $SUPABASE_PROJECT_ID
 
       - name: Push Supabase database
         run: npx dotenv -e ../../secrets/portal.env -- npx supabase db push
