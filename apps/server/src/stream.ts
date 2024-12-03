@@ -32,6 +32,7 @@ export function startStreamListener() {
         for (const { id, message } of messages) {
           if (isShuttingDown) break;
           try {
+            await redisClient.xDel(KBLOCKS_EVENTS_CHANNEL, id);
             const event: string = Object.values(message)[0] as any;
             await publishEvent(JSON.parse(event));
           } catch (error) {
