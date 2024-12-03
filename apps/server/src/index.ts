@@ -37,23 +37,11 @@ const appRouter = router({
   listEvents: publicProcedure
     .input(
       z.object({
-        group: z.string(),
-        version: z.string(),
-        plural: z.string(),
-        system: z.string(),
-        namespace: z.string(),
-        name: z.string(),
+        objUri: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      const objUri = formatBlockUri({
-        group: input.group,
-        version: input.version,
-        plural: input.plural,
-        system: input.system,
-        namespace: input.namespace,
-        name: input.name,
-      });
+      const { objUri } = input;
       const events = await loadEvents(objUri);
       return { objUri, events };
     }),

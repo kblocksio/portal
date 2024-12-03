@@ -3,19 +3,10 @@ import { memo, useEffect, useState } from "react";
 import { type WorkerEventTimestampString } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/trpc";
-import { parseBlockUri } from "@kblocks/api";
 
 const useLatestEvent = (objUri: string) => {
-  const { group, version, plural, system, namespace, name } =
-    parseBlockUri(objUri);
-
   const eventsQuery = trpc.listEvents.useQuery({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
+    objUri,
   });
 
   if (!eventsQuery.data) {
