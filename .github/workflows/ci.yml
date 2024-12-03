@@ -24,15 +24,12 @@ jobs:
           version: latest
 
       - name: Start Supabase local development setup
-        run: |
-          source ../../secrets/portal.env
-          supabase db start
+        run: source ../../secrets/portal.env && supabase db start
         working-directory: apps/server
 
       - name: Verify generated types are checked in
         run: |
-          source ../../secrets/portal.env
-          supabase gen types typescript --local > types.gen.ts
+          source ../../secrets/portal.env && supabase gen types typescript --local > types.gen.ts
           if ! git diff --ignore-space-at-eol --exit-code --quiet types.gen.ts; then
             echo "Detected uncommitted changes after build. See status below:"
             git diff
