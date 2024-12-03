@@ -25,6 +25,8 @@ export const ResourceForm = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
+  const isEnvironmentResourceType = resourceType.group === "kblocks.io";
+
   // create a clone of the schema and remove the status property (the outputs)
   const schema = useMemo(() => {
     const result = cloneDeep(resourceType.schema);
@@ -33,7 +35,12 @@ export const ResourceForm = ({
   }, [resourceType]);
 
   const [formData, setFormData] = useState<any>(initialValues ?? {});
-  const [system, setSystem] = useState(initialMeta?.system ?? "");
+  const [system, setSystem] = useState(
+    initialMeta?.system ??
+      (isEnvironmentResourceType
+        ? resourceType.systems.values().next().value
+        : ""),
+  );
   const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
   );
@@ -116,13 +123,15 @@ export const ResourceForm = ({
               className={`${initialValues ? "opacity-50" : ""}`}
             >
               Namespace
-              <span className="text-destructive">*</span>
+              {!isEnvironmentResourceType && (
+                <span className="text-destructive">*</span>
+              )}
             </Label>
             <Input
-              required
+              required={!isEnvironmentResourceType}
               id="namespace"
               placeholder="Namespace"
-              disabled={!!initialValues}
+              disabled={!!initialValues || isEnvironmentResourceType}
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
             />
@@ -133,20 +142,23 @@ export const ResourceForm = ({
               className={`${initialValues ? "opacity-50" : ""}`}
             >
               Cluster
-              <span className="text-destructive">*</span>
+              {!isEnvironmentResourceType && (
+                <span className="text-destructive">*</span>
+              )}
             </Label>
             <div className="relative">
               <SystemSelector
                 resourceType={resourceType}
-                disabled={!!initialValues}
+                disabled={!!initialValues || isEnvironmentResourceType}
                 value={system}
                 onChange={(value) => setSystem(value)}
-                required={true}
+                required={!isEnvironmentResourceType}
               />
               <input
                 type="text"
                 tabIndex={-1}
-                required
+                required={!isEnvironmentResourceType}
+                disabled={!!initialValues || isEnvironmentResourceType}
                 value={system}
                 onChange={() => {}}
                 style={{

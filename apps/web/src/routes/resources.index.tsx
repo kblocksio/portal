@@ -6,6 +6,7 @@ import { useAppContext } from "@/app-context";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getIconComponent } from "@/lib/get-icon";
+import { RoutePageHeader } from "@/components/route-page-header";
 export const Route = createFileRoute("/resources/")({
   component: Resources,
 });
@@ -32,6 +33,10 @@ function Resources() {
         return false;
       }
 
+      if (r.objType === "kblocks.io/v1/clusters") {
+        return false;
+      }
+
       // don't show resources that are children of other resources
       if (r.metadata?.ownerReferences?.length) {
         return false;
@@ -47,20 +52,11 @@ function Resources() {
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
-      <div className="flex flex-col items-start justify-between md:flex-row">
-        <div className="flex-1 space-y-4">
-          <h1 className="text-3xl font-bold tracking-tight">
-            <div className="flex items-center gap-4">
-              {Icon && <Icon className="h-8 w-8" />}
-              Resources
-            </div>
-          </h1>
-          <p className="text-md text-muted-foreground min-h-10">
-            {meta.description}
-          </p>
-        </div>
-      </div>
-
+      <RoutePageHeader
+        title="Resources"
+        description={meta.description}
+        Icon={Icon}
+      />
       <div>
         {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
           <LoadingSkeleton />

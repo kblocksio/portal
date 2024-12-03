@@ -2,11 +2,12 @@ import { useAppContext } from "@/app-context";
 import { ResourceForm } from "@/components/resource-form/resource-form";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { useCreateResource } from "@/create-resource-context";
+import { LocationContext } from "@/location-context";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { ObjectMetadata } from "@repo/shared";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useEffect, useMemo } from "react";
-
+import { BreadcrumbItem } from "@/app-context";
 export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
   component: CreateResourcePage,
 });
@@ -17,21 +18,35 @@ function CreateResourcePage() {
   const { setBreadcrumbs } = useAppContext();
   const { group, version, plural } = Route.useParams();
   const navigate = useNavigate();
+  const previousRoute = useContext(LocationContext);
+
+  const firstPathSegment = useMemo(() => {
+    if (previousRoute?.previousRoute) {
+      return previousRoute.previousRoute.split("/")[1];
+    }
+    return "/resources";
+  }, [previousRoute]);
+
   useEffect(() => {
-    setBreadcrumbs([
+    const breadcrumbs: BreadcrumbItem[] = [
       {
-        name: "Resources",
-        url: "/resources",
+        name: firstPathSegment
+          .replace(/^\//, "")
+          .replace(/^\w/, (c) => c.toUpperCase()),
+        url: `/${firstPathSegment}`,
       },
-      {
+    ];
+    if (firstPathSegment === "resources") {
+      breadcrumbs.push({
         name: "New",
         url: "/resources/new",
-      },
-      {
-        name: `${group}/${version}/${plural}`,
-      },
-    ]);
-  }, []);
+      });
+    }
+    breadcrumbs.push({
+      name: `${group}/${version}/${plural}`,
+    });
+    setBreadcrumbs(breadcrumbs);
+  }, [firstPathSegment]);
 
   const resourceType = useMemo(
     () =>
@@ -64,10 +79,10 @@ function CreateResourcePage() {
 
       // go to the resource page
       navigate({
-        to: "/resources",
+        to: `/${firstPathSegment}`,
       });
     },
-    [resourceType, handleCreateOrEdit, navigate],
+    [resourceType, handleCreateOrEdit, navigate, firstPathSegment],
   );
 
   return (

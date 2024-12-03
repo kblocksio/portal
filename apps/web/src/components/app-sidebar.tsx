@@ -25,7 +25,7 @@ import { AppSidebarHeader } from "./app-sidebar-header";
 import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { ResourceContext } from "@/resource-context";
+import { ResourceContext, ResourceType } from "@/resource-context";
 import { Button } from "./ui/button";
 
 export const AppSidebar = () => {
@@ -41,6 +41,11 @@ export const AppSidebar = () => {
         isActive: true,
       },
       {
+        title: "Clusters",
+        url: "/clusters",
+        icon: "heroicon://rectangle-group",
+      },
+      {
         title: "Catalog",
         url: "/catalog",
         icon: "heroicon://magnifying-glass",
@@ -52,6 +57,15 @@ export const AppSidebar = () => {
       },
     ];
   }, []);
+
+  const nonSystemResourceTypes = useMemo(() => {
+    if (!resourceTypes) return {};
+    return Object.fromEntries(
+      Object.entries(resourceTypes).filter(
+        ([_, item]) => !item.group.startsWith("kblocks.io"),
+      ),
+    );
+  }, [resourceTypes]);
 
   return (
     <Sidebar collapsible="icon">
@@ -113,14 +127,14 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
             {Object.keys(categories).map((category) => {
-              const items = Object.keys(resourceTypes)
+              const items = Object.keys(nonSystemResourceTypes)
                 .filter((resourceTypeKey) =>
-                  resourceTypes[resourceTypeKey].categories?.includes(category),
+                    nonSystemResourceTypes[resourceTypeKey].categories?.includes(category),
                 )
                 .map((resourceTypeKey) => ({
-                  title: resourceTypes[resourceTypeKey].kind,
+                  title: nonSystemResourceTypes[resourceTypeKey].kind,
                   url: `/catalog/${resourceTypeKey}`,
-                  icon: resourceTypes[resourceTypeKey].icon,
+                  icon: nonSystemResourceTypes[resourceTypeKey].icon,
                 }));
               if (items.length === 0) {
                 return null;

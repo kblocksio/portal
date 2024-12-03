@@ -213,6 +213,7 @@ jobs:
           - argo-app
           - web-service
           - project
+          - cluster
           - workload
     steps:
       - name: Checkout

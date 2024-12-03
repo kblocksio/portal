@@ -75,6 +75,7 @@ export interface ResourceContextValue {
   categories: Record<string, Category>;
   relationships: Record<string, Record<string, Relationship>>;
   projects: Array<Project>;
+  clusters: Array<Cluster>;
   emitter: Emittery;
 }
 
@@ -83,6 +84,15 @@ export type Project = Resource & {
   objects?: string[];
   icon?: string;
   title?: string;
+};
+
+export type Cluster = Resource & {
+  backendUrl?: string;
+  apiKey?: string;
+  id?: string;
+  description?: string;
+  icon?: string;
+  access?: "read_only" | "read_write";
 };
 
 export const ResourceContext = createContext<ResourceContextValue>({
@@ -99,6 +109,7 @@ export const ResourceContext = createContext<ResourceContextValue>({
   loadEvents: () => {},
   relationships: {},
   projects: [],
+  clusters: [],
   emitter: new Emittery(),
 });
 
@@ -442,10 +453,17 @@ export const ResourceProvider = ({
     );
   }, [objects]);
 
+  const clusters = useMemo(() => {
+    return Object.values(objects).filter(
+      (obj) => obj.objType === "kblocks.io/v1/clusters",
+    );
+  }, [objects]);
+
   const value: ResourceContextValue = {
     resourceTypes,
     objects,
     projects,
+    clusters,
     loadEvents,
     systems,
     namespaces,

@@ -8,6 +8,7 @@ import { ObjectMetadata } from "@repo/shared";
 import { useCreateResource } from "@/create-resource-context";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { ResourceForm } from "@/components/resource-form/resource-form";
+import { LocationContext } from "@/location-context";
 
 export const Route = createFileRoute(
   "/resources/edit/$group/$version/$plural/$system/$namespace/$name",
@@ -21,12 +22,22 @@ function EditResourcePage() {
   const { handleCreateOrEdit, isLoading } = useCreateResource();
   const { setBreadcrumbs } = useAppContext();
   const navigate = useNavigate();
+  const previousRoute = useContext(LocationContext);
+
+  const firstPathSegment = useMemo(() => {
+    if (previousRoute?.previousRoute) {
+      return previousRoute.previousRoute.split("/")[1];
+    }
+    return "/resources";
+  }, [previousRoute]);
 
   useEffect(() => {
     setBreadcrumbs([
       {
-        name: "Resources",
-        url: "/resources",
+        name: firstPathSegment
+          .replace(/^\//, "")
+          .replace(/^\w/, (c) => c.toUpperCase()),
+        url: `/${firstPathSegment}`,
       },
       {
         name: `${name}`,
@@ -80,10 +91,16 @@ function EditResourcePage() {
 
       // go to the resource page
       navigate({
-        to: "/resources",
+        to: `/${firstPathSegment}`,
       });
     },
-    [selectedResource, selectedResourceType, handleCreateOrEdit, navigate],
+    [
+      selectedResource,
+      selectedResourceType,
+      handleCreateOrEdit,
+      navigate,
+      firstPathSegment,
+    ],
   );
 
   function renderInitialMeta(objUri?: string): Partial<ObjectMetadata> {
