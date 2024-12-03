@@ -37,7 +37,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     outputs:
       kblocks-host: ${{ steps.qkube.outputs.kblocks-host }}
       qkube-name: ${{ steps.qkube.outputs.qkube-name }}
@@ -57,10 +56,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
           cache-dependency-path: "package-lock.json"
-
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
 
       - name: Cache + Restore node_modules
         uses: actions/cache@v4
@@ -170,12 +165,12 @@ jobs:
 
       - name: Link Supabase project
         if: env.ENV_NAME == 'staging'
-        run: supabase link --project-ref $SUPABASE_PROJECT_ID
+        run: npx dotenv -e ../../secrets/portal.env -- supabase link --project-ref $SUPABASE_PROJECT_ID
         working-directory: apps/server
 
       - name: Push Supabase database
         if: env.ENV_NAME == 'staging'
-        run: supabase db push
+        run: npx dotenv -e ../../secrets/portal.env -- supabase db push
         working-directory: apps/server
 
       - name: Skaffold run
