@@ -1,20 +1,28 @@
 import { ChevronRightIcon } from "lucide-react";
-import { memo, useCallback, useEffect, useState } from "react";
-import {
-  useObjectEvents,
-  type WorkerEventTimestampString,
-} from "@/resource-context";
+import { memo, useEffect, useState } from "react";
+import { type WorkerEventTimestampString } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { trpc } from "@/trpc";
+import { parseBlockUri } from "@kblocks/api";
 
 const useLatestEvent = (objUri: string) => {
-  const [latestEvent, setLatestEvent] = useState<WorkerEventTimestampString>();
-  useObjectEvents(
-    objUri,
-    useCallback((events) => {
-      setLatestEvent(events[events.length - 1]);
-    }, []),
-  );
-  return latestEvent;
+  const { group, version, plural, system, namespace, name } =
+    parseBlockUri(objUri);
+
+  const eventsQuery = trpc.listEvents.useQuery({
+    group,
+    version,
+    plural,
+    system,
+    namespace,
+    name,
+  });
+
+  if (!eventsQuery.data) {
+    return undefined;
+  }
+
+  return eventsQuery.data[eventsQuery.data.length - 1];
 };
 
 const formatEventMessage = (event: WorkerEventTimestampString) => {

@@ -1,8 +1,10 @@
 {
-  "name": "server",
+  "name": "@kblocks-portal/server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "dev": "tsx scripts/dev.mts",
     "build": "tsc",
