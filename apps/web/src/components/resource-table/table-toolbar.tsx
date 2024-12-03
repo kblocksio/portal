@@ -63,7 +63,6 @@ export function ResourceTableToolbar({
                 if (customNewResourceAction) {
                   customNewResourceAction.navigate();
                 } else {
-                  setOrigin(undefined);
                   navigate({ to: "/resources/new" });
                 }
               }}
