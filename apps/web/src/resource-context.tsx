@@ -201,7 +201,7 @@ export const ResourceProvider = ({
 
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
-    const { system } = parseBlockUri(objUri);
+    const { system, name } = parseBlockUri(objUri);
 
     // ignore object messages that don't have metadata (don't skip is object is empty - it means the object was deleted)
     if (
@@ -213,24 +213,34 @@ export const ResourceProvider = ({
     }
 
     if (objType === "kblocks.io/v1/blocks") {
-      const block = object as BlockApiObject;
-      const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
-
       setResourceTypes((prev) => {
-        const systems = prev[key]?.systems ?? new Set();
-        systems.add(system);
-
-        return {
-          ...prev,
-          [key]: {
-            ...block.spec.definition,
-            engine: block.spec.engine,
-            iconComponent: getIconComponent({
-              icon: block.spec.definition.icon,
-            }),
-            systems,
-          },
-        };
+        if (Object.keys(object).length > 0) {
+          const block = object as BlockApiObject;
+          const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
+          const systems = prev[key]?.systems ?? new Set();
+          systems.add(system);
+  
+          return {
+            ...prev,
+            [key]: {
+              ...block.spec.definition,
+              engine: block.spec.engine,
+              iconComponent: getIconComponent({
+                icon: block.spec.definition.icon,
+              }),
+              systems,
+            },
+          };
+        } else {
+          // if the object is deleted, remove the resource type
+          const plural = name.split(".")[0];
+          const group = name.split(".")[1];
+          const key = Object.keys(prev).find((k) => k.includes(plural) && k.includes(group));
+          if (key) {
+            delete prev[key];
+          }
+          return prev;
+        }
       });
     }
 

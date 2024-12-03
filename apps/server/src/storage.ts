@@ -132,10 +132,10 @@ export async function deleteEvents(objUri: string) {
 }
 
 export async function getSlackThread(
-  objUri: string,
+  requestId: string,
 ): Promise<string | undefined> {
   const redis = await connection();
-  const key = keyForSlackThread(objUri);
+  const key = keyForSlackThread(requestId);
   const value = await redis.get(key);
   if (!value) {
     return undefined;
@@ -143,9 +143,9 @@ export async function getSlackThread(
   return value;
 }
 
-export async function setSlackThread(objUri: string, thread: string) {
+export async function setSlackThread(requestId: string, thread: string) {
   const redis = await connection();
-  const key = keyForSlackThread(objUri);
+  const key = keyForSlackThread(requestId);
   await redis.set(key, thread);
 }
 

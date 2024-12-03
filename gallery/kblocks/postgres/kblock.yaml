@@ -26,12 +26,3 @@ spec:
     schema: ./src/values.schema.json
     description: This custom resource represents a PostgreSQL database configuration
       within a Kubernetes cluster.
-  operator:
-    envSecrets:
-      AWS_DEFAULT_REGION: kblocks-secrets
-      AWS_ACCESS_KEY_ID: kblocks-secrets
-      AWS_SECRET_ACCESS_KEY: kblocks-secrets
-      OPENAI_API_KEY: kblocks-secrets
-      GITHUB_TOKEN: kblocks-secrets
-      SLACK_API_TOKEN: kblocks-secrets
-      SLACK_CHANNEL: kblocks-secrets

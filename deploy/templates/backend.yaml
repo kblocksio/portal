@@ -21,6 +21,14 @@ envFrom:
   - secretName: {{ $secretName }}
 {{- if .Values.redis.enabled }}
 env:
+  SLACK_API_TOKEN:
+    fromSecret:
+      secretName: {{ $secretName }}
+      key: SLACK_API_TOKEN
+  OPENAI_API_KEY:
+    fromSecret:
+      secretName: {{ $secretName }}
+      key: OPENAI_API_KEY
   KBLOCKS_PUBSUB_HOST:
     value: "portal-redis.default.svc.cluster.local"
   KBLOCKS_API_KEY:

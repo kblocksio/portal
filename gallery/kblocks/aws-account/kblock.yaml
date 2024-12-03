@@ -31,15 +31,6 @@ spec:
       AWS_SECRET_ACCESS_KEY:
         key: ORG_AWS_SECRET_ACCESS_KEY
         secret: kblocks-secrets
-      OPENAI_API_KEY:
-        key: OPENAI_API_KEY
-        secret: kblocks-secrets
       GITHUB_TOKEN:
         key: GITHUB_TOKEN
-        secret: kblocks-secrets
-      SLACK_API_TOKEN:
-        key: SLACK_API_TOKEN
-        secret: kblocks-secrets
-      SLACK_CHANNEL:
-        key: SLACK_CHANNEL
         secret: kblocks-secrets

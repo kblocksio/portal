@@ -9,7 +9,7 @@ spec:
     schema: ./src/values.schema.json
     outputs:
       - argoConsole
-    description: An ArgoCD application which track a GitHub repository for changes and deploys any commits to the cluster 
+    description: An ArgoCD application which track a GitHub repository for changes and deploys any commits to the cluster
     icon: >
       <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 128 128">
         <defs>
@@ -89,7 +89,4 @@ spec:
     singular: argoapp
   operator:
     envSecrets:
-      OPENAI_API_KEY: kblocks-secrets
       GITHUB_TOKEN: kblocks-secrets
-      SLACK_API_TOKEN: kblocks-secrets
-      SLACK_CHANNEL: kblocks-secrets

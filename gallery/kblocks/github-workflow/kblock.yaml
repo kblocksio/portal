@@ -19,7 +19,4 @@ spec:
       - runid
   operator:
     envSecrets:
-      OPENAI_API_KEY: kblocks-secrets
       GITHUB_TOKEN: kblocks-secrets
-      SLACK_API_TOKEN: kblocks-secrets
-      SLACK_CHANNEL: kblocks-secrets

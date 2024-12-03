@@ -89,5 +89,9 @@ EOF
 # Deploy nginx ingress controller
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
-# Update /etc/hosts to point kind-control-plane and kind-registry to 127.0.0.1
-./update-hosts.sh 127.0.0.1
+# Map a bunch of hosts to 127.0.0.1
+./update-hosts.sh 127.0.0.1 kind-control-plane
+./update-hosts.sh 127.0.0.1 kind-registry
+./update-hosts.sh 127.0.0.1 localhost.kblocks.io
+./update-hosts.sh 127.0.0.1 argo.localhost.kblocks.io
+./update-hosts.sh 127.0.0.1 voting.localhost.kblocks.io
