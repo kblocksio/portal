@@ -1,4 +1,11 @@
-import React, { createContext, useState, ReactNode, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  ReactNode,
+  useContext,
+  type DependencyList,
+  useEffect,
+} from "react";
 import { Project } from "@repo/shared";
 
 export interface BreadcrumbItem {
@@ -44,4 +51,15 @@ export const useAppContext = () => {
     throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
+};
+
+export const useBreadcrumbs = (
+  breadcrumbs: BreadcrumbItem[] | (() => BreadcrumbItem[]),
+  deps: DependencyList = [],
+) => {
+  const { setBreadcrumbs } = useAppContext();
+
+  useEffect(() => {
+    setBreadcrumbs(Array.isArray(breadcrumbs) ? breadcrumbs : breadcrumbs());
+  }, [setBreadcrumbs, ...deps]);
 };

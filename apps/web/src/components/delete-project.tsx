@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { deleteResource } from "@/lib/backend";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -11,17 +11,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource, ResourceContext } from "@/resource-context";
+import type { TrpcProject } from "@kblocks-portal/server";
+import { ResourceIcon } from "@/lib/get-icon";
 
 interface DeleteProjectDialogProps {
-  resources: Resource[];
+  projects: TrpcProject[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;
 }
 
 export function DeleteProjectDialog({
-  resources,
+  projects,
   isOpen,
   onClose,
   onDeleteClick,
@@ -39,7 +40,7 @@ export function DeleteProjectDialog({
     setDeleteError(null);
     try {
       await Promise.all(
-        resources.map((resource) => deleteResource(resource.objUri)),
+        projects.map((project) => deleteResource(project.objUri)),
       );
       onClose();
     } catch (error: any) {
@@ -59,8 +60,6 @@ export function DeleteProjectDialog({
     }
   };
 
-  const { resourceTypes } = useContext(ResourceContext);
-
   return (
     <AlertDialog
       open={open}
@@ -77,15 +76,13 @@ export function DeleteProjectDialog({
           </AlertDialogTitle>
           <div className="flex flex-col gap-4 text-sm">
             <ul className="space-y-1">
-              {resources.map((resource) => {
-                const Icon = resourceTypes[resource.objType]?.iconComponent;
+              {projects.map((project) => {
                 return (
-                  <li key={resource.objUri} className="flex items-center gap-2">
-                    {Icon && <Icon className="size-4" />}
+                  <li key={project.objUri} className="flex items-center gap-2">
+                    <ResourceIcon icon={project.icon} className="size-4" />
                     <span className="text-foreground">
-                      {resource.metadata.namespace &&
-                        `${resource.metadata.namespace}/`}
-                      {resource.metadata.name}
+                      {project.namespace && `${project.namespace}/`}
+                      {project.name}
                     </span>
                   </li>
                 );

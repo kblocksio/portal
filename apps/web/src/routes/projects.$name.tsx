@@ -1,48 +1,29 @@
-import { ResourceContext } from "@/resource-context";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useContext, useMemo } from "react";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 
 import { ProjectHeader } from "@/components/project-header";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute("/projects/$name")({
   component: ProjectPage,
 });
 
 function ProjectPage() {
-  const { resourceTypes, objects, projects } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
   const { name } = Route.useParams();
 
-  const project = useMemo(() => {
-    return projects.find((p) => p.metadata.name === name);
-  }, [projects, name]);
+  useBreadcrumbs([{ name: "Projects" }, { name }]);
 
-  const allResources = useMemo(() => {
-    return (project?.objects ?? []).map((uri) => objects[uri]).filter(Boolean);
-  }, [objects, project]);
+  const project = trpc.getProject.useQuery({ name });
 
-  useEffect(() => {
-    setBreadcrumbs([
-      { name: "Projects" },
-      { name: project?.metadata.name ?? "" },
-    ]);
-  }, [setBreadcrumbs, project]);
+  const resources = trpc.listProjectResources.useQuery({ name });
 
   return (
     <div className="flex flex-col gap-10 pt-8">
-      {project && <ProjectHeader selectedProject={project} />}
-      <div>
-        {!resourceTypes || Object.keys(resourceTypes).length === 0 ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            <ResourceTable resources={allResources} />
-          </>
-        )}
-      </div>
+      {project.data && <ProjectHeader project={project.data} />}
+      {resources.isLoading && <LoadingSkeleton />}
+      {resources.data && <ResourceTable resources={resources.data} />}
     </div>
   );
 }

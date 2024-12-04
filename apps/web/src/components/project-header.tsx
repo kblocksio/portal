@@ -1,6 +1,5 @@
-import { Project } from "@/resource-context";
-import { getIconComponent } from "@/lib/get-icon";
-import { useMemo, useState } from "react";
+import { ResourceIcon } from "@/lib/get-icon";
+import { useState } from "react";
 
 import { Button } from "./ui/button";
 import { MoreVertical } from "lucide-react";
@@ -13,21 +12,17 @@ import {
   DropdownMenuContent,
 } from "./ui/dropdown-menu";
 import { DeleteProjectDialog } from "./delete-project";
+import type { TrpcProject } from "@kblocks-portal/server";
 
 export interface ProjectHeaderProps {
-  selectedProject: Project;
+  project: TrpcProject;
 }
 
-export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ project }: ProjectHeaderProps) => {
   const navigate = useNavigate();
-  const Icon = useMemo(
-    () =>
-      getIconComponent({ icon: selectedProject.icon ?? "heroicon://folder" }),
-    [selectedProject],
-  );
 
   const { group, version, plural, system, namespace, name } = parseBlockUri(
-    selectedProject.objUri,
+    project.objUri,
   );
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -37,12 +32,15 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
       <div className="flex-1 space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
           <div className="flex items-center gap-4">
-            {Icon && <Icon className="h-8 w-8" />}
-            {selectedProject.title ?? selectedProject.metadata.name}
+            <ResourceIcon
+              icon={project.icon ?? "heroicon://folder"}
+              className="h-8 w-8"
+            />
+            {project.title ?? project.name}
           </div>
         </h1>
         <p className="text-md text-muted-foreground min-h-10">
-          {selectedProject.description}
+          {project.description}
         </p>
       </div>
 
@@ -80,7 +78,7 @@ export const ProjectHeader = ({ selectedProject }: ProjectHeaderProps) => {
       </div>
 
       <DeleteProjectDialog
-        resources={[selectedProject]}
+        projects={[project]}
         isOpen={isDeleteOpen}
         onClose={() => {
           setIsDeleteOpen(false);

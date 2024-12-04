@@ -61,7 +61,6 @@ import { ProjectLink } from "../project-link";
 import { useLocalStorage } from "@/hooks/use-localstorage";
 import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
-import { trpc } from "@/trpc";
 import type { TrpcResource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 
@@ -284,20 +283,6 @@ const useColumns = () => {
           props.row.original.lastUpdated && (
             <LastUpdated timestamp={props.row.original.lastUpdated} />
           ),
-        // sortingFn: (rowA, rowB) => {
-        //   const readyConditionA = getReadyCondition(rowA.original);
-        //   const readyConditionB = getReadyCondition(rowB.original);
-        //   const lastUpdatedA =
-        //     readyConditionA?.lastTransitionTime ??
-        //     rowA.original.metadata.creationTimestamp;
-        //   const lastUpdatedB =
-        //     readyConditionB?.lastTransitionTime ??
-        //     rowB.original.metadata.creationTimestamp;
-        //   if (!lastUpdatedA || !lastUpdatedB) {
-        //     return 0;
-        //   }
-        //   return lastUpdatedA.localeCompare(lastUpdatedB);
-        // },
       }),
       columnHelper.display({
         id: "logs",
@@ -308,18 +293,19 @@ const useColumns = () => {
         cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
         // enableSorting: false,
       }),
-      // columnHelper.accessor("outputs", {
-      //   size: 0,
-      //   header: () => <></>,
-      //   cell: (props) => {
-      //     return (
-      //       <ResourceOutputs
-      //         resource={props.row.original}
-      //         resourceType={props.row.original.resourceType}
-      //       />
-      //     );
-      //   },
-      // }),
+      columnHelper.display({
+        id: "outputs",
+        size: 0,
+        header: () => <></>,
+        cell: (props) => {
+          return (
+            <ResourceOutputs
+              resource={props.row.original}
+              // resourceType={props.row.original.resourceType}
+            />
+          );
+        },
+      }),
       columnHelper.display({
         id: "actions",
         size: 0,
@@ -336,6 +322,7 @@ const useColumns = () => {
 };
 
 export const ResourceTable = (props: {
+  resources: TrpcResource[];
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -344,11 +331,11 @@ export const ResourceTable = (props: {
     navigate: () => void;
   };
 }) => {
-  const resources = trpc.listResources.useQuery();
+  const { resources } = props;
 
   const columns = useColumns();
 
-  // const location = useLocation();
+  const location = useLocation();
 
   const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
     JSON.stringify([location.pathname, "columnFilters"]),
@@ -364,27 +351,8 @@ export const ResourceTable = (props: {
     setRowSelection({});
   }, [location.pathname]);
 
-  // const { resourceTypes, relationships, objects, projects } =
-  //   useContext(ResourceContext);
-
-  // const resources = useMemo(() => {
-  //   return props.resources.map<ExtendedResource>((resource) => {
-  //     return {
-  //       ...resource,
-  //       iconComponent: resourceTypes[resource.objType]?.iconComponent,
-  //       rels: Object.entries(relationships[resource.objUri] ?? {})
-  //         .filter(([, rel]) => rel.type === "child")
-  //         .map(([relUri]) => objects[relUri]),
-  //       prjs: projects.filter((p) =>
-  //         (p.objects ?? []).includes(resource.objUri),
-  //       ),
-  //       resourceType: resourceTypes[resource.objType],
-  //     };
-  //   });
-  // }, [props.resources, resourceTypes, relationships, projects, objects]);
-
   const table = useReactTable({
-    data: resources.data ?? [],
+    data: resources,
     columns,
     state: {
       columnFilters,
@@ -528,57 +496,57 @@ const ResourceTableRow = memo(
 );
 ResourceTableRow.displayName = "ResourceTableRow";
 
-// const ResourceOutputs = ({
-//   resource,
-//   resourceType,
-// }: {
-//   resource: Resource;
-//   resourceType: ResourceType;
-// }) => {
-//   const outputs = getResourceOutputs(resource);
-//   const [isOpen, setIsOpen] = useState(false);
+const ResourceOutputs = memo(function ResourceOutputs({
+  resource,
+  // resourceType,
+}: {
+  resource: TrpcResource;
+  // resourceType: ResourceType;
+}) {
+  const outputs = getResourceOutputs(resource.raw);
+  const [isOpen, setIsOpen] = useState(false);
 
-//   if (Object.keys(outputs).length === 0) {
-//     return null;
-//   }
+  if (Object.keys(outputs).length === 0) {
+    return null;
+  }
 
-//   return (
-//     <div>
-//       <Popover open={isOpen} onOpenChange={setIsOpen}>
-//         <TooltipProvider>
-//           <Tooltip>
-//             <TooltipTrigger asChild>
-//               <PopoverTrigger asChild>
-//                 <Button
-//                   variant="ghost"
-//                   className="h-0"
-//                   onClick={(e) => {
-//                     setIsOpen(true);
-//                     e.stopPropagation();
-//                   }}
-//                 >
-//                   <CircleEllipsis className="h-4 w-4" />
-//                   <span className="sr-only">Outputs</span>
-//                 </Button>
-//               </PopoverTrigger>
-//             </TooltipTrigger>
-//             <TooltipContent>
-//               <p>Outputs</p>
-//             </TooltipContent>
-//           </Tooltip>
-//         </TooltipProvider>
-//         <PopoverContent onClick={(e) => e.stopPropagation()}>
-//           <div className="flex flex-col space-y-8">
-//             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-//               <Outputs
-//                 outputs={outputs}
-//                 resourceObjUri={resource.objUri}
-//                 resourceType={resourceType}
-//               />
-//             </div>
-//           </div>
-//         </PopoverContent>
-//       </Popover>
-//     </div>
-//   );
-// };
+  return (
+    <div>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-0"
+                  onClick={(e) => {
+                    setIsOpen(true);
+                    e.stopPropagation();
+                  }}
+                >
+                  <CircleEllipsis className="h-4 w-4" />
+                  <span className="sr-only">Outputs</span>
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Outputs</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <PopoverContent onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col space-y-8">
+            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              {/* <Outputs
+                outputs={outputs}
+                resourceObjUri={resource.objUri}
+                resourceType={resourceType}
+              /> */}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+});
