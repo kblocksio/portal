@@ -75,9 +75,14 @@ const resourcesFromObjects = (
   projects: TrpcProject[],
 ): TrpcResource[] => {
   return allObjects
-    .filter(
-      (object) => blockTypeFromUri(object.objUri) !== "kblocks.io/v1/projects",
-    )
+    .filter((object) => {
+      const blockType = blockTypeFromUri(object.objUri);
+      return (
+        blockType !== "kblocks.io/v1/projects" &&
+        blockType !== "kblocks.io/v1/blocks" &&
+        blockType !== "kblocks.io/v1/clusters"
+      );
+    })
     .map<TrpcResource>((object) => {
       const block = parseBlockUri(object.objUri);
 
