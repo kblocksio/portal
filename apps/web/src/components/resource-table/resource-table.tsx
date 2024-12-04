@@ -12,7 +12,15 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+} from "react";
 import {
   Resource,
   ResourceContext,
@@ -55,50 +63,42 @@ import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
 import { trpc } from "@/trpc";
 import type { TrpcResource } from "@kblocks-portal/server";
-import { getIconComponent } from "@/lib/get-icon";
+import { ResourceIcon } from "@/lib/get-icon";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
-type ExtendedResource = TrpcResource & {
-  iconComponent?: React.ComponentType<{ className?: string }>;
-  // rels: Resource[];
-  // prjs: Project[];
-  // resourceType: ResourceType;
-};
-
-const columnHelper = createColumnHelper<ExtendedResource>();
+const columnHelper = createColumnHelper<TrpcResource>();
 
 const useColumns = () => {
-  return useMemo<ColumnDef<ExtendedResource>[]>(() => {
+  return useMemo(() => {
     return [
-      // columnHelper.accessor("selection", {
-      //   id: "selection",
-      //   cell: (props) => (
-      //     <Checkbox
-      //       checked={props.row.getIsSelected()}
-      //       disabled={!props.row.getCanSelect()}
-      //       onCheckedChange={props.row.getToggleSelectedHandler()}
-      //     />
-      //   ),
-      //   size: 0,
-      //   header: (props) => (
-      //     <Checkbox
-      //       checked={
-      //         props.table.getIsAllRowsSelected()
-      //           ? true
-      //           : props.table.getIsSomeRowsSelected()
-      //             ? "indeterminate"
-      //             : false
-      //       }
-      //       onCheckedChange={(checked) =>
-      //         props.table.toggleAllRowsSelected(checked === true)
-      //       }
-      //     />
-      //   ),
-      // }),
-      columnHelper.accessor("status", {
-        id: "status",
+      columnHelper.display({
+        id: "selection",
         cell: (props) => (
+          <Checkbox
+            checked={props.row.getIsSelected()}
+            disabled={!props.row.getCanSelect()}
+            onCheckedChange={props.row.getToggleSelectedHandler()}
+          />
+        ),
+        size: 0,
+        header: (props) => (
+          <Checkbox
+            checked={
+              props.table.getIsAllRowsSelected()
+                ? true
+                : props.table.getIsSomeRowsSelected()
+                  ? "indeterminate"
+                  : false
+            }
+            onCheckedChange={(checked) =>
+              props.table.toggleAllRowsSelected(checked === true)
+            }
+          />
+        ),
+      }),
+      columnHelper.accessor("status", {
+        cell: () => (
           <div className="flex items-center gap-1.5">
             {/* <StatusBadge obj={props.row.original} merge /> */}
             {/* {props.getValue()} */}
@@ -129,29 +129,23 @@ const useColumns = () => {
         // },
       }),
       columnHelper.accessor("kind", {
-        id: "kind",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Kind" />
         ),
         cell: (props) => {
           return (
             <div className="flex items-center gap-1.5">
-              {props.row.original.iconComponent && (
-                <props.row.original.iconComponent className="h-4 w-4" />
-              )}
+              <ResourceIcon
+                icon={props.row.original.icon}
+                className="h-4 w-4"
+              />
+
               {props.getValue()}
             </div>
           );
         },
-        // filterFn: (row, columnId, filterValue) => {
-        //   return filterValue.includes(row.original.kind);
-        // },
-        // sortingFn: (rowA, rowB) => {
-        //   return rowA.original.kind.localeCompare(rowB.original.kind);
-        // },
       }),
       columnHelper.accessor("name", {
-        id: "name",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Name" />
         ),
@@ -170,54 +164,24 @@ const useColumns = () => {
             </Link>
           </div>
         ),
-        // filterFn: (row, columnId, filterValue) => {
-        //   return row.original.metadata.name.includes(filterValue);
-        // },
-        // sortingFn: (rowA, rowB) => {
-        //   return rowA.original.metadata.name.localeCompare(
-        //     rowB.original.metadata.name,
-        //   );
-        // },
       }),
       columnHelper.accessor("cluster", {
-        id: "cluster",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
-        cell: (props) => (
-          <div className="flex items-center gap-1.5">
-            <SystemBadge system={props.getValue()} />
-          </div>
-        ),
-        // filterFn: (row, columnId, filterValue) => {
-        //   const { system } = parseBlockUri(row.original.objUri);
-        //   return filterValue.includes(system);
-        // },
-        // sortingFn: (rowA, rowB) => {
-        //   const { system: systemA } = parseBlockUri(rowA.original.objUri);
-        //   const { system: systemB } = parseBlockUri(rowB.original.objUri);
-        //   return systemA.localeCompare(systemB);
-        // },
+        cell: (props) => <SystemBadge system={props.getValue()} />,
       }),
       columnHelper.accessor("namespace", {
-        id: "namespace",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Namespace" />
         ),
-        cell: (props) => (
-          <div className="flex items-center gap-1.5">
-            <NamespaceBadge namespace={props.getValue()} />
-          </div>
-        ),
-        // filterFn: (row, columnId, filterValue) => {
-        //   const { namespace } = parseBlockUri(row.original.objUri);
-        //   return filterValue.includes(namespace);
-        // },
-        // sortingFn: (rowA, rowB) => {
-        //   const { namespace: namespaceA } = parseBlockUri(rowA.original.objUri);
-        //   const { namespace: namespaceB } = parseBlockUri(rowB.original.objUri);
-        //   return namespaceA.localeCompare(namespaceB);
-        // },
+        cell: (props) => {
+          const namespace = props.getValue();
+          if (!namespace) {
+            return null;
+          }
+          return <NamespaceBadge namespace={namespace} />;
+        },
       }),
       // columnHelper.accessor("children", {
       //   id: "children",
@@ -312,7 +276,6 @@ const useColumns = () => {
       //   },
       // }),
       columnHelper.accessor("lastUpdated", {
-        id: "lastUpdated",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
         ),
@@ -335,17 +298,16 @@ const useColumns = () => {
         //   return lastUpdatedA.localeCompare(lastUpdatedB);
         // },
       }),
-      // columnHelper.accessor("logs", {
-      //   id: "logs",
-      //   header: (props) => (
-      //     <DataTableColumnHeader column={props.column} title="Logs" />
-      //   ),
-      //   size: 400,
-      //   cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
-      //   // enableSorting: false,
-      // }),
+      columnHelper.display({
+        id: "logs",
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Logs" />
+        ),
+        size: 400,
+        cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
+        // enableSorting: false,
+      }),
       // columnHelper.accessor("outputs", {
-      //   id: "outputs",
       //   size: 0,
       //   header: () => <></>,
       //   cell: (props) => {
@@ -357,17 +319,17 @@ const useColumns = () => {
       //     );
       //   },
       // }),
-      // columnHelper.accessor("actions", {
-      //   id: "actions",
-      //   size: 0,
-      //   header: () => <></>,
-      //   cell: (props) => (
-      //     <ResourceActionsMenu
-      //       resource={props.row.original}
-      //       resourceType={props.row.original.resourceType}
-      //     />
-      //   ),
-      // }),
+      columnHelper.display({
+        id: "actions",
+        size: 0,
+        header: () => <></>,
+        cell: (props) => (
+          <ResourceActionsMenu
+            resource={props.row.original}
+            // resourceType={props.row.original.resourceType}
+          />
+        ),
+      }),
     ];
   }, []);
 };
@@ -381,18 +343,7 @@ export const ResourceTable = (props: {
     navigate: () => void;
   };
 }) => {
-  const resources2 = trpc.listResources.useQuery();
-  const resources3 = useMemo<ExtendedResource[]>(() => {
-    return (
-      resources2.data?.map((r) => ({
-        ...r,
-        iconComponent: getIconComponent({ icon: r.icon }),
-      })) ?? []
-    );
-  }, [resources2.data]);
-  // useEffect(() => {
-  //   console.log(resources2.data?.map((r) => r.icon));
-  // }, [resources2.data]);
+  const resources = trpc.listResources.useQuery();
 
   const columns = useColumns();
 
@@ -432,7 +383,7 @@ export const ResourceTable = (props: {
   // }, [props.resources, resourceTypes, relationships, projects, objects]);
 
   const table = useReactTable({
-    data: resources3,
+    data: resources.data ?? [],
     columns,
     state: {
       columnFilters,

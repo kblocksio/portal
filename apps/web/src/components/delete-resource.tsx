@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { deleteResource } from "@/lib/backend";
 import { Loader2, AlertCircle } from "lucide-react";
 import {
@@ -11,10 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource, ResourceContext } from "@/resource-context";
+import type { TrpcResource } from "@kblocks-portal/server";
+import { ResourceIcon } from "@/lib/get-icon";
 
 interface DeleteResourceDialogProps {
-  resources: Resource[];
+  resources: TrpcResource[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;
@@ -59,8 +60,6 @@ export function DeleteResourceDialog({
     }
   };
 
-  const { resourceTypes } = useContext(ResourceContext);
-
   return (
     <AlertDialog
       open={open}
@@ -78,14 +77,12 @@ export function DeleteResourceDialog({
           <div className="flex flex-col gap-4 text-sm">
             <ul className="space-y-1">
               {resources.map((resource) => {
-                const Icon = resourceTypes[resource.objType]?.iconComponent;
                 return (
                   <li key={resource.objUri} className="flex items-center gap-2">
-                    {Icon && <Icon className="size-4" />}
+                    <ResourceIcon icon={resource.icon} className="size-4" />
                     <span className="text-foreground">
-                      {resource.metadata.namespace &&
-                        `${resource.metadata.namespace}/`}
-                      {resource.metadata.name}
+                      {resource.namespace && `${resource.namespace}/`}
+                      {resource.name}
                     </span>
                   </li>
                 );

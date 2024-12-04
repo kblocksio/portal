@@ -44,9 +44,9 @@ export type TrpcResource = {
   kind: string;
   name: string;
   cluster: string;
-  namespace: string;
+  namespace?: string;
   projects: TrpcProject[];
-  lastUpdated: number | undefined;
+  lastUpdated?: number;
   // children
   icon?: string;
 };
@@ -83,7 +83,7 @@ const appRouter = router({
         kind: object.kind,
         name: object.metadata.name,
         cluster: block.system,
-        namespace: object.metadata.namespace ?? "??",
+        namespace: object.metadata.namespace,
         projects: [],
         lastUpdated: timestamp?.getTime(),
         icon: object.spec?.definition?.icon as string | undefined,
