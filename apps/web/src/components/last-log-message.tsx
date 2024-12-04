@@ -5,15 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/trpc";
 
 const useLatestEvent = (objUri: string) => {
-  const eventsQuery = trpc.listEvents.useQuery({
-    objUri,
-  });
+  return undefined;
+  // const eventsQuery = trpc.listEvents.useQuery({
+  //   objUri,
+  // });
 
-  if (!eventsQuery.data) {
-    return undefined;
-  }
+  // if (!eventsQuery.data) {
+  //   return undefined;
+  // }
 
-  return eventsQuery.data[eventsQuery.data.length - 1];
+  // return eventsQuery.data.events[eventsQuery.data.events.length - 1];
 };
 
 const formatEventMessage = (event: WorkerEventTimestampString) => {

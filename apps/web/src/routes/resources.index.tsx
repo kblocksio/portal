@@ -21,42 +21,15 @@ function Resources() {
   // const { resourceTypes, objects } = useContext(ResourceContext);
   // const { setBreadcrumbs } = useAppContext();
 
-  // const Icon = getIconComponent({ icon: meta.icon });
-
-  // const allResources = useMemo(() => {
-  //   return Object.values(objects).filter((r) => {
-  //     if (r.objType === "kblocks.io/v1/blocks") {
-  //       return false;
-  //     }
-
-  //     if (r.objType === "kblocks.io/v1/projects") {
-  //       return false;
-  //     }
-
-  //     if (r.objType === "kblocks.io/v1/clusters") {
-  //       return false;
-  //     }
-
-  //     // don't show resources that are children of other resources
-  //     if (r.metadata?.ownerReferences?.length) {
-  //       return false;
-  //     }
-
-  //     return true;
-  //   });
-  // }, [objects]);
-
-  // useEffect(() => {
-  //   setBreadcrumbs([{ name: "Resources" }]);
-  // }, [setBreadcrumbs]);
+  const Icon = getIconComponent({ icon: meta.icon });
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
-      {/* <RoutePageHeader
+      <RoutePageHeader
         title="Resources"
         description={meta.description}
         Icon={Icon}
-      /> */}
+      />
       <div>
         <ResourceTable />
       </div>
