@@ -1,38 +1,20 @@
 import {
   useReactTable,
   getCoreRowModel,
-  ColumnDef,
   ColumnFiltersState,
   ColumnSort,
   getFilteredRowModel,
   getSortedRowModel,
   flexRender,
   RowSelectionState,
-  Row,
   createColumnHelper,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  memo,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentType,
-} from "react";
-import {
-  Resource,
-  ResourceContext,
-  ResourceType,
-  type Project,
-} from "@/resource-context";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { DataTableColumnHeader } from "./column-header";
-import { parseBlockUri, StatusReason } from "@kblocks/api";
 import { LastUpdated } from "../last-updated";
-import { cn, getReadyCondition, getResourceOutputs } from "@/lib/utils";
+import { cn, getResourceOutputs } from "@/lib/utils";
 import { LastLogMessage } from "../last-log-message";
-import { StatusBadge } from "../status-badge";
 import { SystemBadge } from "../system-badge";
 import { NamespaceBadge } from "../namespace-badge";
 import {
@@ -44,7 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useLocation } from "@tanstack/react-router";
-import Outputs from "@/components/outputs";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./table-toolbar";
@@ -56,7 +37,6 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
-import { ResourceLink } from "../resource-link";
 import { ProjectLink } from "../project-link";
 import { useLocalStorage } from "@/hooks/use-localstorage";
 import { Checkbox } from "../ui/checkbox";
