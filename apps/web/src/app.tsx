@@ -27,12 +27,6 @@ export function App({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${import.meta.env.VITE_BACKEND_URL}/trpc`,
-          // You can pass any HTTP headers you wish here
-          // async headers() {
-          //   return {
-          //     authorization: getAuthCookie(),
-          //   };
-          // },
         }),
       ],
     }),
@@ -41,11 +35,9 @@ export function App({ children }: { children: React.ReactNode }) {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        {/* {children} */}
         <AppProvider>
           <UserProvider>
             <NotificationsProvider>
-              {/* {children} */}
               <ResourceProvider>
                 <CreateResourceProvider>{children}</CreateResourceProvider>
               </ResourceProvider>
