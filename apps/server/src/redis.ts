@@ -29,6 +29,18 @@ export const objPrefix = (() => {
   }
   return "obj:";
 })();
+export const eventsPrefix = (() => {
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}:logs:`;
+  }
+  return "logs:";
+})();
+export const timestampPrefix = (() => {
+  if (KBLOCKS_STORAGE_PREFIX) {
+    return `${KBLOCKS_STORAGE_PREFIX}:ts:`;
+  }
+  return "ts:";
+})();
 
 const config = {
   password: KBLOCKS_API_KEY,

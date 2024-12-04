@@ -1,6 +1,6 @@
 import * as kblocks from "@kblocks/api";
 import { slackNotify } from "./slack-notify";
-import { createRedisClient, objPrefix } from "./redis.js";
+import { createRedisClient, eventsPrefix, objPrefix, timestampPrefix } from "./redis.js";
 
 const client = createRedisClient();
 
@@ -28,7 +28,11 @@ function keyForObject(blockUri: string) {
 }
 
 function keyForEvents(blockUri: string) {
-  return `logs:${blockUri}`;
+  return eventsPrefix + blockUri;
+}
+
+function keyForTimestamp(blockUri: string) {
+  return timestampPrefix + blockUri;
 }
 
 function keyForSlackThread(blockUri: string) {
@@ -131,6 +135,32 @@ export async function deleteEvents(objUri: string) {
   await redis.del(key);
 }
 
+async function updateTimestampIfSmaller(key: string, newTimestamp: number) {
+  const redis = await connection();
+  const script = `
+    local key = KEYS[1]
+    local newTimestamp = tonumber(ARGV[1])
+
+    if redis.call('EXISTS', key) == 1 then
+        local currentTimestamp = tonumber(redis.call('GET', key))
+        if currentTimestamp < newTimestamp then
+            redis.call('SET', key, newTimestamp)
+            return 1
+        end
+    else
+        redis.call('SET', key, newTimestamp)
+        return 1
+    end
+    return 0
+  `;
+
+  const result = await redis.eval(script, {
+    keys: [key],
+    arguments: [newTimestamp.toString()],
+  });
+  return result === 1;
+}
+
 export async function getSlackThread(
   requestId: string,
 ): Promise<string | undefined> {
@@ -164,7 +194,7 @@ export async function handleEvent(event: kblocks.WorkerEvent) {
   } catch (e) {
     console.error(`Error storing event: ${JSON.stringify(event)}: ${e}`);
   }
-
+  
   try {
     await slackNotify(event);
   } catch (e) {
