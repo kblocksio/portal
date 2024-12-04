@@ -13,20 +13,39 @@ import { Outlet } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink } from "@trpc/client";
+import React, { useState } from "react";
+import { trpc } from "./trpc";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
 import { LocationProvider } from "./location-context.js";
 
 export function App({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: `${import.meta.env.VITE_BACKEND_URL}/trpc`,
+        }),
+      ],
+    }),
+  );
+
   return (
-    <AppProvider>
-      <UserProvider>
-        <NotificationsProvider>
-          <ResourceProvider>
-            <CreateResourceProvider>{children}</CreateResourceProvider>
-          </ResourceProvider>
-        </NotificationsProvider>
-      </UserProvider>
-    </AppProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <UserProvider>
+            <NotificationsProvider>
+              <ResourceProvider>
+                <CreateResourceProvider>{children}</CreateResourceProvider>
+              </ResourceProvider>
+            </NotificationsProvider>
+          </UserProvider>
+        </AppProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
 

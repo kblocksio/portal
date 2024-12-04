@@ -26,7 +26,7 @@ const utcLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
   timeZone: "UTC",
 });
 
-export const TimestampDetails = (props: { timestamp: Date }) => {
+export const TimestampDetails = (props: { timestamp: Date | number }) => {
   const localTime = useMemo(() => {
     return localLongDateTimeFormat.format(props.timestamp);
   }, [props.timestamp]);
@@ -36,7 +36,9 @@ export const TimestampDetails = (props: { timestamp: Date }) => {
   }, [props.timestamp]);
 
   const timestamp = useMemo(() => {
-    return props.timestamp.getTime();
+    return typeof props.timestamp === "number"
+      ? props.timestamp
+      : props.timestamp.getTime();
   }, [props.timestamp]);
 
   return (

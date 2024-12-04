@@ -1,11 +1,10 @@
-import { getIconComponent } from "@/lib/get-icon";
-import { Project } from "@/resource-context";
+import { ResourceIcon } from "@/lib/get-icon";
 import { Button } from "./ui/button";
 import { useNavigate } from "@tanstack/react-router";
+import type { TrpcProject } from "@kblocks-portal/server";
 
-export const ProjectLink = ({ project }: { project: Project }) => {
+export const ProjectLink = ({ project }: { project: TrpcProject }) => {
   const navigate = useNavigate();
-  const Icon = getIconComponent({ icon: project.icon ?? "heroicon://folder" });
   return (
     <Button
       variant="link"
@@ -13,14 +12,17 @@ export const ProjectLink = ({ project }: { project: Project }) => {
       onClick={(e) => {
         navigate({
           to: "/projects/$name",
-          params: { name: project.metadata.name },
+          params: { name: project.name },
         });
         e.stopPropagation();
       }}
     >
       <div className="flex items-center gap-2 p-0">
-        <Icon className="h-4 w-4" />
-        {project.title ?? project.metadata.name}
+        <ResourceIcon
+          icon={project.icon ?? "heroicon://folder"}
+          className="h-4 w-4"
+        />
+        {project.title ?? project.name}
       </div>
     </Button>
   );

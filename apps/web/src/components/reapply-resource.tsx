@@ -11,10 +11,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource } from "@/resource-context";
+import type { TrpcResource } from "@kblocks-portal/server";
 
 interface ReapplyResourceDialogProps {
-  resource: Resource;
+  resource: TrpcResource;
   isOpen: boolean;
   onClose: () => void;
   onReapplyClick?: () => void;
@@ -71,8 +71,8 @@ export function ReapplyResourceDialog({
           <AlertDialogTitle>
             Are you sure you want to reapply{" "}
             <span className="font-mono">
-              {resource.metadata.namespace && `${resource.metadata.namespace}/`}
-              {resource.metadata.name}
+              {resource.namespace && `${resource.namespace}/`}
+              {resource.name}
             </span>
             ?
           </AlertDialogTitle>

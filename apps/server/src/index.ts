@@ -20,6 +20,7 @@ import {
   formatBlockUri,
   Manifest,
   ObjectEvent,
+  parseBlockUri,
 } from "@kblocks/api";
 import {
   getAllObjects,
@@ -29,6 +30,72 @@ import {
   deleteObject,
 } from "./storage";
 import { categories } from "./categories";
+
+import { publicProcedure, router } from "./trpc";
+import { z } from "zod";
+
+export type TrpcProject = {
+  objUri: string;
+  title?: string;
+  name: string;
+  icon?: string;
+};
+
+export type TrpcResource = {
+  objUri: string;
+  status: "ready";
+  kind: string;
+  name: string;
+  cluster: string;
+  namespace?: string;
+  projects: TrpcProject[];
+  lastUpdated?: number;
+  // children
+  icon?: string;
+};
+
+const appRouter = router({
+  listEvents: publicProcedure
+    .input(
+      z.object({
+        objUri: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { objUri } = input;
+      const events = await loadEvents(objUri);
+      return { objUri, events };
+    }),
+  listResources: publicProcedure.query(async () => {
+    const objects = await getAllObjects();
+    return Object.entries(objects).map<TrpcResource>(([objUri, object]) => {
+      const block = parseBlockUri(objUri);
+
+      const readyCondition = object.status?.conditions?.find(
+        (c) => c.type === "Ready",
+      );
+
+      const lastUpdated =
+        readyCondition?.lastTransitionTime ?? object.metadata.creationTimestamp;
+
+      const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
+
+      return {
+        objUri,
+        status: "ready",
+        kind: object.kind,
+        name: object.metadata.name,
+        cluster: block.system,
+        namespace: object.metadata.namespace,
+        projects: [],
+        lastUpdated: timestamp?.getTime(),
+        icon: object.spec?.definition?.icon as string | undefined,
+      };
+    });
+  }),
+});
+
+export type AppRouter = typeof appRouter;
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
 const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
@@ -46,6 +113,15 @@ app.use(
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  }),
+);
+
+import * as trpcExpress from "@trpc/server/adapters/express";
+
+app.use(
+  "/trpc",
+  trpcExpress.createExpressMiddleware({
+    router: appRouter,
   }),
 );
 

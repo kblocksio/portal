@@ -9,15 +9,15 @@ import { MoreVertical } from "lucide-react";
 import { DeleteResourceDialog } from "./delete-resource";
 import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
-import { Resource, ResourceType } from "@/resource-context";
 import { useNavigate } from "@tanstack/react-router";
 import { ProjectsMenu } from "./projects-menu";
+import type { TrpcResource } from "@kblocks-portal/server";
+
 export const ResourceActionsMenu = ({
   resource,
   onDeleteClick,
 }: {
-  resource: Resource;
-  resourceType: ResourceType;
+  resource: TrpcResource;
   onDeleteClick?: () => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);

@@ -8,7 +8,7 @@ import {
 import { TimestampDetails } from "./timestamp-details";
 
 export interface TimestampTooltipProps {
-  timestamp: Date;
+  timestamp: Date | number;
 }
 
 export const TimestampTooltip = (

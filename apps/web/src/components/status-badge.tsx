@@ -9,6 +9,7 @@ import {
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { findCondition } from "./components-utils";
+import { memo } from "react";
 
 const variants = cva("", {
   variants: {
@@ -37,13 +38,13 @@ export interface StatusBadgeProps extends VariantProps<typeof variants> {
   type?: string;
 }
 
-export const StatusBadge = ({
+export const StatusBadge = memo(function StatusBadge({
   obj,
   showMessage,
   size,
   type,
   merge,
-}: StatusBadgeProps) => {
+}: StatusBadgeProps) {
   if (merge && type) {
     throw new Error("merge and type cannot be used together");
   }
@@ -119,4 +120,4 @@ export const StatusBadge = ({
       </Tooltip>
     </TooltipProvider>
   );
-};
+});

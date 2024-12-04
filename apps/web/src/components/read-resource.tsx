@@ -11,10 +11,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Resource } from "@/resource-context";
+import type { TrpcResource } from "@kblocks-portal/server";
 
 interface ReadResourceDialogProps {
-  resource: Resource;
+  resource: TrpcResource;
   isOpen: boolean;
   onClose: () => void;
   onReadClick?: () => void;
@@ -71,8 +71,8 @@ export function ReadResourceDialog({
           <AlertDialogTitle>
             Are you sure you want to send a read request for{" "}
             <span className="font-mono">
-              {resource.metadata.namespace && `${resource.metadata.namespace}/`}
-              {resource.metadata.name}
+              {resource.namespace && `${resource.namespace}/`}
+              {resource.name}
             </span>
             ?
           </AlertDialogTitle>

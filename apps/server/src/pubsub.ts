@@ -1,6 +1,10 @@
 import { EventEmitter } from "stream";
 import { ControlCommand, WorkerEvent } from "@kblocks/api";
-import { createRedisClient, APP_EVENTS_CHANNEL, KBLOCKS_CONTROL_CHANNEL } from "./redis.js";
+import {
+  createRedisClient,
+  APP_EVENTS_CHANNEL,
+  KBLOCKS_CONTROL_CHANNEL,
+} from "./redis.js";
 import { handleEvent } from "./storage";
 import { analyzeErrorWithAI } from "./ai";
 
@@ -15,7 +19,7 @@ subscribeClient
   .connect()
   .then(() => {
     subscribeClient.subscribe(APP_EVENTS_CHANNEL, (message) => {
-      console.log("Received app message:", message);
+      // console.log("Received app message:", message);
       events.emit("event", message);
     });
   })
@@ -23,7 +27,7 @@ subscribeClient
 
 export async function publishEvent(event: WorkerEvent) {
   // in the background, try to analyze the error with AI and publish an "ERROR" event with the details
-  analyzeErrorWithAI(event).catch(e => {
+  analyzeErrorWithAI(event).catch((e) => {
     console.error("Error publishing error event with AI", e);
   });
 
@@ -66,4 +70,3 @@ function createChannelFor(
 ) {
   return `${KBLOCKS_CONTROL_CHANNEL}:${group}/${version}/${plural}/${system}`;
 }
-

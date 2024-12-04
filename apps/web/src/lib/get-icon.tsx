@@ -3,7 +3,7 @@ import { BoxesIcon, LucideProps } from "lucide-react"; // Import props type
 import * as OutlineHeroIcons from "@heroicons/react/24/outline";
 import * as SolidHeroIcons from "@heroicons/react/24/solid";
 import type { Colors } from "./colors.ts";
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { cn } from "./utils.ts";
 
 /**
@@ -53,6 +53,15 @@ export const getIconComponent = ({
   return getLucideIcon(icon);
 };
 
+/**
+ * Memoized icon component.
+ *
+ * @see getIconComponent
+ */
+export const useIconComponent = ({ icon }: { icon?: string }) => {
+  return useMemo(() => getIconComponent({ icon }), [icon]);
+};
+
 export const getIconColors = (options: {
   darkenOnGroupHover?: boolean;
   forceDarken?: boolean;
@@ -100,11 +109,13 @@ const getHeroIconComponent = ({
 };
 
 const getLucideIcon = (icon: string) => {
+  // eslint-disable-next-line import/namespace
   const IconComponent = LucideIcons[icon as keyof typeof LucideIcons];
   if (
     typeof IconComponent === "function" ||
     (IconComponent && "render" in IconComponent)
   ) {
+    // eslint-disable-next-line react/display-name
     return (props?: LucideProps) => {
       const Icon = IconComponent as React.ElementType;
       return <Icon {...props} />;
@@ -113,6 +124,7 @@ const getLucideIcon = (icon: string) => {
     console.log(
       `Icon "${icon}" not found or is not a valid component, fallback to BoxesIcon`,
     );
+    // eslint-disable-next-line react/display-name
     return (props?: LucideProps) => <BoxesIcon {...props} />;
   }
 };
@@ -181,3 +193,19 @@ const colors: Record<Colors, ColorSet> = {
     forceDarken: "text-slate-600 dark:text-slate-300",
   },
 };
+
+/**
+ * Memoized resource icon component.
+ *
+ * @see useIconComponent
+ */
+export const ResourceIcon = memo(function ResourceIcon({
+  icon,
+  className,
+}: {
+  icon?: string;
+  className?: string;
+}) {
+  const IconComponent = useIconComponent({ icon });
+  return <IconComponent className={className} />;
+});
