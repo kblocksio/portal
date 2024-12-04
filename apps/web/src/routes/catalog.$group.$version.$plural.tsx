@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "@/components/markdown";
 import { ResourceContext, ResourceType } from "@/resource-context";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -12,15 +12,14 @@ export const Route = createFileRoute("/catalog/$group/$version/$plural")({
 });
 
 function Catalog() {
-  const { setBreadcrumbs } = useAppContext();
   const { resourceTypes } = useContext(ResourceContext);
   const navigate = useNavigate();
   const { group, version, plural } = Route.useParams();
   const [currentResourceType, setCurrentResourceType] =
     useState<ResourceType | null>(null);
 
-  useEffect(() => {
-    setBreadcrumbs([
+  useBreadcrumbs(
+    () => [
       {
         name: "Catalog",
         url: "/catalog/",
@@ -28,7 +27,11 @@ function Catalog() {
       {
         name: `${group}/${version}/${plural}`,
       },
-    ]);
+    ],
+    [group, version, plural],
+  );
+
+  useEffect(() => {
     if (resourceTypes) {
       setCurrentResourceType(resourceTypes[`${group}/${version}/${plural}`]);
     }

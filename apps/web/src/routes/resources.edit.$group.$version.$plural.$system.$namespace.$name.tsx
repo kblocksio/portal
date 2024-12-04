@@ -1,9 +1,9 @@
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { formatBlockUri, parseBlockUri } from "@kblocks/api";
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useMemo, useEffect, useCallback } from "react";
+import { useContext, useMemo, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { ObjectMetadata } from "@repo/shared";
 import { useCreateResource } from "@/create-resource-context";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
@@ -20,7 +20,6 @@ function EditResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const { resourceTypes, objects } = useContext(ResourceContext);
   const { handleCreateOrEdit, isLoading } = useCreateResource();
-  const { setBreadcrumbs } = useAppContext();
   const navigate = useNavigate();
   const previousRoute = useContext(LocationContext);
 
@@ -31,8 +30,8 @@ function EditResourcePage() {
     return "/resources";
   }, [previousRoute]);
 
-  useEffect(() => {
-    setBreadcrumbs([
+  useBreadcrumbs(() => {
+    return [
       {
         name: firstPathSegment
           .replace(/^\//, "")
@@ -46,8 +45,8 @@ function EditResourcePage() {
       {
         name: `Edit`,
       },
-    ]);
-  }, []);
+    ];
+  }, [firstPathSegment]);
 
   const objUri = formatBlockUri({
     group,

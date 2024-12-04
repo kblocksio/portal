@@ -27,7 +27,7 @@ import { ReadResourceDialog } from "@/components/read-resource";
 import { formatBlockUri } from "@kblocks/api";
 import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
@@ -50,7 +50,6 @@ function ResourcePage() {
   const { resourceTypes, objects, setSelectedResourceId, relationships } =
     useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const { setBreadcrumbs } = useAppContext();
   const [activeTab, setActiveTab] = useState("details");
 
   useEffect(() => {
@@ -181,8 +180,8 @@ function ResourcePage() {
     return children;
   }, [selectedResource, relationships, objects]);
 
-  useEffect(() => {
-    if (!selectedResource) return;
+  useBreadcrumbs(() => {
+    if (!selectedResource) return [];
     const breadcrumbs = [
       {
         name: "Resources",
@@ -195,13 +194,13 @@ function ResourcePage() {
         url: `/resources/${ownerResourceURI.replace("kblocks://", "")}`,
       });
     }
-    setBreadcrumbs([
+    return [
       ...breadcrumbs,
       {
         name: selectedResource.metadata.name,
       },
-    ]);
-  }, [selectedResource, setBreadcrumbs, ownerResourceURI, objects]);
+    ];
+  }, [selectedResource, ownerResourceURI, objects]);
 
   const yamlObject = useMemo(() => {
     const obj: any = cloneDeep(selectedResource ?? {});
@@ -325,7 +324,7 @@ function ResourcePage() {
                 Cluster
               </p>
               <div className="flex truncate text-xs sm:text-sm">
-                <SystemBadge blockUri={selectedResource.objUri} />
+                <SystemBadge system={selectedResource.objUri} />
               </div>
             </div>
           </div>

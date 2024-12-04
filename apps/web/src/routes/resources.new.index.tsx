@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { WizardSearchHeader } from "@/components/wizard-search-header";
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 
 export const Route = createFileRoute("/resources/new/")({
   component: CreateNewResourceCatalog,
@@ -12,23 +12,20 @@ export const Route = createFileRoute("/resources/new/")({
 
 function CreateNewResourceCatalog() {
   const { resourceTypes, categories } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
-  useEffect(() => {
-    setBreadcrumbs([
-      {
-        name: "Resources",
-        url: "/resources",
-      },
-      {
-        name: "Create a new resource",
-      },
-    ]);
-  }, []);
+  useBreadcrumbs([
+    {
+      name: "Resources",
+      url: "/resources",
+    },
+    {
+      name: "Create a new resource",
+    },
+  ]);
 
   const filteredResourceTypes = useMemo(() => {
     return Object.values(resourceTypes).filter((r) => !r.kind?.endsWith("Ref"));

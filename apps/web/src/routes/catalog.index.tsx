@@ -2,9 +2,9 @@ import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog"
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { ResourceContext, ResourceType } from "@/resource-context";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 
@@ -14,16 +14,16 @@ export const Route = createFileRoute("/catalog/")({
 
 function Catalog() {
   const { resourceTypes, categories } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
+
   const navigate = useNavigate();
 
   const Icon = getIconComponent({ icon: "heroicon://magnifying-glass" });
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    setBreadcrumbs([{ name: "Catalog" }]);
-  }, [setBreadcrumbs]);
+  useBreadcrumbs(() => {
+    return [{ name: "Catalog" }];
+  }, []);
 
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

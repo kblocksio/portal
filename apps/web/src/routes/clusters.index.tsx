@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ResourceContext } from "@/resource-context";
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 import { ResourceTable } from "@/components/resource-table/resource-table";
@@ -9,7 +9,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCreateResource } from "@/create-resource-context";
 
 export const Route = createFileRoute("/clusters/")({
   component: Clusters,
@@ -17,13 +16,13 @@ export const Route = createFileRoute("/clusters/")({
 
 function Clusters() {
   const { clusters } = useContext(ResourceContext);
-  const { setBreadcrumbs } = useAppContext();
+
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://rectangle-group" });
 
-  useEffect(() => {
-    setBreadcrumbs([{ name: "Clusters" }]);
-  }, [setBreadcrumbs]);
+  useBreadcrumbs(() => {
+    return [{ name: "Clusters" }];
+  }, []);
 
   const handleAddCluster = () => {
     navigate({

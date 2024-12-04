@@ -1,4 +1,4 @@
-import { useAppContext } from "@/app-context";
+import { useBreadcrumbs } from "@/app-context";
 import { ResourceForm } from "@/components/resource-form/resource-form";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { useCreateResource } from "@/create-resource-context";
@@ -6,7 +6,7 @@ import { LocationContext } from "@/location-context";
 import { ResourceContext, ResourceType } from "@/resource-context";
 import { ObjectMetadata } from "@repo/shared";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useContext, useEffect, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { BreadcrumbItem } from "@/app-context";
 export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
   component: CreateResourcePage,
@@ -15,7 +15,6 @@ export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
 function CreateResourcePage() {
   const { resourceTypes } = useContext(ResourceContext);
   const { handleCreateOrEdit, isLoading } = useCreateResource();
-  const { setBreadcrumbs } = useAppContext();
   const { group, version, plural } = Route.useParams();
   const navigate = useNavigate();
   const previousRoute = useContext(LocationContext);
@@ -27,7 +26,7 @@ function CreateResourcePage() {
     return "/resources";
   }, [previousRoute]);
 
-  useEffect(() => {
+  useBreadcrumbs(() => {
     const breadcrumbs: BreadcrumbItem[] = [
       {
         name: firstPathSegment
@@ -45,7 +44,7 @@ function CreateResourcePage() {
     breadcrumbs.push({
       name: `${group}/${version}/${plural}`,
     });
-    setBreadcrumbs(breadcrumbs);
+    return breadcrumbs;
   }, [firstPathSegment]);
 
   const resourceType = useMemo(
