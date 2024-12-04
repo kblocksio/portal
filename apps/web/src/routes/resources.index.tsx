@@ -5,8 +5,6 @@ import { useIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 import { useAppContext } from "@/app-context";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { map } from "zod";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
