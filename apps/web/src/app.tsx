@@ -51,7 +51,6 @@ export function App({ children }: { children: React.ReactNode }) {
 
 // Create a new Layout component that contains your app shell
 export function AppLayout() {
-  // <Outlet />
   return (
     <div className="flex min-h-screen">
       <SidebarProvider>
