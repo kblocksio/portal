@@ -3,6 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { useIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
+import { useAppContext } from "@/app-context";
+import { useEffect } from "react";
+
 export const Route = createFileRoute("/resources/")({
   component: Resources,
 });
@@ -14,6 +17,12 @@ export const meta = {
 };
 
 function Resources() {
+  const { setBreadcrumbs } = useAppContext();
+
+  useEffect(() => {
+    setBreadcrumbs([{ name: "Resources" }]);
+  }, [setBreadcrumbs]);
+
   const Icon = useIconComponent({ icon: meta.icon });
 
   return (
