@@ -219,7 +219,7 @@ export const ResourceProvider = ({
           const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
           const systems = prev[key]?.systems ?? new Set();
           systems.add(system);
-  
+
           return {
             ...prev,
             [key]: {
@@ -235,7 +235,9 @@ export const ResourceProvider = ({
           // if the object is deleted, remove the resource type
           const plural = name.split(".")[0];
           const group = name.split(".")[1];
-          const key = Object.keys(prev).find((k) => k.includes(plural) && k.includes(group));
+          const key = Object.keys(prev).find(
+            (k) => k.includes(plural) && k.includes(group),
+          );
           if (key) {
             delete prev[key];
           }

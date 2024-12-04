@@ -34,11 +34,19 @@ import { categories } from "./categories";
 import { publicProcedure, router } from "./trpc";
 import { z } from "zod";
 
+export type TrpcApiObject = ApiObject & {
+  objUri: string;
+};
+
 export type TrpcProject = {
   objUri: string;
   title?: string;
   name: string;
+  namespace?: string;
+  description?: string;
   icon?: string;
+  objects: string[];
+  raw: ApiObject;
 };
 
 export type TrpcResource = {
@@ -52,6 +60,68 @@ export type TrpcResource = {
   lastUpdated?: number;
   // children
   icon?: string;
+  raw: ApiObject;
+};
+
+const getTrpcApiObjects = async (): Promise<TrpcApiObject[]> => {
+  const objects = await getAllObjects();
+  return Object.entries(objects).map<TrpcApiObject>(([objUri, object]) => {
+    return { ...object, objUri };
+  });
+};
+
+const resourcesFromObjects = (
+  allObjects: TrpcApiObject[],
+  projects: TrpcProject[],
+): TrpcResource[] => {
+  return allObjects
+    .filter(
+      (object) => blockTypeFromUri(object.objUri) !== "kblocks.io/v1/projects",
+    )
+    .map<TrpcResource>((object) => {
+      const block = parseBlockUri(object.objUri);
+
+      const readyCondition = object.status?.conditions?.find(
+        (c) => c.type === "Ready",
+      );
+
+      const lastUpdated =
+        readyCondition?.lastTransitionTime ?? object.metadata.creationTimestamp;
+
+      const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
+
+      return {
+        objUri: object.objUri,
+        status: "ready",
+        kind: object.kind,
+        name: object.metadata.name,
+        cluster: block.system,
+        namespace: object.metadata.namespace,
+        projects: projects.filter((p) => p.objects.includes(object.objUri)),
+        lastUpdated: timestamp?.getTime(),
+        icon: object.spec?.definition?.icon as string | undefined,
+        raw: object,
+      };
+    });
+};
+
+const projectsFromObjects = (allObjects: TrpcApiObject[]): TrpcProject[] => {
+  return allObjects
+    .filter(
+      (object) => blockTypeFromUri(object.objUri) === "kblocks.io/v1/projects",
+    )
+    .map<TrpcProject>((object) => {
+      return {
+        objUri: object.objUri,
+        title: object.metadata.name,
+        name: object.metadata.name,
+        namespace: object.metadata.namespace,
+        description: object.spec?.definition?.description as string | undefined,
+        icon: object.spec?.definition?.icon as string | undefined,
+        objects: object.objects ?? [],
+        raw: object,
+      };
+    });
 };
 
 const appRouter = router({
@@ -67,32 +137,35 @@ const appRouter = router({
       return { objUri, events };
     }),
   listResources: publicProcedure.query(async () => {
-    const objects = await getAllObjects();
-    return Object.entries(objects).map<TrpcResource>(([objUri, object]) => {
-      const block = parseBlockUri(objUri);
-
-      const readyCondition = object.status?.conditions?.find(
-        (c) => c.type === "Ready",
-      );
-
-      const lastUpdated =
-        readyCondition?.lastTransitionTime ?? object.metadata.creationTimestamp;
-
-      const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
-
-      return {
-        objUri,
-        status: "ready",
-        kind: object.kind,
-        name: object.metadata.name,
-        cluster: block.system,
-        namespace: object.metadata.namespace,
-        projects: [],
-        lastUpdated: timestamp?.getTime(),
-        icon: object.spec?.definition?.icon as string | undefined,
-      };
-    });
+    const objects = await getTrpcApiObjects();
+    const projects = projectsFromObjects(objects);
+    return resourcesFromObjects(objects, projects);
   }),
+  listProjects: publicProcedure.query(async () => {
+    const objects = await getTrpcApiObjects();
+    return projectsFromObjects(objects);
+  }),
+  getProject: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getTrpcApiObjects();
+      const projects = projectsFromObjects(objects);
+      return projects.find((p) => p.name === input.name);
+    }),
+  listProjectResources: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getTrpcApiObjects();
+      const projects = projectsFromObjects(objects);
+      const project = projects.find((project) => project.name === input.name);
+      if (!project) {
+        return [];
+      }
+      const projectObjects = project.objects
+        .map((uri) => objects.find((o) => o.objUri === uri))
+        .filter((object): object is TrpcApiObject => object !== undefined);
+      return resourcesFromObjects(projectObjects, [project]);
+    }),
 });
 
 export type AppRouter = typeof appRouter;
@@ -119,7 +192,7 @@ app.use(
 import * as trpcExpress from "@trpc/server/adapters/express";
 
 app.use(
-  "/trpc",
+  "/api/trpc",
   trpcExpress.createExpressMiddleware({
     router: appRouter,
   }),

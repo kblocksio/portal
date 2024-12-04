@@ -54,7 +54,7 @@ export function getResourceProperties(resource: Resource) {
   return properties;
 }
 
-export function getResourceOutputs(resource: Resource) {
+export function getResourceOutputs(resource: ApiObject) {
   const outputs: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(resource.status ?? {})) {
