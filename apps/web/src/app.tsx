@@ -20,13 +20,15 @@ import { trpc } from "./trpc";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
 import { LocationProvider } from "./location-context.js";
 
+const TRPC_URL = `${location.origin}/api/trpc`;
+
 export function App({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${import.meta.env.VITE_BACKEND_URL}/api/trpc`,
+          url: TRPC_URL,
         }),
       ],
     }),
