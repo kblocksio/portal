@@ -5,7 +5,7 @@ import { useAppContext } from "@/app-context";
 
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getIconComponent } from "@/lib/get-icon";
+import { getIconComponent, useIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -21,7 +21,7 @@ function Resources() {
   // const { resourceTypes, objects } = useContext(ResourceContext);
   // const { setBreadcrumbs } = useAppContext();
 
-  const Icon = getIconComponent({ icon: meta.icon });
+  const Icon = useIconComponent({ icon: meta.icon });
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">

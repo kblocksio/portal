@@ -53,6 +53,15 @@ export const getIconComponent = ({
   return getLucideIcon(icon);
 };
 
+/**
+ * Memoized icon component.
+ *
+ * @see getIconComponent
+ */
+export const useIconComponent = ({ icon }: { icon?: string }) => {
+  return useMemo(() => getIconComponent({ icon }), [icon]);
+};
+
 export const getIconColors = (options: {
   darkenOnGroupHover?: boolean;
   forceDarken?: boolean;
@@ -185,6 +194,11 @@ const colors: Record<Colors, ColorSet> = {
   },
 };
 
+/**
+ * Memoized resource icon component.
+ *
+ * @see useIconComponent
+ */
 export const ResourceIcon = memo(function ResourceIcon({
   icon,
   className,
@@ -192,6 +206,6 @@ export const ResourceIcon = memo(function ResourceIcon({
   icon?: string;
   className?: string;
 }) {
-  const IconComponent = useMemo(() => getIconComponent({ icon }), [icon]);
+  const IconComponent = useIconComponent({ icon });
   return <IconComponent className={className} />;
 });
