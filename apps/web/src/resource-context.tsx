@@ -28,6 +28,7 @@ import { isEqual } from "lodash";
 import { request } from "./lib/backend";
 import { NotificationsContext } from "./notifications-context";
 import { getIconComponent } from "./lib/get-icon";
+import { trpc } from "./trpc";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 
@@ -158,9 +159,9 @@ export const ResourceProvider = ({
     WorkerEvent | undefined
   >(undefined);
 
-  const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
-    "/api/resources",
-  );
+  // const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
+  //   "/api/resources",
+  // );
   const { data: categoriesData } =
     useFetch<Record<string, Category>>("/api/categories");
 
@@ -281,12 +282,12 @@ export const ResourceProvider = ({
     [handleObjectMessage],
   );
 
-  useEffect(() => {
-    if (!initialResources || !initialResources.objects) {
-      return;
-    }
-    handleObjectMessages(initialResources.objects);
-  }, [initialResources, handleObjectMessages]);
+  // useEffect(() => {
+  //   if (!initialResources || !initialResources.objects) {
+  //     return;
+  //   }
+  //   handleObjectMessages(initialResources.objects);
+  // }, [initialResources, handleObjectMessages]);
 
   useEffect(() => {
     setRelationships((prev) => {
@@ -366,6 +367,7 @@ export const ResourceProvider = ({
     });
   }, []);
 
+  const trpcUtils = trpc.useUtils();
   useEffect(() => {
     if (!lastJsonMessage || isEqual(lastJsonMessage, previousMessage)) {
       return;
@@ -401,6 +403,9 @@ export const ResourceProvider = ({
         ]);
         break;
     }
+
+    // Do not invalidate queries just yet: there are too many events coming from the stream.
+    // trpcUtils.invalidate();
   }, [
     lastJsonMessage,
     handleObjectMessage,
@@ -408,6 +413,7 @@ export const ResourceProvider = ({
     addNotifications,
     addEvent,
     previousMessage,
+    trpcUtils,
   ]);
 
   // make sure to close the websocket when the component is unmounted
