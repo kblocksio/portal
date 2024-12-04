@@ -91,7 +91,8 @@ const resourcesFromObjects = (
       );
 
       const lastUpdated =
-        readyCondition?.lastTransitionTime ?? object.metadata.creationTimestamp;
+        readyCondition?.lastTransitionTime ??
+        object.metadata?.creationTimestamp;
 
       const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
 
@@ -99,9 +100,9 @@ const resourcesFromObjects = (
         objUri: object.objUri,
         status: "ready",
         kind: object.kind,
-        name: object.metadata.name,
+        name: object.metadata?.name,
         cluster: block.system,
-        namespace: object.metadata.namespace,
+        namespace: object.metadata?.namespace,
         projects: projects.filter((p) => p.objects.includes(object.objUri)),
         lastUpdated: timestamp?.getTime(),
         icon: object.spec?.definition?.icon as string | undefined,
@@ -118,9 +119,9 @@ const projectsFromObjects = (allObjects: TrpcApiObject[]): TrpcProject[] => {
     .map<TrpcProject>((object) => {
       return {
         objUri: object.objUri,
-        title: object.metadata.name,
-        name: object.metadata.name,
-        namespace: object.metadata.namespace,
+        title: object.metadata?.name,
+        name: object.metadata?.name,
+        namespace: object.metadata?.namespace,
         description: object.spec?.definition?.description as string | undefined,
         icon: object.spec?.definition?.icon as string | undefined,
         objects: object.objects ?? [],
