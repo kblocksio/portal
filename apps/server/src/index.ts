@@ -192,7 +192,7 @@ app.use(
 import * as trpcExpress from "@trpc/server/adapters/express";
 
 app.use(
-  "/trpc",
+  "/api/trpc",
   trpcExpress.createExpressMiddleware({
     router: appRouter,
   }),

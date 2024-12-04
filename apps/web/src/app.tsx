@@ -26,7 +26,7 @@ export function App({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${import.meta.env.VITE_BACKEND_URL}/trpc`,
+          url: `${import.meta.env.VITE_BACKEND_URL}/api/trpc`,
         }),
       ],
     }),
