@@ -43,6 +43,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
 import type { TrpcResource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
+import { StatusBadge } from "../status-badge";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
@@ -77,11 +78,12 @@ const useColumns = () => {
         ),
       }),
       columnHelper.accessor("status", {
-        cell: () => (
+        cell: (props) => (
           <div className="flex items-center gap-1.5">
-            {/* <StatusBadge obj={props.row.original} merge /> */}
-            {/* {props.getValue()} */}
-            <div className={cn("size-3 rounded-full bg-green-500")} />
+            <StatusBadge
+              conditions={props.row.original.statusConditions}
+              merge
+            />
           </div>
         ),
         size: 0,

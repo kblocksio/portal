@@ -302,7 +302,7 @@ function ResourcePage() {
                 {selectedResource.status?.conditions?.map((condition) => (
                   <StatusBadge
                     key={condition.type}
-                    obj={selectedResource}
+                    conditions={selectedResource.status?.conditions ?? []}
                     showMessage
                     type={condition.type}
                   />

@@ -21,6 +21,8 @@ import {
   Manifest,
   ObjectEvent,
   parseBlockUri,
+  StatusReason,
+  type Condition,
 } from "@kblocks/api";
 import {
   getAllObjects,
@@ -51,7 +53,8 @@ export type TrpcProject = {
 
 export type TrpcResource = {
   objUri: string;
-  status: "ready";
+  status?: "ready" | "failed";
+  statusConditions: Condition[];
   kind: string;
   name: string;
   cluster: string;
@@ -68,6 +71,21 @@ const getTrpcApiObjects = async (): Promise<TrpcApiObject[]> => {
   return Object.entries(objects).map<TrpcApiObject>(([objUri, object]) => {
     return { ...object, objUri };
   });
+};
+
+const getReadyCondition = (conditions: Condition[]): Condition | undefined => {
+  return conditions.find((c) => c.type === "Ready");
+};
+
+const getResourceStatus = (
+  conditions: Condition[],
+): "ready" | "failed" | undefined => {
+  const readyCondition = getReadyCondition(conditions);
+  return readyCondition?.reason === StatusReason.Completed
+    ? "ready"
+    : readyCondition?.reason === StatusReason.Error
+      ? "failed"
+      : undefined;
 };
 
 const resourcesFromObjects = (
@@ -98,7 +116,8 @@ const resourcesFromObjects = (
 
       return {
         objUri: object.objUri,
-        status: "ready",
+        status: getResourceStatus(object.status?.conditions ?? []),
+        statusConditions: object.status?.conditions ?? [],
         kind: object.kind,
         name: object.metadata?.name,
         cluster: block.system,
