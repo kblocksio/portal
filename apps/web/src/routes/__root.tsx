@@ -1,8 +1,4 @@
-import {
-  createRootRoute,
-  Outlet,
-  ScrollRestoration,
-} from "@tanstack/react-router";
+import { createRootRoute, ScrollRestoration } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import { AppLayout } from "@/app";
 
@@ -19,11 +15,11 @@ export const Route = createRootRoute({
     <>
       <AppLayout />
       <ScrollRestoration />
-      {/* <Suspense>
+      <Suspense>
         <div className="hidden lg:visible">
           <TanStackRouterDevtools />
         </div>
-      </Suspense> */}
+      </Suspense>
     </>
   ),
 });

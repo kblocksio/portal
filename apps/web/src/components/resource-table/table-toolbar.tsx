@@ -1,6 +1,6 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
 import { useContext, useState } from "react";
-import { Resource, ResourceContext } from "@/resource-context";
+import { ResourceContext } from "@/resource-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Cross2Icon } from "@radix-ui/react-icons";
@@ -19,9 +19,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
 import { ProjectsMenu } from "../projects-menu";
+import type { TrpcResource } from "@kblocks-portal/server";
 
 export interface ResourceTableToolbarProps {
-  table: TanstackTable<Resource>;
+  table: TanstackTable<TrpcResource>;
   showActions?: boolean;
   showCreateNew?: boolean;
   customNewResourceAction?: {
@@ -107,9 +108,9 @@ export function ResourceTableToolbar({
             />
           )}
 
-          {table.getColumn("system") && (
+          {table.getColumn("cluster") && (
             <DataTableFacetedFilter
-              column={table.getColumn("system")}
+              column={table.getColumn("cluster")}
               title="Cluster"
               options={systems.map((system) => ({
                 label: system,

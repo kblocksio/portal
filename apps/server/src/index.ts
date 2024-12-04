@@ -36,6 +36,9 @@ import { z } from "zod";
 
 export type TrpcProject = {
   objUri: string;
+  title?: string;
+  name: string;
+  icon?: string;
 };
 
 export type TrpcResource = {

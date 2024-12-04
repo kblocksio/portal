@@ -1,11 +1,7 @@
-import { ResourceContext } from "@/resource-context";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useContext, useMemo } from "react";
-import { useAppContext } from "@/app-context";
 
 import { ResourceTable } from "@/components/resource-table/resource-table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getIconComponent, useIconComponent } from "@/lib/get-icon";
+import { useIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -18,9 +14,6 @@ export const meta = {
 };
 
 function Resources() {
-  // const { resourceTypes, objects } = useContext(ResourceContext);
-  // const { setBreadcrumbs } = useAppContext();
-
   const Icon = useIconComponent({ icon: meta.icon });
 
   return (

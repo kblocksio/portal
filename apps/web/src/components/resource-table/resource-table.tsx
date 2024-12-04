@@ -216,65 +216,66 @@ const useColumns = () => {
       //     );
       //   },
       // }),
-      // columnHelper.accessor("projects", {
-      //   id: "projects",
-      //   header: (props) => (
-      //     <DataTableColumnHeader column={props.column} title="Projects" />
-      //   ),
-      //   cell: (props) => {
-      //     const prjs = props.row.original.prjs;
-      //     if (prjs.length === 0) {
-      //       return null;
-      //     }
+      columnHelper.accessor("projects", {
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Projects" />
+        ),
+        cell: (props) => {
+          const projects = props.getValue();
+          if (projects.length === 0) {
+            return null;
+          }
 
-      //     if (prjs.length === 1) {
-      //       return (
-      //         <span className="truncate">
-      //           <ProjectLink project={prjs[0]} />
-      //         </span>
-      //       );
-      //     }
+          if (projects.length === 1) {
+            return (
+              <span className="truncate">
+                <ProjectLink project={projects[0]} />
+              </span>
+            );
+          }
 
-      //     return (
-      //       <TooltipProvider>
-      //         <Tooltip>
-      //           <TooltipTrigger asChild>
-      //             <Button variant="ghost" className="h-0">
-      //               {prjs.length} Projects
-      //             </Button>
-      //           </TooltipTrigger>
-      //           <TooltipContent>
-      //             <div className="flex flex-col items-start gap-2">
-      //               {prjs.map((p) => (
-      //                 <ProjectLink key={p.metadata.name} project={p} />
-      //               ))}
-      //             </div>
-      //           </TooltipContent>
-      //         </Tooltip>
-      //       </TooltipProvider>
-      //     );
-      //   },
-      //   filterFn: (row, columnId, selectedProjects) => {
-      //     if (selectedProjects.includes("$unassigned")) {
-      //       if (row.original.prjs.length === 0) {
-      //         return true;
-      //       }
-      //     }
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    {projects.length === 1
+                      ? `${projects.length} Project`
+                      : `${projects.length} Projects`}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col items-start gap-2">
+                    {projects.map((project) => (
+                      <ProjectLink key={project.objUri} project={project} />
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+        // filterFn: (row, columnId, selectedProjects) => {
+        //   if (selectedProjects.includes("$unassigned")) {
+        //     if (row.getValue().length === 0) {
+        //       return true;
+        //     }
+        //   }
 
-      //     for (const p of selectedProjects) {
-      //       if (row.original.prjs.find((pp) => pp.metadata.name === p)) {
-      //         return true;
-      //       }
-      //     }
+        //   for (const p of selectedProjects) {
+        //     if (row.original.prjs.find((pp) => pp.metadata.name === p)) {
+        //       return true;
+        //     }
+        //   }
 
-      //     return false;
-      //   },
-      //   sortingFn: (rowA, rowB) => {
-      //     return JSON.stringify(rowA.original.prjs).localeCompare(
-      //       JSON.stringify(rowB.original.prjs),
-      //     );
-      //   },
-      // }),
+        //   return false;
+        // },
+        // sortingFn: (rowA, rowB) => {
+        //   return JSON.stringify(rowA.original.prjs).localeCompare(
+        //     JSON.stringify(rowB.original.prjs),
+        //   );
+        // },
+      }),
       columnHelper.accessor("lastUpdated", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
@@ -414,12 +415,12 @@ export const ResourceTable = (props: {
 
   return (
     <div className={cn("flex flex-col gap-8", props.className)}>
-      {/* <ResourceTableToolbar
+      <ResourceTableToolbar
         table={table}
         showActions={props.showActions}
         showCreateNew={props.showCreateNew}
         customNewResourceAction={props.customNewResourceAction}
-      /> */}
+      />
       <div className={cn("rounded-md border bg-white", props.className)}>
         <div
           ref={scrollRef}
