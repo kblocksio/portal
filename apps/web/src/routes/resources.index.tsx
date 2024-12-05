@@ -6,6 +6,8 @@ import { useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { TablePagination } from "@/components/resource-table/table-pagination";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -40,15 +42,22 @@ function Resources() {
         description={meta.description}
         Icon={Icon}
       />
+
       <div>
         {resources.isLoading && <LoadingSkeleton />}
+
         {resources.data && (
           <ResourceTable
             resources={resources.data.data}
+            fetching={resources.isFetching}
+          />
+        )}
+
+        {resources.data?.pageCount && (
+          <TablePagination
             page={page}
             pageCount={resources.data.pageCount}
             onPageChange={setPage}
-            fetching={resources.isFetching}
           />
         )}
       </div>

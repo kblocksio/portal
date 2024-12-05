@@ -34,7 +34,7 @@ import {
 import { useLocation } from "@tanstack/react-router";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
-import { ResourceTableToolbar } from "./table-toolbar";
+import { ResourceTableToolbar } from "./resource-table-toolbar";
 import { CircleEllipsis } from "lucide-react";
 import {
   Tooltip,
@@ -326,9 +326,6 @@ const useColumns = () => {
 
 export const ResourceTable = memo(function ResourceTable({
   resources,
-  page = 1,
-  pageCount,
-  onPageChange,
   className,
   showActions,
   showCreateNew,
@@ -336,10 +333,6 @@ export const ResourceTable = memo(function ResourceTable({
   fetching,
 }: {
   resources: TrpcResource[];
-  page: number;
-  // perPage?: number;
-  pageCount: number;
-  onPageChange?: (page: number) => void;
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -365,7 +358,7 @@ export const ResourceTable = memo(function ResourceTable({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   useEffect(() => {
     setRowSelection({});
-  }, [location.pathname, page]);
+  }, [location.pathname, resources]);
 
   const table = useReactTable({
     data: resources,
@@ -450,36 +443,6 @@ export const ResourceTable = memo(function ResourceTable({
         </Table>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between py-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (page > 1) {
-                onPageChange?.(page - 1);
-              }
-            }}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-muted-foreground text-sm">
-            Page {page} of {pageCount}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (page < pageCount) {
-                onPageChange?.(page + 1);
-              }
-            }}
-            disabled={page === pageCount}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-
       {emptyTable && (
         <div className="flex h-16 items-center justify-center">
           <p className="text-muted-foreground">
@@ -506,62 +469,61 @@ const ResourceTableRow = memo(function ResourceTableRow({
     </TableRow>
   );
 });
-ResourceTableRow.displayName = "ResourceTableRow";
 
-const ResourceOutputs = memo(function ResourceOutputs({
-  resource,
-  // resourceType,
-}: {
-  resource: TrpcResource;
-  // resourceType: ResourceType;
-}) {
-  const outputs = getResourceOutputs(resource.raw);
-  const [isOpen, setIsOpen] = useState(false);
+// const ResourceOutputs = memo(function ResourceOutputs({
+//   resource,
+//   // resourceType,
+// }: {
+//   resource: TrpcResource;
+//   // resourceType: ResourceType;
+// }) {
+//   const outputs = getResourceOutputs(resource.raw);
+//   const [isOpen, setIsOpen] = useState(false);
 
-  if (Object.keys(outputs).length === 0) {
-    return null;
-  }
+//   if (Object.keys(outputs).length === 0) {
+//     return null;
+//   }
 
-  return (
-    <div>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-0"
-                  onClick={(e) => {
-                    setIsOpen(true);
-                    e.stopPropagation();
-                  }}
-                >
-                  <CircleEllipsis className="h-4 w-4" />
-                  <span className="sr-only">Outputs</span>
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Outputs</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <PopoverContent onClick={(e) => e.stopPropagation()}>
-          <div className="flex flex-col space-y-8">
-            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              {/* <Outputs
-                outputs={outputs}
-                resourceObjUri={resource.objUri}
-                resourceType={resourceType}
-              /> */}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-});
+//   return (
+//     <div>
+//       <Popover open={isOpen} onOpenChange={setIsOpen}>
+//         <TooltipProvider>
+//           <Tooltip>
+//             <TooltipTrigger asChild>
+//               <PopoverTrigger asChild>
+//                 <Button
+//                   variant="ghost"
+//                   className="h-0"
+//                   onClick={(e) => {
+//                     setIsOpen(true);
+//                     e.stopPropagation();
+//                   }}
+//                 >
+//                   <CircleEllipsis className="h-4 w-4" />
+//                   <span className="sr-only">Outputs</span>
+//                 </Button>
+//               </PopoverTrigger>
+//             </TooltipTrigger>
+//             <TooltipContent>
+//               <p>Outputs</p>
+//             </TooltipContent>
+//           </Tooltip>
+//         </TooltipProvider>
+//         <PopoverContent onClick={(e) => e.stopPropagation()}>
+//           <div className="flex flex-col space-y-8">
+//             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+//               {/* <Outputs
+//                 outputs={outputs}
+//                 resourceObjUri={resource.objUri}
+//                 resourceType={resourceType}
+//               /> */}
+//             </div>
+//           </div>
+//         </PopoverContent>
+//       </Popover>
+//     </div>
+//   );
+// });
 
 const DelayedRender: FC<PropsWithChildren<{ delay: number }>> = ({
   delay,

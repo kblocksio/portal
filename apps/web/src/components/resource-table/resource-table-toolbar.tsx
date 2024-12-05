@@ -1,5 +1,5 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
-import { useContext, useState } from "react";
+import { memo, useContext, useState } from "react";
 import { ResourceContext } from "@/resource-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export interface ResourceTableToolbarProps {
   };
 }
 
-export function ResourceTableToolbar({
+export const ResourceTableToolbar = memo(function ResourceTableToolbar({
   table,
   showActions = true,
   showCreateNew = true,
@@ -55,6 +55,8 @@ export function ResourceTableToolbar({
               table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="h-8"
+            // TODO: Add back when the backend supports filtering.
+            disabled
           />
         </div>
 
@@ -227,4 +229,4 @@ export function ResourceTableToolbar({
       />
     </div>
   );
-}
+});
