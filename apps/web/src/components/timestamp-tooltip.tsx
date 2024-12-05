@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { memo, PropsWithChildren } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -11,21 +11,22 @@ export interface TimestampTooltipProps {
   timestamp: Date | number;
 }
 
-export const TimestampTooltip = (
-  props: PropsWithChildren<TimestampTooltipProps>,
-) => {
+export const TimestampTooltip = memo(function TimestampTooltip({
+  timestamp,
+  children,
+}: PropsWithChildren<TimestampTooltipProps>) {
   return (
     <TooltipProvider delayDuration={400}>
       <Tooltip>
         <TooltipTrigger>
           <span className="hover:bg-muted flex items-center rounded-sm px-1 py-0.5 hover:bg-gray-100">
-            {props.children}
+            {children}
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          <TimestampDetails timestamp={props.timestamp} />
+          <TimestampDetails timestamp={timestamp} />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
-};
+});

@@ -120,7 +120,6 @@ const useColumns = () => {
                 icon={props.row.original.icon}
                 className="h-4 w-4"
               />
-
               {props.getValue()}
             </div>
           );
@@ -279,14 +278,14 @@ const useColumns = () => {
         id: "outputs",
         size: 0,
         header: () => <></>,
-        cell: (props) => {
-          return (
-            <ResourceOutputs
-              resource={props.row.original}
-              // resourceType={props.row.original.resourceType}
-            />
-          );
-        },
+        // cell: (props) => {
+        //   return (
+        //     <ResourceOutputs
+        //       resource={props.row.original}
+        //       // resourceType={props.row.original.resourceType}
+        //     />
+        //   );
+        // },
       }),
       columnHelper.display({
         id: "actions",
@@ -358,7 +357,7 @@ export const ResourceTable = (props: {
     count: rows.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 40,
-    overscan: 20,
+    overscan: 40,
   });
 
   const emptyTable = table.getFilteredRowModel().rows.length === 0;

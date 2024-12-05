@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -26,20 +26,22 @@ const utcLongDateTimeFormat = new Intl.DateTimeFormat(undefined, {
   timeZone: "UTC",
 });
 
-export const TimestampDetails = (props: { timestamp: Date | number }) => {
+export const TimestampDetails = memo(function TimestampDetails({
+  timestamp,
+}: {
+  timestamp: Date | number;
+}) {
   const localTime = useMemo(() => {
-    return localLongDateTimeFormat.format(props.timestamp);
-  }, [props.timestamp]);
+    return localLongDateTimeFormat.format(timestamp);
+  }, [timestamp]);
 
   const utcTime = useMemo(() => {
-    return utcLongDateTimeFormat.format(props.timestamp);
-  }, [props.timestamp]);
+    return utcLongDateTimeFormat.format(timestamp);
+  }, [timestamp]);
 
-  const timestamp = useMemo(() => {
-    return typeof props.timestamp === "number"
-      ? props.timestamp
-      : props.timestamp.getTime();
-  }, [props.timestamp]);
+  const timestampMs = useMemo(() => {
+    return typeof timestamp === "number" ? timestamp : timestamp.getTime();
+  }, [timestamp]);
 
   return (
     <div className="grid grid-cols-[8em_1fr] gap-1 py-1 text-xs">
@@ -48,7 +50,7 @@ export const TimestampDetails = (props: { timestamp: Date | number }) => {
       <span className="text-muted-foreground font-light">UTC</span>
       <span className="text-foreground">{utcTime}</span>
       <span className="text-muted-foreground font-light">Timestamp</span>
-      <span className="text-foreground">{timestamp}</span>
+      <span className="text-foreground">{timestampMs}</span>
     </div>
   );
-};
+});

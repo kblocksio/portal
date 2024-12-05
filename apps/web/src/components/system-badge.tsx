@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { chooseColor } from "./components-utils";
+import { memo } from "react";
 
 const clusterColors = [
   "bg-blue-100 text-blue-800",
@@ -20,7 +21,9 @@ export interface SystemBadgeProps {
   system: string;
 }
 
-export const SystemBadge = ({ system }: SystemBadgeProps) => {
+export const SystemBadge = memo(function SystemBadge({
+  system,
+}: SystemBadgeProps) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -43,4 +46,4 @@ export const SystemBadge = ({ system }: SystemBadgeProps) => {
       </Tooltip>
     </TooltipProvider>
   );
-};
+});
