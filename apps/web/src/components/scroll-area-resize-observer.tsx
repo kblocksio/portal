@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
-export const ScrollAreaResizeObserver = ({
+export const ScrollAreaResizeObserver = memo(function ScrollAreaResizeObserver({
   children,
 }: {
   children: React.ReactNode;
-}) => {
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -32,4 +32,4 @@ export const ScrollAreaResizeObserver = ({
       </div>
     </div>
   );
-};
+});
