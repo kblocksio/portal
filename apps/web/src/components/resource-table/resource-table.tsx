@@ -396,7 +396,7 @@ export const ResourceTable = memo(function ResourceTable({
       />
       <div
         className={cn(
-          "relative overflow-x-hidden rounded-md border bg-white",
+          "relative overflow-x-auto rounded-md border bg-white",
           className,
         )}
       >
