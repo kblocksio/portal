@@ -124,9 +124,7 @@ export const ResourceProvider = ({
   children: React.ReactNode;
 }) => {
   const { addNotifications } = useContext(NotificationsContext);
-  const [resourceTypes, setResourceTypes] = useState<
-    Record<string, ResourceType>
-  >({});
+  const { data: resourceTypes } = useResourceTypes();
   const [categories, setCategories] = useState<Record<string, Category>>({});
   const [objects, setObjects] = useState<Record<string, Resource>>({});
   const [selectedResourceId, setSelectedResourceId] = useState<
@@ -211,40 +209,6 @@ export const ResourceProvider = ({
       !(object as ApiObject)?.metadata
     ) {
       return;
-    }
-
-    if (objType === "kblocks.io/v1/blocks") {
-      setResourceTypes((prev) => {
-        if (Object.keys(object).length > 0) {
-          const block = object as BlockApiObject;
-          const key = `${block.spec.definition.group}/${block.spec.definition.version}/${block.spec.definition.plural}`;
-          const systems = prev[key]?.systems ?? new Set();
-          systems.add(system);
-
-          return {
-            ...prev,
-            [key]: {
-              ...block.spec.definition,
-              engine: block.spec.engine,
-              iconComponent: getIconComponent({
-                icon: block.spec.definition.icon,
-              }),
-              systems,
-            },
-          };
-        } else {
-          // if the object is deleted, remove the resource type
-          const plural = name.split(".")[0];
-          const group = name.split(".")[1];
-          const key = Object.keys(prev).find(
-            (k) => k.includes(plural) && k.includes(group),
-          );
-          if (key) {
-            delete prev[key];
-          }
-          return prev;
-        }
-      });
     }
 
     // add the object to the list of objects
@@ -422,7 +386,6 @@ export const ResourceProvider = ({
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
     return () => {
-      console.log("Resource Context unmounted, closing websocket");
       const websocket = getWebSocket();
       if (websocket) {
         websocket.close();
@@ -542,4 +505,24 @@ export const useObjectEvents = (
       unsubscribe();
     };
   }, [emitter, eventsUrl, fetchEvents, objUri]);
+};
+
+export const useResourceTypes = () => {
+  return trpc.listTypes.useQuery(undefined, {
+    initialData: {},
+    select(data) {
+      return Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          {
+            ...value,
+            systems: new Set(value.systems),
+            iconComponent: getIconComponent({
+              icon: value.icon,
+            }),
+          },
+        ]),
+      );
+    },
+  });
 };

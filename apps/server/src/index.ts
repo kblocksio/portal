@@ -38,6 +38,7 @@ import { z } from "zod";
 
 export type TrpcApiObject = ApiObject & {
   objUri: string;
+  spec?: Manifest;
 };
 
 export type TrpcProject = {
@@ -64,6 +65,7 @@ export type TrpcResource = {
   // children
   icon?: string;
   raw: ApiObject;
+  outputs: Record<string, any>;
 };
 
 const getTrpcApiObjects = async (): Promise<TrpcApiObject[]> => {
@@ -86,6 +88,47 @@ const getResourceStatus = (
     : readyCondition?.reason === StatusReason.Error
       ? "failed"
       : undefined;
+};
+
+const containsString = (arr1: string[], arr2: string[]): boolean => {
+  return arr1.some((item) => arr2.includes(item));
+};
+
+const propertiesBlackList = ["lastStateHash"];
+
+function addProperty(
+  target: Record<string, any>,
+  value: any,
+  keyPrefix: string[] = [],
+) {
+  if (containsString(keyPrefix, propertiesBlackList)) {
+    return;
+  }
+  if (value === undefined) {
+    return;
+  }
+
+  if (typeof value === "object" && value !== null && keyPrefix.length === 0) {
+    for (const [k, v] of Object.entries(value)) {
+      addProperty(target, v, [...keyPrefix, k]);
+    }
+  } else {
+    target[keyPrefix.join(".")] = value;
+  }
+}
+
+const getResourceOutputs = (resource: ApiObject): Record<string, any> => {
+  const outputs: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(resource.status ?? {})) {
+    if (key === "conditions") {
+      continue;
+    }
+
+    addProperty(outputs, value, [key]);
+  }
+
+  return outputs;
 };
 
 const resourcesFromObjects = (
@@ -125,6 +168,7 @@ const resourcesFromObjects = (
         projects: projects.filter((p) => p.objects.includes(object.objUri)),
         lastUpdated: timestamp?.getTime(),
         icon: object.spec?.definition?.icon as string | undefined,
+        outputs: getResourceOutputs(object),
         raw: object,
       };
     });
@@ -149,6 +193,46 @@ const projectsFromObjects = (allObjects: TrpcApiObject[]): TrpcProject[] => {
     });
 };
 
+export type Definition = Manifest["definition"];
+
+export interface ResourceType extends Definition {
+  icon?: string;
+  engine: string;
+  systems: string[];
+}
+
+const mapTypeFromObject = (object: TrpcApiObject): [string, ResourceType] => {
+  if (!object.spec) {
+    throw new Error(`Object ${object.objUri} has no spec`);
+  }
+
+  const key = `${object.spec.definition.group}/${object.spec.definition.version}/${object.spec.definition.plural}`;
+
+  const { system, name } = parseBlockUri(object.objUri);
+
+  return [
+    key,
+    {
+      ...object.spec.definition,
+      engine: object.spec.engine,
+      systems: [system],
+      icon: object.spec.definition.icon,
+    },
+  ];
+};
+
+const typesFromObjects = (
+  allObjects: TrpcApiObject[],
+): Record<string, ResourceType> => {
+  return allObjects
+    .filter((o) => blockTypeFromUri(o.objUri) === "kblocks.io/v1/blocks")
+    .reduce<Record<string, ResourceType>>((acc, object) => {
+      const [key, type] = mapTypeFromObject(object);
+      acc[key] = type;
+      return acc;
+    }, {});
+};
+
 const appRouter = router({
   listEvents: publicProcedure
     .input(
@@ -161,6 +245,11 @@ const appRouter = router({
       const events = await loadEvents(objUri);
       return { objUri, events };
     }),
+  listTypes: publicProcedure.query(async () => {
+    const objects = await getTrpcApiObjects();
+    const types = typesFromObjects(objects);
+    return types;
+  }),
   listResources: publicProcedure.query(async () => {
     const objects = await getTrpcApiObjects();
     const projects = projectsFromObjects(objects);
@@ -170,6 +259,18 @@ const appRouter = router({
     const objects = await getTrpcApiObjects();
     return projectsFromObjects(objects);
   }),
+  // getResource: publicProcedure
+  //   .input(z.object({ objUri: z.string() }))
+  //   .query(async ({ input }) => {
+  //     const object = await getObject(input.objUri);
+  //     return object
+  //       ? {
+  //           ...object,
+  //           objUri: input.objUri,
+  //           outputs: getResourceOutputs(object),
+  //         }
+  //       : undefined;
+  //   }),
   getProject: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {
