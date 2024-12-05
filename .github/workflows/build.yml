@@ -125,6 +125,18 @@ jobs:
             -d '{"type":"CNAME","name":"'${{ env.ENV_NAME }}'","content":"'$QKUBE_NAME'","ttl":3600}' \
             https://api.dnsimple.com/v2/${{ secrets.DNSIMPLE_ACCOUNT }}/zones/kblocks.io/records --verbose
 
+      - name: Install prometheus
+        run: |
+          # install prometheus operator
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+          helm install prometheus-operator prometheus-community/kube-prometheus-stack
+
+          # install cloudwatch agent
+          curl https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/service/cwagent-prometheus/prometheus-k8s.yaml | 
+          sed "s/{{cluster_name}}/${{ env.ENV_NAME }}/;s/{{region_name}}/us-east-1/" | 
+          kubectl apply -f -
+
       - name: Install gallery secrets
         run: |
           export KBLOCKS_SYSTEM_ID="${{ steps.qkube.outputs.kblocks-host }}"
