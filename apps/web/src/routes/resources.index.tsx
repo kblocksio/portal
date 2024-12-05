@@ -5,6 +5,7 @@ import { RoutePageHeader } from "@/components/route-page-header";
 import { useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -21,7 +22,16 @@ function Resources() {
 
   const Icon = useIconComponent({ icon: meta.icon });
 
-  const resources = trpc.listResources.useQuery();
+  const [page, setPage] = useState(1);
+  const resources = trpc.listResources.useQuery(
+    {
+      page,
+      perPage: 10,
+    },
+    {
+      placeholderData: (data) => data,
+    },
+  );
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
@@ -32,7 +42,15 @@ function Resources() {
       />
       <div>
         {resources.isLoading && <LoadingSkeleton />}
-        {resources.data && <ResourceTable resources={resources.data} />}
+        {resources.data && (
+          <ResourceTable
+            resources={resources.data.data}
+            page={page}
+            pageCount={resources.data.pageCount}
+            onPageChange={setPage}
+            fetching={resources.isFetching}
+          />
+        )}
       </div>
     </div>
   );

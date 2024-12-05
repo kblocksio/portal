@@ -34,7 +34,7 @@ import {
 import { categories } from "./categories";
 
 import { publicProcedure, router } from "./trpc";
-import { z } from "zod";
+import { number, string, union, z } from "zod";
 
 export type TrpcApiObject = ApiObject & {
   objUri: string;
@@ -250,11 +250,38 @@ const appRouter = router({
     const types = typesFromObjects(objects);
     return types;
   }),
-  listResources: publicProcedure.query(async () => {
-    const objects = await getTrpcApiObjects();
-    const projects = projectsFromObjects(objects);
-    return resourcesFromObjects(objects, projects);
-  }),
+  listResources: publicProcedure
+    .input(
+      z
+        .object({
+          page: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).default(1)),
+          perPage: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).max(100).default(20)),
+        })
+        .optional()
+        .default({}),
+    )
+    .query(async ({ input }) => {
+      const { page, perPage } = input;
+      const objects = await getTrpcApiObjects();
+      const projects = projectsFromObjects(objects);
+      const resources = resourcesFromObjects(objects, projects);
+      const startIndex = (page - 1) * perPage;
+      const endIndex = startIndex + perPage;
+      const paginatedResources = resources.slice(startIndex, endIndex);
+      const pageCount = Math.ceil(resources.length / perPage);
+      return {
+        data: paginatedResources,
+        page,
+        perPage,
+        pageCount,
+      };
+    }),
   listProjects: publicProcedure.query(async () => {
     const objects = await getTrpcApiObjects();
     return projectsFromObjects(objects);

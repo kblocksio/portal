@@ -14,7 +14,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { httpBatchLink, httpLink, splitLink } from "@trpc/client";
 import React, { useState } from "react";
 import { trpc } from "./trpc";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
@@ -27,8 +27,16 @@ export function App({ children }: { children: React.ReactNode }) {
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        httpBatchLink({
-          url: TRPC_URL,
+        splitLink({
+          condition(op) {
+            return op.path === "listEvents";
+          },
+          false: httpLink({
+            url: TRPC_URL,
+          }),
+          true: httpBatchLink({
+            url: TRPC_URL,
+          }),
         }),
       ],
     }),

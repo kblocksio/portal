@@ -76,7 +76,9 @@ export function ResourceTableToolbar({
         )}
       </div>
 
-      <ScrollArea className="w-full" orientation="horizontal">
+      {/* TODO: Add back when the backend supports filtering */}
+
+      {/* <ScrollArea className="w-full" orientation="horizontal">
         <div className="flex items-center gap-2">
           {table.getColumn("kind") && (
             <DataTableFacetedFilter
@@ -155,7 +157,7 @@ export function ResourceTableToolbar({
             </Button>
           )}
         </div>
-      </ScrollArea>
+      </ScrollArea> */}
 
       {(showActions || showCreateNew) && (
         <div className="hidden items-center gap-2 md:flex">

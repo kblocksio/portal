@@ -9,8 +9,14 @@ import {
   RowSelectionState,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useState,
+  type FC,
+  type PropsWithChildren,
+} from "react";
 import { DataTableColumnHeader } from "./column-header";
 import { LastUpdated } from "../last-updated";
 import { cn, getResourceOutputs } from "@/lib/utils";
@@ -44,6 +50,8 @@ import { Link } from "../ui/link";
 import type { TrpcResource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 import { StatusBadge } from "../status-badge";
+import { motion } from "framer-motion";
+import { Spinner } from "../spinner";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
@@ -124,6 +132,8 @@ const useColumns = () => {
             </div>
           );
         },
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
       }),
       columnHelper.accessor("name", {
         header: (props) => (
@@ -144,12 +154,16 @@ const useColumns = () => {
             </Link>
           </div>
         ),
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
       }),
       columnHelper.accessor("cluster", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => <SystemBadge system={props.getValue()} />,
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
       }),
       columnHelper.accessor("namespace", {
         header: (props) => (
@@ -162,6 +176,8 @@ const useColumns = () => {
           }
           return <NamespaceBadge namespace={namespace} />;
         },
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
       }),
       // columnHelper.accessor("children", {
       //   id: "children",
@@ -235,6 +251,8 @@ const useColumns = () => {
             </TooltipProvider>
           );
         },
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
         // filterFn: (row, columnId, selectedProjects) => {
         //   if (selectedProjects.includes("$unassigned")) {
         //     if (row.getValue().length === 0) {
@@ -264,6 +282,8 @@ const useColumns = () => {
           props.row.original.lastUpdated && (
             <LastUpdated timestamp={props.row.original.lastUpdated} />
           ),
+        // TODO: Add back when the backend supports sorting.
+        enableSorting: false,
       }),
       columnHelper.display({
         id: "logs",
@@ -272,7 +292,7 @@ const useColumns = () => {
         ),
         size: 400,
         cell: (props) => <LastLogMessage objUri={props.row.original.objUri} />,
-        // enableSorting: false,
+        enableSorting: false,
       }),
       columnHelper.display({
         id: "outputs",
@@ -286,6 +306,7 @@ const useColumns = () => {
         //     />
         //   );
         // },
+        enableSorting: false,
       }),
       columnHelper.display({
         id: "actions",
@@ -297,13 +318,28 @@ const useColumns = () => {
             // resourceType={props.row.original.resourceType}
           />
         ),
+        enableSorting: false,
       }),
     ];
   }, []);
 };
 
-export const ResourceTable = (props: {
+export const ResourceTable = memo(function ResourceTable({
+  resources,
+  page = 1,
+  pageCount,
+  onPageChange,
+  className,
+  showActions,
+  showCreateNew,
+  customNewResourceAction,
+  fetching,
+}: {
   resources: TrpcResource[];
+  page: number;
+  // perPage?: number;
+  pageCount: number;
+  onPageChange?: (page: number) => void;
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -311,9 +347,8 @@ export const ResourceTable = (props: {
     label: string;
     navigate: () => void;
   };
-}) => {
-  const { resources } = props;
-
+  fetching?: boolean;
+}) {
   const columns = useColumns();
 
   const location = useLocation();
@@ -330,7 +365,7 @@ export const ResourceTable = (props: {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   useEffect(() => {
     setRowSelection({});
-  }, [location.pathname]);
+  }, [location.pathname, page]);
 
   const table = useReactTable({
     data: resources,
@@ -349,101 +384,99 @@ export const ResourceTable = (props: {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const { rows } = table.getRowModel();
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 40,
-    overscan: 40,
-  });
-
   const emptyTable = table.getFilteredRowModel().rows.length === 0;
 
   return (
-    <div className={cn("flex flex-col gap-8", props.className)}>
+    <div className={cn("flex flex-col gap-8", className)}>
       <ResourceTableToolbar
         table={table}
-        showActions={props.showActions}
-        showCreateNew={props.showCreateNew}
-        customNewResourceAction={props.customNewResourceAction}
+        showActions={showActions}
+        showCreateNew={showCreateNew}
+        customNewResourceAction={customNewResourceAction}
       />
-      <div className={cn("rounded-md border bg-white", props.className)}>
-        <div
-          ref={scrollRef}
-          style={{
-            overflow: "auto",
-            height: "600px",
-          }}
-        >
-          <div style={{ height: `${virtualizer.getTotalSize()}px` }}>
-            <Table className="w-full">
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) =>
-                      header.isPlaceholder ? null : (
-                        <TableHead
-                          key={header.id}
-                          colSpan={header.colSpan}
-                          style={{ width: header.getSize() }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                        </TableHead>
-                      ),
-                    )}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {virtualizer.getVirtualItems().map((virtualRow, index) => {
-                  const row = rows[virtualRow.index];
-                  return (
-                    <ResourceTableRow
-                      key={row.id}
-                      isSelected={row.getIsSelected()}
-                      style={{
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${
-                          virtualRow.start - index * virtualRow.size
-                        }px)`,
-                      }}
+      <div
+        className={cn(
+          "relative overflow-x-hidden rounded-md border bg-white",
+          className,
+        )}
+      >
+        {fetching && (
+          <DelayedRender delay={200}>
+            <motion.div
+              className="absolute inset-0 z-10 flex items-center justify-center bg-white/90"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Spinner />
+            </motion.div>
+          </DelayedRender>
+        )}
+        <Table className="w-full">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) =>
+                  header.isPlaceholder ? null : (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      style={{ width: header.getSize() }}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </ResourceTableRow>
-                  );
-                })}
-                {/* {table.getRowModel().rows.map((row) => (
-                  <ResourceTableRow
-                    key={row.id}
-                    resource={row.original}
-                    row={row}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </ResourceTableRow>
-                ))} */}
-              </TableBody>
-            </Table>
-          </div>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </TableHead>
+                  ),
+                )}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <ResourceTableRow
+                key={row.original.objUri}
+                isSelected={row.getIsSelected()}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </ResourceTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between py-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (page > 1) {
+                onPageChange?.(page - 1);
+              }
+            }}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-muted-foreground text-sm">
+            Page {page} of {pageCount}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (page < pageCount) {
+                onPageChange?.(page + 1);
+              }
+            }}
+            disabled={page === pageCount}
+          >
+            Next
+          </Button>
         </div>
       </div>
 
@@ -456,25 +489,23 @@ export const ResourceTable = (props: {
       )}
     </div>
   );
-};
+});
 
-const ResourceTableRow = memo(
-  ({
-    isSelected,
-    children,
-    style,
-  }: {
-    isSelected: boolean;
-    children: React.ReactNode;
-    style: React.CSSProperties;
-  }) => {
-    return (
-      <TableRow data-state={isSelected ? "selected" : undefined} style={style}>
-        {children}
-      </TableRow>
-    );
-  },
-);
+const ResourceTableRow = memo(function ResourceTableRow({
+  isSelected,
+  children,
+  style,
+}: {
+  isSelected: boolean;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <TableRow data-state={isSelected ? "selected" : undefined} style={style}>
+      {children}
+    </TableRow>
+  );
+});
 ResourceTableRow.displayName = "ResourceTableRow";
 
 const ResourceOutputs = memo(function ResourceOutputs({
@@ -531,3 +562,20 @@ const ResourceOutputs = memo(function ResourceOutputs({
     </div>
   );
 });
+
+const DelayedRender: FC<PropsWithChildren<{ delay: number }>> = ({
+  delay,
+  children,
+}) => {
+  const [isRendered, setIsRendered] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsRendered(true);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  return isRendered ? <>{children}</> : null;
+};
