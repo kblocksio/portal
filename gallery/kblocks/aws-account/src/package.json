@@ -1,7 +1,7 @@
 {
   "name": "aws-account",
   "dependencies": {
-    "@cdktf/provider-aws": "^19.39.0",
-    "cdktf": "^0.20.9"
+    "@cdktf/provider-aws": "^19.46.0",
+    "cdktf": "^0.20.10"
   }
 }

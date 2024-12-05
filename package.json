@@ -8,18 +8,18 @@
     "format": "prettier . --write"
   },
   "devDependencies": {
-    "@kblocks/cli": "^0.5.20",
+    "@kblocks/cli": "^0.5.21",
     "@quickube/cli": "^0.47.0",
     "@types/request": "^2.48.12",
     "concurrently": "^9.1.0",
-    "dotenv": "^16.4.6",
+    "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.6",
-    "turbo": "^2.1.2"
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "turbo": "^2.3.3"
   },
   "name": "with-vite",
-  "packageManager": "npm@10.9.0+sha512.65a9c38a8172948f617a53619762cd77e12b9950fe1f9239debcb8d62c652f2081824b986fee7c0af6c0a7df615becebe4bf56e17ec27214a87aa29d9e038b4b",
+  "packageManager": "npm@10.9.2",
   "workspaces": [
     "apps/*",
     "packages/*",
