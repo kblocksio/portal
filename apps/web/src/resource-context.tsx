@@ -153,11 +153,11 @@ export const ResourceProvider = ({
     onError: (error) => {
       console.error("WebSocket Error:", error);
     },
+    // onMessage(event) {
+    //   console.log("WebSocket message:", event);
+    // },
   });
-
-  const [previousMessage, setPreviousMessage] = useState<
-    WorkerEvent | undefined
-  >(undefined);
+  const previousMessageRef = useRef<WorkerEvent | undefined>(undefined);
 
   // const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
   //   "/api/resources",
@@ -367,13 +367,15 @@ export const ResourceProvider = ({
     });
   }, []);
 
-  const trpcUtils = trpc.useUtils();
   useEffect(() => {
-    if (!lastJsonMessage || isEqual(lastJsonMessage, previousMessage)) {
+    if (
+      !lastJsonMessage ||
+      isEqual(lastJsonMessage, previousMessageRef.current)
+    ) {
       return;
     }
 
-    setPreviousMessage(lastJsonMessage);
+    previousMessageRef.current = lastJsonMessage;
     addEvent(lastJsonMessage);
     const blockUri = parseBlockUri(lastJsonMessage.objUri);
 
@@ -403,18 +405,19 @@ export const ResourceProvider = ({
         ]);
         break;
     }
-
-    // Do not invalidate queries just yet: there are too many events coming from the stream.
-    // trpcUtils.invalidate();
   }, [
     lastJsonMessage,
     handleObjectMessage,
     handlePatchMessage,
     addNotifications,
     addEvent,
-    previousMessage,
-    trpcUtils,
   ]);
+
+  // Do not invalidate queries just yet: there are too many events coming from the stream.
+  // const trpcUtils = trpc.useUtils();
+  // useEffect(() => {
+  //   // trpcUtils.invalidate();
+  // }, [trpcUtils, lastJsonMessage]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
