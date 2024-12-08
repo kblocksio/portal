@@ -13,7 +13,6 @@ import Emittery from "emittery";
 import { useFetch } from "./hooks/use-fetch";
 import {
   ObjectEvent,
-  PatchEvent,
   ErrorEvent,
   ApiObject,
   WorkerEvent,
@@ -325,22 +324,6 @@ export const ResourceProvider = ({
     });
   }, [resolvePluralFromKind, objects, resolveOwnerUri]);
 
-  const handlePatchMessage = useCallback((message: PatchEvent) => {
-    const { objUri, patch } = message;
-
-    setObjects((prev) => {
-      if (!prev[objUri]) {
-        return prev;
-      }
-
-      const newObject = { ...prev[objUri], ...patch };
-      return {
-        ...prev,
-        [objUri]: newObject,
-      };
-    });
-  }, []);
-
   const addEvent = useCallback((event: WorkerEvent) => {
     let timestamp = (event as any).timestamp ?? new Date();
     if (timestamp && typeof timestamp === "string") {
@@ -351,7 +334,7 @@ export const ResourceProvider = ({
     const eventKey = `${timestamp.toISOString()}.${event.objUri}`;
 
     // ignore OBJECT and PATCH events because they are handled by the respective handlers
-    if (event.type === "OBJECT" || event.type === "PATCH") {
+    if (event.type === "OBJECT") {
       return;
     }
 
@@ -379,9 +362,6 @@ export const ResourceProvider = ({
       case "OBJECT":
         handleObjectMessage(lastJsonMessage as ObjectEvent);
         break;
-      case "PATCH":
-        handlePatchMessage(lastJsonMessage as PatchEvent);
-        break;
       case "ERROR":
         addNotifications([
           {
@@ -404,7 +384,6 @@ export const ResourceProvider = ({
   }, [
     lastJsonMessage,
     handleObjectMessage,
-    handlePatchMessage,
     addNotifications,
     addEvent,
     previousMessage,
