@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["objUri", "name", "owner", "files"],
+  "required": ["name", "owner", "files"],
   "properties": {
     "name": {
       "type": "string",
