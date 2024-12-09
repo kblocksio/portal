@@ -77,7 +77,10 @@ export type ExtendedApiObject = StrictApiObject & {
 };
 
 export type Project = ExtendedApiObject & {
-  objects: string[];
+  objects?: string[];
+  icon?: string;
+  title?: string;
+  description?: string;
 };
 
 export type Cluster = ExtendedApiObject & {};
@@ -121,7 +124,7 @@ const resourcesFromObjects = (
     .map((object) => ({
       ...object,
       projects: projects.filter((project) =>
-        project.objects.includes(object.objUri),
+        project.objects?.includes(object.objUri),
       ),
       type: types[object.objType],
       relationships: Object.entries(relationships[object.objUri] ?? {}).map(
@@ -349,26 +352,27 @@ const appRouter = router({
       }
       return resource;
     }),
-  // getProject: publicProcedure
-  //   .input(z.object({ name: z.string() }))
-  //   .query(async ({ input }) => {
-  //     const objects = await getExtendedObjects();
-  //     const projects = projectsFromObjects(objects);
-  //     return projects.find((p) => p.name === input.name);
-  //   }),
-  // listProjectResources: publicProcedure
-  //   .input(z.object({ name: z.string() }))
-  //   .query(async ({ input }) => {
-  //     const objects = await getExtendedObjects();
-  //     const projects = projectsFromObjects(objects);
-  //     const project = projects.find((project) => project.name === input.name);
-  //     if (!project) {
-  //       return [];
-  //     }
-  //     return objects.filter((object) =>
-  //       object.projects?.find((p) => p.objUri === project.objUri),
-  //     );
-  //   }),
+  getProject: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getExtendedObjects();
+      const projects = projectsFromObjects(objects);
+      return projects.find((p) => p.metadata?.name === input.name);
+    }),
+  listProjectResources: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getExtendedObjects();
+      const projects = projectsFromObjects(objects);
+      const project = projects.find(
+        (project) => project.metadata?.name === input.name,
+      );
+      return (
+        project?.objects?.map((objUri) =>
+          objects.find((o) => o.objUri === objUri),
+        ) ?? []
+      );
+    }),
 });
 
 export type AppRouter = typeof appRouter;
