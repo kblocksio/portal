@@ -58,8 +58,8 @@ export const reconcileFile = (file: GitContent['files'][number], deletion: boole
       return true;
     }
 
-    if (file.readOnly) {
-      console.log('file is read only, skipping');
+    if (!file.readOnly) {
+      console.log('file is not read only, and can be overwritten, skipping');
       return false;
     }
 
