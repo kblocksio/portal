@@ -9,13 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute("/clusters/")({
   component: Clusters,
 });
 
 function Clusters() {
-  const { clusters } = useContext(ResourceContext);
+  const clusters = trpc.listClusters.useQuery();
 
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://rectangle-group" });
@@ -43,12 +44,12 @@ function Clusters() {
           description="These are the clusters available in the platform."
           Icon={Icon}
         />
-        {clusters.length === 0 ? (
+        {clusters.data?.length === 0 ? (
           <ClustersEmptyState handleAddCluster={handleAddCluster} />
         ) : (
           <div className="flex flex-col gap-4">
             <ResourceTable
-              resources={clusters}
+              resources={clusters.data}
               showActions={false}
               customNewResourceAction={{
                 label: "Add Cluster",
