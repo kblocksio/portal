@@ -34,10 +34,6 @@
     "status": {
       "type": "object",
       "properties": {
-        "objUri": {
-          "type": "string",
-          "description": "The uri of the object which this sync is part of"
-        },
         "merged": {
           "type": "boolean",
           "description": "Whether the content has been merged"

@@ -22,7 +22,6 @@ export type ApiObject = {
 };
 
 export interface GitContent extends ApiObject {
-  objUri: string;
   name: string;
   owner: string;
   files: {
