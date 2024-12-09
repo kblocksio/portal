@@ -1,14 +1,8 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
-import { memo, useContext, useState } from "react";
-import { ResourceContext } from "@/resource-context";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { DataTableFacetedFilter } from "./faceted-filter";
-import { getIconComponent } from "@/lib/get-icon";
 import { useNavigate } from "@tanstack/react-router";
-
-import { ScrollArea } from "../ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,

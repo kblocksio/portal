@@ -1,8 +1,8 @@
 import { ChevronRightIcon } from "lucide-react";
 import { memo, useEffect, useMemo, useState } from "react";
-import { type WorkerEventTimestampString } from "@/resource-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/trpc";
+import type { WorkerEventTimestampString } from "@kblocks-portal/server";
 
 const useLatestEvent = (objUri: string) => {
   const eventsQuery = trpc.listEvents.useQuery({
@@ -13,7 +13,7 @@ const useLatestEvent = (objUri: string) => {
     return undefined;
   }
 
-  return eventsQuery.data.events[eventsQuery.data.events.length - 1];
+  return eventsQuery.data[eventsQuery.data.length - 1];
 };
 
 const formatEventMessage = (event: WorkerEventTimestampString) => {

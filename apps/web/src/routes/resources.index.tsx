@@ -6,7 +6,6 @@ import { useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { TablePagination } from "@/components/resource-table/table-pagination";
 
 export const Route = createFileRoute("/resources/")({

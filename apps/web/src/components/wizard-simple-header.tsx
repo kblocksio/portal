@@ -1,11 +1,11 @@
 import { getIconColors, ResourceIcon } from "@/lib/get-icon";
 import { CardTitle, CardDescription } from "./ui/card";
-import type { ResourceType } from "@kblocks-portal/server";
+import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 
 export interface WizardSimpleHeaderProps {
   title: string;
   description: string;
-  resourceType: ResourceType;
+  resourceType: ExtendedResourceType;
 }
 
 export const WizardSimpleHeader = ({

@@ -81,8 +81,9 @@ export function DeleteProjectDialog({
                   <li key={project.objUri} className="flex items-center gap-2">
                     <ResourceIcon icon={project.icon} className="size-4" />
                     <span className="text-foreground">
-                      {project.namespace && `${project.namespace}/`}
-                      {project.name}
+                      {project.metadata.namespace &&
+                        `${project.metadata.namespace}/`}
+                      {project.metadata.name}
                     </span>
                   </li>
                 );

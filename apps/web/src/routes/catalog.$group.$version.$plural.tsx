@@ -1,22 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MarkdownWrapper } from "@/components/markdown";
-import { ResourceContext, ResourceType } from "@/resource-context";
 import { useBreadcrumbs } from "@/app-context";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
+import { useResourceTypes } from "@/hooks/use-resource-types";
 
 export const Route = createFileRoute("/catalog/$group/$version/$plural")({
   component: Catalog,
 });
 
 function Catalog() {
-  const { resourceTypes } = useContext(ResourceContext);
   const navigate = useNavigate();
   const { group, version, plural } = Route.useParams();
-  const [currentResourceType, setCurrentResourceType] =
-    useState<ResourceType | null>(null);
+
+  const resourceTypeId = useMemo(
+    () => `${group}/${version}/${plural}`,
+    [group, version, plural],
+  );
+  const resourceTypes = useResourceTypes();
+  const currentResourceType = useMemo(
+    () => resourceTypes.data[resourceTypeId],
+    [resourceTypes, resourceTypeId],
+  );
 
   useBreadcrumbs(
     () => [
@@ -25,17 +32,11 @@ function Catalog() {
         url: "/catalog/",
       },
       {
-        name: `${group}/${version}/${plural}`,
+        name: resourceTypeId,
       },
     ],
     [group, version, plural],
   );
-
-  useEffect(() => {
-    if (resourceTypes) {
-      setCurrentResourceType(resourceTypes[`${group}/${version}/${plural}`]);
-    }
-  }, [resourceTypes, group, version, plural]);
 
   return (
     <div className={cn("container relative mx-auto flex flex-col gap-4")}>

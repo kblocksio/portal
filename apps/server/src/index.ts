@@ -50,7 +50,7 @@ export type Relationship = {
   type: RelationshipType;
 };
 
-export { type Condition };
+export { type Condition, type WorkerEventTimestampString };
 
 /**
  * Represents a `@kblocks/api` {@link ApiObject} but without the `any` type, since it
@@ -92,7 +92,9 @@ export type Project = ExtendedApiObject & {
  *
  * Extends the {@link ExtendedApiObject}.
  */
-export type Cluster = ExtendedApiObject & {};
+export type Cluster = ExtendedApiObject & {
+  access: "read_only" | string;
+};
 
 /**
  * Represents a resource object.
@@ -279,7 +281,7 @@ const appRouter = router({
     .query(async ({ input }) => {
       const { objUri } = input;
       const events = await loadEvents(objUri);
-      return { objUri, events };
+      return events as unknown as WorkerEventTimestampString[];
     }),
   listTypes: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
@@ -387,6 +389,9 @@ const appRouter = router({
         ) ?? []
       );
     }),
+  listCategories: publicProcedure.query(async () => {
+    return categories;
+  }),
 });
 
 export type AppRouter = typeof appRouter;
@@ -411,6 +416,7 @@ app.use(
 );
 
 import * as trpcExpress from "@trpc/server/adapters/express";
+import type { WorkerEventTimestampString } from "./api-events";
 
 app.use(
   "/api/trpc",

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Sidebar,
   SidebarRail,
@@ -25,12 +25,19 @@ import { AppSidebarHeader } from "./app-sidebar-header";
 import { getIconComponent } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { ResourceContext, ResourceType } from "@/resource-context";
+import { useResourceTypes } from "@/hooks/use-resource-types";
 import { Button } from "./ui/button";
+import { trpc } from "@/trpc";
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
-  const { resourceTypes, categories, projects } = useContext(ResourceContext);
+  const { data: categories } = trpc.listCategories.useQuery(undefined, {
+    initialData: {},
+  });
+  const { data: resourceTypes } = useResourceTypes();
+  const { data: projects } = trpc.listProjects.useQuery(undefined, {
+    initialData: [],
+  });
   const location = useLocation();
   const platformSideBarItems = useMemo(() => {
     return [
@@ -62,7 +69,7 @@ export const AppSidebar = () => {
     if (!resourceTypes) return {};
     return Object.fromEntries(
       Object.entries(resourceTypes).filter(
-        ([_, item]) => !item.group.startsWith("kblocks.io"),
+        ([, item]) => !item.group.startsWith("kblocks.io"),
       ),
     );
   }, [resourceTypes]);
@@ -129,7 +136,9 @@ export const AppSidebar = () => {
             {Object.keys(categories).map((category) => {
               const items = Object.keys(nonSystemResourceTypes)
                 .filter((resourceTypeKey) =>
-                    nonSystemResourceTypes[resourceTypeKey].categories?.includes(category),
+                  nonSystemResourceTypes[resourceTypeKey].categories?.includes(
+                    category,
+                  ),
                 )
                 .map((resourceTypeKey) => ({
                   title: nonSystemResourceTypes[resourceTypeKey].kind,

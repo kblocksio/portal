@@ -1,17 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ResourceContext, ResourceType } from "@/resource-context";
 import { WizardSearchHeader } from "@/components/wizard-search-header";
 import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog";
 import { useBreadcrumbs } from "@/app-context";
+import { trpc } from "@/trpc";
+import {
+  useResourceTypes,
+  type ExtendedResourceType,
+} from "@/hooks/use-resource-types";
 
 export const Route = createFileRoute("/resources/new/")({
   component: CreateNewResourceCatalog,
 });
 
 function CreateNewResourceCatalog() {
-  const { resourceTypes, categories } = useContext(ResourceContext);
+  const { data: resourceTypes } = useResourceTypes();
+  const { data: categories } = trpc.listCategories.useQuery(undefined, {
+    initialData: {},
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -42,7 +49,7 @@ function CreateNewResourceCatalog() {
   const navigate = useNavigate();
 
   const onResourceSelection = useCallback(
-    (resourceType: ResourceType) => {
+    (resourceType: ExtendedResourceType) => {
       navigate({
         to: `/resources/new/${resourceType.group}/${resourceType.version}/${resourceType.plural}`,
       });

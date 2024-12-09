@@ -11,7 +11,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { cn } from "@/lib/utils";
-import type { ResourceType } from "@kblocks-portal/server";
+import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 
 export const SystemSelector = ({
   value,
@@ -20,7 +20,7 @@ export const SystemSelector = ({
   disabled,
   required,
 }: {
-  resourceType: ResourceType;
+  resourceType: ExtendedResourceType;
   disabled: boolean;
   value?: string;
   required?: boolean;

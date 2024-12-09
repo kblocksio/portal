@@ -2,18 +2,24 @@ import { ResourceCatalog } from "@/components/resource-catalog/resource-catalog"
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useCallback, useContext, useMemo, useState } from "react";
-import { ResourceContext, ResourceType } from "@/resource-context";
+import { useCallback, useMemo, useState } from "react";
 import { useBreadcrumbs } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
+import { trpc } from "@/trpc";
+import type { ResourceType } from "@kblocks-portal/server";
+import { useResourceTypes } from "@/hooks/use-resource-types";
 
 export const Route = createFileRoute("/catalog/")({
   component: Catalog,
 });
 
 function Catalog() {
-  const { resourceTypes, categories } = useContext(ResourceContext);
+  const resourceTypes = useResourceTypes();
+
+  const categories = trpc.listCategories.useQuery(undefined, {
+    initialData: {},
+  });
 
   const navigate = useNavigate();
 
@@ -48,15 +54,15 @@ function Catalog() {
   );
 
   const nonSystemResourceTypes = useMemo(() => {
-    return Object.values(resourceTypes).filter(
-      (item: ResourceType) => !item.group.startsWith("kblocks.io"),
+    return Object.values(resourceTypes.data).filter(
+      (item) => !item.group.startsWith("kblocks.io"),
     );
-  }, [resourceTypes]);
+  }, [resourceTypes.data]);
 
   const filteredResourceTypes = useMemo(() => {
     if (!nonSystemResourceTypes) return [];
     if (!searchQuery) return Object.values(nonSystemResourceTypes);
-    return Object.values(nonSystemResourceTypes).filter((item: ResourceType) =>
+    return Object.values(nonSystemResourceTypes).filter((item) =>
       item.kind.toLowerCase().includes(searchQuery?.toLowerCase()),
     );
   }, [nonSystemResourceTypes, searchQuery]);
@@ -72,6 +78,7 @@ function Catalog() {
         <div className="relative mb-6 flex-grow">
           <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
           <Input
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             tabIndex={0}
             type="text"
@@ -82,7 +89,7 @@ function Catalog() {
           />
         </div>
         <ResourceCatalog
-          categories={categories}
+          categories={categories.data}
           filtereResources={filteredResourceTypes}
           onResourceCreateClick={handleOnResourceCreateClick}
           isLoading={!searchQuery && Object.keys(resourceTypes).length === 0}

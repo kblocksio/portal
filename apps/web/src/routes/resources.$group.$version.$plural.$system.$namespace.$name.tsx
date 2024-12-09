@@ -1,14 +1,9 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronsUpDown, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  ResourceContext,
-  useObjectEvents,
-  type WorkerEventTimestampString,
-} from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
@@ -47,7 +42,6 @@ export const Route = createFileRoute(
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const { setSelectedResourceId } = useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
 
@@ -94,41 +88,28 @@ function ResourcePage() {
     return relationship?.resource.objUri;
   }, [relationships]);
 
-  const [lastEventCount, setLastEventCount] = useState<number>();
+  const [lastEventCount, setLastEventCount] = useState<number>(-1);
   const [showLogsBadge, setShowLogsBadge] = useState(false);
 
-  const [events, setEvents] = useState<WorkerEventTimestampString[]>([]);
-  useObjectEvents(objUri, (events) => {
-    setEvents(events);
-    setLastEventCount(events.length);
-
-    if (lastEventCount === undefined) {
-      return;
-    }
-
-    if (activeTab === "logs") {
-      return;
-    }
-
-    setShowLogsBadge(events.length > lastEventCount);
-  });
-
+  const events = trpc.listEvents.useQuery(
+    {
+      objUri,
+    },
+    {
+      initialData: [],
+    },
+  );
   useEffect(() => {
-    if (selectedResource) {
-      setSelectedResourceId({
-        objType: selectedResource?.objType,
-        objUri: selectedResource?.objUri,
-      });
-    }
-  }, [selectedResource, setSelectedResourceId]);
+    setShowLogsBadge(events.data.length > lastEventCount);
+    setLastEventCount(events.data.length);
+  });
 
   useEffect(() => {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
-      setSelectedResourceId(undefined);
       navigate({ to: "/resources" });
     }
-  }, [selectedResource, deleteInProgress, setSelectedResourceId, navigate]);
+  }, [selectedResource, deleteInProgress, navigate]);
 
   const selectedResourceType = useMemo(
     () => selectedResource?.type,
@@ -399,7 +380,7 @@ function ResourcePage() {
           <CardContent className="h-full p-0">
             {selectedResource && (
               <div className="pt-4 sm:pt-6">
-                <Timeline events={events} />
+                <Timeline events={events.data} />
               </div>
             )}
           </CardContent>
