@@ -21,7 +21,6 @@ import {
   Manifest,
   ObjectEvent,
   parseBlockUri,
-  StatusReason,
   type Condition,
   type OwnerReference,
 } from "@kblocks/api";
@@ -35,7 +34,7 @@ import {
 import { categories } from "./categories";
 
 import { publicProcedure, router } from "./trpc";
-import { number, string, union, z } from "zod";
+import { z } from "zod";
 
 export type Definition = Manifest["definition"];
 
@@ -156,15 +155,13 @@ const resourcesFromObjects = (
 
 const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
   return allObjects.filter(
-    (object): object is Project =>
-      blockTypeFromUri(object.objUri) === "kblocks.io/v1/projects",
+    (object): object is Project => object.objType === "kblocks.io/v1/projects",
   );
 };
 
 const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
   return allObjects.filter(
-    (object): object is Cluster =>
-      blockTypeFromUri(object.objUri) === "kblocks.io/v1/clusters",
+    (object): object is Cluster => object.objType === "kblocks.io/v1/clusters",
   );
 };
 
@@ -353,7 +350,6 @@ const appRouter = router({
   getResource: publicProcedure
     .input(z.object({ objUri: z.string() }))
     .query(async ({ input }) => {
-      // return {} as { resource: ApiResource };
       const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
