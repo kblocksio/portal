@@ -45,11 +45,32 @@ export interface ResourceType extends Definition {
   systems: string[];
 }
 
+export type RelationshipType = "parent" | "child" | "ref";
+
 export type Relationship = {
-  type: "parent" | "child" | "ref";
+  type: RelationshipType;
 };
 
-export type ExtendedApiObject = ApiObject & {
+export { type Condition };
+
+export type StrictApiObject = {
+  apiVersion: ApiObject["apiVersion"];
+  kind: ApiObject["kind"];
+  color?: string;
+
+  metadata: ApiObject["metadata"];
+
+  // current state
+  status?: {
+    // [key: string]: any;
+    conditions?: Condition[];
+  };
+
+  // [key: string]: any;
+};
+// export type StrictApiObject = ApiObject;
+
+export type ExtendedApiObject = StrictApiObject & {
   objUri: string;
   objType: string;
   spec?: Manifest;
@@ -62,15 +83,13 @@ export type Project = ExtendedApiObject & {
 export type Cluster = ExtendedApiObject & {};
 
 export type Resource = ExtendedApiObject & {
-  spec?: Manifest;
   projects: Project[];
   type?: ResourceType;
   relationships: {
-    type: Relationship["type"];
+    type: RelationshipType;
     resource: ExtendedApiObject & {
-      type: ResourceType;
+      type?: ResourceType;
     };
-    // resource: Omit<Resource, "relationships">;
   }[];
 };
 
@@ -286,8 +305,8 @@ const appRouter = router({
         page,
         perPage,
         pageCount,
-        types,
-        relationships,
+        // types,
+        // relationships,
         // projects: projects.map((project) => ({
         //   ...project,
         //   objects: project.objects.map((objUri) =>
@@ -310,38 +329,46 @@ const appRouter = router({
     const objects = await getExtendedObjects();
     return clustersFromObjects(objects);
   }),
-  // getResource: publicProcedure
-  //   .input(z.object({ objUri: z.string() }))
-  //   .query(async ({ input }) => {
-  //     const object = await getObject(input.objUri);
-  //     return object
-  //       ? {
-  //           ...object,
-  //           objUri: input.objUri,
-  //           outputs: getResourceOutputs(object),
-  //         }
-  //       : undefined;
-  //   }),
-  getProject: publicProcedure
-    .input(z.object({ name: z.string() }))
+  getResource: publicProcedure
+    .input(z.object({ objUri: z.string() }))
     .query(async ({ input }) => {
+      // return {} as { resource: ApiResource };
       const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
-      return projects.find((p) => p.name === input.name);
-    }),
-  listProjectResources: publicProcedure
-    .input(z.object({ name: z.string() }))
-    .query(async ({ input }) => {
-      const objects = await getExtendedObjects();
-      const projects = projectsFromObjects(objects);
-      const project = projects.find((project) => project.name === input.name);
-      if (!project) {
-        return [];
-      }
-      return objects.filter((object) =>
-        object.projects?.find((p) => p.objUri === project.objUri),
+      const types = typesFromObjects(objects);
+      const relationships = relationshipsFromObjects(objects, types);
+      const resources = resourcesFromObjects(
+        objects,
+        projects,
+        types,
+        relationships,
       );
+      const resource = resources.find((r) => r.objUri === input.objUri);
+      if (!resource) {
+        throw new Error(`Resource ${input.objUri} not found`);
+      }
+      return resource;
     }),
+  // getProject: publicProcedure
+  //   .input(z.object({ name: z.string() }))
+  //   .query(async ({ input }) => {
+  //     const objects = await getExtendedObjects();
+  //     const projects = projectsFromObjects(objects);
+  //     return projects.find((p) => p.name === input.name);
+  //   }),
+  // listProjectResources: publicProcedure
+  //   .input(z.object({ name: z.string() }))
+  //   .query(async ({ input }) => {
+  //     const objects = await getExtendedObjects();
+  //     const projects = projectsFromObjects(objects);
+  //     const project = projects.find((project) => project.name === input.name);
+  //     if (!project) {
+  //       return [];
+  //     }
+  //     return objects.filter((object) =>
+  //       object.projects?.find((p) => p.objUri === project.objUri),
+  //     );
+  //   }),
 });
 
 export type AppRouter = typeof appRouter;
@@ -366,6 +393,7 @@ app.use(
 );
 
 import * as trpcExpress from "@trpc/server/adapters/express";
+import e from "express";
 
 app.use(
   "/api/trpc",

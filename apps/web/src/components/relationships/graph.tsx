@@ -10,6 +10,7 @@ export const RelationshipGraph = memo(function RelationshipGraph({
 }: {
   selectedResource?: Resource;
 }) {
+  return <pre>to do</pre>;
   const { relationships, objects, resourceTypes } = useContext(ResourceContext);
 
   const { nodes, edges } = useMemo(() => {

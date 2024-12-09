@@ -180,43 +180,43 @@ const useColumns = () => {
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
-      columnHelper.accessor("relationships", {
-        header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Children" />
-        ),
-        cell: (props) => {
-          const relationships = props.getValue();
-          const children = relationships
-            .filter((relationship) => relationship.type === "child")
-            .map((relationship) => relationship.resource);
+      // columnHelper.accessor("relationships", {
+      //   header: (props) => (
+      //     <DataTableColumnHeader column={props.column} title="Children" />
+      //   ),
+      //   cell: (props) => {
+      //     const relationships = props.getValue();
+      //     const children = relationships
+      //       .filter((relationship) => relationship.type === "child")
+      //       .map((relationship) => relationship.resource);
 
-          if (children.length === 0) {
-            return null;
-          }
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className="h-0">
-                    <div>{children.length} Children</div>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="flex flex-col gap-2">
-                    {children.map((resource) => {
-                      return (
-                        <div key={resource.objUri}>
-                          <ResourceLink resource={resource} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        },
-      }),
+      //     if (children.length === 0) {
+      //       return null;
+      //     }
+      //     return (
+      //       <TooltipProvider>
+      //         <Tooltip>
+      //           <TooltipTrigger asChild>
+      //             <Button variant="ghost" className="h-0">
+      //               <div>{children.length} Children</div>
+      //             </Button>
+      //           </TooltipTrigger>
+      //           <TooltipContent>
+      //             <div className="flex flex-col gap-2">
+      //               {children.map((resource) => {
+      //                 return (
+      //                   <div key={resource.objUri}>
+      //                     <ResourceLink resource={resource} />
+      //                   </div>
+      //                 );
+      //               })}
+      //             </div>
+      //           </TooltipContent>
+      //         </Tooltip>
+      //       </TooltipProvider>
+      //     );
+      //   },
+      // }),
       columnHelper.accessor("projects", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Projects" />
