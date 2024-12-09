@@ -13,7 +13,12 @@ export function getReadyCondition(obj: ApiObject) {
   );
 }
 
-const propertiesBlackList = ["lastStateHash"];
+const propertiesBlackList = [
+  "lastStateHash",
+  "projects",
+  "type",
+  "relationships",
+];
 
 const containsString = (arr1: string[], arr2: string[]): boolean => {
   return arr1.some((item) => arr2.includes(item));
