@@ -7,11 +7,11 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command";
-import { ResourceType } from "@/resource-context";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { cn } from "@/lib/utils";
+import type { ResourceType } from "@kblocks-portal/server";
 
 export const SystemSelector = ({
   value,

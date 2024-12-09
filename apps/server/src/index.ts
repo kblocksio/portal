@@ -178,13 +178,16 @@ const mapTypeFromObject = (
 const typesFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Record<string, ResourceType> => {
-  return allObjects
-    .filter((o) => blockTypeFromUri(o.objUri) === "kblocks.io/v1/blocks")
-    .reduce<Record<string, ResourceType>>((acc, object) => {
-      const [key, type] = mapTypeFromObject(object);
-      acc[key] = type;
-      return acc;
-    }, {});
+  return (
+    allObjects
+      .filter((o) => blockTypeFromUri(o.objUri) === "kblocks.io/v1/blocks")
+      // .filter((o) => o.objUri.startsWith("kblocks://kblocks.io/v1/blocks"))
+      .reduce<Record<string, ResourceType>>((acc, object) => {
+        const [key, type] = mapTypeFromObject(object);
+        acc[key] = type;
+        return acc;
+      }, {})
+  );
 };
 
 const relationshipsFromObjects = (

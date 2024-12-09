@@ -5,7 +5,8 @@ import {
   CreateResourceResponse,
 } from "@repo/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
-import { ResourceType } from "@/resource-context";
+import type { ResourceType } from "@kblocks-portal/server";
+// import { ResourceType } from "@/resource-context";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 

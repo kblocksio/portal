@@ -1,4 +1,3 @@
-import { ResourceContext, ResourceType } from "@/resource-context";
 import { formatBlockUri, parseBlockUri } from "@kblocks/api";
 import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useMemo, useCallback } from "react";
@@ -9,6 +8,7 @@ import { useCreateResource } from "@/create-resource-context";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { ResourceForm } from "@/components/resource-form/resource-form";
 import { LocationContext } from "@/location-context";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute(
   "/resources/edit/$group/$version/$plural/$system/$namespace/$name",
@@ -18,7 +18,6 @@ export const Route = createFileRoute(
 
 function EditResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
-  const { resourceTypes, objects } = useContext(ResourceContext);
   const { handleCreateOrEdit, isLoading } = useCreateResource();
   const navigate = useNavigate();
   const previousRoute = useContext(LocationContext);
@@ -57,17 +56,11 @@ function EditResourcePage() {
     name,
   });
 
-  const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
+  const { data: selectedResource } = trpc.getResource.useQuery({ objUri });
 
   const selectedResourceType = useMemo(
-    () =>
-      Object.values(resourceTypes).find(
-        (resourceType: ResourceType) =>
-          resourceType.group === group &&
-          resourceType.version === version &&
-          resourceType.plural === plural,
-      ),
-    [resourceTypes, group, version, plural],
+    () => selectedResource?.type,
+    [selectedResource],
   );
 
   const handleEdit = useCallback(

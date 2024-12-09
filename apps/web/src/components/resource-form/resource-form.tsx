@@ -6,10 +6,11 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
-import { ResourceContext, ResourceType } from "@/resource-context";
+import { ResourceContext } from "@/resource-context";
 import { SystemSelector } from "./system-selector";
 import cloneDeep from "lodash.clonedeep";
 import YamlButton from "../yaml-button";
+import type { ResourceType } from "@kblocks-portal/server";
 export interface FormGeneratorProps {
   resourceType: ResourceType;
   isLoading: boolean;
