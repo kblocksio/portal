@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react";
-// import { ResourceType } from "./resource-context";
 import { createResource } from "./lib/backend";
 import type { ResourceType } from "@kblocks-portal/server";
 
