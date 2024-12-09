@@ -11,11 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import type { TrpcProject } from "@kblocks-portal/server";
+import type { Project } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 
 interface DeleteProjectDialogProps {
-  projects: TrpcProject[];
+  projects: Project[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;

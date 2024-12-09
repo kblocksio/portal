@@ -137,29 +137,35 @@ export const ResourceProvider = ({
     Record<string, Record<string, Relationship>>
   >({});
 
-  const { lastJsonMessage, getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
+  // Invalidate queries on every message, but throttle the calls to avoid too many requests.
+  const trpcUtils = trpc.useUtils();
+  const invalidateQueries = useCallback(
+    throttle(
+      () => {
+        console.log("invalidating queries");
+        trpcUtils.invalidate();
+      },
+      500,
+      { leading: true, trailing: true },
+    ),
+    [trpcUtils],
+  );
+
+  const { getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
     shouldReconnect: (closeEvent) => {
       console.log("WebSocket shouldReconnect...", closeEvent);
+      if (import.meta.env.DEV) {
+        setTimeout(() => {
+          invalidateQueries();
+        }, 500);
+      }
       return true;
     },
-    onOpen: () => {
-      console.log("WebSocket connected");
+    onMessage() {
+      invalidateQueries();
     },
-    onClose: () => {
-      console.log("WebSocket disconnected");
-    },
-    onError: (error) => {
-      console.error("WebSocket Error:", error);
-    },
-    // onMessage(event) {
-    //   console.log("WebSocket message:", event);
-    // },
   });
-  const previousMessageRef = useRef<WorkerEvent | undefined>(undefined);
 
-  // const { data: initialResources } = useFetch<{ objects: ObjectEvent[] }>(
-  //   "/api/resources",
-  // );
   const { data: categoriesData } =
     useFetch<Record<string, Category>>("/api/categories");
 
@@ -169,38 +175,38 @@ export const ResourceProvider = ({
     }
   }, [categoriesData]);
 
-  const resolvePluralFromKind = useCallback(
-    (kind: string) => {
-      for (const def of Object.values(resourceTypes)) {
-        if (def.kind === kind) {
-          return def.plural;
-        }
-      }
+  // const resolvePluralFromKind = useCallback(
+  //   (kind: string) => {
+  //     for (const def of Object.values(resourceTypes)) {
+  //       if (def.kind === kind) {
+  //         return def.plural;
+  //       }
+  //     }
 
-      return kind.toLowerCase();
-    },
-    [resourceTypes],
-  );
+  //     return kind.toLowerCase();
+  //   },
+  //   [resourceTypes],
+  // );
 
-  const resolveOwnerUri = useCallback(
-    (ref: OwnerReference, system: string, namespace: string) => {
-      const [group, version] = ref.apiVersion.split("/");
-      const plural = resolvePluralFromKind(ref.kind);
-      return formatBlockUri({
-        group,
-        version,
-        system,
-        namespace,
-        plural,
-        name: ref.name,
-      });
-    },
-    [resolvePluralFromKind],
-  );
+  // const resolveOwnerUri = useCallback(
+  //   (ref: OwnerReference, system: string, namespace: string) => {
+  //     const [group, version] = ref.apiVersion.split("/");
+  //     const plural = resolvePluralFromKind(ref.kind);
+  //     return formatBlockUri({
+  //       group,
+  //       version,
+  //       system,
+  //       namespace,
+  //       plural,
+  //       name: ref.name,
+  //     });
+  //   },
+  //   [resolvePluralFromKind],
+  // );
 
   const handleObjectMessage = useCallback((message: ObjectEvent) => {
     const { object, objUri, objType } = message;
-    const { system, name } = parseBlockUri(objUri);
+    // const { system, name } = parseBlockUri(objUri);
 
     // ignore object messages that don't have metadata (don't skip is object is empty - it means the object was deleted)
     if (
@@ -352,23 +358,6 @@ export const ResourceProvider = ({
   //   }
   // }, [lastJsonMessage, handleObjectMessage, addNotifications, addEvent]);
 
-  // Invalidate queries on every message, but throttle the calls to avoid too many requests.
-  const trpcUtils = trpc.useUtils();
-  const invalidateQueries = useCallback(
-    throttle(
-      () => {
-        console.log("invalidating queries");
-        trpcUtils.invalidate();
-      },
-      500,
-      { leading: true, trailing: true },
-    ),
-    [trpcUtils],
-  );
-  useEffect(() => {
-    invalidateQueries();
-  }, [invalidateQueries, lastJsonMessage]);
-
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
     return () => {
@@ -407,17 +396,13 @@ export const ResourceProvider = ({
     [emitter],
   );
 
-  const projects = useMemo(() => {
-    return Object.values(objects).filter(
-      (obj) => obj.objType === "kblocks.io/v1/projects",
-    );
-  }, [objects]);
+  const { data: projects } = trpc.listProjects.useQuery(undefined, {
+    initialData: [],
+  });
 
-  const clusters = useMemo(() => {
-    return Object.values(objects).filter(
-      (obj) => obj.objType === "kblocks.io/v1/clusters",
-    );
-  }, [objects]);
+  const { data: clusters } = trpc.listClusters.useQuery(undefined, {
+    initialData: [],
+  });
 
   const value: ResourceContextValue = {
     resourceTypes,

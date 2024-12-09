@@ -19,10 +19,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
 import { ProjectsMenu } from "../projects-menu";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { ExtendedApiObject } from "@kblocks-portal/server";
 
 export interface ResourceTableToolbarProps {
-  table: TanstackTable<TrpcResource>;
+  table: TanstackTable<ExtendedApiObject>;
   showActions?: boolean;
   showCreateNew?: boolean;
   customNewResourceAction?: {

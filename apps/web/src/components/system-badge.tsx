@@ -7,6 +7,8 @@ import {
 } from "./ui/tooltip";
 import { chooseColor } from "./components-utils";
 import { memo } from "react";
+import type { ExtendedApiObject } from "@kblocks-portal/server";
+import { parseBlockUri } from "@kblocks/api";
 
 const clusterColors = [
   "bg-blue-100 text-blue-800",
@@ -18,12 +20,13 @@ const clusterColors = [
 ];
 
 export interface SystemBadgeProps {
-  system: string;
+  object: ExtendedApiObject;
 }
 
 export const SystemBadge = memo(function SystemBadge({
-  system,
+  object,
 }: SystemBadgeProps) {
+  const system = parseBlockUri(object.objUri).system;
   return (
     <TooltipProvider>
       <Tooltip>

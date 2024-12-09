@@ -1,9 +1,9 @@
 import { ResourceIcon } from "@/lib/get-icon";
 import { Button } from "./ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import type { TrpcProject } from "@kblocks-portal/server";
+import type { ExtendedApiObject } from "@kblocks-portal/server";
 
-export const ProjectLink = ({ project }: { project: TrpcProject }) => {
+export const ProjectLink = ({ project }: { project: ExtendedApiObject }) => {
   const navigate = useNavigate();
   return (
     <Button
@@ -12,7 +12,7 @@ export const ProjectLink = ({ project }: { project: TrpcProject }) => {
       onClick={(e) => {
         navigate({
           to: "/projects/$name",
-          params: { name: project.name },
+          params: { name: project.metadata.name },
         });
         e.stopPropagation();
       }}
@@ -22,7 +22,7 @@ export const ProjectLink = ({ project }: { project: TrpcProject }) => {
           icon={project.icon ?? "heroicon://folder"}
           className="h-4 w-4"
         />
-        {project.title ?? project.name}
+        {project.title ?? project.metadata.name}
       </div>
     </Button>
   );

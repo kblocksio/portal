@@ -12,10 +12,10 @@ import {
   DropdownMenuContent,
 } from "./ui/dropdown-menu";
 import { DeleteProjectDialog } from "./delete-project";
-import type { TrpcProject } from "@kblocks-portal/server";
+import type { Project } from "@kblocks-portal/server";
 
 export interface ProjectHeaderProps {
-  project: TrpcProject;
+  project: Project;
 }
 
 export const ProjectHeader = ({ project }: ProjectHeaderProps) => {

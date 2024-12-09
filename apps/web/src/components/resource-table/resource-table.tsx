@@ -47,15 +47,18 @@ import { ProjectLink } from "../project-link";
 import { useLocalStorage } from "@/hooks/use-localstorage";
 import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { Relationship, Resource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 import { StatusBadge } from "../status-badge";
 import { motion } from "framer-motion";
 import { Spinner } from "../spinner";
+import { parseBlockUri } from "@kblocks/api";
+import Outputs from "../outputs";
+import { ResourceLink } from "../resource-link";
 
 const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
 
-const columnHelper = createColumnHelper<TrpcResource>();
+const columnHelper = createColumnHelper<Resource>();
 
 const useColumns = () => {
   return useMemo(() => {
@@ -85,11 +88,12 @@ const useColumns = () => {
           />
         ),
       }),
-      columnHelper.accessor("status", {
+      columnHelper.display({
+        id: "status",
         cell: (props) => (
           <div className="flex items-center gap-1.5">
             <StatusBadge
-              conditions={props.row.original.statusConditions}
+              conditions={props.row.original.status?.conditions ?? []}
               merge
             />
           </div>
@@ -125,7 +129,7 @@ const useColumns = () => {
           return (
             <div className="flex items-center gap-1.5">
               <ResourceIcon
-                icon={props.row.original.icon}
+                icon={props.row.original.spec?.definition?.icon}
                 className="h-4 w-4"
               />
               {props.getValue()}
@@ -135,7 +139,8 @@ const useColumns = () => {
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
-      columnHelper.accessor("name", {
+      columnHelper.display({
+        id: "name",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Name" />
         ),
@@ -150,74 +155,75 @@ const useColumns = () => {
                 )}` as any
               }
             >
-              {props.getValue()}
+              {props.row.original.metadata?.name}
             </Link>
           </div>
         ),
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
-      columnHelper.accessor("cluster", {
+      columnHelper.display({
+        id: "cluster",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
-        cell: (props) => <SystemBadge system={props.getValue()} />,
+        cell: (props) => <SystemBadge object={props.row.original} />,
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
-      columnHelper.accessor("namespace", {
+      columnHelper.display({
+        id: "namespace",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Namespace" />
         ),
-        cell: (props) => {
-          const namespace = props.getValue();
-          if (!namespace) {
-            return null;
-          }
-          return <NamespaceBadge namespace={namespace} />;
-        },
+        cell: (props) => <NamespaceBadge object={props.row.original} />,
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
-      // columnHelper.accessor("children", {
-      //   id: "children",
-      //   header: (props) => (
-      //     <DataTableColumnHeader column={props.column} title="Children" />
-      //   ),
-      //   cell: (props) => {
-      //     if (props.row.original.rels.length === 0) {
-      //       return null;
-      //     }
-      //     return (
-      //       <TooltipProvider>
-      //         <Tooltip>
-      //           <TooltipTrigger asChild>
-      //             <Button variant="ghost" className="h-0">
-      //               <div>{props.row.original.rels.length} Children</div>
-      //             </Button>
-      //           </TooltipTrigger>
-      //           <TooltipContent>
-      //             <div className="flex flex-col gap-2">
-      //               {props.row.original.rels.map((r) => {
-      //                 return (
-      //                   <div key={r.objUri}>
-      //                     <ResourceLink resource={r} />
-      //                   </div>
-      //                 );
-      //               })}
-      //             </div>
-      //           </TooltipContent>
-      //         </Tooltip>
-      //       </TooltipProvider>
-      //     );
-      //   },
-      // }),
+      columnHelper.accessor("relationships", {
+        header: (props) => (
+          <DataTableColumnHeader column={props.column} title="Children" />
+        ),
+        cell: (props) => {
+          const relationships = props.getValue();
+          const children = relationships
+            .filter((relationship) => relationship.type === "child")
+            .map((relationship) => relationship.resource);
+
+          if (children.length === 0) {
+            return null;
+          }
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    <div>{children.length} Children</div>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-2">
+                    {children.map((resource) => {
+                      return (
+                        <div key={resource.objUri}>
+                          <ResourceLink resource={resource} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+      }),
       columnHelper.accessor("projects", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Projects" />
         ),
         cell: (props) => {
-          const projects = props.getValue();
+          // return JSON.stringify(props.row.original.projects);
+          const projects = props.getValue() ?? [];
           if (projects.length === 0) {
             return null;
           }
@@ -274,14 +280,26 @@ const useColumns = () => {
         //   );
         // },
       }),
-      columnHelper.accessor("lastUpdated", {
+      columnHelper.display({
+        id: "lastUpdated",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Last Updated" />
         ),
-        cell: (props) =>
-          props.row.original.lastUpdated && (
-            <LastUpdated timestamp={props.row.original.lastUpdated} />
-          ),
+        cell: (props) => {
+          const object = props.row.original;
+
+          const readyCondition = object.status?.conditions?.find(
+            (c) => c.type === "Ready",
+          );
+
+          const lastUpdated =
+            readyCondition?.lastTransitionTime ??
+            object.metadata?.creationTimestamp;
+
+          const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
+
+          return timestamp && <LastUpdated timestamp={timestamp.getTime()} />;
+        },
         // TODO: Add back when the backend supports sorting.
         enableSorting: false,
       }),
@@ -298,26 +316,16 @@ const useColumns = () => {
         id: "outputs",
         size: 0,
         header: () => <></>,
-        // cell: (props) => {
-        //   return (
-        //     <ResourceOutputs
-        //       resource={props.row.original}
-        //       // resourceType={props.row.original.resourceType}
-        //     />
-        //   );
-        // },
+        cell: (props) => {
+          return <ResourceOutputs resource={props.row.original} />;
+        },
         enableSorting: false,
       }),
       columnHelper.display({
         id: "actions",
         size: 0,
         header: () => <></>,
-        cell: (props) => (
-          <ResourceActionsMenu
-            resource={props.row.original}
-            // resourceType={props.row.original.resourceType}
-          />
-        ),
+        cell: (props) => <ResourceActionsMenu resource={props.row.original} />,
         enableSorting: false,
       }),
     ];
@@ -332,7 +340,7 @@ export const ResourceTable = memo(function ResourceTable({
   customNewResourceAction,
   fetching,
 }: {
-  resources: TrpcResource[];
+  resources: Resource[];
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -470,74 +478,72 @@ const ResourceTableRow = memo(function ResourceTableRow({
   );
 });
 
-// const ResourceOutputs = memo(function ResourceOutputs({
-//   resource,
-//   // resourceType,
-// }: {
-//   resource: TrpcResource;
-//   // resourceType: ResourceType;
-// }) {
-//   const outputs = getResourceOutputs(resource.raw);
-//   const [isOpen, setIsOpen] = useState(false);
+const ResourceOutputs = memo(function ResourceOutputs({
+  resource,
+}: {
+  resource: Resource;
+}) {
+  const outputs = getResourceOutputs(resource);
+  const [isOpen, setIsOpen] = useState(false);
 
-//   if (Object.keys(outputs).length === 0) {
-//     return null;
-//   }
+  if (Object.keys(outputs).length === 0 || !resource.type) {
+    return null;
+  }
 
-//   return (
-//     <div>
-//       <Popover open={isOpen} onOpenChange={setIsOpen}>
-//         <TooltipProvider>
-//           <Tooltip>
-//             <TooltipTrigger asChild>
-//               <PopoverTrigger asChild>
-//                 <Button
-//                   variant="ghost"
-//                   className="h-0"
-//                   onClick={(e) => {
-//                     setIsOpen(true);
-//                     e.stopPropagation();
-//                   }}
-//                 >
-//                   <CircleEllipsis className="h-4 w-4" />
-//                   <span className="sr-only">Outputs</span>
-//                 </Button>
-//               </PopoverTrigger>
-//             </TooltipTrigger>
-//             <TooltipContent>
-//               <p>Outputs</p>
-//             </TooltipContent>
-//           </Tooltip>
-//         </TooltipProvider>
-//         <PopoverContent onClick={(e) => e.stopPropagation()}>
-//           <div className="flex flex-col space-y-8">
-//             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-//               {/* <Outputs
-//                 outputs={outputs}
-//                 resourceObjUri={resource.objUri}
-//                 resourceType={resourceType}
-//               /> */}
-//             </div>
-//           </div>
-//         </PopoverContent>
-//       </Popover>
-//     </div>
-//   );
-// });
+  return (
+    <div>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-0"
+                  onClick={(e) => {
+                    setIsOpen(true);
+                    e.stopPropagation();
+                  }}
+                >
+                  <CircleEllipsis className="h-4 w-4" />
+                  <span className="sr-only">Outputs</span>
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Outputs</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <PopoverContent onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col space-y-8">
+            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              <Outputs
+                outputs={outputs}
+                resourceObjUri={resource.objUri}
+                resourceType={resource.type}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+});
 
-const DelayedRender: FC<PropsWithChildren<{ delay: number }>> = ({
-  delay,
-  children,
-}) => {
-  const [isRendered, setIsRendered] = useState(false);
+// const DelayedRender: FC<PropsWithChildren<{ delay: number }>> = ({
+//   delay,
+//   children,
+// }) => {
+//   const [isRendered, setIsRendered] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsRendered(true);
-    }, delay);
+//   useEffect(() => {
+//     const timer = setTimeout(() => {
+//       setIsRendered(true);
+//     }, delay);
 
-    return () => clearTimeout(timer);
-  }, [delay]);
+//     return () => clearTimeout(timer);
+//   }, [delay]);
 
-  return isRendered ? <>{children}</> : null;
-};
+//   return isRendered ? <>{children}</> : null;
+// };

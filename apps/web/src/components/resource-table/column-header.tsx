@@ -34,7 +34,7 @@ function DataTableColumnHeaderBase<TData, TValue>({
   }, [title, capitalize]);
 
   return (
-    <div className={cn("flex items-center space-x-2 pl-2", className)}>
+    <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

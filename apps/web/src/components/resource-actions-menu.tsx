@@ -11,13 +11,13 @@ import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
 import { useNavigate } from "@tanstack/react-router";
 import { ProjectsMenu } from "./projects-menu";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 
 export const ResourceActionsMenu = memo(function ResourceActionsMenu({
   resource,
   onDeleteClick,
 }: {
-  resource: TrpcResource;
+  resource: Resource;
   onDeleteClick?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
