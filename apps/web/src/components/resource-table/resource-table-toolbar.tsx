@@ -31,16 +31,16 @@ export interface ResourceTableToolbarProps {
   };
 }
 
-export const ResourceTableToolbar = memo(function ResourceTableToolbar({
+export const ResourceTableToolbar = ({
   table,
   showActions = true,
   showCreateNew = true,
   customNewResourceAction,
-}: ResourceTableToolbarProps) {
+}: ResourceTableToolbarProps) => {
   const navigate = useNavigate();
-  const isFiltered = table.getState().columnFilters.length > 0;
+  // const isFiltered = table.getState().columnFilters.length > 0;
 
-  const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
+  // const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -229,4 +229,4 @@ export const ResourceTableToolbar = memo(function ResourceTableToolbar({
       />
     </div>
   );
-});
+};

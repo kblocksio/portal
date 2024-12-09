@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import useWebSocket from "react-use-websocket";
+import { throttle } from "lodash";
 import Emittery from "emittery";
 import { useFetch } from "./hooks/use-fetch";
 import {
@@ -252,115 +253,121 @@ export const ResourceProvider = ({
   //   handleObjectMessages(initialResources.objects);
   // }, [initialResources, handleObjectMessages]);
 
-  useEffect(() => {
-    setRelationships((prev) => {
-      for (const r of Object.values(objects)) {
-        const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
-        if (refs.length === 0) {
-          continue;
-        }
-
-        const childUri = r.objUri;
-        const { system, namespace } = parseBlockUri(childUri);
-
-        for (const ref of refs) {
-          const parentUri = resolveOwnerUri(ref, system, namespace);
-
-          prev[childUri] = {
-            ...(prev[childUri] ?? {}),
-            [parentUri]: {
-              type: "parent",
-            },
-          };
-
-          prev[parentUri] = {
-            ...(prev[parentUri] ?? {}),
-            [childUri]: {
-              type: "child",
-            },
-          };
-        }
-      }
-
-      // DO NOT REMOVE!!
-      // Here we use the spread syntax to shallow copy the relationships object.
-      // This is necessary to trigger a re-render.
-      return { ...prev };
-    });
-  }, [resolvePluralFromKind, objects, resolveOwnerUri]);
-
-  const addEvent = useCallback((event: WorkerEvent) => {
-    let timestamp = (event as any).timestamp ?? new Date();
-    if (timestamp && typeof timestamp === "string") {
-      timestamp = new Date(timestamp);
-      event.timestamp = timestamp;
-    }
-
-    const eventKey = `${timestamp.toISOString()}.${event.objUri}`;
-
-    // ignore OBJECT and PATCH events because they are handled by the respective handlers
-    if (event.type === "OBJECT") {
-      return;
-    }
-
-    setEventsPerObject((eventsPerObject) => {
-      return {
-        ...eventsPerObject,
-        [event.objUri]: {
-          ...eventsPerObject[event.objUri],
-          [eventKey]: event,
-        },
-      };
-    });
-  }, []);
-
-  useEffect(() => {
-    if (
-      !lastJsonMessage ||
-      isEqual(lastJsonMessage, previousMessageRef.current)
-    ) {
-      return;
-    }
-
-    previousMessageRef.current = lastJsonMessage;
-    addEvent(lastJsonMessage);
-    const blockUri = parseBlockUri(lastJsonMessage.objUri);
-
-    switch (lastJsonMessage.type) {
-      case "OBJECT":
-        handleObjectMessage(lastJsonMessage as ObjectEvent);
-        break;
-      case "ERROR":
-        addNotifications([
-          {
-            id: urlForResource(blockUri),
-            message: lastJsonMessage.message ?? "Unknown error",
-            type: "error",
-          },
-        ]);
-        break;
-      case "LIFECYCLE":
-        addNotifications([
-          {
-            id: urlForResource(blockUri),
-            message: `${blockUri.name}: ${lastJsonMessage.event.message}`,
-            type: "success",
-          },
-        ]);
-        break;
-    }
-  }, [
-    lastJsonMessage,
-    handleObjectMessage,
-    addNotifications,
-    addEvent,
-  ]);
-
-  // Do not invalidate queries just yet: there are too many events coming from the stream.
-  // const trpcUtils = trpc.useUtils();
   // useEffect(() => {
-  //   // trpcUtils.invalidate();
-  // }, [trpcUtils, lastJsonMessage]);
+  //   setRelationships((prev) => {
+  //     for (const r of Object.values(objects)) {
+  //       const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
+  //       if (refs.length === 0) {
+  //         continue;
+  //       }
+
+  //       const childUri = r.objUri;
+  //       const { system, namespace } = parseBlockUri(childUri);
+
+  //       for (const ref of refs) {
+  //         const parentUri = resolveOwnerUri(ref, system, namespace);
+
+  //         prev[childUri] = {
+  //           ...(prev[childUri] ?? {}),
+  //           [parentUri]: {
+  //             type: "parent",
+  //           },
+  //         };
+
+  //         prev[parentUri] = {
+  //           ...(prev[parentUri] ?? {}),
+  //           [childUri]: {
+  //             type: "child",
+  //           },
+  //         };
+  //       }
+  //     }
+
+  //     // DO NOT REMOVE!!
+  //     // Here we use the spread syntax to shallow copy the relationships object.
+  //     // This is necessary to trigger a re-render.
+  //     return { ...prev };
+  //   });
+  // }, [resolvePluralFromKind, objects, resolveOwnerUri]);
+
+  // const addEvent = useCallback((event: WorkerEvent) => {
+  //   let timestamp = (event as any).timestamp ?? new Date();
+  //   if (timestamp && typeof timestamp === "string") {
+  //     timestamp = new Date(timestamp);
+  //     event.timestamp = timestamp;
+  //   }
+
+  //   const eventKey = `${timestamp.toISOString()}.${event.objUri}`;
+
+  //   // ignore OBJECT and PATCH events because they are handled by the respective handlers
+  //   if (event.type === "OBJECT") {
+  //     return;
+  //   }
+
+  //   setEventsPerObject((eventsPerObject) => {
+  //     return {
+  //       ...eventsPerObject,
+  //       [event.objUri]: {
+  //         ...eventsPerObject[event.objUri],
+  //         [eventKey]: event,
+  //       },
+  //     };
+  //   });
+  // }, []);
+
+  // useEffect(() => {
+  //   if (
+  //     !lastJsonMessage ||
+  //     isEqual(lastJsonMessage, previousMessageRef.current)
+  //   ) {
+  //     return;
+  //   }
+
+  //   previousMessageRef.current = lastJsonMessage;
+  //   addEvent(lastJsonMessage);
+  //   const blockUri = parseBlockUri(lastJsonMessage.objUri);
+
+  //   switch (lastJsonMessage.type) {
+  //     case "OBJECT":
+  //       handleObjectMessage(lastJsonMessage as ObjectEvent);
+  //       break;
+  //     case "ERROR":
+  //       addNotifications([
+  //         {
+  //           id: urlForResource(blockUri),
+  //           message: lastJsonMessage.message ?? "Unknown error",
+  //           type: "error",
+  //         },
+  //       ]);
+  //       break;
+  //     case "LIFECYCLE":
+  //       addNotifications([
+  //         {
+  //           id: urlForResource(blockUri),
+  //           message: `${blockUri.name}: ${lastJsonMessage.event.message}`,
+  //           type: "success",
+  //         },
+  //       ]);
+  //       break;
+  //   }
+  // }, [lastJsonMessage, handleObjectMessage, addNotifications, addEvent]);
+
+  // Invalidate queries on every message, but throttle the calls to avoid too many requests.
+  const trpcUtils = trpc.useUtils();
+  const invalidateQueries = useCallback(
+    throttle(
+      () => {
+        console.log("invalidating queries");
+        trpcUtils.invalidate();
+      },
+      500,
+      { leading: true, trailing: true },
+    ),
+    [trpcUtils],
+  );
+  useEffect(() => {
+    invalidateQueries();
+  }, [invalidateQueries, lastJsonMessage]);
 
   // make sure to close the websocket when the component is unmounted
   useEffect(() => {
