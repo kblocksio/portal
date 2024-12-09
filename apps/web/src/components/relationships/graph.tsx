@@ -1,4 +1,4 @@
-import type { ExtendedResourceType } from "@/hooks/use-resource-types";
+import type { Resource } from "@kblocks-portal/server";
 import { memo } from "react";
 // import { Box } from "lucide-react";
 // import { OwnerGraph, OwnerNode } from "./owner-graph";
@@ -8,7 +8,7 @@ import { memo } from "react";
 export const RelationshipGraph = memo(function RelationshipGraph({
   selectedResource,
 }: {
-  selectedResource?: ExtendedResourceType;
+  selectedResource?: Resource;
 }) {
   return <pre>to do: {selectedResource?.kind}</pre>;
   // const { relationships, objects, resourceTypes } = useContext(ResourceContext);
