@@ -325,25 +325,12 @@ const appRouter = router({
         page,
         perPage,
         pageCount,
-        // types,
-        // relationships,
-        // projects: projects.map((project) => ({
-        //   ...project,
-        //   objects: project.objects.map((objUri) =>
-        //     objects.find((o) => o.objUri === objUri),
-        //   ),
-        // })),
       };
     }),
   listProjects: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
     const projects = projectsFromObjects(objects);
-    return projects.map((project) => ({
-      ...project,
-      // objects: project.objects.map((objUri) =>
-      //   objects.find((o) => o.objUri === objUri),
-      // ),
-    }));
+    return projects;
   }),
   listClusters: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();

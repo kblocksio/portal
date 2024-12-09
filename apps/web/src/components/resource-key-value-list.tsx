@@ -1,18 +1,8 @@
-import React, { useContext, useCallback } from "react";
+import React, { useCallback } from "react";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { LinkIcon } from "lucide-react";
-import { getResourceOutputs, parseRef } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { ResourceLink } from "./resource-link";
 import { PropertyKey, PropertyValue } from "./ui/property";
 import { CopyToClipboardButton } from "./copy-to-clipboard";
 import { Checkbox } from "./ui/checkbox";
