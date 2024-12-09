@@ -7,6 +7,7 @@ import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { TablePagination } from "@/components/resource-table/table-pagination";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -30,7 +31,7 @@ function Resources() {
       perPage: 10,
     },
     {
-      placeholderData: (data) => data,
+      placeholderData: keepPreviousData,
     },
   );
 
