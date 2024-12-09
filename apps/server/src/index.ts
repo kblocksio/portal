@@ -53,29 +53,34 @@ export type Relationship = {
 
 export { type Condition };
 
+/**
+ * Represents a `@kblocks/api` {@link ApiObject} but without the `any` type, since it
+ * seems to break the tRPC typing of the router.
+ */
 export type StrictApiObject = {
   apiVersion: ApiObject["apiVersion"];
   kind: ApiObject["kind"];
   color?: string;
-
   metadata: ApiObject["metadata"];
-
-  // current state
   status?: {
-    // [key: string]: any;
     conditions?: Condition[];
   };
-
-  // [key: string]: any;
 };
-// export type StrictApiObject = ApiObject;
 
+/**
+ * Extends the {@link StrictApiObject} with common properties.
+ */
 export type ExtendedApiObject = StrictApiObject & {
   objUri: string;
   objType: string;
   spec?: Manifest;
 };
 
+/**
+ * Represents a project object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
 export type Project = ExtendedApiObject & {
   objects?: string[];
   icon?: string;
@@ -83,8 +88,18 @@ export type Project = ExtendedApiObject & {
   description?: string;
 };
 
+/**
+ * Represents a cluster object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
 export type Cluster = ExtendedApiObject & {};
 
+/**
+ * Represents a resource object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
 export type Resource = ExtendedApiObject & {
   projects: Project[];
   type?: ResourceType;
@@ -400,7 +415,6 @@ app.use(
 );
 
 import * as trpcExpress from "@trpc/server/adapters/express";
-import e from "express";
 
 app.use(
   "/api/trpc",
