@@ -93,7 +93,7 @@ export type Project = ExtendedApiObject & {
  * Extends the {@link ExtendedApiObject}.
  */
 export type Cluster = ExtendedApiObject & {
-  access: "read_only" | string;
+  access: "read_only" | "read_write";
 };
 
 /**
