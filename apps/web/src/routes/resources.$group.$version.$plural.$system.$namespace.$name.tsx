@@ -1,19 +1,13 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronsUpDown, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  Resource,
-  ResourceContext,
-  useObjectEvents,
-  type WorkerEventTimestampString,
-} from "@/resource-context";
 import { StatusBadge } from "@/components/status-badge";
 import { SystemBadge } from "@/components/system-badge";
 import Timeline from "@/components/events/timeline";
-import { getIconColors } from "@/lib/get-icon";
+import { ResourceIcon } from "@/lib/get-icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +29,7 @@ import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
 import { cloneDeep } from "lodash";
 import { ProjectItems } from "@/components/projects-menu";
+import { trpc } from "@/trpc";
 
 const DEFAULT_TAB = "details";
 
@@ -47,8 +42,6 @@ export const Route = createFileRoute(
 function ResourcePage() {
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
-  const { resourceTypes, objects, setSelectedResourceId, relationships } =
-    useContext(ResourceContext);
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
 
@@ -79,76 +72,47 @@ function ResourcePage() {
     name,
   });
 
-  const numberOfRelationships = useMemo(() => {
-    return Object.keys(relationships).length;
-  }, [relationships]);
-
-  const ownerResourceURI = useMemo((): string | null => {
-    // Wait until relationships is populated
-    if (!relationships || numberOfRelationships === 0) {
-      return null;
-    }
-    const rels = relationships[objUri];
-    if (!rels) {
-      return null;
-    }
-    let owner: string | null = null;
-    Object.keys(rels)?.forEach((key) => {
-      if (rels[key].type === "parent") {
-        owner = key;
-      }
-    });
-    return owner;
-  }, [relationships, numberOfRelationships, objUri]);
-
-  const [lastEventCount, setLastEventCount] = useState<number>();
-  const [showLogsBadge, setShowLogsBadge] = useState(false);
-
-  const [events, setEvents] = useState<WorkerEventTimestampString[]>([]);
-  useObjectEvents(objUri, (events) => {
-    setEvents(events);
-    setLastEventCount(events.length);
-
-    if (lastEventCount === undefined) {
-      return;
-    }
-
-    if (activeTab === "logs") {
-      return;
-    }
-
-    setShowLogsBadge(events.length > lastEventCount);
+  const { data: selectedResource } = trpc.getResource.useQuery({
+    objUri,
   });
 
-  const selectedResource = useMemo(() => objects[objUri], [objects, objUri]);
+  const relationships = useMemo(() => {
+    return selectedResource?.relationships;
+  }, [selectedResource]);
 
+  const ownerResourceURI = useMemo(() => {
+    const relationship = relationships?.find(
+      (relationship) => relationship.type === "parent",
+    );
+
+    return relationship?.resource.objUri;
+  }, [relationships]);
+
+  const [lastEventCount, setLastEventCount] = useState<number>(-1);
+  const [showLogsBadge, setShowLogsBadge] = useState(false);
+
+  const events = trpc.listEvents.useQuery(
+    {
+      objUri,
+    },
+    {
+      initialData: [],
+    },
+  );
   useEffect(() => {
-    if (selectedResource) {
-      setSelectedResourceId({
-        objType: selectedResource?.objType,
-        objUri: selectedResource?.objUri,
-      });
-    }
-  }, [selectedResource, setSelectedResourceId]);
+    setShowLogsBadge(events.data.length > lastEventCount);
+    setLastEventCount(events.data.length);
+  });
 
   useEffect(() => {
     if (deleteInProgress && !selectedResource) {
       setDeleteInProgress(false);
-      setSelectedResourceId(undefined);
       navigate({ to: "/resources" });
     }
-  }, [selectedResource, deleteInProgress, setSelectedResourceId, navigate]);
+  }, [selectedResource, deleteInProgress, navigate]);
 
   const selectedResourceType = useMemo(
-    () =>
-      selectedResource ? resourceTypes[selectedResource.objType] : undefined,
-    [resourceTypes, selectedResource],
-  );
-
-  const Icon = selectedResourceType?.iconComponent;
-
-  const iconColor = useMemo(
-    () => getIconColors({ color: selectedResource?.color }),
+    () => selectedResource?.type,
     [selectedResource],
   );
 
@@ -165,32 +129,22 @@ function ResourcePage() {
   }, [selectedResource]);
 
   const children = useMemo(() => {
-    if (!selectedResource) {
-      return [];
-    }
-
-    const children: Resource[] = [];
-    const rels = relationships[selectedResource.objUri] ?? {};
-    for (const [relUri, rel] of Object.entries(rels)) {
-      if (rel.type === "child") {
-        children.push(objects[relUri]);
-      }
-    }
-
-    return children;
-  }, [selectedResource, relationships, objects]);
+    return selectedResource?.relationships
+      ?.filter((relationship) => relationship.type === "child")
+      .map((relationship) => relationship.resource);
+  }, [selectedResource, relationships]);
 
   useBreadcrumbs(() => {
-    if (!selectedResource) return [];
     const breadcrumbs = [
       {
         name: "Resources",
         url: `/resources/`,
       },
     ];
+    if (!selectedResource) return breadcrumbs;
     if (ownerResourceURI) {
       breadcrumbs.push({
-        name: objects[ownerResourceURI].metadata.name,
+        name: selectedResource.metadata.name,
         url: `/resources/${ownerResourceURI.replace("kblocks://", "")}`,
       });
     }
@@ -200,7 +154,7 @@ function ResourcePage() {
         name: selectedResource.metadata.name,
       },
     ];
-  }, [selectedResource, ownerResourceURI, objects]);
+  }, [selectedResource, ownerResourceURI]);
 
   const yamlObject = useMemo(() => {
     const obj: any = cloneDeep(selectedResource ?? {});
@@ -217,8 +171,9 @@ function ResourcePage() {
     };
   }, [selectedResource]);
 
-  if (!selectedResource || !selectedResourceType) {
-    return null;
+  if (!selectedResource) {
+    // TODO: show loading state
+    return <div>Loading...</div>;
   }
 
   return (
@@ -228,7 +183,10 @@ function ResourcePage() {
           <div className="flex w-full shrink flex-col gap-6 truncate">
             <div className="flex items-center gap-4 truncate">
               <div className="relative">
-                {Icon && <Icon className={`size-12 ${iconColor}`} />}
+                <ResourceIcon
+                  icon={selectedResourceType?.icon}
+                  className="size-12"
+                />
               </div>
               <div className="flex min-w-0 flex-col truncate">
                 <p className="text-muted-foreground truncate text-sm leading-none">
@@ -241,7 +199,6 @@ function ResourcePage() {
               </div>
             </div>
           </div>
-
           <div className="flex shrink-0 space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -302,7 +259,7 @@ function ResourcePage() {
                 {selectedResource.status?.conditions?.map((condition) => (
                   <StatusBadge
                     key={condition.type}
-                    obj={selectedResource}
+                    conditions={selectedResource.status?.conditions ?? []}
                     showMessage
                     type={condition.type}
                   />
@@ -314,9 +271,7 @@ function ResourcePage() {
               </p>
               <div className="flex truncate text-xs sm:text-sm">
                 {selectedResource.metadata.namespace && (
-                  <NamespaceBadge
-                    namespace={selectedResource.metadata.namespace}
-                  />
+                  <NamespaceBadge object={selectedResource} />
                 )}
               </div>
 
@@ -324,7 +279,7 @@ function ResourcePage() {
                 Cluster
               </p>
               <div className="flex truncate text-xs sm:text-sm">
-                <SystemBadge system={selectedResource.objUri} />
+                <SystemBadge object={selectedResource} />
               </div>
             </div>
           </div>
@@ -389,23 +344,25 @@ function ResourcePage() {
             )}
 
             {/* Outputs */}
-            {outputs && Object.keys(outputs).length > 0 && (
-              <div className="w-full">
-                <div className="pb-4 sm:pt-6">
-                  <CardTitle>Outputs</CardTitle>
+            {selectedResource.type &&
+              outputs &&
+              Object.keys(outputs).length > 0 && (
+                <div className="w-full">
+                  <div className="pb-4 sm:pt-6">
+                    <CardTitle>Outputs</CardTitle>
+                  </div>
+                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+                    <Outputs
+                      outputs={outputs}
+                      resourceObjUri={selectedResource.objUri}
+                      resourceType={selectedResource.type}
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                  <Outputs
-                    outputs={outputs}
-                    resourceObjUri={selectedResource.objUri}
-                    resourceType={selectedResourceType}
-                  />
-                </div>
-              </div>
-            )}
+              )}
 
             {/* Children */}
-            {children.length > 0 && (
+            {children && children.length > 0 && (
               <div className="w-full">
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
@@ -423,7 +380,7 @@ function ResourcePage() {
           <CardContent className="h-full p-0">
             {selectedResource && (
               <div className="pt-4 sm:pt-6">
-                <Timeline events={events} />
+                <Timeline events={events.data} />
               </div>
             )}
           </CardContent>

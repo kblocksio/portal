@@ -11,11 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { ExtendedApiObject, Resource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 
 interface DeleteResourceDialogProps {
-  resources: TrpcResource[];
+  resources: ExtendedApiObject[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;

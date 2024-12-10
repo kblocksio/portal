@@ -1,6 +1,11 @@
 import * as kblocks from "@kblocks/api";
 import { slackNotify } from "./slack-notify";
-import { createRedisClient, eventsPrefix, objPrefix, timestampPrefix } from "./redis.js";
+import {
+  createRedisClient,
+  eventsPrefix,
+  objPrefix,
+  timestampPrefix,
+} from "./redis.js";
 
 const client = createRedisClient();
 
@@ -194,7 +199,7 @@ export async function handleEvent(event: kblocks.WorkerEvent) {
   } catch (e) {
     console.error(`Error storing event: ${JSON.stringify(event)}: ${e}`);
   }
-  
+
   try {
     await slackNotify(event);
   } catch (e) {

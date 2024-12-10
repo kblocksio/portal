@@ -5,7 +5,7 @@ import {
   CreateResourceResponse,
 } from "@repo/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
-import { ResourceType } from "@/resource-context";
+import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -61,7 +61,7 @@ export const rejectUser = async (): Promise<void> => {
 
 export const createResource = async (
   system: string,
-  type: ResourceType,
+  type: ExtendedResourceType,
   obj: ApiObject,
 ): Promise<CreateResourceResponse> => {
   const objType = `${type.group}/${type.version}/${type.plural}`;

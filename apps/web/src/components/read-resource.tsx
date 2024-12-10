@@ -11,10 +11,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 
 interface ReadResourceDialogProps {
-  resource: TrpcResource;
+  resource: Resource;
   isOpen: boolean;
   onClose: () => void;
   onReadClick?: () => void;

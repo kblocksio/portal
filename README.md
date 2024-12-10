@@ -108,8 +108,7 @@ kubectl get pods -n kblocks
 Install the demo resources to your cluster:
 
 ```sh
-cd demo
-./install.sh
+cd demo && ./install.sh && cd ..
 ```
 
 Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).

@@ -1,4 +1,4 @@
-import { ApiObject, StatusReason } from "@kblocks/api";
+import { StatusReason, type Condition } from "@kblocks/api";
 import { Loader2 } from "lucide-react";
 import {
   Tooltip,
@@ -24,7 +24,7 @@ const variants = cva("", {
 });
 
 export interface StatusBadgeProps extends VariantProps<typeof variants> {
-  obj: ApiObject;
+  conditions: Condition[];
   showMessage?: boolean;
 
   /**
@@ -39,7 +39,7 @@ export interface StatusBadgeProps extends VariantProps<typeof variants> {
 }
 
 export const StatusBadge = memo(function StatusBadge({
-  obj,
+  conditions,
   showMessage,
   size,
   type,
@@ -49,7 +49,7 @@ export const StatusBadge = memo(function StatusBadge({
     throw new Error("merge and type cannot be used together");
   }
 
-  const condition = findCondition(obj, type);
+  const condition = findCondition(conditions, type);
   const reason = condition?.reason;
 
   const getStatusContent = (reason: string) => {

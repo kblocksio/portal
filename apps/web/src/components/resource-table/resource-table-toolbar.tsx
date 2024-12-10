@@ -1,14 +1,8 @@
 import { type Table as TanstackTable } from "@tanstack/react-table";
-import { useContext, useState } from "react";
-import { ResourceContext } from "@/resource-context";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { DataTableFacetedFilter } from "./faceted-filter";
-import { getIconComponent } from "@/lib/get-icon";
 import { useNavigate } from "@tanstack/react-router";
-
-import { ScrollArea } from "../ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +13,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
 import { ProjectsMenu } from "../projects-menu";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { ExtendedApiObject } from "@kblocks-portal/server";
 
 export interface ResourceTableToolbarProps {
-  table: TanstackTable<TrpcResource>;
+  table: TanstackTable<ExtendedApiObject>;
   showActions?: boolean;
   showCreateNew?: boolean;
   customNewResourceAction?: {
@@ -31,16 +25,16 @@ export interface ResourceTableToolbarProps {
   };
 }
 
-export function ResourceTableToolbar({
+export const ResourceTableToolbar = ({
   table,
   showActions = true,
   showCreateNew = true,
   customNewResourceAction,
-}: ResourceTableToolbarProps) {
+}: ResourceTableToolbarProps) => {
   const navigate = useNavigate();
-  const isFiltered = table.getState().columnFilters.length > 0;
+  // const isFiltered = table.getState().columnFilters.length > 0;
 
-  const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
+  // const { systems, namespaces, kinds, projects } = useContext(ResourceContext);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -55,6 +49,8 @@ export function ResourceTableToolbar({
               table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="h-8"
+            // TODO: Add back when the backend supports filtering.
+            disabled
           />
         </div>
 
@@ -76,7 +72,9 @@ export function ResourceTableToolbar({
         )}
       </div>
 
-      <ScrollArea className="w-full" orientation="horizontal">
+      {/* TODO: Add back when the backend supports filtering */}
+
+      {/* <ScrollArea className="w-full" orientation="horizontal">
         <div className="flex items-center gap-2">
           {table.getColumn("kind") && (
             <DataTableFacetedFilter
@@ -155,7 +153,7 @@ export function ResourceTableToolbar({
             </Button>
           )}
         </div>
-      </ScrollArea>
+      </ScrollArea> */}
 
       {(showActions || showCreateNew) && (
         <div className="hidden items-center gap-2 md:flex">
@@ -225,4 +223,4 @@ export function ResourceTableToolbar({
       />
     </div>
   );
-}
+};

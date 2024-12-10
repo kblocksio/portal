@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +11,15 @@ import { ReapplyResourceDialog } from "./reapply-resource";
 import { ReadResourceDialog } from "./read-resource";
 import { useNavigate } from "@tanstack/react-router";
 import { ProjectsMenu } from "./projects-menu";
-import type { TrpcResource } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 
-export const ResourceActionsMenu = ({
+export const ResourceActionsMenu = memo(function ResourceActionsMenu({
   resource,
   onDeleteClick,
 }: {
-  resource: TrpcResource;
+  resource: Resource;
   onDeleteClick?: () => void;
-}) => {
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
@@ -115,4 +115,4 @@ export const ResourceActionsMenu = ({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+});

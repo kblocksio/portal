@@ -1,11 +1,11 @@
-import { getIconColors } from "@/lib/get-icon";
+import { getIconColors, ResourceIcon } from "@/lib/get-icon";
 import { CardTitle, CardDescription } from "./ui/card";
-import { ResourceType } from "@/resource-context";
+import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 
 export interface WizardSimpleHeaderProps {
   title: string;
   description: string;
-  resourceType: ResourceType;
+  resourceType: ExtendedResourceType;
 }
 
 export const WizardSimpleHeader = ({
@@ -13,13 +13,15 @@ export const WizardSimpleHeader = ({
   description,
   resourceType,
 }: WizardSimpleHeaderProps) => {
-  const ResourceIcon = resourceType?.iconComponent;
   const iconColor = getIconColors({ color: resourceType?.color });
 
   return (
     <div className="flex items-center space-x-2">
       <div className="rounded-full p-2">
-        <ResourceIcon className={`${iconColor} h-7 w-7`} />
+        <ResourceIcon
+          icon={resourceType?.icon}
+          className={`${iconColor} h-7 w-7`}
+        />
       </div>
       <div>
         <CardTitle>{title}</CardTitle>

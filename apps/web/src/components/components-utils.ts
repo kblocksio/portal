@@ -7,9 +7,10 @@ export const chooseColor = (key: string, palette: string[]): string => {
   return palette[index];
 };
 
-export const findCondition = (obj: ApiObject, type: string | undefined): Condition | undefined => {
-  const conditions = obj.status?.conditions ?? [];
-
+export const findCondition = (
+  conditions: Condition[],
+  type: string | undefined,
+): Condition | undefined => {
   // if no type is provided, merge all statuses - the logic is simple - if all statuses are True, the resource is ready
   if (!type) {
     // if we have only one condition, just return it, right?
@@ -17,15 +18,15 @@ export const findCondition = (obj: ApiObject, type: string | undefined): Conditi
       return conditions[0];
     }
 
-    const notReady = conditions.filter(s => s.status !== "True");
+    const notReady = conditions.filter((s) => s.status !== "True");
     if (notReady.length > 0) {
       return {
         lastProbeTime: notReady[0].lastProbeTime,
         lastTransitionTime: notReady[0].lastTransitionTime,
         status: "False",
         reason: notReady[0].reason,
-        type: notReady.map(x => x.type).join(", "),
-        message: notReady.map(x => x.message).join(", "),
+        type: notReady.map((x) => x.type).join(", "),
+        message: notReady.map((x) => x.message).join(", "),
       };
     } else {
       return {
@@ -39,8 +40,11 @@ export const findCondition = (obj: ApiObject, type: string | undefined): Conditi
   return conditions.find((c) => c.type === type);
 };
 
-export const getResourceStatusReason = (obj: ApiObject, type: string | undefined) => {
-  const readyCondition = findCondition(obj, type);
+export const getResourceStatusReason = (
+  obj: ApiObject,
+  type: string | undefined,
+) => {
+  const readyCondition = findCondition(obj.status?.conditions ?? [], type);
   return readyCondition?.reason as StatusReason;
 };
 

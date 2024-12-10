@@ -1,8 +1,8 @@
 import { ChevronRightIcon } from "lucide-react";
-import { memo, useEffect, useState } from "react";
-import { type WorkerEventTimestampString } from "@/resource-context";
+import { memo, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/trpc";
+import type { WorkerEventTimestampString } from "@kblocks-portal/server";
 
 const useLatestEvent = (objUri: string) => {
   const eventsQuery = trpc.listEvents.useQuery({
@@ -13,7 +13,7 @@ const useLatestEvent = (objUri: string) => {
     return undefined;
   }
 
-  return eventsQuery.data.events[eventsQuery.data.events.length - 1];
+  return eventsQuery.data[eventsQuery.data.length - 1];
 };
 
 const formatEventMessage = (event: WorkerEventTimestampString) => {
@@ -43,6 +43,13 @@ export const LastLogMessage = memo(function LastLogMessage({
     }
   }, [latestEvent]);
 
+  const text = useMemo(() => {
+    if (!latestEvent) {
+      return "";
+    }
+    return formatEventMessage(latestEvent);
+  }, [latestEvent]);
+
   return (
     <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
@@ -60,9 +67,9 @@ export const LastLogMessage = memo(function LastLogMessage({
             </span>
             <span
               className="text-muted-foreground min-w-0 flex-grow truncate font-mono text-xs"
-              title={formatEventMessage(latestEvent)}
+              title={text}
             >
-              {formatEventMessage(latestEvent)}
+              {text}
             </span>
           </motion.div>
         )}

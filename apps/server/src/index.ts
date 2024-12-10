@@ -21,6 +21,8 @@ import {
   Manifest,
   ObjectEvent,
   parseBlockUri,
+  type Condition,
+  type OwnerReference,
 } from "@kblocks/api";
 import {
   getAllObjects,
@@ -34,100 +36,239 @@ import { categories } from "./categories";
 import { publicProcedure, router } from "./trpc";
 import { z } from "zod";
 
-export type TrpcApiObject = ApiObject & {
-  objUri: string;
+export type Definition = Manifest["definition"];
+
+export interface ResourceType extends Definition {
+  icon?: string;
+  engine: string;
+  systems: string[];
+}
+
+export type RelationshipType = "parent" | "child" | "ref";
+
+export type Relationship = {
+  type: RelationshipType;
 };
 
-export type TrpcProject = {
+export { type Condition, type WorkerEventTimestampString };
+
+/**
+ * Represents a `@kblocks/api` {@link ApiObject} but without the `any` type, since it
+ * seems to break the tRPC typing of the router.
+ */
+export type StrictApiObject = {
+  apiVersion: ApiObject["apiVersion"];
+  kind: ApiObject["kind"];
+  color?: string;
+  metadata: ApiObject["metadata"];
+  status?: {
+    conditions?: Condition[];
+  };
+};
+
+/**
+ * Extends the {@link StrictApiObject} with common properties.
+ */
+export type ExtendedApiObject = StrictApiObject & {
   objUri: string;
+  objType: string;
+  spec?: Manifest;
+};
+
+/**
+ * Represents a project object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
+export type Project = ExtendedApiObject & {
+  objects?: string[];
+  icon?: string;
   title?: string;
-  name: string;
-  namespace?: string;
   description?: string;
-  icon?: string;
-  objects: string[];
-  raw: ApiObject;
 };
 
-export type TrpcResource = {
-  objUri: string;
-  status: "ready";
-  kind: string;
-  name: string;
-  cluster: string;
-  namespace?: string;
-  projects: TrpcProject[];
-  lastUpdated?: number;
-  // children
-  icon?: string;
-  raw: ApiObject;
+/**
+ * Represents a cluster object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
+export type Cluster = ExtendedApiObject & {
+  access: "read_only" | "read_write";
 };
 
-const getTrpcApiObjects = async (): Promise<TrpcApiObject[]> => {
+/**
+ * Represents a resource object.
+ *
+ * Extends the {@link ExtendedApiObject}.
+ */
+export type Resource = ExtendedApiObject & {
+  projects: Project[];
+  type?: ResourceType;
+  relationships: {
+    type: RelationshipType;
+    resource: ExtendedApiObject & {
+      type?: ResourceType;
+    };
+  }[];
+};
+
+const getExtendedObjects = async (): Promise<ExtendedApiObject[]> => {
   const objects = await getAllObjects();
-  return Object.entries(objects).map<TrpcApiObject>(([objUri, object]) => {
-    return { ...object, objUri };
+  return Object.entries(objects).map<ExtendedApiObject>(([objUri, object]) => {
+    return {
+      ...object,
+      objUri,
+      objType: blockTypeFromUri(objUri),
+    };
   });
 };
 
 const resourcesFromObjects = (
-  allObjects: TrpcApiObject[],
-  projects: TrpcProject[],
-): TrpcResource[] => {
+  allObjects: ExtendedApiObject[],
+  projects: Project[],
+  types: Record<string, ResourceType>,
+  relationships: Record<string, Record<string, Relationship>>,
+): Resource[] => {
   return allObjects
     .filter((object) => {
-      const type = blockTypeFromUri(object.objUri);
       return (
-        type !== "kblocks.io/v1/projects" &&
-        type !== "kblocks.io/v1/blocks" &&
-        type !== "kblocks.io/v1/clusters"
+        object.objType !== "kblocks.io/v1/projects" &&
+        object.objType !== "kblocks.io/v1/blocks" &&
+        object.objType !== "kblocks.io/v1/clusters"
       );
     })
-    .map<TrpcResource>((object) => {
-      const block = parseBlockUri(object.objUri);
-
-      const readyCondition = object.status?.conditions?.find(
-        (c) => c.type === "Ready",
-      );
-
-      const lastUpdated =
-        readyCondition?.lastTransitionTime ??
-        object.metadata?.creationTimestamp;
-
-      const timestamp = lastUpdated ? new Date(lastUpdated) : undefined;
-
-      return {
-        objUri: object.objUri,
-        status: "ready",
-        kind: object.kind,
-        name: object.metadata?.name,
-        cluster: block.system,
-        namespace: object.metadata?.namespace,
-        projects: projects.filter((p) => p.objects.includes(object.objUri)),
-        lastUpdated: timestamp?.getTime(),
-        icon: object.spec?.definition?.icon as string | undefined,
-        raw: object,
-      };
-    });
+    .map((object) => ({
+      ...object,
+      projects: projects.filter((project) =>
+        project.objects?.includes(object.objUri),
+      ),
+      type: types[object.objType],
+      relationships: Object.entries(relationships[object.objUri] ?? {}).map(
+        ([relationshipObjUri, relationship]) => ({
+          ...relationship,
+          resource: {
+            ...allObjects.find((o) => o.objUri === relationshipObjUri)!,
+            type: types[relationshipObjUri],
+          },
+        }),
+      ),
+    }));
 };
 
-const projectsFromObjects = (allObjects: TrpcApiObject[]): TrpcProject[] => {
-  return allObjects
-    .filter(
-      (object) => blockTypeFromUri(object.objUri) === "kblocks.io/v1/projects",
-    )
-    .map<TrpcProject>((object) => {
-      return {
-        objUri: object.objUri,
-        title: object.metadata?.name,
-        name: object.metadata?.name,
-        namespace: object.metadata?.namespace,
-        description: object.spec?.definition?.description as string | undefined,
-        icon: object.spec?.definition?.icon as string | undefined,
-        objects: object.objects ?? [],
-        raw: object,
+const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
+  return allObjects.filter(
+    (object): object is Project => object.objType === "kblocks.io/v1/projects",
+  );
+};
+
+const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
+  return allObjects.filter(
+    (object): object is Cluster => object.objType === "kblocks.io/v1/clusters",
+  );
+};
+
+const mapTypeFromObject = (
+  object: ExtendedApiObject,
+): [string, ResourceType] => {
+  if (!object.spec) {
+    throw new Error(`Object ${object.objUri} has no spec`);
+  }
+
+  const key = `${object.spec.definition.group}/${object.spec.definition.version}/${object.spec.definition.plural}`;
+
+  const { system, name } = parseBlockUri(object.objUri);
+
+  return [
+    key,
+    {
+      ...object.spec.definition,
+      engine: object.spec.engine,
+      systems: [system],
+      icon: object.spec.definition.icon,
+    },
+  ];
+};
+
+const typesFromObjects = (
+  allObjects: ExtendedApiObject[],
+): Record<string, ResourceType> => {
+  return (
+    allObjects
+      .filter((o) => blockTypeFromUri(o.objUri) === "kblocks.io/v1/blocks")
+      // .filter((o) => o.objUri.startsWith("kblocks://kblocks.io/v1/blocks"))
+      .reduce<Record<string, ResourceType>>((acc, object) => {
+        const [key, type] = mapTypeFromObject(object);
+        acc[key] = type;
+        return acc;
+      }, {})
+  );
+};
+
+const relationshipsFromObjects = (
+  objects: ExtendedApiObject[],
+  resourceTypes: Record<string, ResourceType>,
+): Record<string, Record<string, Relationship>> => {
+  const relationships: Record<string, Record<string, Relationship>> = {};
+  for (const r of Object.values(objects)) {
+    const refs: OwnerReference[] = r.metadata?.ownerReferences ?? [];
+    if (refs.length === 0) {
+      continue;
+    }
+
+    const childUri = r.objUri;
+    const { system, namespace } = parseBlockUri(childUri);
+
+    for (const ref of refs) {
+      const parentUri = resolveOwnerUri(ref, system, namespace, resourceTypes);
+
+      relationships[childUri] = {
+        ...(relationships[childUri] ?? {}),
+        [parentUri]: {
+          type: "parent",
+        },
       };
-    });
+
+      relationships[parentUri] = {
+        ...(relationships[parentUri] ?? {}),
+        [childUri]: {
+          type: "child",
+        },
+      };
+    }
+  }
+
+  return relationships;
+};
+
+const resolvePluralFromKind = (
+  kind: string,
+  resourceTypes: Record<string, ResourceType>,
+): string => {
+  for (const def of Object.values(resourceTypes)) {
+    if (def.kind === kind) {
+      return def.plural;
+    }
+  }
+
+  return kind.toLowerCase();
+};
+
+const resolveOwnerUri = (
+  ref: OwnerReference,
+  system: string,
+  namespace: string,
+  resourceTypes: Record<string, ResourceType>,
+) => {
+  const [group, version] = ref.apiVersion.split("/");
+  const plural = resolvePluralFromKind(ref.kind, resourceTypes);
+  return formatBlockUri({
+    group,
+    version,
+    system,
+    namespace,
+    plural,
+    name: ref.name,
+  });
 };
 
 const appRouter = router({
@@ -140,38 +281,104 @@ const appRouter = router({
     .query(async ({ input }) => {
       const { objUri } = input;
       const events = await loadEvents(objUri);
-      return { objUri, events };
+      return events as unknown as WorkerEventTimestampString[];
     }),
-  listResources: publicProcedure.query(async () => {
-    const objects = await getTrpcApiObjects();
-    const projects = projectsFromObjects(objects);
-    return resourcesFromObjects(objects, projects);
+  listTypes: publicProcedure.query(async () => {
+    const objects = await getExtendedObjects();
+    const types = typesFromObjects(objects);
+    return types;
   }),
+  listResources: publicProcedure
+    .input(
+      z
+        .object({
+          page: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).default(1)),
+          perPage: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).max(100).default(20)),
+        })
+        .optional()
+        .default({}),
+    )
+    .query(async ({ input }) => {
+      const { page, perPage } = input;
+      const objects = await getExtendedObjects();
+      const projects = projectsFromObjects(objects);
+      const types = typesFromObjects(objects);
+      const relationships = relationshipsFromObjects(objects, types);
+      const resources = resourcesFromObjects(
+        objects,
+        projects,
+        types,
+        relationships,
+      );
+      const startIndex = (page - 1) * perPage;
+      const endIndex = startIndex + perPage;
+      const paginatedResources = resources.slice(startIndex, endIndex);
+      const pageCount = Math.ceil(resources.length / perPage);
+      return {
+        data: paginatedResources,
+        page,
+        perPage,
+        pageCount,
+      };
+    }),
   listProjects: publicProcedure.query(async () => {
-    const objects = await getTrpcApiObjects();
-    return projectsFromObjects(objects);
+    const objects = await getExtendedObjects();
+    const projects = projectsFromObjects(objects);
+    return projects;
   }),
+  listClusters: publicProcedure.query(async () => {
+    const objects = await getExtendedObjects();
+    return clustersFromObjects(objects);
+  }),
+  getResource: publicProcedure
+    .input(z.object({ objUri: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getExtendedObjects();
+      const projects = projectsFromObjects(objects);
+      const types = typesFromObjects(objects);
+      const relationships = relationshipsFromObjects(objects, types);
+      const resources = resourcesFromObjects(
+        objects,
+        projects,
+        types,
+        relationships,
+      );
+      const resource = resources.find((r) => r.objUri === input.objUri);
+      if (!resource) {
+        throw new Error(`Resource ${input.objUri} not found`);
+      }
+      return resource;
+    }),
   getProject: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {
-      const objects = await getTrpcApiObjects();
+      const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
-      return projects.find((p) => p.name === input.name);
+      return projects.find((p) => p.metadata?.name === input.name);
     }),
   listProjectResources: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {
-      const objects = await getTrpcApiObjects();
+      const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
-      const project = projects.find((project) => project.name === input.name);
-      if (!project) {
-        return [];
-      }
-      const projectObjects = project.objects
-        .map((uri) => objects.find((o) => o.objUri === uri))
-        .filter((object): object is TrpcApiObject => object !== undefined);
-      return resourcesFromObjects(projectObjects, [project]);
+      const project = projects.find(
+        (project) => project.metadata?.name === input.name,
+      );
+      return (
+        project?.objects?.map((objUri) =>
+          objects.find((o) => o.objUri === objUri),
+        ) ?? []
+      );
     }),
+  listCategories: publicProcedure.query(async () => {
+    return categories;
+  }),
 });
 
 export type AppRouter = typeof appRouter;
@@ -196,6 +403,7 @@ app.use(
 );
 
 import * as trpcExpress from "@trpc/server/adapters/express";
+import type { WorkerEventTimestampString } from "./api-events";
 
 app.use(
   "/api/trpc",

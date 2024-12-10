@@ -5,6 +5,9 @@ import { RoutePageHeader } from "@/components/route-page-header";
 import { useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { TablePagination } from "@/components/resource-table/table-pagination";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -21,7 +24,16 @@ function Resources() {
 
   const Icon = useIconComponent({ icon: meta.icon });
 
-  const resources = trpc.listResources.useQuery();
+  const [page, setPage] = useState(1);
+  const resources = trpc.listResources.useQuery(
+    {
+      page,
+      perPage: 10,
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  );
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
@@ -30,9 +42,24 @@ function Resources() {
         description={meta.description}
         Icon={Icon}
       />
+
       <div>
         {resources.isLoading && <LoadingSkeleton />}
-        {resources.data && <ResourceTable resources={resources.data} />}
+
+        {resources.data && (
+          <ResourceTable
+            resources={resources.data.data}
+            fetching={resources.isFetching}
+          />
+        )}
+
+        {resources.data?.pageCount && (
+          <TablePagination
+            page={page}
+            pageCount={resources.data.pageCount}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );

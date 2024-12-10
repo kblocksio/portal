@@ -12,10 +12,10 @@ import {
   DropdownMenuContent,
 } from "./ui/dropdown-menu";
 import { DeleteProjectDialog } from "./delete-project";
-import type { TrpcProject } from "@kblocks-portal/server";
+import type { Project } from "@kblocks-portal/server";
 
 export interface ProjectHeaderProps {
-  project: TrpcProject;
+  project: Project;
 }
 
 export const ProjectHeader = ({ project }: ProjectHeaderProps) => {
@@ -36,7 +36,7 @@ export const ProjectHeader = ({ project }: ProjectHeaderProps) => {
               icon={project.icon ?? "heroicon://folder"}
               className="h-8 w-8"
             />
-            {project.title ?? project.name}
+            {project.title ?? project.metadata?.name}
           </div>
         </h1>
         <p className="text-md text-muted-foreground min-h-10">

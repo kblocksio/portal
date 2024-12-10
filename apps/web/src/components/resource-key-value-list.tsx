@@ -1,19 +1,8 @@
-import React, { useContext, useCallback } from "react";
+import React, { useCallback } from "react";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { LinkIcon } from "lucide-react";
-import { getResourceOutputs, parseRef } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import JsonView from "@uiw/react-json-view";
 import linkifyHtml from "linkify-html";
-import { ResourceContext } from "@/resource-context";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { ResourceLink } from "./resource-link";
 import { PropertyKey, PropertyValue } from "./ui/property";
 import { CopyToClipboardButton } from "./copy-to-clipboard";
 import { Checkbox } from "./ui/checkbox";
@@ -27,41 +16,41 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
   data,
   resourceObjUri,
 }) => {
-  const { objects } = useContext(ResourceContext);
   const renderValue = useCallback(
     (value: any) => {
       if (typeof value === "string") {
         //handle ref:// spacial case
         if (value.includes("ref://")) {
-          const { objUri: refUri, attribute } = parseRef(value, resourceObjUri);
-          const referencedObject = objects[refUri];
-          if (referencedObject && attribute) {
-            const referencedPropValue =
-              getResourceOutputs(referencedObject)?.[attribute];
-            if (referencedPropValue) {
-              return (
-                <div className="flex items-center space-x-2 truncate">
-                  <div className="text-foreground flex gap-1 truncate italic">
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger>
-                          <LinkIcon className="h-4 w-4" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <ResourceLink
-                            resource={referencedObject}
-                            attribute={attribute}
-                          />
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+          return <span className="text-muted-foreground">{value}</span>;
+          //   const { objUri: refUri, attribute } = parseRef(value, resourceObjUri);
+          //   const referencedObject = objects[refUri];
+          //   if (referencedObject && attribute) {
+          //     const referencedPropValue =
+          //       getResourceOutputs(referencedObject)?.[attribute];
+          //     if (referencedPropValue) {
+          //       return (
+          //         <div className="flex items-center space-x-2 truncate">
+          //           <div className="text-foreground flex gap-1 truncate italic">
+          //             <TooltipProvider>
+          //               <Tooltip delayDuration={0}>
+          //                 <TooltipTrigger>
+          //                   <LinkIcon className="h-4 w-4" />
+          //                 </TooltipTrigger>
+          //                 <TooltipContent>
+          //                   <ResourceLink
+          //                     resource={referencedObject}
+          //                     attribute={attribute}
+          //                   />
+          //                 </TooltipContent>
+          //               </Tooltip>
+          //             </TooltipProvider>
 
-                    {renderValue(referencedPropValue)}
-                  </div>
-                </div>
-              );
-            }
-          }
+          //             {renderValue(referencedPropValue)}
+          //           </div>
+          //         </div>
+          //       );
+          //     }
+          //   }
         }
 
         return (
@@ -121,7 +110,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
 
       return value;
     },
-    [objects, resourceObjUri],
+    [resourceObjUri],
   );
 
   return Object.entries(data).map(([key, value]) => (

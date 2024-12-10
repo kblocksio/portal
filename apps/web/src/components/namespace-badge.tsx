@@ -7,6 +7,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { parseBlockUri } from "@kblocks/api";
+import type { ExtendedApiObject } from "@kblocks-portal/server";
 
 const namespaceColors = [
   "bg-purple-100 text-purple-800",
@@ -18,10 +20,11 @@ const namespaceColors = [
 ];
 
 export const NamespaceBadge = memo(function NamespaceBadge({
-  namespace,
+  object,
 }: {
-  namespace: string;
+  object: ExtendedApiObject;
 }) {
+  const namespace = parseBlockUri(object.objUri).namespace;
   return (
     <TooltipProvider>
       <Tooltip>

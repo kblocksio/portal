@@ -1,6 +1,5 @@
 import { AppProvider } from "./app-context";
 import { UserProvider } from "./hooks/use-user";
-import { ResourceProvider } from "./resource-context.js";
 import { CreateResourceProvider } from "./create-resource-context.js";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -14,25 +13,73 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import React, { useState } from "react";
+import { httpBatchLink, httpLink, splitLink } from "@trpc/client";
+import React, { useCallback, useEffect, useState } from "react";
 import { trpc } from "./trpc";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
 import { LocationProvider } from "./location-context.js";
+import { throttle } from "lodash";
+import useWebSocket from "react-use-websocket";
+import type { WorkerEvent } from "@kblocks/api";
 
 const TRPC_URL = `${location.origin}/api/trpc`;
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 export function App({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
-        httpBatchLink({
-          url: TRPC_URL,
+        splitLink({
+          condition(op) {
+            return op.path === "listEvents";
+          },
+          false: httpLink({
+            url: TRPC_URL,
+          }),
+          true: httpBatchLink({
+            url: TRPC_URL,
+          }),
         }),
       ],
     }),
   );
+
+  // Invalidate queries on every message, but throttle the calls to avoid too many requests.
+  const invalidateQueries = useCallback(
+    throttle(
+      () => {
+        queryClient.invalidateQueries();
+      },
+      500,
+      { leading: true, trailing: true },
+    ),
+    [queryClient],
+  );
+
+  const { getWebSocket } = useWebSocket<WorkerEvent>(WS_URL, {
+    shouldReconnect() {
+      if (import.meta.env.DEV) {
+        setTimeout(() => {
+          invalidateQueries();
+        }, 500);
+      }
+      return true;
+    },
+    onMessage() {
+      invalidateQueries();
+    },
+  });
+
+  // make sure to close the websocket when the component is unmounted
+  useEffect(() => {
+    return () => {
+      const websocket = getWebSocket();
+      if (websocket) {
+        websocket.close();
+      }
+    };
+  }, [getWebSocket]);
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -40,9 +87,7 @@ export function App({ children }: { children: React.ReactNode }) {
         <AppProvider>
           <UserProvider>
             <NotificationsProvider>
-              <ResourceProvider>
-                <CreateResourceProvider>{children}</CreateResourceProvider>
-              </ResourceProvider>
+              <CreateResourceProvider>{children}</CreateResourceProvider>
             </NotificationsProvider>
           </UserProvider>
         </AppProvider>

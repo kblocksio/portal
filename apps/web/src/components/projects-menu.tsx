@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuPortal,
@@ -6,12 +6,17 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "./ui/dropdown-menu";
-import { Project, ResourceContext } from "@/resource-context";
 import { createResource } from "@/lib/backend";
 import { parseBlockUri } from "@kblocks/api";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/trpc";
+import { useResourceTypes } from "@/hooks/use-resource-types";
+import type { Project } from "@kblocks-portal/server";
+
 export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
-  const { projects } = useContext(ResourceContext);
+  const { data: projects } = trpc.listProjects.useQuery(undefined, {
+    initialData: [],
+  });
 
   return (
     <DropdownMenuSub>
@@ -31,7 +36,10 @@ export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
 };
 
 export const ProjectItems = ({ objUris }: { objUris: string[] }) => {
-  const { projects, resourceTypes } = useContext(ResourceContext);
+  const { data: projects } = trpc.listProjects.useQuery(undefined, {
+    initialData: [],
+  });
+  const { data: resourceTypes } = useResourceTypes();
 
   const isChecked = useCallback(
     (project: Project) => {

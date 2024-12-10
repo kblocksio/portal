@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useContext } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "../ui/button";
 import { FileCode, Loader2 } from "lucide-react";
 import { FieldRenderer } from "./field-renderer";
@@ -6,12 +6,14 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
 import { ObjectMetadata } from "@repo/shared";
-import { ResourceContext, ResourceType } from "@/resource-context";
 import { SystemSelector } from "./system-selector";
 import cloneDeep from "lodash.clonedeep";
 import YamlButton from "../yaml-button";
+import { trpc } from "@/trpc";
+import type { ExtendedResourceType } from "@/hooks/use-resource-types";
+
 export interface FormGeneratorProps {
-  resourceType: ResourceType;
+  resourceType: ExtendedResourceType;
   isLoading: boolean;
   handleSubmit: (meta: ObjectMetadata, fields: any) => void;
   initialValues?: ApiObject;
@@ -25,7 +27,9 @@ export const ResourceForm = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
-  const { clusters } = useContext(ResourceContext);
+  const { data: clusters } = trpc.listClusters.useQuery(undefined, {
+    initialData: [],
+  });
   const isEnvironmentResourceType = resourceType.group === "kblocks.io";
 
   // create a clone of the schema and remove the status property (the outputs)
@@ -40,7 +44,8 @@ export const ResourceForm = ({
     initialMeta?.system ??
       (isEnvironmentResourceType
         ? resourceType.systems.values().next().value
-        : ""),
+        : "") ??
+      "",
   );
   const [namespace, setNamespace] = useState(
     initialMeta?.namespace ?? "default",
@@ -61,7 +66,7 @@ export const ResourceForm = ({
     }
   }, [name]);
 
-  const metadataObject: ObjectMetadata = useMemo(
+  const metadataObject = useMemo<ObjectMetadata>(
     () => ({
       name,
       namespace,

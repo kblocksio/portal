@@ -1,3 +1,4 @@
+import type { Project } from "@kblocks-portal/server";
 import React, {
   createContext,
   useState,
@@ -6,7 +7,6 @@ import React, {
   type DependencyList,
   useEffect,
 } from "react";
-import { Project } from "@repo/shared";
 
 export interface BreadcrumbItem {
   name: string;

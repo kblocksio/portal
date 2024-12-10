@@ -3,17 +3,17 @@ import { ResourceForm } from "@/components/resource-form/resource-form";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { useCreateResource } from "@/create-resource-context";
 import { LocationContext } from "@/location-context";
-import { ResourceContext, ResourceType } from "@/resource-context";
 import { ObjectMetadata } from "@repo/shared";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useMemo } from "react";
 import { BreadcrumbItem } from "@/app-context";
+import { useResourceTypes } from "@/hooks/use-resource-types";
 export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
   component: CreateResourcePage,
 });
 
 function CreateResourcePage() {
-  const { resourceTypes } = useContext(ResourceContext);
+  const resourceTypes = useResourceTypes();
   const { handleCreateOrEdit, isLoading } = useCreateResource();
   const { group, version, plural } = Route.useParams();
   const navigate = useNavigate();
@@ -49,8 +49,8 @@ function CreateResourcePage() {
 
   const resourceType = useMemo(
     () =>
-      Object.values(resourceTypes).find(
-        (resourceType: ResourceType) =>
+      Object.values(resourceTypes.data).find(
+        (resourceType) =>
           resourceType.group === group &&
           resourceType.version === version &&
           resourceType.plural === plural,

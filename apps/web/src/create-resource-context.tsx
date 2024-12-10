@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
-import { ResourceType } from "./resource-context";
 import { createResource } from "./lib/backend";
+import type { ExtendedResourceType } from "./hooks/use-resource-types";
 
 interface CreateResourceContextType {
   isLoading: boolean;
   handleCreateOrEdit: (
     system: string,
-    resourceType: ResourceType,
+    resourceType: ExtendedResourceType,
     providedValues: any,
   ) => Promise<void>;
 }
@@ -36,7 +36,7 @@ export const CreateResourceProvider: React.FC<CreateResourceProviderProps> = ({
 
   const handleCreateOrEdit = async (
     system: string,
-    resourceType: ResourceType,
+    resourceType: ExtendedResourceType,
     providedValues: any,
   ) => {
     setIsLoading(true);
