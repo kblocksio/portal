@@ -27,7 +27,7 @@ module.exports = {
     // React
     {
       files: ["**/*.{js,jsx,ts,tsx}"],
-      plugins: ["react", "jsx-a11y"],
+      plugins: ["react", "jsx-a11y", "eslint-plugin-react-compiler"],
       extends: [
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
@@ -46,6 +46,9 @@ module.exports = {
         "import/resolver": {
           typescript: {},
         },
+      },
+      rules: {
+        "react-compiler/react-compiler": "error",
       },
     },
 

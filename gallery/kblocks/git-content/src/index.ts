@@ -6,9 +6,9 @@ if (!process.env.KBLOCKS_OBJECT) {
 }
 
 const object = JSON.parse(fs.readFileSync(process.env.KBLOCKS_OBJECT, "utf8"));
-const outputs = process.env.KBLOCKS_OUTPUTS;
+const outputs = process.env.KBLOCKS_OUTPUTS || process.env.KBLOCKS_STATUS;
 if (!outputs) {
-  throw new Error('KBLOCKS_OUTPUTS is not set');
+  throw new Error('neither KBLOCKS_OUTPUTS nor KBLOCKS_STATUS is set');
 }
 
 const githubToken = process.env.GITHUB_TOKEN;

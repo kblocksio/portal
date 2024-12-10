@@ -19,6 +19,7 @@ stringData:
   KBLOCKS_API_KEY: __KBLOCKS_API_KEY__
   KBLOCKS_SYSTEM_ID: __KBLOCKS_SYSTEM_ID__
   KBLOCKS_STORAGE_PREFIX: __KBLOCKS_STORAGE_PREFIX__
+  KBLOCKS_PORTAL_SYSTEM: __KBLOCKS_PORTAL_SYSTEM__
 EOF
 \`\`\`
 `;
@@ -34,6 +35,7 @@ const outputs = process.env.KBLOCKS_OUTPUTS;
 const adminPassword = process.env.KBLOCKS_API_KEY;
 const redisHost = process.env.KBLOCKS_PUBSUB_HOST;
 const redisPort = process.env.KBLOCKS_PUBSUB_PORT;
+const portalSystem = process.env.KBLOCKS_SYSTEM_ID;
 
 const clusterId = object.metadata.name;
 
@@ -54,6 +56,7 @@ exports.create = async () => {
     KBLOCKS_PUBSUB_PORT: redisPort,
     KBLOCKS_SYSTEM_ID: clusterId,
     KBLOCKS_STORAGE_PREFIX: clusterId,
+    KBLOCKS_PORTAL_SYSTEM: portalSystem,
   });
   console.log(`Creating a new cluster ${clusterId}`);
   console.log("generating a 'create cluster' command", command);
