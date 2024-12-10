@@ -19,7 +19,11 @@ import { DeleteResourceDialog } from "@/components/delete-resource";
 import { ReapplyResourceDialog } from "@/components/reapply-resource";
 import { ReadResourceDialog } from "@/components/read-resource";
 import { formatBlockUri } from "@kblocks/api";
-import { getResourceProperties, getResourceOutputs } from "@/lib/utils";
+import {
+  getResourceProperties,
+  getResourceOutputs,
+  propertiesBlackList,
+} from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useBreadcrumbs } from "@/app-context";
 import { KeyValueList } from "@/components/resource-key-value-list";
@@ -27,7 +31,7 @@ import Outputs from "@/components/outputs";
 import { ResourceTable } from "@/components/resource-table/resource-table";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
-import { cloneDeep } from "lodash";
+import { cloneDeep, omit } from "lodash";
 import { ProjectItems } from "@/components/projects-menu";
 import { trpc } from "@/trpc";
 
@@ -157,7 +161,10 @@ function ResourcePage() {
   }, [selectedResource, ownerResourceURI]);
 
   const yamlObject = useMemo(() => {
-    const obj: any = cloneDeep(selectedResource ?? {});
+    const obj: any = omit(
+      cloneDeep(selectedResource ?? {}),
+      propertiesBlackList,
+    );
     delete obj.metadata?.managedFields;
     delete obj.status?.lastStateHash;
     delete obj.objUri;
@@ -388,7 +395,7 @@ function ResourcePage() {
 
         <TabsContent value="relationships">
           <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
-            <RelationshipGraph selectedResource={selectedResource} />
+            <RelationshipGraph objUri={objUri} />
           </div>
         </TabsContent>
         <TabsContent value="yaml">

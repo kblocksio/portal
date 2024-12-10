@@ -1,7 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
 import { ApiObject, formatBlockUri, parseBlockUri } from "@kblocks/api";
-import { Resource } from "@/resource-context";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,7 +12,7 @@ export function getReadyCondition(obj: ApiObject) {
   );
 }
 
-const propertiesBlackList = [
+export const propertiesBlackList = [
   "lastStateHash",
   "projects",
   "type",
@@ -45,7 +44,7 @@ function addProperty(
   }
 }
 
-export function getResourceProperties(resource: Resource) {
+export function getResourceProperties(resource: ApiObject) {
   const properties: Record<string, any> = {};
   addProperty(properties, {
     ...resource,
