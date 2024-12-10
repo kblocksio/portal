@@ -51,7 +51,7 @@ export function App({ children }: { children: React.ReactNode }) {
       () => {
         queryClient.invalidateQueries();
       },
-      500,
+      2000,
       { leading: true, trailing: true },
     ),
     [queryClient],

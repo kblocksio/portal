@@ -28,7 +28,7 @@ function Resources() {
   const resources = trpc.listResources.useQuery(
     {
       page,
-      perPage: 10,
+      perPage: 20,
     },
     {
       placeholderData: keepPreviousData,

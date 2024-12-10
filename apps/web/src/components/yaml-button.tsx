@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { memo, useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import yaml from "react-syntax-highlighter/dist/esm/languages/hljs/yaml";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -16,7 +12,7 @@ import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 SyntaxHighlighter.registerLanguage("yaml", yaml);
 
-export default function YamlButton({
+export default memo(function YamlButton({
   children,
   object,
 }: {
@@ -25,12 +21,11 @@ export default function YamlButton({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTitle className="sr-only">YAML</DialogTitle>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogDescription>
           <p className="text-sm text-gray-500">
             Copy & paste to add this into a Kubernetes manifest
@@ -40,15 +35,15 @@ export default function YamlButton({
       </DialogContent>
     </Dialog>
   );
-}
+});
 
-export const YamlView = ({ object }: { object: any }) => {
+export const YamlView = memo(function YamlView({ object }: { object: any }) {
   const yamlString = dump(object);
 
   return (
     <div className="overflow-auto rounded border">
       <div className="relative">
-        <CopyButton text={yamlString} className="absolute top-2 right-2 z-10"/>
+        <CopyButton text={yamlString} className="absolute right-2 top-2 z-10" />
         <SyntaxHighlighter
           language="yaml"
           style={docco}
@@ -62,15 +57,15 @@ export const YamlView = ({ object }: { object: any }) => {
       </div>
     </div>
   );
-};
+});
 
-const CopyButton = ({
+const CopyButton = memo(function CopyButton({
   text,
   className,
 }: {
   text: string;
   className?: string;
-}) => {
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -82,9 +77,13 @@ const CopyButton = ({
   const Icon = copied ? ClipboardCheckIcon : ClipboardIcon;
 
   return (
-    <Button variant="outline" onClick={handleCopy} size="icon" className={className}>
+    <Button
+      variant="outline"
+      onClick={handleCopy}
+      size="icon"
+      className={className}
+    >
       <Icon className="size-4 shrink-0 grow-0" />
     </Button>
   );
-};
-
+});

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/collapsible";
 import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
-import { getIconComponent } from "@/lib/get-icon";
+import { ResourceIcon } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useResourceTypes } from "@/hooks/use-resource-types";
@@ -205,13 +205,13 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
             to={item.url as any}
             className={isActive ? "bg-sidebar-accent" : ""}
           >
-            {item.icon &&
-              (() => {
-                const Icon = getIconComponent({ icon: item.icon });
-                return (
-                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                );
-              })()}
+            {item.icon && (
+              <ResourceIcon
+                icon={item.icon}
+                className="h-5 w-5 flex-shrink-0"
+                aria-hidden="true"
+              />
+            )}
             <span title={item.title}>{item.title}</span>
           </Link>
         </SidebarMenuButton>
@@ -238,13 +238,13 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
               setIsOpen(!isOpen);
             }}
           >
-            {item.icon &&
-              (() => {
-                const Icon = getIconComponent({ icon: item.icon });
-                return (
-                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                );
-              })()}
+            {item.icon && (
+              <ResourceIcon
+                icon={item.icon}
+                className="h-5 w-5 flex-shrink-0"
+                aria-hidden="true"
+              />
+            )}
             <span title={item.title}>{item.title}</span>
             <ChevronRight
               className={`ml-auto transition-transform duration-300 ${
@@ -274,16 +274,13 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
                       to={subItem.url as any}
                       className={isSubItemActive ? "bg-sidebar-accent" : ""}
                     >
-                      {subItem.icon &&
-                        (() => {
-                          const Icon = getIconComponent({ icon: subItem.icon });
-                          return (
-                            <Icon
-                              className="h-5 w-5 flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                          );
-                        })()}
+                      {subItem.icon && (
+                        <ResourceIcon
+                          className="h-5 w-5 flex-shrink-0"
+                          aria-hidden="true"
+                          icon={subItem.icon}
+                        />
+                      )}
                       <span title={subItem.title}>{subItem.title}</span>
                     </Link>
                   </SidebarMenuSubButton>

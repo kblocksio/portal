@@ -271,6 +271,39 @@ const resolveOwnerUri = (
   });
 };
 
+export interface ObjectHierarchy {
+  objUri: string;
+  name: string;
+  kind?: string;
+  icon?: string;
+  children: ObjectHierarchy[];
+}
+
+const getObjectHierarchy = (
+  objUri: string,
+  objects: ExtendedApiObject[],
+  types: Record<string, ResourceType>,
+  relationships: Record<string, Record<string, Relationship>>,
+): ObjectHierarchy => {
+  const object = objects.find((o) => o.objUri === objUri);
+  if (!object) {
+    throw new Error(`Object ${objUri} not found`);
+  }
+  const type = types[object.objType];
+  const children = Object.entries(relationships[objUri] ?? {})
+    .filter(([childObjUri, relationship]) => relationship.type === "child")
+    .map(([childObjUri, relationship]) =>
+      getObjectHierarchy(childObjUri, objects, types, relationships),
+    );
+  return {
+    objUri,
+    name: object.metadata?.name,
+    kind: type?.kind,
+    icon: type?.icon,
+    children,
+  };
+};
+
 const appRouter = router({
   listEvents: publicProcedure
     .input(
@@ -354,6 +387,14 @@ const appRouter = router({
         throw new Error(`Resource ${input.objUri} not found`);
       }
       return resource;
+    }),
+  getObjectHierarchy: publicProcedure
+    .input(z.object({ objUri: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getExtendedObjects();
+      const types = typesFromObjects(objects);
+      const relationships = relationshipsFromObjects(objects, types);
+      return getObjectHierarchy(input.objUri, objects, types, relationships);
     }),
   getProject: publicProcedure
     .input(z.object({ name: z.string() }))

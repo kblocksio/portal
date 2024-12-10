@@ -6,18 +6,32 @@ import type { Colors } from "./colors.ts";
 import React, { memo, useMemo } from "react";
 import { cn } from "./utils.ts";
 
+export type LucideIconString = keyof typeof LucideIcons;
+export type HeroIconString = `heroicon://${string}`;
+export type SvgString = `<svg${string}>`;
+export type XmlString = `<?xml${string}>`;
+
+export type Icon =
+  | LucideIconString
+  | HeroIconString
+  | SvgString
+  | XmlString
+  | string;
+
 /**
  *  Supprts 3 types of icons:
  *  - Heroicons
  *  - SVG
  *  - LucideIcons
+ *
+ * @see {@link Icon}
  */
 export const getIconComponent = ({
   solid = false,
   icon,
 }: {
   solid?: boolean;
-  icon?: string;
+  icon?: Icon;
 }): React.ComponentType<{ className?: string }> => {
   // handle empty icon or heroicon
   if (!icon || icon.startsWith("heroicon://")) {
@@ -34,7 +48,7 @@ export const getIconComponent = ({
     // remove the "width" and "height" attributes from the <svg>
     const parser = new DOMParser();
     const doc = parser.parseFromString(icon, "image/svg+xml");
-    const svg = doc.getElementsByTagName("svg")[0];
+    const svg = doc.getElementsByTagName("svg")[0]!;
     svg.removeAttribute("width");
     svg.removeAttribute("height");
 
@@ -56,9 +70,9 @@ export const getIconComponent = ({
 /**
  * Memoized icon component.
  *
- * @see getIconComponent
+ * @see {@link getIconComponent}
  */
-export const useIconComponent = ({ icon }: { icon?: string }) => {
+export const useIconComponent = ({ icon }: { icon?: Icon }) => {
   return useMemo(() => getIconComponent({ icon }), [icon]);
 };
 
@@ -97,7 +111,7 @@ const getHeroIconComponent = ({
   icon?: string;
 }) => {
   if (icon.startsWith("heroicon://")) {
-    icon = icon.split("heroicon://")[1];
+    icon = icon.split("heroicon://")[1]!;
   }
   const iconSet = solid ? SolidHeroIcons : OutlineHeroIcons;
   const iconComponent = iconSet[getHeroIconName(icon) as keyof typeof iconSet];
@@ -197,13 +211,14 @@ const colors: Record<Colors, ColorSet> = {
 /**
  * Memoized resource icon component.
  *
- * @see useIconComponent
+ * @see {@link useIconComponent}
+ * @see {@link Icon}
  */
 export const ResourceIcon = memo(function ResourceIcon({
   icon,
   className,
 }: {
-  icon?: string;
+  icon?: Icon;
   className?: string;
 }) {
   const IconComponent = useIconComponent({ icon });
