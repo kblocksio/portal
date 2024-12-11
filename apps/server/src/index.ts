@@ -420,6 +420,31 @@ const appRouter = router({
   listCategories: publicProcedure.query(async () => {
     return categories;
   }),
+  listCatalogItems: publicProcedure.query(async () => {
+    const objects = await getExtendedObjects();
+    const types = typesFromObjects(objects);
+    const nonSystemTypes = Object.fromEntries(
+      Object.entries(types).filter(
+        ([, item]) => !item.group.startsWith("kblocks.io"),
+      ),
+    );
+    return Object.keys(categories)
+      .map((categoryName) => {
+        const category = categories[categoryName];
+        return {
+          category: category.title,
+          icon: category.icon,
+          types: Object.values(nonSystemTypes)
+            .filter((type) => type.categories?.includes(categoryName))
+            .map((type) => ({
+              typeUri: `${type.group}/${type.version}/${type.plural}`,
+              kind: type.kind,
+              icon: type.icon,
+            })),
+        };
+      })
+      .filter((item) => item.types.length > 0);
+  }),
 });
 
 export type AppRouter = typeof appRouter;

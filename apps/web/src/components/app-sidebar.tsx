@@ -25,16 +25,11 @@ import { AppSidebarHeader } from "./app-sidebar-header";
 import { ResourceIcon } from "@/lib/get-icon";
 import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { useResourceTypes } from "@/hooks/use-resource-types";
 import { Button } from "./ui/button";
 import { trpc } from "@/trpc";
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
-  const { data: categories } = trpc.listCategories.useQuery(undefined, {
-    initialData: {},
-  });
-  const { data: resourceTypes } = useResourceTypes();
   const { data: projects } = trpc.listProjects.useQuery(undefined, {
     initialData: [],
   });
@@ -65,14 +60,19 @@ export const AppSidebar = () => {
     ];
   }, []);
 
-  const nonSystemResourceTypes = useMemo(() => {
-    if (!resourceTypes) return {};
-    return Object.fromEntries(
-      Object.entries(resourceTypes).filter(
-        ([, item]) => !item.group.startsWith("kblocks.io"),
-      ),
-    );
-  }, [resourceTypes]);
+  const catalogItems = trpc.listCatalogItems.useQuery(undefined, {
+    initialData: [],
+    select: (data) =>
+      data.map<Item>((item) => ({
+        title: item.category,
+        icon: item.icon,
+        items: item.types.map<Item>((type) => ({
+          title: type.kind,
+          url: `/catalog/${type.typeUri}`,
+          icon: type.icon,
+        })),
+      })),
+  });
 
   return (
     <Sidebar collapsible="icon">
@@ -133,7 +133,10 @@ export const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
-            {Object.keys(categories).map((category) => {
+            {catalogItems.data?.map((item) => (
+              <SidebarItem key={item.title} item={item} isActive={false} />
+            ))}
+            {/* {Object.keys(categories).map((category) => {
               const items = Object.keys(nonSystemResourceTypes)
                 .filter((resourceTypeKey) =>
                   nonSystemResourceTypes[resourceTypeKey].categories?.includes(
@@ -160,7 +163,7 @@ export const AppSidebar = () => {
                   }}
                 />
               );
-            })}
+            })} */}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
@@ -172,7 +175,19 @@ export const AppSidebar = () => {
   );
 };
 
-const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
+interface Item {
+  title: string;
+  url?: string;
+  icon?: string;
+  items?: Item[];
+}
+
+interface SidebarItemProps {
+  item: Item;
+  isActive: boolean;
+}
+
+const SidebarItem = ({ item, isActive }: SidebarItemProps) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -189,7 +204,9 @@ const SidebarItem = ({ item, isActive }: { item: any; isActive: boolean }) => {
   }, [location.pathname, item.url]);
 
   const isAnySubItemActive = useMemo(
-    () => item.items?.some((subItem: any) => location.pathname === subItem.url),
+    () =>
+      item.items?.some((subItem: any) => location.pathname === subItem.url) ??
+      false,
     [item.items, location.pathname],
   );
 
