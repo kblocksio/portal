@@ -164,7 +164,6 @@ const mapObjectToResource = (
   allObjects: ExtendedApiObject[],
   projects: Project[],
   types: Record<string, ResourceType>,
-  clusters: Cluster[],
   relationships: Record<string, Record<string, Relationship>>,
 ): Resource => {
   return {
@@ -202,15 +201,15 @@ const resourcesFromObjects = (
   allObjects: ExtendedApiObject[],
   projects: Project[],
   types: Record<string, ResourceType>,
+  clusters: Cluster[],
   relationships: Record<string, Record<string, Relationship>>,
 ): Resource[] => {
   return allObjects
     .filter((object) => {
-
       // first check is this object belongs to a cluster known to the portal
       const { system } = parseBlockUri(object.objUri);
       const cluster = Object.values(clusters)?.find(
-          (c) => c.metadata?.name === system,
+        (c) => c.metadata?.name === system,
       );
       if (!cluster) {
         return false;
@@ -472,11 +471,13 @@ const appRouter = router({
       const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
+      const clusters = clustersFromObjects(objects, types);
       const relationships = relationshipsFromObjects(objects, types);
       const resources = resourcesFromObjects(
         objects,
         projects,
         types,
+        clusters,
         relationships,
       );
       return resources.find((resource) => {
