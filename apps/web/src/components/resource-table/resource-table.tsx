@@ -129,7 +129,7 @@ const useColumns = () => {
           return (
             <div className="flex items-center gap-1.5">
               <ResourceIcon
-                icon={props.row.original.spec?.definition?.icon}
+                icon={props.row.original.type?.icon}
                 className="h-4 w-4"
               />
               {props.getValue()}

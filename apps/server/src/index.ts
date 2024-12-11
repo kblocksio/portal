@@ -144,15 +144,34 @@ const resourcesFromObjects = (
         project.objects?.includes(object.objUri),
       ),
       type: types[object.objType],
-      relationships: Object.entries(relationships[object.objUri] ?? {}).map(
-        ([relationshipObjUri, relationship]) => ({
+      relationships: Object.entries(relationships[object.objUri] ?? {})
+        .map(
+          ([relationshipObjUri, relationship]) =>
+            [
+              relationshipObjUri,
+              {
+                relationship,
+                child: allObjects.find((o) => o.objUri === relationshipObjUri),
+              },
+            ] as const,
+        )
+        .filter(
+          (
+            entry,
+          ): entry is [
+            string,
+            { relationship: Relationship; child: ExtendedApiObject },
+          ] => entry[1].child !== undefined,
+        )
+        .map(([relationshipObjUri, { relationship, child }]) => {
+          return {
           ...relationship,
           resource: {
-            ...allObjects.find((o) => o.objUri === relationshipObjUri)!,
-            type: types[relationshipObjUri],
+              ...child,
+              type: types[child.objType],
           },
+          };
         }),
-      ),
     }));
 };
 
