@@ -42,6 +42,7 @@ export interface ResourceType extends Definition {
   icon?: string;
   engine: string;
   systems: string[];
+  readme?: string;
 }
 
 export type RelationshipType = "parent" | "child" | "ref";
@@ -321,6 +322,17 @@ const appRouter = router({
     const types = typesFromObjects(objects);
     return types;
   }),
+  getType: publicProcedure
+    .input(z.object({ typeUri: z.string() }))
+    .query(async ({ input }) => {
+      const objects = await getExtendedObjects();
+      const types = typesFromObjects(objects);
+      const type = types[input.typeUri];
+      if (!type) {
+        throw new Error(`Type ${input.typeUri} not found`);
+      }
+      return type;
+    }),
   listResources: publicProcedure
     .input(
       z
