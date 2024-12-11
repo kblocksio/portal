@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { ClassValue, clsx } from "clsx";
-import { ApiObject, formatBlockUri, parseBlockUri } from "@kblocks/api";
+import type { ApiObject } from "@kblocks/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,6 +17,7 @@ export const propertiesBlackList = [
   "projects",
   "type",
   "relationships",
+  "references",
 ];
 
 const containsString = (arr1: string[], arr2: string[]): boolean => {
@@ -91,19 +92,3 @@ export const splitAndCapitalizeCamelCase = (str: string): string => {
       .join(" ")
   );
 };
-
-export function parseRef(ref: string, referencingObjectUri: string) {
-  const sanitizedRef = ref.replace("${ref://", "").replace("}", "");
-  const { version, system, namespace } = parseBlockUri(referencingObjectUri);
-  const [pluralAndGroup, name, attribute] = sanitizedRef.split("/");
-  const [plural, group] = pluralAndGroup.split(/\.(.+)/);
-  const uri = formatBlockUri({
-    group,
-    version,
-    plural,
-    system,
-    namespace,
-    name,
-  });
-  return { objUri: uri, attribute: attribute.split("?")[0] };
-}

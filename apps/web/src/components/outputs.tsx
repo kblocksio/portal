@@ -1,16 +1,14 @@
 import React from "react";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import { resolveOutputField } from "./resource-outputs/output-resolver";
-import type { ResourceType } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 
 export default function Outputs({
   outputs,
-  resourceObjUri,
-  resourceType,
+  resource,
 }: {
   outputs: Record<string, any>;
-  resourceObjUri: string;
-  resourceType: ResourceType;
+  resource: Resource;
 }) {
   const keys = Object.keys(outputs);
   if (keys.length === 0) {
@@ -21,7 +19,7 @@ export default function Outputs({
   const nonUiComponents: Record<string, any> = {};
   for (const key of keys) {
     const component = resolveOutputField({
-      schema: resourceType.schema.properties.status?.properties?.[key] ?? {
+      schema: resource.type?.schema.properties.status?.properties?.[key] ?? {
         type: "string",
       },
       value: outputs[key],
@@ -36,7 +34,7 @@ export default function Outputs({
 
   return (
     <>
-      <KeyValueList data={nonUiComponents} resourceObjUri={resourceObjUri} />
+      <KeyValueList resource={resource} properties={nonUiComponents} />
       {uiComponents.map((component, index) => (
         <React.Fragment key={index}>{component}</React.Fragment>
       ))}

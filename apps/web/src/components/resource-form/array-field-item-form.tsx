@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { FieldRenderer } from "./field-renderer";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { PrimitiveFieldRenderer } from "./primitive-field-renderer";
 
 interface ArrayFieldItemFormProps {

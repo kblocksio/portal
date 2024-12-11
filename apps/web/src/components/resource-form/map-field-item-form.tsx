@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { InputField } from "./input-field";
 import { FieldRenderer } from "./field-renderer";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 
 interface MapFieldItemFormProps {
   fieldName: string;

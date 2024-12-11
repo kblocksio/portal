@@ -8,7 +8,7 @@ import {
 } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { ResourceType } from "@/resource-context";
-import { Category } from "@repo/shared";
+import { Category } from "@kblocks-portal/shared";
 import { useMemo } from "react";
 import { MarkdownWrapper } from "../markdown";
 import { ResourceTypeCard } from "./resource-card";

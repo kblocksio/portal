@@ -1,4 +1,4 @@
-import type { Installation } from "@repo/shared";
+import type { Installation } from "@kblocks-portal/shared";
 import { useFetch } from "./use-fetch";
 
 export const useGitHubInstallations = () => {

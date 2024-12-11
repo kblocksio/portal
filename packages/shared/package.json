@@ -1,5 +1,5 @@
 {
-  "name": "@repo/shared",
+  "name": "@kblocks-portal/shared",
   "version": "0.0.0",
   "description": "",
   "exports": {
@@ -10,7 +10,7 @@
   },
   "author": "ainvoner",
   "dependencies": {
-    "@kblocks/api": "0.5.6",
+    "@kblocks/api": "^0.5.6",
     "@supabase/supabase-js": "^2.46.2"
   }
 }

@@ -1,4 +1,4 @@
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { getDataByPath, isObjectPopulated, updateDataByPath } from "./utils";
 import { ObjectFieldForm } from "./object-field-form";
 import { FieldRenderer } from "./field-renderer";

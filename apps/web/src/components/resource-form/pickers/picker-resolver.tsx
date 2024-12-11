@@ -1,4 +1,4 @@
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { InstancePicker } from "./instance-picker";
 import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";

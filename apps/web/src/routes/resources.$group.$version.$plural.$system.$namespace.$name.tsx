@@ -354,8 +354,8 @@ function ResourcePage() {
                 </div>
                 <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
                   <KeyValueList
-                    data={properties}
-                    resourceObjUri={selectedResource.objUri}
+                    resource={selectedResource}
+                    properties={properties}
                   />
                 </div>
               </div>
@@ -370,11 +370,7 @@ function ResourcePage() {
                     <CardTitle>Outputs</CardTitle>
                   </div>
                   <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                    <Outputs
-                      outputs={outputs}
-                      resourceObjUri={selectedResource.objUri}
-                      resourceType={selectedResource.type}
-                    />
+                    <Outputs outputs={outputs} resource={selectedResource} />
                   </div>
                 </div>
               )}

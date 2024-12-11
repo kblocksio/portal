@@ -3,7 +3,7 @@ import { ResourceForm } from "@/components/resource-form/resource-form";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { useCreateResource } from "@/create-resource-context";
 import { LocationContext } from "@/location-context";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useMemo } from "react";
 import { BreadcrumbItem } from "@/app-context";

@@ -1,23 +1,25 @@
-import { Resource, ResourceContext } from "@/resource-context";
-import { getIconColors } from "@/lib/get-icon";
+import { getIconColors, ResourceIcon } from "@/lib/get-icon";
 import { Link } from "./ui/link";
-import { useContext } from "react";
+import type { Resource } from "@kblocks-portal/server";
 
-export const ResourceLink = ({ resource, attribute }: { resource: Resource, attribute?: string }) => {
-  const { resourceTypes } = useContext(ResourceContext);
-  const selectedResourceType = resourceTypes[resource.objType];
-  const Icon = selectedResourceType?.iconComponent;
+export const ResourceLink = ({
+  resource,
+  attribute,
+}: {
+  resource: Resource;
+  attribute?: string;
+}) => {
+  const selectedResourceType = resource.type;
 
   return (
     <div className="flex items-center gap-2">
       <div className="relative">
-        {Icon && (
-          <Icon
-            className={`h-5 w-5 ${getIconColors({
-              color: resource.color,
-            })}`}
-          />
-        )}
+        <ResourceIcon
+          icon={selectedResourceType?.icon}
+          className={`h-5 w-5 ${getIconColors({
+            color: resource.color,
+          })}`}
+        />
       </div>
       <Link
         to={`/resources/${resource.objUri.replace("kblocks://", "")}` as any}

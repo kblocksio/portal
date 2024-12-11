@@ -1,4 +1,4 @@
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { getDataByPath, updateDataByPath } from "./utils";
 import { linkifyDescription, sanitizeDescription } from "./description-parser";
 import { splitAndCapitalizeCamelCase } from "@/lib/utils";

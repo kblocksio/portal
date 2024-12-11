@@ -5,7 +5,7 @@ import { FieldRenderer } from "./field-renderer";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ApiObject } from "@kblocks/api";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { SystemSelector } from "./system-selector";
 import cloneDeep from "lodash.clonedeep";
 import YamlButton from "../yaml-button";
