@@ -6,6 +6,7 @@ import {
   GetResourceResponse,
   GetLogsResponse,
   GetEventsResponse,
+  parseRef,
 } from "@repo/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
@@ -111,6 +112,7 @@ export type Resource = ExtendedApiObject & {
       type?: ResourceType;
     };
   }[];
+  references?: Record<string, ExtendedApiObject & { type?: ResourceType }>;
 };
 
 const getExtendedObjects = async (): Promise<ExtendedApiObject[]> => {
@@ -122,6 +124,76 @@ const getExtendedObjects = async (): Promise<ExtendedApiObject[]> => {
       objType: blockTypeFromUri(objUri),
     };
   });
+};
+
+const resolveReferences = (
+  object: ExtendedApiObject,
+  allObjects: ExtendedApiObject[],
+  types: Record<string, ResourceType>,
+): Record<string, ExtendedApiObject & { type?: ResourceType }> => {
+  const references: Record<
+    string,
+    ExtendedApiObject & { type?: ResourceType }
+  > = {};
+  for (const value of Object.values(object)) {
+    if (typeof value !== "string" || !value.startsWith("${ref://")) {
+      continue;
+    }
+    const referenceObjectUri = parseRef(value, object.objUri);
+    if (references[referenceObjectUri.objUri]) {
+      continue;
+    }
+    const renferenceObject = allObjects.find(
+      (o) => o.objUri === referenceObjectUri.objUri,
+    );
+    if (!renferenceObject) {
+      console.error(`Reference object ${referenceObjectUri.objUri} not found`);
+      continue;
+    }
+    references[referenceObjectUri.objUri] = {
+      ...renferenceObject,
+      type: types[renferenceObject.objType],
+    };
+  }
+  return references;
+};
+
+const mapObjectToResource = (
+  object: ExtendedApiObject,
+  allObjects: ExtendedApiObject[],
+  projects: Project[],
+  types: Record<string, ResourceType>,
+  relationships: Record<string, Record<string, Relationship>>,
+): Resource => {
+  return {
+    ...object,
+    projects: projects.filter((project) =>
+      project.objects?.includes(object.objUri),
+    ),
+    type: types[object.objType],
+    relationships: Object.entries(relationships[object.objUri] ?? {})
+      .map(([relationshipObjUri, relationship]) => {
+        const child = allObjects.find((o) => o.objUri === relationshipObjUri);
+        if (!child) {
+          return undefined;
+        }
+        return {
+          relationship,
+          child,
+        };
+      })
+      .filter((child) => child !== undefined)
+      .map(({ relationship, child }) => {
+        return {
+          ...relationship,
+          resource: {
+            ...child,
+            type: types[child.objType],
+          },
+        };
+      }),
+    references: resolveReferences(object, allObjects, types),
+  };
 };
 
 const resourcesFromObjects = (
@@ -138,41 +210,9 @@ const resourcesFromObjects = (
         object.objType !== "kblocks.io/v1/clusters"
       );
     })
-    .map((object) => ({
-      ...object,
-      projects: projects.filter((project) =>
-        project.objects?.includes(object.objUri),
-      ),
-      type: types[object.objType],
-      relationships: Object.entries(relationships[object.objUri] ?? {})
-        .map(
-          ([relationshipObjUri, relationship]) =>
-            [
-              relationshipObjUri,
-              {
-                relationship,
-                child: allObjects.find((o) => o.objUri === relationshipObjUri),
-              },
-            ] as const,
-        )
-        .filter(
-          (
-            entry,
-          ): entry is [
-            string,
-            { relationship: Relationship; child: ExtendedApiObject },
-          ] => entry[1].child !== undefined,
-        )
-        .map(([relationshipObjUri, { relationship, child }]) => {
-          return {
-          ...relationship,
-          resource: {
-              ...child,
-              type: types[child.objType],
-          },
-          };
-        }),
-    }));
+    .map((object) =>
+      mapObjectToResource(object, allObjects, projects, types, relationships),
+    );
 };
 
 const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
@@ -212,16 +252,13 @@ const mapTypeFromObject = (
 const typesFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Record<string, ResourceType> => {
-  return (
-    allObjects
-      .filter((o) => blockTypeFromUri(o.objUri) === "kblocks.io/v1/blocks")
-      // .filter((o) => o.objUri.startsWith("kblocks://kblocks.io/v1/blocks"))
-      .reduce<Record<string, ResourceType>>((acc, object) => {
-        const [key, type] = mapTypeFromObject(object);
-        acc[key] = type;
-        return acc;
-      }, {})
-  );
+  return allObjects
+    .filter((o) => o.objType === "kblocks.io/v1/blocks")
+    .reduce<Record<string, ResourceType>>((acc, object) => {
+      const [key, type] = mapTypeFromObject(object);
+      acc[key] = type;
+      return acc;
+    }, {});
 };
 
 const relationshipsFromObjects = (
@@ -391,6 +428,54 @@ const appRouter = router({
         pageCount,
       };
     }),
+  listResourcesV2: publicProcedure
+    .input(
+      z
+        .object({
+          page: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).default(1)),
+          perPage: z
+            .union([z.number(), z.string()])
+            .optional()
+            .pipe(z.coerce.number().int().min(1).max(100).default(20)),
+        })
+        .optional()
+        .default({}),
+    )
+    .query(async ({ input }) => {
+      const { page, perPage } = input;
+      const objects = await getExtendedObjects();
+      const projects = projectsFromObjects(objects);
+      const types = typesFromObjects(objects);
+      const relationships = relationshipsFromObjects(objects, types);
+      const resources = resourcesFromObjects(
+        objects,
+        projects,
+        types,
+        relationships,
+      );
+      return resources.find((resource) => {
+        const entries = Object.entries(resource);
+        const references = entries.filter(([key, value]) => {
+          if (key.startsWith("ref://")) {
+            return [key, value];
+          }
+        });
+      });
+      const startIndex = (page - 1) * perPage;
+      const endIndex = startIndex + perPage;
+      const paginatedResources = resources.slice(startIndex, endIndex);
+      const pageCount = Math.ceil(resources.length / perPage);
+      return {
+        data: paginatedResources,
+        page,
+        perPage,
+        pageCount,
+        references: [],
+      };
+    }),
   listProjects: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
     const projects = projectsFromObjects(objects);
@@ -407,17 +492,17 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
-      const resources = resourcesFromObjects(
+      const object = objects.find((r) => r.objUri === input.objUri);
+      if (!object) {
+        throw new Error(`Resource ${input.objUri} not found`);
+      }
+      return mapObjectToResource(
+        object,
         objects,
         projects,
         types,
         relationships,
       );
-      const resource = resources.find((r) => r.objUri === input.objUri);
-      if (!resource) {
-        throw new Error(`Resource ${input.objUri} not found`);
-      }
-      return resource;
     }),
   getObjectHierarchy: publicProcedure
     .input(z.object({ objUri: z.string() }))

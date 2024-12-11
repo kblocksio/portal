@@ -6,51 +6,64 @@ import linkifyHtml from "linkify-html";
 import { PropertyKey, PropertyValue } from "./ui/property";
 import { CopyToClipboardButton } from "./copy-to-clipboard";
 import { Checkbox } from "./ui/checkbox";
+import { type Resource } from "@kblocks-portal/server";
+import { getResourceOutputs } from "@/lib/utils";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Tooltip } from "./ui/tooltip";
+import { LinkIcon } from "lucide-react";
+import { ResourceLink } from "./resource-link";
+import { parseRef } from "@repo/shared";
 
-type KeyValueListProps = {
-  data: Record<string, any>;
-  resourceObjUri: string;
-};
+export interface KeyValueListProps {
+  resource: Resource;
+  properties: Record<string, any>;
+}
 
 export const KeyValueList: React.FC<KeyValueListProps> = ({
-  data,
-  resourceObjUri,
+  resource,
+  properties: data,
 }) => {
+  // const data = useMemo(() => {
+  //   return getResourceProperties(resource);
+  // }, [resource]);
+
   const renderValue = useCallback(
     (value: any) => {
       if (typeof value === "string") {
         //handle ref:// spacial case
         if (value.includes("ref://")) {
-          return <span className="text-muted-foreground">{value}</span>;
-          //   const { objUri: refUri, attribute } = parseRef(value, resourceObjUri);
-          //   const referencedObject = objects[refUri];
-          //   if (referencedObject && attribute) {
-          //     const referencedPropValue =
-          //       getResourceOutputs(referencedObject)?.[attribute];
-          //     if (referencedPropValue) {
-          //       return (
-          //         <div className="flex items-center space-x-2 truncate">
-          //           <div className="text-foreground flex gap-1 truncate italic">
-          //             <TooltipProvider>
-          //               <Tooltip delayDuration={0}>
-          //                 <TooltipTrigger>
-          //                   <LinkIcon className="h-4 w-4" />
-          //                 </TooltipTrigger>
-          //                 <TooltipContent>
-          //                   <ResourceLink
-          //                     resource={referencedObject}
-          //                     attribute={attribute}
-          //                   />
-          //                 </TooltipContent>
-          //               </Tooltip>
-          //             </TooltipProvider>
+          const { objUri: refUri, attribute } = parseRef(
+            value,
+            resource.objUri,
+          );
+          const referencedObject = resource.references?.[refUri];
+          if (referencedObject && attribute) {
+            const referencedPropValue =
+              getResourceOutputs(referencedObject)?.[attribute];
+            if (referencedPropValue) {
+              return (
+                <div className="flex items-center space-x-2 truncate">
+                  <div className="text-foreground flex gap-1 truncate italic">
+                    <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger>
+                          <LinkIcon className="h-4 w-4" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <ResourceLink
+                            resource={referencedObject as Resource}
+                            attribute={attribute}
+                          />
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
 
-          //             {renderValue(referencedPropValue)}
-          //           </div>
-          //         </div>
-          //       );
-          //     }
-          //   }
+                    {renderValue(referencedPropValue)}
+                  </div>
+                </div>
+              );
+            }
+          }
         }
 
         return (
@@ -110,7 +123,7 @@ export const KeyValueList: React.FC<KeyValueListProps> = ({
 
       return value;
     },
-    [resourceObjUri],
+    [resource],
   );
 
   return Object.entries(data).map(([key, value]) => (

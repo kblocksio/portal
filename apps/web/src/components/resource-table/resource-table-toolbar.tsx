@@ -13,7 +13,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { DeleteResourceDialog } from "../delete-resource";
 import { ProjectsMenu } from "../projects-menu";
-import type { ExtendedApiObject } from "@kblocks-portal/server";
+import type { ExtendedApiObject, Resource } from "@kblocks-portal/server";
 
 export interface ResourceTableToolbarProps {
   table: TanstackTable<ExtendedApiObject>;
@@ -211,7 +211,9 @@ export const ResourceTableToolbar = ({
       )}
 
       <DeleteResourceDialog
-        resources={table.getSelectedRowModel().rows.map((row) => row.original)}
+        resources={table
+          .getSelectedRowModel()
+          .rows.map((row) => row.original as Resource)}
         isOpen={isDeleteOpen}
         onDeleteClick={() => {
           setIsDeleteOpen(false);
