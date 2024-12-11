@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useContext } from "react";
-import { ResourceContext } from "@/resource-context";
 import { useBreadcrumbs } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
@@ -16,7 +14,9 @@ export const Route = createFileRoute("/clusters/")({
 });
 
 function Clusters() {
-  const clusters = trpc.listClusters.useQuery();
+  const clusters = trpc.listClusters.useQuery(undefined, {
+    initialData: [],
+  });
 
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://rectangle-group" });
