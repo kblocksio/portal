@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { uiPickerParser } from "./pickers/ui-picker-parser";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { getDataByPath, reorderProperties, updateDataByPath } from "./utils";
 import { ObjectFieldRenderer } from "./object-field-renderer";
 import { resolvePickerField } from "./pickers/picker-resolver";

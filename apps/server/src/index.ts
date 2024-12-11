@@ -7,7 +7,7 @@ import {
   GetLogsResponse,
   GetEventsResponse,
   parseRef,
-} from "@repo/shared";
+} from "@kblocks-portal/shared";
 import projects from "./mock-data/projects.json";
 import { exchangeCodeForTokens } from "./github.js";
 import { createServerSupabase, privateSupabase } from "./supabase.js";

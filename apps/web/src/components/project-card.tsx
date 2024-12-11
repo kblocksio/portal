@@ -1,6 +1,6 @@
 import { Circle } from "lucide-react";
-import { Project } from "@repo/shared";
 import { Button } from "./ui/button";
+import type { Project } from "@kblocks-portal/server";
 
 export interface ProjectCardProps {
   project: Project;

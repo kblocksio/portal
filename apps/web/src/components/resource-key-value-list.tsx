@@ -12,7 +12,7 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Tooltip } from "./ui/tooltip";
 import { LinkIcon } from "lucide-react";
 import { ResourceLink } from "./resource-link";
-import { parseRef } from "@repo/shared";
+import { parseRef } from "@kblocks-portal/shared";
 
 export interface KeyValueListProps {
   resource: Resource;

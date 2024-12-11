@@ -1,7 +1,7 @@
 import { SwitchField } from "./switch-field";
 import { InputField } from "./input-field";
 import { EnumField } from "./enum-field";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { Field } from "./form-field";
 
 interface PrimitiveFieldRendererProps {
