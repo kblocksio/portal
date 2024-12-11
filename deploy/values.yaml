@@ -8,3 +8,6 @@ backend:
 
 redis:
   enabled: false
+
+localCluster:
+  enabled: false

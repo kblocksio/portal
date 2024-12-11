@@ -24,7 +24,7 @@ function EditResourcePage() {
 
   const firstPathSegment = useMemo(() => {
     if (previousRoute?.previousRoute) {
-      return previousRoute.previousRoute.split("/")[1];
+      return previousRoute.previousRoute.split("/")[1] || "/resources";
     }
     return "/resources";
   }, [previousRoute]);

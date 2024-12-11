@@ -95,6 +95,7 @@ export type Project = ExtendedApiObject & {
  */
 export type Cluster = ExtendedApiObject & {
   access: "read_only" | "read_write";
+  type: ResourceType;
 };
 
 /**
@@ -165,11 +166,11 @@ const resourcesFromObjects = (
         )
         .map(([relationshipObjUri, { relationship, child }]) => {
           return {
-          ...relationship,
-          resource: {
+            ...relationship,
+            resource: {
               ...child,
               type: types[child.objType],
-          },
+            },
           };
         }),
     }));
@@ -181,10 +182,19 @@ const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
   );
 };
 
-const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
-  return allObjects.filter(
-    (object): object is Cluster => object.objType === "kblocks.io/v1/clusters",
-  );
+const clustersFromObjects = (
+  allObjects: ExtendedApiObject[],
+  types: Record<string, ResourceType>,
+): Cluster[] => {
+  return allObjects
+    .filter(
+      (object): object is Cluster =>
+        object.objType === "kblocks.io/v1/clusters",
+    )
+    .map((object) => ({
+      ...object,
+      type: types["kblocks.io/v1/clusters"],
+    }));
 };
 
 const mapTypeFromObject = (
@@ -398,7 +408,8 @@ const appRouter = router({
   }),
   listClusters: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
-    return clustersFromObjects(objects);
+    const types = typesFromObjects(objects);
+    return clustersFromObjects(objects, types);
   }),
   getResource: publicProcedure
     .input(z.object({ objUri: z.string() }))
@@ -407,6 +418,16 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
+      // special case for clusters
+      if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
+        const clusters = clustersFromObjects(objects, types);
+        const cluster = clusters.find((c) => c.objUri === input.objUri);
+        if (!cluster) {
+          throw new Error(`Cluster ${input.objUri} not found`);
+        }
+        return cluster;
+      }
+      // normal case for resources
       const resources = resourcesFromObjects(
         objects,
         projects,
