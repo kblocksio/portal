@@ -129,10 +129,20 @@ const resourcesFromObjects = (
   allObjects: ExtendedApiObject[],
   projects: Project[],
   types: Record<string, ResourceType>,
+  clusters: Cluster[],
   relationships: Record<string, Record<string, Relationship>>,
 ): Resource[] => {
   return allObjects
     .filter((object) => {
+      // first check is this object belongs to a cluster known to the portal
+      const { system } = parseBlockUri(object.objUri);
+      const cluster = Object.values(clusters)?.find(
+        (c) => c.metadata?.name === system,
+      );
+      if (!cluster) {
+        return false;
+      }
+
       return (
         object.objType !== "kblocks.io/v1/projects" &&
         object.objType !== "kblocks.io/v1/blocks" &&
@@ -384,10 +394,12 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
+      const clusters = clustersFromObjects(objects, types);
       const resources = resourcesFromObjects(
         objects,
         projects,
         types,
+        clusters,
         relationships,
       );
       const startIndex = (page - 1) * perPage;
@@ -418,9 +430,9 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
+      const clusters = clustersFromObjects(objects, types);
       // special case for clusters
       if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
-        const clusters = clustersFromObjects(objects, types);
         const cluster = clusters.find((c) => c.objUri === input.objUri);
         if (!cluster) {
           throw new Error(`Cluster ${input.objUri} not found`);
@@ -432,6 +444,7 @@ const appRouter = router({
         objects,
         projects,
         types,
+        clusters,
         relationships,
       );
       const resource = resources.find((r) => r.objUri === input.objUri);
