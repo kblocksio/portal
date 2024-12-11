@@ -5,7 +5,7 @@ import { MarkdownWrapper } from "@/components/markdown";
 import { useBreadcrumbs } from "@/app-context";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { useResourceTypes } from "@/hooks/use-resource-types";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute("/catalog/$group/$version/$plural")({
   component: Catalog,
@@ -19,11 +19,9 @@ function Catalog() {
     () => `${group}/${version}/${plural}`,
     [group, version, plural],
   );
-  const resourceTypes = useResourceTypes();
-  const currentResourceType = useMemo(
-    () => resourceTypes.data[resourceTypeId],
-    [resourceTypes, resourceTypeId],
-  );
+  const { data: resourceType } = trpc.getType.useQuery({
+    typeUri: resourceTypeId,
+  });
 
   useBreadcrumbs(
     () => [
@@ -40,20 +38,22 @@ function Catalog() {
 
   return (
     <div className={cn("container relative mx-auto flex flex-col gap-4")}>
-      {currentResourceType && (
+      {resourceType && (
         <>
           {/* fixed position bellow the app header with some margin - app header is h-16 */}
           <Button
             className="absolute right-0 top-0"
             onClick={() => {
               navigate({
-                to: `/resources/new/${group}/${version}/${plural}`,
+                to: `/resources/new/${resourceTypeId}`,
               });
             }}
           >
             New Resource...
           </Button>
-          <MarkdownWrapper content={currentResourceType.readme || ""} />
+          {resourceType.readme && (
+            <MarkdownWrapper content={resourceType.readme} />
+          )}
         </>
       )}
     </div>
