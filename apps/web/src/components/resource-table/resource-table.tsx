@@ -518,11 +518,7 @@ const ResourceOutputs = memo(function ResourceOutputs({
         <PopoverContent onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-col space-y-8">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <Outputs
-                outputs={outputs}
-                resourceObjUri={resource.objUri}
-                resourceType={resource.type}
-              />
+              <Outputs outputs={outputs} resource={resource} />
             </div>
           </div>
         </PopoverContent>

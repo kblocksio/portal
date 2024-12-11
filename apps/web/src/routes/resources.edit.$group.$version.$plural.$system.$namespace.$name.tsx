@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useContext, useMemo, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useBreadcrumbs } from "@/app-context";
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { useCreateResource } from "@/create-resource-context";
 import { WizardSimpleHeader } from "@/components/wizard-simple-header";
 import { ResourceForm } from "@/components/resource-form/resource-form";

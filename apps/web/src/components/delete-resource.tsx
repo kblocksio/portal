@@ -11,11 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import type { ExtendedApiObject, Resource } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 
 interface DeleteResourceDialogProps {
-  resources: ExtendedApiObject[];
+  resources: Resource[];
   isOpen: boolean;
   onClose: () => void;
   onDeleteClick?: () => void;
@@ -79,10 +79,14 @@ export function DeleteResourceDialog({
               {resources.map((resource) => {
                 return (
                   <li key={resource.objUri} className="flex items-center gap-2">
-                    <ResourceIcon icon={resource.icon} className="size-4" />
+                    <ResourceIcon
+                      icon={resource.type?.icon}
+                      className="size-4"
+                    />
                     <span className="text-foreground">
-                      {resource.namespace && `${resource.namespace}/`}
-                      {resource.name}
+                      {resource.metadata.namespace &&
+                        `${resource.metadata.namespace}/`}
+                      {resource.metadata.name}
                     </span>
                   </li>
                 );

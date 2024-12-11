@@ -3,7 +3,7 @@ import {
   GetUserResponse,
   ResourceQuery,
   CreateResourceResponse,
-} from "@repo/shared";
+} from "@kblocks-portal/shared";
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 

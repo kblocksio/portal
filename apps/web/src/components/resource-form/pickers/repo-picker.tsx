@@ -1,4 +1,4 @@
-import { Repository } from "@repo/shared";
+import { Repository } from "@kblocks-portal/shared";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
   Select,

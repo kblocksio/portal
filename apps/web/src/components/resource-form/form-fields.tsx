@@ -1,4 +1,4 @@
-import { ObjectMetadata } from "@repo/shared";
+import { ObjectMetadata } from "@kblocks-portal/shared";
 import { FieldRenderer } from "./field-renderer";
 
 export const FormFields = ({

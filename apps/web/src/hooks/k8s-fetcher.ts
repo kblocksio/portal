@@ -1,5 +1,5 @@
 import { getResources } from "@/lib/backend";
-import { ResourceQuery } from "@repo/shared";
+import { ResourceQuery } from "@kblocks-portal/shared";
 
 export const k8sFetcher = async (query: ResourceQuery) => {
   try {

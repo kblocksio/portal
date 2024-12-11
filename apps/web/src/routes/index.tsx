@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import platformMd from "../mock-data/acme.platform.md?raw";
 import { MarkdownWrapper } from "@/components/markdown";
 import { useBreadcrumbs } from "@/app-context";
+import { trpc } from "@/trpc";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -11,6 +12,8 @@ function Index() {
   useBreadcrumbs(() => {
     return [{ name: "Home", url: "/" }];
   }, []);
+
+  trpc.listResourcesV2.useQuery();
 
   return (
     <div className="container mx-auto flex flex-col gap-4">
