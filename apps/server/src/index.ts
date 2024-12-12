@@ -450,56 +450,6 @@ const appRouter = router({
         pageCount,
       };
     }),
-  listResourcesV2: publicProcedure
-    .input(
-      z
-        .object({
-          page: z
-            .union([z.number(), z.string()])
-            .optional()
-            .pipe(z.coerce.number().int().min(1).default(1)),
-          perPage: z
-            .union([z.number(), z.string()])
-            .optional()
-            .pipe(z.coerce.number().int().min(1).max(100).default(20)),
-        })
-        .optional()
-        .default({}),
-    )
-    .query(async ({ input }) => {
-      const { page, perPage } = input;
-      const objects = await getExtendedObjects();
-      const projects = projectsFromObjects(objects);
-      const types = typesFromObjects(objects);
-      const clusters = clustersFromObjects(objects, types);
-      const relationships = relationshipsFromObjects(objects, types);
-      const resources = resourcesFromObjects(
-        objects,
-        projects,
-        types,
-        clusters,
-        relationships,
-      );
-      return resources.find((resource) => {
-        const entries = Object.entries(resource);
-        const references = entries.filter(([key, value]) => {
-          if (key.startsWith("ref://")) {
-            return [key, value];
-          }
-        });
-      });
-      const startIndex = (page - 1) * perPage;
-      const endIndex = startIndex + perPage;
-      const paginatedResources = resources.slice(startIndex, endIndex);
-      const pageCount = Math.ceil(resources.length / perPage);
-      return {
-        data: paginatedResources,
-        page,
-        perPage,
-        pageCount,
-        references: [],
-      };
-    }),
   listProjects: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
     const projects = projectsFromObjects(objects);
