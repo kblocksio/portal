@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronsUpDown, MoreVertical } from "lucide-react";
@@ -34,6 +34,7 @@ import { YamlView } from "@/components/yaml-button";
 import { cloneDeep, omit } from "lodash";
 import { ProjectItems } from "@/components/projects-menu";
 import { trpc } from "@/trpc";
+import { LocationContext } from "@/location-context";
 
 const DEFAULT_TAB = "details";
 
@@ -48,6 +49,14 @@ function ResourcePage() {
   const navigate = useNavigate();
   const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
+  const previousRoute = useContext(LocationContext);
+
+  const firstPathSegment = useMemo(() => {
+    if (previousRoute?.previousRoute) {
+      return previousRoute.previousRoute.split("/")[1] || "/resources";
+    }
+    return "/resources";
+  }, [previousRoute]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -141,8 +150,10 @@ function ResourcePage() {
   useBreadcrumbs(() => {
     const breadcrumbs = [
       {
-        name: "Resources",
-        url: `/resources/`,
+        name: firstPathSegment
+          .replace(/^\//, "")
+          .replace(/^\w/, (c) => c.toUpperCase()),
+        url: `/${firstPathSegment}`,
       },
     ];
     if (!selectedResource) return breadcrumbs;

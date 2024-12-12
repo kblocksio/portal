@@ -96,6 +96,7 @@ export type Project = ExtendedApiObject & {
  */
 export type Cluster = ExtendedApiObject & {
   access: "read_only" | "read_write";
+  type: ResourceType;
 };
 
 /**
@@ -200,10 +201,20 @@ const resourcesFromObjects = (
   allObjects: ExtendedApiObject[],
   projects: Project[],
   types: Record<string, ResourceType>,
+  clusters: Cluster[],
   relationships: Record<string, Record<string, Relationship>>,
 ): Resource[] => {
   return allObjects
     .filter((object) => {
+      // first check is this object belongs to a cluster known to the portal
+      const { system } = parseBlockUri(object.objUri);
+      const cluster = Object.values(clusters)?.find(
+        (c) => c.metadata?.name === system,
+      );
+      if (!cluster) {
+        return false;
+      }
+
       return (
         object.objType !== "kblocks.io/v1/projects" &&
         object.objType !== "kblocks.io/v1/blocks" &&
@@ -221,10 +232,19 @@ const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
   );
 };
 
-const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
-  return allObjects.filter(
-    (object): object is Cluster => object.objType === "kblocks.io/v1/clusters",
-  );
+const clustersFromObjects = (
+  allObjects: ExtendedApiObject[],
+  types: Record<string, ResourceType>,
+): Cluster[] => {
+  return allObjects
+    .filter(
+      (object): object is Cluster =>
+        object.objType === "kblocks.io/v1/clusters",
+    )
+    .map((object) => ({
+      ...object,
+      type: types["kblocks.io/v1/clusters"],
+    }));
 };
 
 const mapTypeFromObject = (
@@ -411,10 +431,12 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
+      const clusters = clustersFromObjects(objects, types);
       const resources = resourcesFromObjects(
         objects,
         projects,
         types,
+        clusters,
         relationships,
       );
       const startIndex = (page - 1) * perPage;
@@ -435,7 +457,8 @@ const appRouter = router({
   }),
   listClusters: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
-    return clustersFromObjects(objects);
+    const types = typesFromObjects(objects);
+    return clustersFromObjects(objects, types);
   }),
   getResource: publicProcedure
     .input(z.object({ objUri: z.string() }))
@@ -444,6 +467,16 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
+      const clusters = clustersFromObjects(objects, types);
+      // special case for clusters
+      if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
+        const cluster = clusters.find((c) => c.objUri === input.objUri);
+        if (!cluster) {
+          throw new Error(`Cluster ${input.objUri} not found`);
+        }
+        return cluster;
+      }
+      // normal case for resources
       const object = objects.find((r) => r.objUri === input.objUri);
       if (!object) {
         throw new Error(`Resource ${input.objUri} not found`);
