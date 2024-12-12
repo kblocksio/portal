@@ -536,7 +536,6 @@ const appRouter = router({
         objects,
         projects,
         types,
-        clusters,
         relationships,
       );
     }),
