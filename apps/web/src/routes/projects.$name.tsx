@@ -17,7 +17,7 @@ export const Route = createFileRoute("/projects/$name")({
 function ProjectPage() {
   const { name } = Route.useParams();
 
-  useBreadcrumbs([{ name: "Projects" }, { name }]);
+  useBreadcrumbs([{ name: "Projects" }, { name }], [name]);
 
   const project = trpc.getProject.useQuery({ name });
 

@@ -30,7 +30,7 @@ export const meta = {
 };
 
 function Resources() {
-  useBreadcrumbs([{ name: "Resources" }]);
+  useBreadcrumbs([{ name: "Resources" }], []);
 
   const Icon = useIconComponent({ icon: meta.icon });
 

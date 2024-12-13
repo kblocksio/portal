@@ -11,14 +11,15 @@ import React from "react";
 
 export const AppBreadcrumbs = () => {
   const { breadcrumbs } = useAppContext();
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {breadcrumbs.map((breadcrumb, index) => (
-          <React.Fragment key={index}>
+          <React.Fragment key={breadcrumb.name}>
             <BreadcrumbItem>
               {index === breadcrumbs.length - 1 ? (
-                <BreadcrumbPage key={index}>{breadcrumb.name}</BreadcrumbPage>
+                <BreadcrumbPage>{breadcrumb.name}</BreadcrumbPage>
               ) : (
                 <BreadcrumbLink
                   href={breadcrumb.url}
