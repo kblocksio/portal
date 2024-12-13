@@ -116,6 +116,137 @@ export type Resource = ExtendedApiObject & {
   references?: Record<string, ExtendedApiObject & { type?: ResourceType }>;
 };
 
+type ResourceKnownFields = "name" | "kind" | "namespace" | "cluster";
+
+const getFieldFromResource = (
+  resource: Resource,
+  field: ResourceKnownFields,
+): string => {
+  switch (field) {
+    case "name":
+      return resource.metadata?.name ?? "";
+    case "kind":
+      return resource.kind ?? "";
+    case "namespace":
+      return resource.metadata?.namespace ?? "";
+    case "cluster":
+      const { system } = parseBlockUri(resource.objUri);
+      return system;
+    default:
+      throw new Error(`Unknown field: ${field}`);
+  }
+};
+
+type SortingOptions = {
+  id: ResourceKnownFields;
+  desc: boolean;
+};
+
+function sortResources(
+  resources: Resource[],
+  sorting: SortingOptions[],
+): Resource[] {
+  return resources.sort((a, b) => {
+    for (const sortOption of sorting) {
+      try {
+        const aField = getFieldFromResource(a, sortOption.id);
+        const bField = getFieldFromResource(b, sortOption.id);
+        const comparison = aField.localeCompare(bField);
+        if (comparison !== 0) {
+          return sortOption.desc ? -comparison : comparison;
+        }
+      } catch (e) {
+        console.error(`Error sorting resources: ${e}`);
+      }
+    }
+    return 0;
+  });
+}
+
+type FilterOptions = {
+  text?: string;
+  kind?: string;
+  name?: string;
+  cluster?: string;
+  namespace?: string;
+  projects?: string[];
+};
+
+function filterResources(
+  resources: Resource[],
+  filters: FilterOptions,
+): Resource[] {
+  return resources.filter((resource) => {
+    const { system } = parseBlockUri(resource.objUri);
+
+    // Text search across multiple fields
+    if (filters.text) {
+      const searchText = filters.text.toLowerCase();
+      const searchableText = [
+        resource.metadata?.name,
+        resource.kind,
+        resource.metadata?.namespace,
+        resource.type?.kind,
+        resource.metadata?.annotations?.description,
+        system,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      if (!searchableText.includes(searchText)) {
+        return false;
+      }
+    }
+
+    // Kind filter
+    if (filters.kind && resource.type?.kind !== filters.kind) {
+      return false;
+    }
+
+    // Name filter
+    if (
+      filters.name &&
+      !resource.metadata?.name
+        ?.toLowerCase()
+        .includes(filters.name.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Cluster filter
+    if (filters.cluster) {
+      if (system !== filters.cluster) {
+        return false;
+      }
+    }
+
+    // Namespace filter
+    if (
+      filters.namespace &&
+      resource.metadata?.namespace !== filters.namespace
+    ) {
+      return false;
+    }
+
+    // Projects filter
+    if (filters.projects?.length) {
+      const resourceProjectNames = resource.projects.map(
+        (p) => p.metadata?.name,
+      );
+      if (
+        !filters.projects.some((projectName) =>
+          resourceProjectNames.includes(projectName),
+        )
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
 const getExtendedObjects = async (): Promise<ExtendedApiObject[]> => {
   const objects = await getAllObjects();
   return Object.entries(objects).map<ExtendedApiObject>(([objUri, object]) => {
@@ -421,33 +552,59 @@ const appRouter = router({
             .union([z.number(), z.string()])
             .optional()
             .pipe(z.coerce.number().int().min(1).max(100).default(20)),
+          filters: z
+            .object({
+              text: z.string().optional(),
+              kind: z.string().optional(),
+              name: z.string().optional(),
+              cluster: z.string().optional(),
+              namespace: z.string().optional(),
+              projects: z.array(z.string()).optional(),
+            })
+            .optional()
+            .default({}),
+          sorting: z
+            .array(z.object({ id: z.string(), desc: z.boolean() }))
+            .optional(),
         })
         .optional()
         .default({}),
     )
     .query(async ({ input }) => {
-      const { page, perPage } = input;
+      const { page, perPage, sorting, filters } = input;
       const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
       const clusters = clustersFromObjects(objects, types);
-      const resources = resourcesFromObjects(
+      let resources = resourcesFromObjects(
         objects,
         projects,
         types,
         clusters,
         relationships,
       );
+
+      // Sort resources
+      if (sorting) {
+        resources = sortResources(resources, sorting as SortingOptions[]);
+      }
+
+      // Apply filters
+      resources = filterResources(resources, filters);
+
+      // Paginate resources
       const startIndex = (page - 1) * perPage;
       const endIndex = startIndex + perPage;
       const paginatedResources = resources.slice(startIndex, endIndex);
-      const pageCount = Math.ceil(resources.length / perPage);
+      const pageCount = Math.max(1, Math.ceil(resources.length / perPage));
+
       return {
         data: paginatedResources,
         page,
         perPage,
         pageCount,
+        total: resources.length,
       };
     }),
   listProjects: publicProcedure.query(async () => {
@@ -512,11 +669,22 @@ const appRouter = router({
       const project = projects.find(
         (project) => project.metadata?.name === input.name,
       );
-      return (
-        project?.objects?.map((objUri) =>
-          objects.find((o) => o.objUri === objUri),
-        ) ?? []
-      );
+      const projectObjects = project?.objects ?? [];
+      return projectObjects.map((objUri) => {
+        const object = objects.find((o) => o.objUri === objUri);
+        if (!object) {
+          throw new Error(`Object ${objUri} not found`);
+        }
+        const types = typesFromObjects(objects);
+        const relationships = relationshipsFromObjects(objects, types);
+        return mapObjectToResource(
+          object,
+          objects,
+          projects,
+          types,
+          relationships,
+        );
+      });
     }),
   listCategories: publicProcedure.query(async () => {
     return categories;

@@ -55,7 +55,7 @@ export const useAppContext = () => {
 
 export const useBreadcrumbs = (
   breadcrumbs: BreadcrumbItem[] | (() => BreadcrumbItem[]),
-  deps: DependencyList = [],
+  deps: DependencyList,
 ) => {
   const { setBreadcrumbs } = useAppContext();
 

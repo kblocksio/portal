@@ -8,6 +8,9 @@ import {
   flexRender,
   RowSelectionState,
   createColumnHelper,
+  type TableOptions,
+  type Table as ReactTable,
+  type TableState,
 } from "@tanstack/react-table";
 import {
   memo,
@@ -44,50 +47,55 @@ import {
 } from "../ui/tooltip";
 import { ResourceActionsMenu } from "../resource-actions-menu";
 import { ProjectLink } from "../project-link";
-import { useLocalStorage } from "@/hooks/use-localstorage";
 import { Checkbox } from "../ui/checkbox";
 import { Link } from "../ui/link";
-import type { Relationship, Resource } from "@kblocks-portal/server";
+import type { Resource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 import { StatusBadge } from "../status-badge";
-import { motion } from "framer-motion";
-import { Spinner } from "../spinner";
-import { parseBlockUri } from "@kblocks/api";
 import Outputs from "../outputs";
 import { ResourceLink } from "../resource-link";
+import { parseBlockUri } from "@kblocks/api";
 
-const defaultSorting: ColumnSort[] = [{ id: "kind", desc: false }];
+export const defaultResourceSorting: ColumnSort[] = [
+  { id: "kind", desc: false },
+];
 
 const columnHelper = createColumnHelper<Resource>();
 
-const useColumns = () => {
+const useColumns = (options?: {
+  enableRowSelection?: TableOptions<Resource>["enableRowSelection"];
+}) => {
   return useMemo(() => {
     return [
-      columnHelper.display({
-        id: "selection",
-        cell: (props) => (
-          <Checkbox
-            checked={props.row.getIsSelected()}
-            disabled={!props.row.getCanSelect()}
-            onCheckedChange={props.row.getToggleSelectedHandler()}
-          />
-        ),
-        size: 0,
-        header: (props) => (
-          <Checkbox
-            checked={
-              props.table.getIsAllRowsSelected()
-                ? true
-                : props.table.getIsSomeRowsSelected()
-                  ? "indeterminate"
-                  : false
-            }
-            onCheckedChange={(checked) =>
-              props.table.toggleAllRowsSelected(checked === true)
-            }
-          />
-        ),
-      }),
+      ...(options?.enableRowSelection
+        ? [
+            columnHelper.display({
+              id: "selection",
+              cell: (props) => (
+                <Checkbox
+                  checked={props.row.getIsSelected()}
+                  disabled={!props.row.getCanSelect()}
+                  onCheckedChange={props.row.getToggleSelectedHandler()}
+                />
+              ),
+              size: 0,
+              header: (props) => (
+                <Checkbox
+                  checked={
+                    props.table.getIsAllRowsSelected()
+                      ? true
+                      : props.table.getIsSomeRowsSelected()
+                        ? "indeterminate"
+                        : false
+                  }
+                  onCheckedChange={(checked) =>
+                    props.table.toggleAllRowsSelected(checked === true)
+                  }
+                />
+              ),
+            }),
+          ]
+        : []),
       columnHelper.display({
         id: "status",
         cell: (props) => (
@@ -136,10 +144,8 @@ const useColumns = () => {
             </div>
           );
         },
-        // TODO: Add back when the backend supports sorting.
-        enableSorting: false,
       }),
-      columnHelper.display({
+      columnHelper.accessor((row) => row.metadata.name, {
         id: "name",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Name" />
@@ -159,64 +165,67 @@ const useColumns = () => {
             </Link>
           </div>
         ),
-        // TODO: Add back when the backend supports sorting.
-        enableSorting: false,
       }),
-      columnHelper.display({
+      columnHelper.accessor((object) => parseBlockUri(object.objUri).system, {
         id: "cluster",
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Cluster" />
         ),
         cell: (props) => <SystemBadge object={props.row.original} />,
-        // TODO: Add back when the backend supports sorting.
-        enableSorting: false,
       }),
-      columnHelper.display({
-        id: "namespace",
+      columnHelper.accessor(
+        (object) => parseBlockUri(object.objUri).namespace,
+        {
+          id: "namespace",
+          header: (props) => (
+            <DataTableColumnHeader column={props.column} title="Namespace" />
+          ),
+          cell: (props) => <NamespaceBadge object={props.row.original} />,
+        },
+      ),
+      columnHelper.accessor("relationships", {
         header: (props) => (
-          <DataTableColumnHeader column={props.column} title="Namespace" />
+          <DataTableColumnHeader column={props.column} title="Children" />
         ),
-        cell: (props) => <NamespaceBadge object={props.row.original} />,
-        // TODO: Add back when the backend supports sorting.
+        cell: (props) => {
+          const relationships = props.getValue() ?? [];
+          const children = relationships
+            .filter((relationship) => relationship.type === "child")
+            .map((relationship) => relationship.resource);
+
+          if (children.length === 0) {
+            return null;
+          }
+
+          return (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-0">
+                    <div>
+                      {children.length === 1
+                        ? "1 Child"
+                        : `${children.length} Children`}
+                    </div>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-2">
+                    {children.map((resource) => {
+                      return (
+                        <div key={resource.objUri}>
+                          <ResourceLink resource={resource} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
         enableSorting: false,
       }),
-      // columnHelper.accessor("relationships", {
-      //   header: (props) => (
-      //     <DataTableColumnHeader column={props.column} title="Children" />
-      //   ),
-      //   cell: (props) => {
-      //     const relationships = props.getValue();
-      //     const children = relationships
-      //       .filter((relationship) => relationship.type === "child")
-      //       .map((relationship) => relationship.resource);
-
-      //     if (children.length === 0) {
-      //       return null;
-      //     }
-      //     return (
-      //       <TooltipProvider>
-      //         <Tooltip>
-      //           <TooltipTrigger asChild>
-      //             <Button variant="ghost" className="h-0">
-      //               <div>{children.length} Children</div>
-      //             </Button>
-      //           </TooltipTrigger>
-      //           <TooltipContent>
-      //             <div className="flex flex-col gap-2">
-      //               {children.map((resource) => {
-      //                 return (
-      //                   <div key={resource.objUri}>
-      //                     <ResourceLink resource={resource} />
-      //                   </div>
-      //                 );
-      //               })}
-      //             </div>
-      //           </TooltipContent>
-      //         </Tooltip>
-      //       </TooltipProvider>
-      //     );
-      //   },
-      // }),
       columnHelper.accessor("projects", {
         header: (props) => (
           <DataTableColumnHeader column={props.column} title="Projects" />
@@ -257,7 +266,6 @@ const useColumns = () => {
             </TooltipProvider>
           );
         },
-        // TODO: Add back when the backend supports sorting.
         enableSorting: false,
         // filterFn: (row, columnId, selectedProjects) => {
         //   if (selectedProjects.includes("$unassigned")) {
@@ -300,8 +308,6 @@ const useColumns = () => {
 
           return timestamp && <LastUpdated timestamp={timestamp.getTime()} />;
         },
-        // TODO: Add back when the backend supports sorting.
-        enableSorting: false,
       }),
       columnHelper.display({
         id: "logs",
@@ -332,15 +338,23 @@ const useColumns = () => {
   }, []);
 };
 
-export const ResourceTable = memo(function ResourceTable({
-  resources,
-  className,
-  showActions,
-  showCreateNew,
-  customNewResourceAction,
-  fetching,
-}: {
-  resources: Resource[];
+export const useResourceTable = (
+  options: Omit<TableOptions<Resource>, "columns">,
+): ReactTable<Resource> => {
+  const columns = useColumns({
+    enableRowSelection: options.enableRowSelection ?? false,
+  });
+
+  const table = useReactTable({
+    ...options,
+    columns,
+  });
+
+  return table;
+};
+
+export interface ResourceTableProps {
+  table: ReactTable<Resource>;
   className?: string;
   showActions?: boolean;
   showCreateNew?: boolean;
@@ -349,42 +363,16 @@ export const ResourceTable = memo(function ResourceTable({
     navigate: () => void;
   };
   fetching?: boolean;
-}) {
-  const columns = useColumns();
+}
 
-  const location = useLocation();
-
-  const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
-    JSON.stringify([location.pathname, "columnFilters"]),
-    [],
-  );
-  const [sorting, setSorting] = useLocalStorage(
-    JSON.stringify([location.pathname, "sorting"]),
-    defaultSorting,
-  );
-
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  useEffect(() => {
-    setRowSelection({});
-  }, [location.pathname, resources]);
-
-  const table = useReactTable({
-    data: resources,
-    columns,
-    state: {
-      columnFilters,
-      sorting,
-      rowSelection,
-    },
-    onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
-
+export const ResourceTable = ({
+  table,
+  className,
+  showActions,
+  showCreateNew,
+  customNewResourceAction,
+  fetching,
+}: ResourceTableProps) => {
   const emptyTable = table.getFilteredRowModel().rows.length === 0;
 
   return (
@@ -460,7 +448,7 @@ export const ResourceTable = memo(function ResourceTable({
       )}
     </div>
   );
-});
+};
 
 const ResourceTableRow = memo(function ResourceTableRow({
   isSelected,
