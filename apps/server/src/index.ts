@@ -129,6 +129,8 @@ function filterResources(
   filters: FilterOptions,
 ): Resource[] {
   return resources.filter((resource) => {
+    const { system } = parseBlockUri(resource.objUri);
+
     // Text search across multiple fields
     if (filters.text) {
       const searchText = filters.text.toLowerCase();
@@ -138,6 +140,7 @@ function filterResources(
         resource.metadata?.namespace,
         resource.type?.kind,
         resource.metadata?.annotations?.description,
+        system,
       ]
         .filter(Boolean)
         .join(" ")
@@ -165,7 +168,6 @@ function filterResources(
 
     // Cluster filter
     if (filters.cluster) {
-      const { system } = parseBlockUri(resource.objUri);
       if (system !== filters.cluster) {
         return false;
       }
@@ -494,6 +496,9 @@ const appRouter = router({
             })
             .optional()
             .default({}),
+          sorting: z
+            .array(z.object({ id: z.string(), desc: z.boolean() }))
+            .optional(),
         })
         .optional()
         .default({}),
@@ -517,7 +522,7 @@ const appRouter = router({
       const startIndex = (page - 1) * perPage;
       const endIndex = startIndex + perPage;
       const paginatedResources = resources.slice(startIndex, endIndex);
-      const pageCount = Math.ceil(resources.length / perPage);
+      const pageCount = Math.max(1, Math.ceil(resources.length / perPage));
 
       return {
         data: paginatedResources,
@@ -578,11 +583,22 @@ const appRouter = router({
       const project = projects.find(
         (project) => project.metadata?.name === input.name,
       );
-      return (
-        project?.objects?.map((objUri) =>
-          objects.find((o) => o.objUri === objUri),
-        ) ?? []
-      );
+      const projectObjects = project?.objects ?? [];
+      return projectObjects.map((objUri) => {
+        const object = objects.find((o) => o.objUri === objUri);
+        if (!object) {
+          throw new Error(`Object ${objUri} not found`);
+        }
+        const types = typesFromObjects(objects);
+        const relationships = relationshipsFromObjects(objects, types);
+        return mapObjectToResource(
+          object,
+          objects,
+          projects,
+          types,
+          relationships,
+        );
+      });
     }),
   listCategories: publicProcedure.query(async () => {
     return categories;

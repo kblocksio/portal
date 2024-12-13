@@ -44,13 +44,9 @@ export const ResourceTableToolbar = ({
         <div className="grow">
           <Input
             placeholder="Filter resources..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
+            value={table.getState().globalFilter ?? ""}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
             className="h-8"
-            // TODO: Add back when the backend supports filtering.
-            disabled
           />
         </div>
 

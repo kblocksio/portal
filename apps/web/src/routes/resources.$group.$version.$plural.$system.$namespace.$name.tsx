@@ -28,12 +28,21 @@ import { NamespaceBadge } from "@/components/namespace-badge";
 import { useBreadcrumbs } from "@/app-context";
 import { KeyValueList } from "@/components/resource-key-value-list";
 import Outputs from "@/components/outputs";
-import { ResourceTable } from "@/components/resource-table/resource-table";
+import {
+  ResourceTable,
+  useResourceTable,
+} from "@/components/resource-table/resource-table";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
 import { cloneDeep, omit } from "lodash";
 import { ProjectItems } from "@/components/projects-menu";
 import { trpc } from "@/trpc";
+import type { Resource } from "@kblocks-portal/server";
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+} from "@tanstack/react-table";
 
 const DEFAULT_TAB = "details";
 
@@ -370,11 +379,7 @@ function ResourcePage() {
                 <div className="pb-4 sm:pt-6">
                   <CardTitle>Children</CardTitle>
                 </div>
-                <ResourceTable
-                  resources={children}
-                  showActions={false}
-                  showCreateNew={false}
-                />
+                <ChildrenResourceTable resources={children} />
               </div>
             )}
           </div>
@@ -429,5 +434,17 @@ function ResourcePage() {
     </div>
   );
 }
+
+const ChildrenResourceTable = ({ resources }: { resources: Resource[] }) => {
+  const table = useResourceTable({
+    data: resources,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+  return (
+    <ResourceTable table={table} showActions={false} showCreateNew={false} />
+  );
+};
 
 export default ResourcePage;

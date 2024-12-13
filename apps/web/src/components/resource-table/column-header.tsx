@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { memo, useMemo } from "react";
+import { useMemo } from "react";
 import { splitAndCapitalizeCamelCase } from "@/lib/utils";
 
 export interface DataTableColumnHeaderProps<TData, TValue>
@@ -23,7 +23,7 @@ export interface DataTableColumnHeaderProps<TData, TValue>
   capitalize?: boolean;
 }
 
-function DataTableColumnHeaderBase<TData, TValue>({
+export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
@@ -80,7 +80,3 @@ function DataTableColumnHeaderBase<TData, TValue>({
     </div>
   );
 }
-
-export const DataTableColumnHeader = memo(
-  DataTableColumnHeaderBase,
-) as typeof DataTableColumnHeaderBase;

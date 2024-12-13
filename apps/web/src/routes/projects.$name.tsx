@@ -2,9 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useBreadcrumbs } from "@/app-context";
 
 import { ProjectHeader } from "@/components/project-header";
-import { ResourceTable } from "@/components/resource-table/resource-table";
+import {
+  ResourceTable,
+  useResourceTable,
+} from "@/components/resource-table/resource-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/trpc";
+import { getCoreRowModel } from "@tanstack/react-table";
 
 export const Route = createFileRoute("/projects/$name")({
   component: ProjectPage,
@@ -17,13 +21,24 @@ function ProjectPage() {
 
   const project = trpc.getProject.useQuery({ name });
 
-  const resources = trpc.listProjectResources.useQuery({ name });
+  const resources = trpc.listProjectResources.useQuery(
+    { name },
+    {
+      initialData: [],
+    },
+  );
+
+  const table = useResourceTable({
+    data: resources.data,
+    getCoreRowModel: getCoreRowModel(),
+    enableRowSelection: true,
+  });
 
   return (
     <div className="flex flex-col gap-10 pt-8">
       {project.data && <ProjectHeader project={project.data} />}
       {resources.isLoading && <LoadingSkeleton />}
-      {resources.data && <ResourceTable resources={resources.data} />}
+      <ResourceTable table={table} />
     </div>
   );
 }

@@ -1,13 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ResourceTable } from "@/components/resource-table/resource-table";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
+import {
+  defaultResourceSorting,
+  ResourceTable,
+  useResourceTable,
+} from "@/components/resource-table/resource-table";
 import { useIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
 import { useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { TablePagination } from "@/components/resource-table/table-pagination";
 import { keepPreviousData } from "@tanstack/react-query";
+import { useLocalStorage } from "@/hooks/use-localstorage";
+import {
+  getCoreRowModel,
+  type ColumnFiltersState,
+  type ColumnSort,
+} from "@tanstack/react-table";
 
 export const Route = createFileRoute("/resources/")({
   component: Resources,
@@ -25,15 +35,53 @@ function Resources() {
   const Icon = useIconComponent({ icon: meta.icon });
 
   const [page, setPage] = useState(1);
+
+  const location = useLocation();
+
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [columnFilters, setColumnFilters] = useLocalStorage<ColumnFiltersState>(
+    JSON.stringify([location.pathname, "columnFilters"]),
+    [],
+  );
+  const [sorting, setSorting] = useLocalStorage<ColumnSort[]>(
+    JSON.stringify([location.pathname, "sorting"]),
+    defaultResourceSorting,
+  );
+
+  const queryFilters = useMemo(() => {
+    const filters: Record<string, unknown> = {};
+    columnFilters.forEach((filter) => {
+      filters[filter.id] = filter.value;
+    });
+    filters.text = globalFilter;
+    return filters;
+  }, [columnFilters, globalFilter]);
+
   const resources = trpc.listResources.useQuery(
     {
       page,
       perPage: 20,
+      filters: queryFilters,
+      sorting,
     },
     {
       placeholderData: keepPreviousData,
     },
   );
+
+  const table = useResourceTable({
+    data: resources.data?.data ?? [],
+    state: {
+      columnFilters,
+      sorting,
+      globalFilter,
+    },
+    onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    enableRowSelection: true,
+  });
 
   return (
     <div className="flex flex-col gap-10 py-2 pt-8">
@@ -47,13 +95,10 @@ function Resources() {
         {resources.isLoading && <LoadingSkeleton />}
 
         {resources.data && (
-          <ResourceTable
-            resources={resources.data.data}
-            fetching={resources.isFetching}
-          />
+          <ResourceTable table={table} fetching={resources.isFetching} />
         )}
 
-        {resources.data?.pageCount && (
+        {resources.data?.pageCount !== undefined && (
           <TablePagination
             page={page}
             pageCount={resources.data.pageCount}
