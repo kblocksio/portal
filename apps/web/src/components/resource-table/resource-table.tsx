@@ -266,6 +266,7 @@ const useColumns = (options?: {
             </TooltipProvider>
           );
         },
+        enableSorting: false,
         // filterFn: (row, columnId, selectedProjects) => {
         //   if (selectedProjects.includes("$unassigned")) {
         //     if (row.getValue().length === 0) {

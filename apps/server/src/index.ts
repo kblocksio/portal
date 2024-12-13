@@ -116,6 +116,53 @@ export type Resource = ExtendedApiObject & {
   references?: Record<string, ExtendedApiObject & { type?: ResourceType }>;
 };
 
+type ResourceKnownFields = "name" | "kind" | "namespace" | "cluster";
+
+const getFieldFromResource = (
+  resource: Resource,
+  field: ResourceKnownFields,
+): string => {
+  switch (field) {
+    case "name":
+      return resource.metadata?.name ?? "";
+    case "kind":
+      return resource.kind ?? "";
+    case "namespace":
+      return resource.metadata?.namespace ?? "";
+    case "cluster":
+      const { system } = parseBlockUri(resource.objUri);
+      return system;
+    default:
+      throw new Error(`Unknown field: ${field}`);
+  }
+};
+
+type SortingOptions = {
+  id: ResourceKnownFields;
+  desc: boolean;
+};
+
+function sortResources(
+  resources: Resource[],
+  sorting: SortingOptions[],
+): Resource[] {
+  return resources.sort((a, b) => {
+    for (const sortOption of sorting) {
+      try {
+        const aField = getFieldFromResource(a, sortOption.id);
+        const bField = getFieldFromResource(b, sortOption.id);
+        const comparison = aField.localeCompare(bField);
+        if (comparison !== 0) {
+          return sortOption.desc ? -comparison : comparison;
+        }
+      } catch (e) {
+        console.error(`Error sorting resources: ${e}`);
+      }
+    }
+    return 0;
+  });
+}
+
 type FilterOptions = {
   text?: string;
   kind?: string;
@@ -524,7 +571,7 @@ const appRouter = router({
         .default({}),
     )
     .query(async ({ input }) => {
-      const { page, perPage, filters } = input;
+      const { page, perPage, sorting, filters } = input;
       const objects = await getExtendedObjects();
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
@@ -538,9 +585,15 @@ const appRouter = router({
         relationships,
       );
 
+      // Sort resources
+      if (sorting) {
+        resources = sortResources(resources, sorting as SortingOptions[]);
+      }
+
       // Apply filters
       resources = filterResources(resources, filters);
 
+      // Paginate resources
       const startIndex = (page - 1) * perPage;
       const endIndex = startIndex + perPage;
       const paginatedResources = resources.slice(startIndex, endIndex);
