@@ -100,8 +100,8 @@ function Resources() {
 
         {resources.data?.pageCount !== undefined && (
           <TablePagination
-            page={page}
-            pageCount={resources.data.pageCount}
+            page={page || 1}
+            pageCount={resources.data.pageCount || 1}
             onPageChange={setPage}
           />
         )}
