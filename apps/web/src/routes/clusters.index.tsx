@@ -2,12 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useBreadcrumbs } from "@/app-context";
 import { getIconComponent } from "@/lib/get-icon";
 import { RoutePageHeader } from "@/components/route-page-header";
-import { ResourceTable } from "@/components/resource-table/resource-table";
+import {
+  ResourceTable,
+  useResourceTable,
+} from "@/components/resource-table/resource-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { trpc } from "@/trpc";
+import { getFilteredRowModel, getSortedRowModel } from "@tanstack/react-table";
+import { getCoreRowModel } from "@tanstack/react-table";
 
 export const Route = createFileRoute("/clusters/")({
   component: Clusters,
@@ -36,6 +41,13 @@ function Clusters() {
     });
   };
 
+  const table = useResourceTable({
+    data: clusters.data,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
   return (
     <div className="container mx-auto flex flex-col gap-4">
       <div className="flex flex-col gap-4 pb-8 pt-8">
@@ -49,7 +61,7 @@ function Clusters() {
         ) : (
           <div className="flex flex-col gap-4">
             <ResourceTable
-              resources={clusters.data}
+              table={table}
               showActions={false}
               customNewResourceAction={{
                 label: "Add Cluster",
