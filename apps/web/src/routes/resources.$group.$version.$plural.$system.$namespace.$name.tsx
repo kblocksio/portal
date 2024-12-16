@@ -44,6 +44,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DEFAULT_TAB = "details";
 
@@ -97,6 +98,7 @@ function ResourcePage() {
   const { data: selectedResource } = trpc.getResource.useQuery({
     objUri,
   });
+  // const selectedResource = undefined;
 
   const relationships = useMemo(() => {
     return selectedResource?.relationships;
@@ -137,6 +139,7 @@ function ResourcePage() {
     () => selectedResource?.type,
     [selectedResource],
   );
+  // const selectedResourceType = undefined;
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
@@ -151,10 +154,10 @@ function ResourcePage() {
   }, [selectedResource]);
 
   const children = useMemo(() => {
-    return selectedResource?.relationships
+    return relationships
       ?.filter((relationship) => relationship.type === "child")
       .map((relationship) => relationship.resource);
-  }, [selectedResource, relationships]);
+  }, [relationships]);
 
   useBreadcrumbs(() => {
     const breadcrumbs = [
@@ -198,10 +201,10 @@ function ResourcePage() {
     };
   }, [selectedResource]);
 
-  if (!selectedResource) {
-    // TODO: show loading state
-    return <div>Loading...</div>;
-  }
+  // if (!selectedResource) {
+  //   // TODO: show loading state
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-8 sm:py-8">
@@ -210,19 +213,31 @@ function ResourcePage() {
           <div className="flex w-full shrink flex-col gap-6 truncate">
             <div className="flex items-center gap-4 truncate">
               <div className="relative">
-                <ResourceIcon
-                  icon={selectedResourceType?.icon}
-                  className="size-12"
-                />
+                {selectedResourceType ? (
+                  <ResourceIcon
+                    icon={selectedResourceType?.icon}
+                    className="size-12"
+                  />
+                ) : (
+                  <Skeleton className="size-12" />
+                )}
               </div>
               <div className="flex min-w-0 flex-col truncate">
-                <p className="text-muted-foreground truncate text-sm leading-none">
-                  {selectedResourceType?.group}/{selectedResourceType?.version}.
-                  {selectedResourceType?.kind}
-                </p>
-                <h1 className="truncate text-2xl font-bold">
-                  {selectedResource.metadata.name}
-                </h1>
+                {selectedResourceType ? (
+                  <p className="text-muted-foreground truncate text-sm leading-none">
+                    {selectedResourceType?.group}/
+                    {selectedResourceType?.version}.{selectedResourceType?.kind}
+                  </p>
+                ) : (
+                  <Skeleton className="h-4 w-48" />
+                )}
+                {selectedResource ? (
+                  <h1 className="truncate text-2xl font-bold">
+                    {selectedResource.metadata.name}
+                  </h1>
+                ) : (
+                  <Skeleton className="mt-2 h-6 w-96" />
+                )}
               </div>
             </div>
           </div>
@@ -235,7 +250,7 @@ function ResourcePage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <ProjectItems objUris={[selectedResource.objUri]} />
+                <ProjectItems objUris={[objUri]} />
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -283,22 +298,28 @@ function ResourcePage() {
                 Status
               </p>
               <div className="flex flex-col items-start gap-1 text-xs sm:text-sm">
-                {selectedResource.status?.conditions?.map((condition) => (
-                  <StatusBadge
-                    key={condition.type}
-                    conditions={selectedResource.status?.conditions ?? []}
-                    showMessage
-                    type={condition.type}
-                  />
-                ))}
+                {selectedResource ? (
+                  selectedResource.status?.conditions?.map((condition) => (
+                    <StatusBadge
+                      key={condition.type}
+                      conditions={selectedResource?.status?.conditions ?? []}
+                      showMessage
+                      type={condition.type}
+                    />
+                  ))
+                ) : (
+                  <Skeleton className="h-4 w-32" />
+                )}
               </div>
 
               <p className="text-muted-foreground text-xs leading-none">
                 Namespace
               </p>
               <div className="flex truncate text-xs sm:text-sm">
-                {selectedResource.metadata.namespace && (
+                {selectedResource?.metadata?.namespace ? (
                   <NamespaceBadge object={selectedResource} />
+                ) : (
+                  <Skeleton className="h-4 w-32" />
                 )}
               </div>
 
@@ -306,7 +327,11 @@ function ResourcePage() {
                 Cluster
               </p>
               <div className="flex truncate text-xs sm:text-sm">
-                <SystemBadge object={selectedResource} />
+                {selectedResource ? (
+                  <SystemBadge object={selectedResource} />
+                ) : (
+                  <Skeleton className="h-4 w-32" />
+                )}
               </div>
             </div>
           </div>
@@ -353,95 +378,119 @@ function ResourcePage() {
             YAML
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="details">
-          <div className="flex flex-col gap-8">
-            {/* Properties */}
-            {Object.keys(properties).length > 0 && (
-              <div className="w-full">
-                <div className="pb-4 pt-4 sm:pt-6">
-                  <CardTitle>Properties</CardTitle>
-                </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                  <KeyValueList
-                    resource={selectedResource}
-                    properties={properties}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Outputs */}
-            {selectedResource.type &&
-              outputs &&
-              Object.keys(outputs).length > 0 && (
-                <div className="w-full">
-                  <div className="pb-4 sm:pt-6">
-                    <CardTitle>Outputs</CardTitle>
+        {selectedResource ? (
+          <>
+            <TabsContent value="details">
+              <div className="flex flex-col gap-8">
+                {/* Properties */}
+                {Object.keys(properties).length > 0 && (
+                  <div className="w-full">
+                    <div className="pb-4 pt-4 sm:pt-6">
+                      <CardTitle>Properties</CardTitle>
+                    </div>
+                    <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+                      <KeyValueList
+                        resource={selectedResource}
+                        properties={properties}
+                      />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                    <Outputs outputs={outputs} resource={selectedResource} />
+                )}
+
+                {/* Outputs */}
+                {selectedResource?.type &&
+                  outputs &&
+                  Object.keys(outputs).length > 0 && (
+                    <div className="w-full">
+                      <div className="pb-4 sm:pt-6">
+                        <CardTitle>Outputs</CardTitle>
+                      </div>
+                      <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+                        <Outputs
+                          outputs={outputs}
+                          resource={selectedResource}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                {/* Children */}
+                {children && children.length > 0 && (
+                  <div className="w-full">
+                    <div className="pb-4 sm:pt-6">
+                      <CardTitle>Children</CardTitle>
+                    </div>
+                    <ChildrenResourceTable resources={children} />
                   </div>
-                </div>
-              )}
-
-            {/* Children */}
-            {children && children.length > 0 && (
-              <div className="w-full">
-                <div className="pb-4 sm:pt-6">
-                  <CardTitle>Children</CardTitle>
-                </div>
-                <ChildrenResourceTable resources={children} />
+                )}
               </div>
-            )}
-          </div>
-        </TabsContent>
-        <TabsContent value="logs">
-          <CardContent className="h-full p-0">
-            {selectedResource && (
-              <div className="pt-4 sm:pt-6">
-                <Timeline events={events.data} />
-              </div>
-            )}
-          </CardContent>
-        </TabsContent>
+            </TabsContent>
+            <TabsContent value="logs">
+              <CardContent className="h-full p-0">
+                {selectedResource && (
+                  <div className="pt-4 sm:pt-6">
+                    <Timeline events={events.data} />
+                  </div>
+                )}
+              </CardContent>
+            </TabsContent>
 
-        <TabsContent value="relationships">
-          <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
-            <RelationshipGraph objUri={objUri} />
+            <TabsContent value="relationships">
+              <div className="flex h-[640px] flex-col gap-8 pt-4 sm:pt-6">
+                <RelationshipGraph objUri={objUri} />
+              </div>
+            </TabsContent>
+            <TabsContent value="yaml">
+              <CardContent className="h-full p-0">
+                <YamlView object={yamlObject} />
+              </CardContent>
+            </TabsContent>
+          </>
+        ) : (
+          <div className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
           </div>
-        </TabsContent>
-        <TabsContent value="yaml">
-          <CardContent className="h-full p-0">
-            <YamlView object={yamlObject} />
-          </CardContent>
-        </TabsContent>
+        )}
       </Tabs>
 
-      <DeleteResourceDialog
-        resources={[selectedResource]}
-        isOpen={isDeleteOpen}
-        onDeleteClick={() => {
-          setDeleteInProgress(true);
-        }}
-        onClose={() => {
-          setIsDeleteOpen(false);
-        }}
-      />
-      <ReapplyResourceDialog
-        resource={selectedResource}
-        isOpen={isReapplyOpen}
-        onReapplyClick={() => {}}
-        onClose={() => {
-          setIsReapplyOpen(false);
-        }}
-      />
-      <ReadResourceDialog
-        resource={selectedResource}
-        isOpen={isReadOpen}
-        onClose={() => {
-          setIsReadOpen(false);
-        }}
-      />
+      {selectedResource && (
+        <>
+          <DeleteResourceDialog
+            resources={[selectedResource]}
+            isOpen={isDeleteOpen}
+            onDeleteClick={() => {
+              setDeleteInProgress(true);
+            }}
+            onClose={() => {
+              setIsDeleteOpen(false);
+            }}
+          />
+          <ReapplyResourceDialog
+            resource={selectedResource}
+            isOpen={isReapplyOpen}
+            onReapplyClick={() => {}}
+            onClose={() => {
+              setIsReapplyOpen(false);
+            }}
+          />
+          <ReadResourceDialog
+            resource={selectedResource}
+            isOpen={isReadOpen}
+            onClose={() => {
+              setIsReadOpen(false);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
