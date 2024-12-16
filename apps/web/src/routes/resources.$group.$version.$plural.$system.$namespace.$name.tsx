@@ -98,7 +98,6 @@ function ResourcePage() {
   const { data: selectedResource } = trpc.getResource.useQuery({
     objUri,
   });
-  // const selectedResource = undefined;
 
   const relationships = useMemo(() => {
     return selectedResource?.relationships;
@@ -139,7 +138,17 @@ function ResourcePage() {
     () => selectedResource?.type,
     [selectedResource],
   );
-  // const selectedResourceType = undefined;
+
+  const resourceTypeName = useMemo(() => {
+    if (!selectedResourceType) return "";
+    return (
+      selectedResourceType?.group +
+      "/" +
+      selectedResourceType?.version +
+      "." +
+      selectedResourceType?.kind
+    );
+  }, [selectedResourceType]);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
@@ -201,11 +210,6 @@ function ResourcePage() {
     };
   }, [selectedResource]);
 
-  // if (!selectedResource) {
-  //   // TODO: show loading state
-  //   return <div>Loading...</div>;
-  // }
-
   return (
     <div className="container mx-auto flex flex-col gap-4 py-4 sm:gap-8 sm:py-8">
       <div className="flex flex-col gap-3">
@@ -213,9 +217,9 @@ function ResourcePage() {
           <div className="flex w-full shrink flex-col gap-6 truncate">
             <div className="flex items-center gap-4 truncate">
               <div className="relative">
-                {selectedResourceType ? (
+                {selectedResource ? (
                   <ResourceIcon
-                    icon={selectedResourceType?.icon}
+                    icon={selectedResource.type?.icon}
                     className="size-12"
                   />
                 ) : (
@@ -223,10 +227,9 @@ function ResourcePage() {
                 )}
               </div>
               <div className="flex min-w-0 flex-col truncate">
-                {selectedResourceType ? (
+                {selectedResource ? (
                   <p className="text-muted-foreground truncate text-sm leading-none">
-                    {selectedResourceType?.group}/
-                    {selectedResourceType?.version}.{selectedResourceType?.kind}
+                    {resourceTypeName}
                   </p>
                 ) : (
                   <Skeleton className="h-4 w-48" />
@@ -447,13 +450,16 @@ function ResourcePage() {
             </TabsContent>
           </>
         ) : (
-          <div className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+          <div className="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
+            <Skeleton className="h-6 w-full" />
+            <div></div>
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
+            <div className="col-span-2 h-6 w-full"></div>
             <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
+            <div></div>
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
