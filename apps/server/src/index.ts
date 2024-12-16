@@ -670,21 +670,20 @@ const appRouter = router({
         (project) => project.metadata?.name === input.name,
       );
       const projectObjects = project?.objects ?? [];
-      return projectObjects.map((objUri) => {
-        const object = objects.find((o) => o.objUri === objUri);
-        if (!object) {
-          throw new Error(`Object ${objUri} not found`);
-        }
-        const types = typesFromObjects(objects);
-        const relationships = relationshipsFromObjects(objects, types);
-        return mapObjectToResource(
-          object,
-          objects,
-          projects,
-          types,
-          relationships,
-        );
-      });
+      return projectObjects
+        .map((objUri) => objects.find((o) => o.objUri === objUri))
+        .filter((object) => object != undefined)
+        .map((object) => {
+          const types = typesFromObjects(objects);
+          const relationships = relationshipsFromObjects(objects, types);
+          return mapObjectToResource(
+            object,
+            objects,
+            projects,
+            types,
+            relationships,
+          );
+        });
     }),
   listCategories: publicProcedure.query(async () => {
     return categories;

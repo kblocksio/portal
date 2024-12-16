@@ -16,7 +16,7 @@ export const AppBreadcrumbs = () => {
     <Breadcrumb>
       <BreadcrumbList>
         {breadcrumbs.map((breadcrumb, index) => (
-          <React.Fragment key={breadcrumb.name}>
+          <React.Fragment key={index}>
             <BreadcrumbItem>
               {index === breadcrumbs.length - 1 ? (
                 <BreadcrumbPage>{breadcrumb.name}</BreadcrumbPage>
