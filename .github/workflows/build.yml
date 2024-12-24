@@ -198,14 +198,12 @@ jobs:
       matrix:
         block:
           - api-docs
-          - app-objects
           - autobuild
           - autobuild-static-site
           - aws-account
           - background-worker
           - bucket
           - cloudfront
-          - core-objects
           - cron-job
           - networked-workload
           - postgres
