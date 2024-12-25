@@ -643,7 +643,7 @@ const appRouter = router({
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
       const clusters = clustersFromObjects(objects);
-      // special case for clusters
+      // special case for clusters TODO: ainvover - move to different endpoint
       if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
         const cluster = clusters.find((c) => c.objUri === input.objUri);
         if (!cluster) {
