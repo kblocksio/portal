@@ -363,19 +363,19 @@ const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
   );
 };
 
-const clustersFromObjects = (
-  allObjects: ExtendedApiObject[],
-  types: Record<string, ResourceType>,
-): Cluster[] => {
-  return allObjects
+const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
+  const clusters = allObjects
     .filter(
       (object): object is Cluster =>
         object.objType === "kblocks.io/v1/clusters",
     )
-    .map((object) => ({
-      ...object,
-      type: types["kblocks.io/v1/clusters"],
-    }));
+    .map((object) => {
+      return {
+        ...object,
+      };
+    });
+
+  return clusters;
 };
 
 const mapTypeFromObject = (
@@ -403,13 +403,32 @@ const mapTypeFromObject = (
 const typesFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Record<string, ResourceType> => {
-  return allObjects
+  const clusters = clustersFromObjects(allObjects);
+  const clustersNames = Object.values(clusters)?.map((c) => c.metadata?.name);
+  const clusterTypeObject = allObjects.find(
+    (o) =>
+      o.objType === "kblocks.io/v1/blocks" &&
+      o.metadata?.name === "clusters.kblocks.io",
+  );
+  const types = allObjects
     .filter((o) => o.objType === "kblocks.io/v1/blocks")
+    .filter((o) => {
+      const { system } = parseBlockUri(o.objUri);
+      return clustersNames.includes(system);
+    })
     .reduce<Record<string, ResourceType>>((acc, object) => {
       const [key, type] = mapTypeFromObject(object);
       acc[key] = type;
       return acc;
     }, {});
+
+  // add cluster type
+  if (clusterTypeObject) {
+    const [key, type] = mapTypeFromObject(clusterTypeObject);
+    types[key] = type;
+  }
+
+  return types;
 };
 
 const relationshipsFromObjects = (
@@ -576,7 +595,7 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
-      const clusters = clustersFromObjects(objects, types);
+      const clusters = clustersFromObjects(objects);
       let resources = resourcesFromObjects(
         objects,
         projects,
@@ -614,8 +633,7 @@ const appRouter = router({
   }),
   listClusters: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
-    const types = typesFromObjects(objects);
-    return clustersFromObjects(objects, types);
+    return clustersFromObjects(objects);
   }),
   getResource: publicProcedure
     .input(z.object({ objUri: z.string() }))
@@ -624,8 +642,8 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
-      const clusters = clustersFromObjects(objects, types);
-      // special case for clusters
+      const clusters = clustersFromObjects(objects);
+      // special case for clusters TODO: ainvover - move to different endpoint
       if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
         const cluster = clusters.find((c) => c.objUri === input.objUri);
         if (!cluster) {
