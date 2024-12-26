@@ -177,7 +177,7 @@ jobs:
           export VITE_SKIP_AUTH=true
           export PORTAL_INGRESS_HOST="${{ steps.qkube.outputs.kblocks-host }}"
           export PORTAL_REDIS_ENABLED=false
-          export PORTAL_LOCAL_CLUSTER_ENABLED=false
+          export PORTAL_LOCAL_CLUSTER_NAME="${{ steps.qkube.outputs.kblocks-host }}"
           # TODO: Remove this step
           npm run build
           skaffold run --platform=linux/arm64
