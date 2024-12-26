@@ -146,11 +146,14 @@ jobs:
         run: |
           ./scripts/install-cert.sh ./secrets/STAR_kblocks_io.key ./secrets/STAR_kblocks_io.pem
 
-      - name: Install the Workload block (needed for the portal)
+      - name: Install the blocks needed for the portal
         working-directory: gallery
         env:
           KBLOCKS_STORAGE_PREFIX: ${{ env.ENV_NAME }}
-        run: ./install-blocks.sh ./kblocks/workload
+        run: |
+          ./install-blocks.sh ./kblocks/workload
+          ./install-blocks.sh ./kblocks/project
+          ./install-blocks.sh ./kblocks/cluster
 
       - name: Build and push backend
         uses: docker/build-push-action@v6
