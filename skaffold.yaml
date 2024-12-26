@@ -39,4 +39,4 @@ deploy:
           frontend.image: "{{.IMAGE_FULLY_QUALIFIED_wingcloudbot_kblocks_frontend}}"
           ingress.host: "{{.PORTAL_INGRESS_HOST}}"
           redis.enabled: "{{.PORTAL_REDIS_ENABLED}}"
-          localCluster.enabled: "{{.PORTAL_LOCAL_CLUSTER_ENABLED}}"
+          localCluster.name: "{{.PORTAL_LOCAL_CLUSTER_NAME}}"
