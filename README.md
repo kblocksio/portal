@@ -76,7 +76,8 @@ Setup all of the secrets and certs to your cluster:
 > Replace `KBLOCKS_SYSTEM_ID` with the system id if you are installing to a non-local cluster
 
 ```sh
-KBLOCKS_SYSTEM_ID=local ./scripts/install-all-secrets.sh
+export KBLOCKS_SYSTEM_ID=local
+./scripts/install-all-secrets.sh
 ```
 
 ### 6. Install the portal

@@ -1,8 +1,6 @@
-{{- if eq true .Values.localCluster.enabled }}
 apiVersion: kblocks.io/v1
 kind: Cluster
 metadata:
-  name: local
+  name: {{ .Values.localCluster.name | quote }}
 access: read_write
-description: This is my local cluster
-{{- end }}
+description: default cluster
