@@ -356,7 +356,8 @@ const resourcesFromObjects = (
       return (
         object.objType !== "kblocks.io/v1/projects" &&
         object.objType !== "kblocks.io/v1/blocks" &&
-        object.objType !== "kblocks.io/v1/clusters"
+        object.objType !== "kblocks.io/v1/clusters" &&
+        object.objType !== "kblocks.io/v1/organizations"
       );
     })
     .map((object) =>
