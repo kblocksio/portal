@@ -15,6 +15,7 @@ echo "Install system blocks required by the portal"
   ./install-blocks.sh kblocks/workload
   ./install-blocks.sh kblocks/project
   ./install-blocks.sh kblocks/cluster
+  ./install-blocks.sh kblocks/organization
 )
 
 echo "Installing to $context"

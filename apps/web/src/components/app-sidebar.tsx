@@ -27,6 +27,7 @@ import { Link } from "./ui/link";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "./ui/button";
 import { trpc } from "@/trpc";
+import { Project } from "@kblocks-portal/server";
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
@@ -62,11 +63,11 @@ export const AppSidebar = () => {
 
   const catalogItems = trpc.listCatalogItems.useQuery(undefined, {
     initialData: [],
-    select: (data) =>
-      data.map<Item>((item) => ({
+    select: (data: any) =>
+      data.map((item: any) => ({
         title: item.category,
         icon: item.icon,
-        items: item.types.map<Item>((type) => ({
+        items: item.types.map((type: any) => ({
           title: type.kind,
           url: `/catalog/${type.typeUri}`,
           icon: type.icon,
@@ -115,7 +116,7 @@ export const AppSidebar = () => {
             </div>
           </SidebarGroupLabel>
           <SidebarMenu>
-            {projects.map((project) => (
+            {projects.map((project: Project) => (
               <SidebarItem
                 key={project.metadata.name}
                 item={{
@@ -133,37 +134,9 @@ export const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
-            {catalogItems.data?.map((item) => (
+            {catalogItems.data?.map((item: Item) => (
               <SidebarItem key={item.title} item={item} isActive={false} />
             ))}
-            {/* {Object.keys(categories).map((category) => {
-              const items = Object.keys(nonSystemResourceTypes)
-                .filter((resourceTypeKey) =>
-                  nonSystemResourceTypes[resourceTypeKey].categories?.includes(
-                    category,
-                  ),
-                )
-                .map((resourceTypeKey) => ({
-                  title: nonSystemResourceTypes[resourceTypeKey].kind,
-                  url: `/catalog/${resourceTypeKey}`,
-                  icon: nonSystemResourceTypes[resourceTypeKey].icon,
-                }));
-              if (items.length === 0) {
-                return null;
-              }
-              return (
-                <SidebarItem
-                  isActive={false}
-                  key={category}
-                  item={{
-                    title: categories[category].title,
-                    url: "#",
-                    icon: categories[category].icon,
-                    items,
-                  }}
-                />
-              );
-            })} */}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

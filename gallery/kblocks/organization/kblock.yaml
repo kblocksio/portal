@@ -1,0 +1,17 @@
+apiVersion: kblocks.io/v1
+kind: Block
+spec:
+  engine: noop
+  definition:
+    readme: ./README.md
+    schema: ./src/values.schema.json
+    description: An example of a noop block
+    group: kblocks.io
+    version: v1
+    categories:
+      - environments
+    kind: Organization
+    plural: organizations
+    singular: organization
+metadata:
+  name: organizations.kblocks.io

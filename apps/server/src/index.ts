@@ -46,6 +46,13 @@ export interface ResourceType extends Definition {
   readme?: string;
 }
 
+export interface Organization extends ExtendedApiObject {
+  name: string;
+  description: string;
+  icon: string;
+  readme: string;
+}
+
 export type RelationshipType = "parent" | "child" | "ref";
 
 export type Relationship = {
@@ -400,6 +407,15 @@ const mapTypeFromObject = (
   ];
 };
 
+const organizationsFromObjects = (
+  allObjects: ExtendedApiObject[],
+): Organization[] => {
+  return allObjects.filter(
+    (object): object is Organization =>
+      object.objType === "kblocks.io/v1/organizations",
+  );
+};
+
 const typesFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Record<string, ResourceType> => {
@@ -547,6 +563,11 @@ const appRouter = router({
     const objects = await getExtendedObjects();
     const types = typesFromObjects(objects);
     return types;
+  }),
+  listOrganizations: publicProcedure.query(async () => {
+    const objects = await getExtendedObjects();
+    const organizations = organizationsFromObjects(objects);
+    return organizations;
   }),
   getType: publicProcedure
     .input(z.object({ typeUri: z.string() }))
