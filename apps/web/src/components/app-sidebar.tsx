@@ -167,9 +167,11 @@ export const AppSidebar = () => {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <AppSidebarFooter />
-      </SidebarFooter>
+      {!import.meta.env.VITE_SKIP_AUTH && (
+        <SidebarFooter>
+          <AppSidebarFooter />
+        </SidebarFooter>
+      )}
       <SidebarRail />
     </Sidebar>
   );
