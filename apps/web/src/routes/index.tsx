@@ -13,7 +13,7 @@ function Index() {
 
   // TODO: this is a temporary solution to display the readme of the first organization
   const readme = useMemo(() => {
-    if (!organizations || organizations.length === 0) return "null";
+    if (!organizations || organizations.length === 0) return "";
     const org = organizations[0];
     return org.readme;
   }, [organizations]);

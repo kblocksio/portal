@@ -8,7 +8,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { AudioWaveform, ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/trpc";
 import { getIconComponent } from "@/lib/get-icon";
@@ -32,20 +32,28 @@ export const AppSidebarHeader = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
+              disabled={!activeTeam}
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                 {ActiveTeamIcon ? <ActiveTeamIcon className="size-4" /> : null}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {activeTeam?.name}
-                </span>
-                <span className="truncate text-xs">
-                  {activeTeam?.description}
-                </span>
-              </div>
+              {!activeTeam ? (
+                <div className="grid flex-1 gap-1.5">
+                  <div className="bg-sidebar-accent h-4 w-24 animate-pulse rounded-md" />
+                  <div className="bg-sidebar-accent h-3 w-32 animate-pulse rounded-md" />
+                </div>
+              ) : (
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {activeTeam.name}
+                  </span>
+                  <span className="truncate text-xs">
+                    {activeTeam.description}
+                  </span>
+                </div>
+              )}
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
