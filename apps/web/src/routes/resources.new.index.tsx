@@ -24,15 +24,18 @@ function CreateNewResourceCatalog() {
     setSearchQuery(e.target.value);
   }, []);
 
-  useBreadcrumbs([
-    {
-      name: "Resources",
-      url: "/resources",
-    },
-    {
-      name: "Create a new resource",
-    },
-  ]);
+  useBreadcrumbs(
+    () => [
+      {
+        name: "Resources",
+        url: "/resources",
+      },
+      {
+        name: "Create a new resource",
+      },
+    ],
+    [],
+  );
 
   const filteredResourceTypes = useMemo(() => {
     return Object.values(resourceTypes).filter((r) => {
