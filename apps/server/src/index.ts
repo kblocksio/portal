@@ -372,6 +372,17 @@ const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
 };
 
 const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
+  const clusterTypeObject = allObjects.find(
+    (o) =>
+      o.objType === "kblocks.io/v1/blocks" &&
+      o.metadata?.name === "clusters.kblocks.io",
+  );
+
+  if (!clusterTypeObject) {
+    throw new Error("Cluster type object not found");
+  }
+  const [_, type] = mapTypeFromObject(clusterTypeObject);
+
   const clusters = allObjects
     .filter(
       (object): object is Cluster =>
@@ -380,6 +391,7 @@ const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
     .map((object) => {
       return {
         ...object,
+        type,
       };
     });
 
