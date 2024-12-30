@@ -154,6 +154,7 @@ jobs:
           ./install-blocks.sh ./kblocks/workload
           ./install-blocks.sh ./kblocks/project
           ./install-blocks.sh ./kblocks/cluster
+          ./install-blocks.sh ./kblocks/organization
 
       - name: Build and push backend
         uses: docker/build-push-action@v6
@@ -222,6 +223,7 @@ jobs:
           - web-service
           - project
           - cluster
+          - organization
           - workload
     steps:
       - name: Checkout
