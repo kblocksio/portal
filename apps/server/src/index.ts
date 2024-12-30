@@ -46,6 +46,13 @@ export interface ResourceType extends Definition {
   readme?: string;
 }
 
+export interface Organization extends ExtendedApiObject {
+  name: string;
+  description: string;
+  icon: string;
+  readme: string;
+}
+
 export type RelationshipType = "parent" | "child" | "ref";
 
 export type Relationship = {
@@ -349,7 +356,8 @@ const resourcesFromObjects = (
       return (
         object.objType !== "kblocks.io/v1/projects" &&
         object.objType !== "kblocks.io/v1/blocks" &&
-        object.objType !== "kblocks.io/v1/clusters"
+        object.objType !== "kblocks.io/v1/clusters" &&
+        object.objType !== "kblocks.io/v1/organizations"
       );
     })
     .map((object) =>
@@ -364,6 +372,17 @@ const projectsFromObjects = (allObjects: ExtendedApiObject[]): Project[] => {
 };
 
 const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
+  const clusterTypeObject = allObjects.find(
+    (o) =>
+      o.objType === "kblocks.io/v1/blocks" &&
+      o.metadata?.name === "clusters.kblocks.io",
+  );
+
+  if (!clusterTypeObject) {
+    throw new Error("Cluster type object not found");
+  }
+  const [_, type] = mapTypeFromObject(clusterTypeObject);
+
   const clusters = allObjects
     .filter(
       (object): object is Cluster =>
@@ -372,6 +391,7 @@ const clustersFromObjects = (allObjects: ExtendedApiObject[]): Cluster[] => {
     .map((object) => {
       return {
         ...object,
+        type,
       };
     });
 
@@ -398,6 +418,15 @@ const mapTypeFromObject = (
       icon: object.spec.definition.icon,
     },
   ];
+};
+
+const organizationsFromObjects = (
+  allObjects: ExtendedApiObject[],
+): Organization[] => {
+  return allObjects.filter(
+    (object): object is Organization =>
+      object.objType === "kblocks.io/v1/organizations",
+  );
 };
 
 const typesFromObjects = (
@@ -547,6 +576,11 @@ const appRouter = router({
     const objects = await getExtendedObjects();
     const types = typesFromObjects(objects);
     return types;
+  }),
+  listOrganizations: publicProcedure.query(async () => {
+    const objects = await getExtendedObjects();
+    const organizations = organizationsFromObjects(objects);
+    return organizations;
   }),
   getType: publicProcedure
     .input(z.object({ typeUri: z.string() }))

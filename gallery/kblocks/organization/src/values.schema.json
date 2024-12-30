@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": [],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the organization"
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the organization"
+    },
+    "icon": {
+      "type": "string",
+      "description": "The icon of the organization. This can be either a heroicon in the format heroicon:// or a lucidicon name or an SVG of the icon.\n\n@ui kblocks.io/textarea"
+    },
+    "readme": {
+      "type": "string",
+      "description": "The readme of the organization \n@ui kblocks.io/textarea"
+    }
+  }
+}

@@ -19,9 +19,9 @@ function CreateResourcePage() {
   const navigate = useNavigate();
   const previousRoute = useContext(LocationContext);
 
-  const firstPathSegment = useMemo(() => {
+  const firstPathSegment = useMemo((): string => {
     if (previousRoute?.previousRoute) {
-      return previousRoute.previousRoute.split("/")[1];
+      return previousRoute.previousRoute.split("/")[1] || "/resources";
     }
     return "/resources";
   }, [previousRoute]);
