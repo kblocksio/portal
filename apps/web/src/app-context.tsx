@@ -1,4 +1,4 @@
-import type { Project } from "@kblocks-portal/server";
+import type { Organization, Project } from "@kblocks-portal/server";
 import React, {
   createContext,
   useState,
@@ -15,7 +15,9 @@ export interface BreadcrumbItem {
 
 interface AppContextType {
   selectedProject: Project | null;
+  selectedOrganization: Organization | null;
   setSelectedProject: (project: Project | null) => void;
+  setSelectedOrganization: (organization: Organization | null) => void;
   breadcrumbs: BreadcrumbItem[];
   setBreadcrumbs: (breadcrumbs: BreadcrumbItem[]) => void;
 }
@@ -29,12 +31,16 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(null);
 
   return (
     <AppContext.Provider
       value={{
         selectedProject,
         setSelectedProject,
+        selectedOrganization,
+        setSelectedOrganization,
         breadcrumbs,
         setBreadcrumbs,
       }}

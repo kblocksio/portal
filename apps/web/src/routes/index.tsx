@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MarkdownWrapper } from "@/components/markdown";
-import { useBreadcrumbs } from "@/app-context";
+import { useAppContext, useBreadcrumbs } from "@/app-context";
 import { trpc } from "@/trpc";
 import { useMemo } from "react";
 
@@ -9,14 +9,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data: organizations } = trpc.listOrganizations.useQuery();
+  const { selectedOrganization } = useAppContext();
 
   // TODO: this is a temporary solution to display the readme of the first organization
   const readme = useMemo(() => {
-    if (!organizations || organizations.length === 0) return "";
-    const org = organizations[0];
-    return org.readme;
-  }, [organizations]);
+    if (!selectedOrganization) return "";
+    return selectedOrganization.readme;
+  }, [selectedOrganization]);
 
   useBreadcrumbs(() => {
     return [{ name: "Home", url: "/" }];

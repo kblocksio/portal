@@ -5,7 +5,7 @@ spec:
   definition:
     readme: ./README.md
     schema: ./src/values.schema.json
-    description: An example of a noop block
+    description: An organization is a collection of projects and resources.
     group: kblocks.io
     version: v1
     categories:

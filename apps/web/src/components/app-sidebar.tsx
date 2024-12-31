@@ -35,6 +35,20 @@ export const AppSidebar = () => {
     initialData: [],
   });
   const location = useLocation();
+  const adminSidebarItems = useMemo(() => {
+    return [
+      {
+        title: "Clusters",
+        url: "/clusters",
+        icon: "heroicon://rectangle-group",
+      },
+      {
+        title: "Organizations",
+        url: "/organizations",
+        icon: "heroicon://user-group",
+      },
+    ];
+  }, []);
   const platformSideBarItems = useMemo(() => {
     return [
       {
@@ -42,11 +56,6 @@ export const AppSidebar = () => {
         url: "/",
         icon: "heroicon://home-modern",
         isActive: true,
-      },
-      {
-        title: "Clusters",
-        url: "/clusters",
-        icon: "heroicon://rectangle-group",
       },
       {
         title: "Catalog",
@@ -81,6 +90,14 @@ export const AppSidebar = () => {
         <AppSidebarHeader />
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarMenu>
+            {adminSidebarItems.map((item) => (
+              <SidebarItem key={item.title} item={item} isActive={false} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>

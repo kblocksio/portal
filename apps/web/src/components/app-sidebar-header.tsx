@@ -12,10 +12,13 @@ import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/trpc";
 import { getIconComponent } from "@/lib/get-icon";
+import { Organization } from "@kblocks-portal/server";
+import { useAppContext } from "@/app-context";
 
 export const AppSidebarHeader = () => {
   const { data: organizations } = trpc.listOrganizations.useQuery();
   const [activeTeam, setActiveTeam] = useState(organizations?.[0]);
+  const { setSelectedOrganization } = useAppContext();
 
   const ActiveTeamIcon = useMemo(() => {
     if (!activeTeam?.icon) return null;
@@ -25,6 +28,11 @@ export const AppSidebarHeader = () => {
   useEffect(() => {
     setActiveTeam(organizations?.[0]);
   }, [organizations]);
+
+  const onSelectOrganization = (organization: Organization) => {
+    setActiveTeam(organization);
+    setSelectedOrganization(organization);
+  };
 
   return (
     <SidebarMenu>
@@ -71,7 +79,7 @@ export const AppSidebarHeader = () => {
               return (
                 <DropdownMenuItem
                   key={org.name}
-                  onClick={() => setActiveTeam(org)}
+                  onClick={() => onSelectOrganization(org)}
                   className="gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center rounded-sm border">
