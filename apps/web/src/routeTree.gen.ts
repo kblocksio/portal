@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as ResourcesIndexImport } from './routes/resources.index'
+import { Route as OrganizationsIndexImport } from './routes/organizations.index'
 import { Route as ClustersIndexImport } from './routes/clusters.index'
 import { Route as CatalogIndexImport } from './routes/catalog.index'
 import { Route as ProjectsNameImport } from './routes/projects.$name'
@@ -40,6 +41,12 @@ const IndexRoute = IndexImport.update({
 const ResourcesIndexRoute = ResourcesIndexImport.update({
   id: '/resources/',
   path: '/resources/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OrganizationsIndexRoute = OrganizationsIndexImport.update({
+  id: '/organizations/',
+  path: '/organizations/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -133,6 +140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClustersIndexImport
       parentRoute: typeof rootRoute
     }
+    '/organizations/': {
+      id: '/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations'
+      preLoaderRoute: typeof OrganizationsIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/resources/': {
       id: '/resources/'
       path: '/resources'
@@ -186,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/projects/$name': typeof ProjectsNameRoute
   '/catalog': typeof CatalogIndexRoute
   '/clusters': typeof ClustersIndexRoute
+  '/organizations': typeof OrganizationsIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/resources/new': typeof ResourcesNewIndexRoute
   '/catalog/$group/$version/$plural': typeof CatalogGroupVersionPluralRoute
@@ -200,6 +215,7 @@ export interface FileRoutesByTo {
   '/projects/$name': typeof ProjectsNameRoute
   '/catalog': typeof CatalogIndexRoute
   '/clusters': typeof ClustersIndexRoute
+  '/organizations': typeof OrganizationsIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/resources/new': typeof ResourcesNewIndexRoute
   '/catalog/$group/$version/$plural': typeof CatalogGroupVersionPluralRoute
@@ -215,6 +231,7 @@ export interface FileRoutesById {
   '/projects/$name': typeof ProjectsNameRoute
   '/catalog/': typeof CatalogIndexRoute
   '/clusters/': typeof ClustersIndexRoute
+  '/organizations/': typeof OrganizationsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
   '/resources/new/': typeof ResourcesNewIndexRoute
   '/catalog/$group/$version/$plural': typeof CatalogGroupVersionPluralRoute
@@ -231,6 +248,7 @@ export interface FileRouteTypes {
     | '/projects/$name'
     | '/catalog'
     | '/clusters'
+    | '/organizations'
     | '/resources'
     | '/resources/new'
     | '/catalog/$group/$version/$plural'
@@ -244,6 +262,7 @@ export interface FileRouteTypes {
     | '/projects/$name'
     | '/catalog'
     | '/clusters'
+    | '/organizations'
     | '/resources'
     | '/resources/new'
     | '/catalog/$group/$version/$plural'
@@ -257,6 +276,7 @@ export interface FileRouteTypes {
     | '/projects/$name'
     | '/catalog/'
     | '/clusters/'
+    | '/organizations/'
     | '/resources/'
     | '/resources/new/'
     | '/catalog/$group/$version/$plural'
@@ -272,6 +292,7 @@ export interface RootRouteChildren {
   ProjectsNameRoute: typeof ProjectsNameRoute
   CatalogIndexRoute: typeof CatalogIndexRoute
   ClustersIndexRoute: typeof ClustersIndexRoute
+  OrganizationsIndexRoute: typeof OrganizationsIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
   ResourcesNewIndexRoute: typeof ResourcesNewIndexRoute
   CatalogGroupVersionPluralRoute: typeof CatalogGroupVersionPluralRoute
@@ -286,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsNameRoute: ProjectsNameRoute,
   CatalogIndexRoute: CatalogIndexRoute,
   ClustersIndexRoute: ClustersIndexRoute,
+  OrganizationsIndexRoute: OrganizationsIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
   ResourcesNewIndexRoute: ResourcesNewIndexRoute,
   CatalogGroupVersionPluralRoute: CatalogGroupVersionPluralRoute,
@@ -311,6 +333,7 @@ export const routeTree = rootRoute
         "/projects/$name",
         "/catalog/",
         "/clusters/",
+        "/organizations/",
         "/resources/",
         "/resources/new/",
         "/catalog/$group/$version/$plural",
@@ -333,6 +356,9 @@ export const routeTree = rootRoute
     },
     "/clusters/": {
       "filePath": "clusters.index.tsx"
+    },
+    "/organizations/": {
+      "filePath": "organizations.index.tsx"
     },
     "/resources/": {
       "filePath": "resources.index.tsx"

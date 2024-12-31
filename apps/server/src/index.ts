@@ -423,10 +423,16 @@ const mapTypeFromObject = (
 const organizationsFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Organization[] => {
-  return allObjects.filter(
-    (object): object is Organization =>
-      object.objType === "kblocks.io/v1/organizations",
-  );
+  return allObjects
+    .filter(
+      (object): object is Organization =>
+        object.objType === "kblocks.io/v1/organizations",
+    )
+    .sort((a, b) => {
+      const aTime = a.metadata?.creationTimestamp ?? "";
+      const bTime = b.metadata?.creationTimestamp ?? "";
+      return aTime.localeCompare(bTime);
+    });
 };
 
 const typesFromObjects = (
