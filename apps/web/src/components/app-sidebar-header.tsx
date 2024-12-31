@@ -26,7 +26,9 @@ export const AppSidebarHeader = () => {
   }, [activeTeam]);
 
   useEffect(() => {
-    setActiveTeam(organizations?.[0]);
+    if (organizations?.[0]) {
+      onSelectOrganization(organizations[0]);
+    }
   }, [organizations]);
 
   const onSelectOrganization = (organization: Organization) => {

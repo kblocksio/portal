@@ -11,7 +11,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { selectedOrganization } = useAppContext();
 
-  // TODO: this is a temporary solution to display the readme of the first organization
   const readme = useMemo(() => {
     if (!selectedOrganization) return "";
     return selectedOrganization.readme;
