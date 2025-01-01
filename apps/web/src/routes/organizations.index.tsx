@@ -6,22 +6,27 @@ import {
   ResourceTable,
   useResourceTable,
 } from "@/components/resource-table/resource-table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { trpc } from "@/trpc";
 import { getFilteredRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { getCoreRowModel } from "@tanstack/react-table";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/organizations/")({
   component: Organizations,
 });
 
 function Organizations() {
-  const { data: organizations } = trpc.listOrganizations.useQuery(undefined, {
-    initialData: [],
-  });
+  const { data: organizations = [] } = trpc.listOrganizations.useQuery(
+    undefined,
+    {
+      initialData: [],
+    },
+  );
+
+  useEffect(() => {
+    console.log("mounted");
+  }, []);
 
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://user-group" });
@@ -70,29 +75,3 @@ function Organizations() {
     </div>
   );
 }
-
-const ClustersEmptyState = ({
-  handleAddCluster,
-}: {
-  handleAddCluster: () => void;
-}) => {
-  return (
-    <div className="p-6">
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-background mb-4 rounded-full p-3">
-            <PlusCircle className="text-muted-foreground h-12 w-12" />
-          </div>
-          <h2 className="mb-2 text-lg font-semibold">No clusters found</h2>
-          <p className="text-muted-foreground mb-4 max-w-sm text-sm">
-            Get started by adding your first cluster
-          </p>
-          <Button onClick={handleAddCluster}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add new cluster
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};

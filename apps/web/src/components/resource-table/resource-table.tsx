@@ -372,12 +372,7 @@ export const ResourceTable = ({
   showCreateNew,
   customNewResourceAction,
 }: ResourceTableProps) => {
-  const emptyTable =
-    table &&
-    table.getFilteredRowModel() &&
-    table.getFilteredRowModel().rows &&
-    table.getFilteredRowModel().rows.length === 0;
-
+  const emptyTable = table.getFilteredRowModel().rows.length === 0;
   return (
     <div className={cn("flex flex-col gap-8", className)}>
       <ResourceTableToolbar
