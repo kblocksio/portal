@@ -423,6 +423,17 @@ const mapTypeFromObject = (
 const organizationsFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Organization[] => {
+  const organizationTypeObject = allObjects.find(
+    (o) =>
+      o.objType === "kblocks.io/v1/blocks" &&
+      o.metadata?.name === "organizations.kblocks.io",
+  );
+
+  if (!organizationTypeObject) {
+    throw new Error("Organization type object not found");
+  }
+  const [_, type] = mapTypeFromObject(organizationTypeObject);
+
   return allObjects
     .filter(
       (object): object is Organization =>
@@ -434,7 +445,6 @@ const organizationsFromObjects = (
       return aTime.localeCompare(bTime);
     })
     .map((object) => {
-      const [_, type] = mapTypeFromObject(object);
       return {
         ...object,
         type,
