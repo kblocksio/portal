@@ -432,6 +432,13 @@ const organizationsFromObjects = (
       const aTime = a.metadata?.creationTimestamp ?? "";
       const bTime = b.metadata?.creationTimestamp ?? "";
       return aTime.localeCompare(bTime);
+    })
+    .map((object) => {
+      const [_, type] = mapTypeFromObject(object);
+      return {
+        ...object,
+        type,
+      };
     });
 };
 

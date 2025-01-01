@@ -8,6 +8,7 @@ spec:
     description: An organization is a collection of projects and resources.
     group: kblocks.io
     version: v1
+    icon: heroicon://user-group
     categories:
       - environments
     kind: Organization
