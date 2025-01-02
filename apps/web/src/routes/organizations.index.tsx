@@ -92,13 +92,13 @@ const OrganizationsEmptyState = ({
           <div className="bg-background mb-4 rounded-full p-3">
             <PlusCircle className="text-muted-foreground h-12 w-12" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold">No clusters found</h2>
+          <h2 className="mb-2 text-lg font-semibold">No organizations found</h2>
           <p className="text-muted-foreground mb-4 max-w-sm text-sm">
-            Get started by adding your first cluster
+            Get started by adding your first organization
           </p>
           <Button onClick={handleAddOrganization}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add new cluster
+            Add new organization
           </Button>
         </CardContent>
       </Card>
