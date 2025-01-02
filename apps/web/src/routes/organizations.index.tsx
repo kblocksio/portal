@@ -10,7 +10,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { trpc } from "@/trpc";
 import { getFilteredRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { getCoreRowModel } from "@tanstack/react-table";
-import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
@@ -21,9 +20,7 @@ export const Route = createFileRoute("/organizations/")({
 });
 
 function Organizations() {
-  const organizations = trpc.listOrganizations.useQuery(undefined, {
-    initialData: [],
-  });
+  const organizations = trpc.listOrganizations.useQuery();
 
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://user-group" });
