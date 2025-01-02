@@ -56,9 +56,9 @@ export const LastLogMessage = memo(function LastLogMessage({
         {latestEvent && (
           <motion.div
             key={latestEvent.timestamp.toString()}
-            initial={skip ? { opacity: 0 } : { y: "100%", opacity: 0 }}
-            animate={{ y: "0%", opacity: 1 }}
-            exit={{ y: "-100%", opacity: 0 }}
+            initial={skip ? undefined : { y: "100%", opacity: 0 }}
+            animate={skip ? undefined : { y: "0%", opacity: 1 }}
+            exit={skip ? undefined : { y: "-100%", opacity: 0 }}
             transition={{ duration: 0.5 }}
             className="absolute inset-0 flex min-w-0 items-center gap-0.5 px-1"
           >

@@ -197,7 +197,9 @@ function ResourcePage() {
       cloneDeep(selectedResource ?? {}),
       propertiesBlackList,
     );
+    // eslint-disable-next-line react-compiler/react-compiler
     delete obj.metadata?.managedFields;
+    // eslint-disable-next-line react-compiler/react-compiler
     delete obj.status?.lastStateHash;
     delete obj.objUri;
     delete obj.objType;
@@ -423,6 +425,8 @@ function ResourcePage() {
                     <div className="pb-4 sm:pt-6">
                       <CardTitle>Children</CardTitle>
                     </div>
+                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                    {/* @ts-ignore-next-line */}
                     <ChildrenResourceTable resources={children} />
                   </div>
                 )}

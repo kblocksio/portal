@@ -23,11 +23,6 @@ export const ResourceLink = ({
       </div>
       <Link
         to={`/resources/${resource.objUri.replace("kblocks://", "")}` as any}
-        onMouseEnter={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        // className="underline"
       >
         <div className="text-md flex items-center gap-2">
           {resource.metadata.name}

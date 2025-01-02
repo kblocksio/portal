@@ -24,7 +24,11 @@ import { AppSidebarFooter } from "./app-sidebar-footer";
 import { AppSidebarHeader } from "./app-sidebar-header";
 import { ResourceIcon } from "@/lib/get-icon";
 import { Link } from "./ui/link";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import {
+  useLocation,
+  useNavigate,
+  type ActiveOptions,
+} from "@tanstack/react-router";
 import { Button } from "./ui/button";
 import { trpc } from "@/trpc";
 import { Project } from "@kblocks-portal/server";
@@ -34,7 +38,6 @@ export const AppSidebar = () => {
   const { data: projects } = trpc.listProjects.useQuery(undefined, {
     initialData: [],
   });
-  const location = useLocation();
   const adminSidebarItems = useMemo(() => {
     return [
       {
@@ -55,7 +58,6 @@ export const AppSidebar = () => {
         title: "Home",
         url: "/",
         icon: "heroicon://home-modern",
-        isActive: true,
       },
       {
         title: "Catalog",
@@ -94,7 +96,7 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarMenu>
             {adminSidebarItems.map((item) => (
-              <SidebarItem key={item.title} item={item} isActive={false} />
+              <SidebarItem key={item.title} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroup>
@@ -102,11 +104,7 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
             {platformSideBarItems.map((item) => (
-              <SidebarItem
-                key={item.title}
-                item={item}
-                isActive={location.pathname === item.url}
-              />
+              <SidebarItem key={item.title} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroup>
@@ -141,9 +139,6 @@ export const AppSidebar = () => {
                   url: `/projects/${project.metadata.name}`,
                   icon: project.icon ?? "heroicon://folder",
                 }}
-                isActive={
-                  location.pathname === `/projects/${project.metadata.name}`
-                }
               />
             ))}
           </SidebarMenu>
@@ -152,7 +147,7 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
             {catalogItems.data?.map((item: Item) => (
-              <SidebarItem key={item.title} item={item} isActive={false} />
+              <SidebarItem key={item.title} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroup>
@@ -171,15 +166,15 @@ interface Item {
   title: string;
   url?: string;
   icon?: string;
+  activeOptions?: ActiveOptions;
   items?: Item[];
 }
 
 interface SidebarItemProps {
   item: Item;
-  isActive: boolean;
 }
 
-const SidebarItem = ({ item, isActive }: SidebarItemProps) => {
+const SidebarItem = ({ item }: SidebarItemProps) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -212,7 +207,8 @@ const SidebarItem = ({ item, isActive }: SidebarItemProps) => {
         <SidebarMenuButton asChild>
           <Link
             to={item.url as any}
-            className={isActive ? "bg-sidebar-accent" : ""}
+            activeOptions={item.activeOptions}
+            activeProps={{ className: "bg-sidebar-accent" }}
           >
             {item.icon && (
               <ResourceIcon
@@ -238,7 +234,6 @@ const SidebarItem = ({ item, isActive }: SidebarItemProps) => {
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
-            className={isActive ? "bg-sidebar-accent" : ""}
             onClick={(e) => {
               e.preventDefault();
               if (item.url && item.url !== "#") {
@@ -266,22 +261,15 @@ const SidebarItem = ({ item, isActive }: SidebarItemProps) => {
           <SidebarMenuSub>
             {item.items?.map((subItem: any) => {
               if (subItem.items) {
-                return (
-                  <SidebarItem
-                    key={subItem.title}
-                    item={subItem}
-                    isActive={location.pathname === subItem.url}
-                  />
-                );
+                return <SidebarItem key={subItem.title} item={subItem} />;
               }
 
-              const isSubItemActive = location.pathname === subItem.url;
               return (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton asChild>
                     <Link
                       to={subItem.url as any}
-                      className={isSubItemActive ? "bg-sidebar-accent" : ""}
+                      activeProps={{ className: "bg-sidebar-accent" }}
                     >
                       {subItem.icon && (
                         <ResourceIcon
