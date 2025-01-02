@@ -13,15 +13,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { trpc } from "@/trpc";
 import { getFilteredRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { getCoreRowModel } from "@tanstack/react-table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/clusters/")({
   component: Clusters,
 });
 
 function Clusters() {
-  const clusters = trpc.listClusters.useQuery(undefined, {
-    initialData: [],
-  });
+  const clusters = trpc.listClusters.useQuery();
 
   const navigate = useNavigate();
   const Icon = getIconComponent({ icon: "heroicon://rectangle-group" });
@@ -42,11 +41,26 @@ function Clusters() {
   };
 
   const table = useResourceTable({
-    data: clusters.data,
+    data: clusters.data ?? [],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
+  if (clusters.isLoading) {
+    return (
+      <div className="container mx-auto flex flex-col gap-4">
+        <div className="flex flex-col gap-4 pb-8 pt-8">
+          <RoutePageHeader
+            title="Clusters"
+            description="These are the clusters available in the platform."
+            Icon={Icon}
+          />
+          <ClustersSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto flex flex-col gap-4">
@@ -56,19 +70,20 @@ function Clusters() {
           description="These are the clusters available in the platform."
           Icon={Icon}
         />
-        {clusters.data?.length === 0 ? (
-          <ClustersEmptyState handleAddCluster={handleAddCluster} />
-        ) : (
-          <div className="flex flex-col gap-4">
-            <ResourceTable
-              table={table}
-              showActions={false}
-              customNewResourceAction={{
-                label: "Add Cluster",
-                navigate: handleAddCluster,
-              }}
-            />
-          </div>
+        {clusters.isLoading && <ClustersSkeleton />}
+        {!clusters.isLoading &&
+          (!clusters.data || clusters.data.length === 0) && (
+            <ClustersEmptyState handleAddCluster={handleAddCluster} />
+          )}
+        {!clusters.isLoading && clusters.data && clusters.data.length > 0 && (
+          <ResourceTable
+            table={table}
+            showActions={false}
+            customNewResourceAction={{
+              label: "Add Cluster",
+              navigate: handleAddCluster,
+            }}
+          />
         )}
       </div>
     </div>
@@ -100,3 +115,19 @@ const ClustersEmptyState = ({
     </div>
   );
 };
+
+function ClustersSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between gap-4">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-9 w-32" />
+      </div>
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    </div>
+  );
+}

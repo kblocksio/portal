@@ -47,6 +47,7 @@ export function App({ children }: { children: React.ReactNode }) {
 
   // Invalidate queries on every message, but throttle the calls to avoid too many requests.
   const invalidateQueries = useCallback(
+    // eslint-disable-next-line react-compiler/react-compiler
     throttle(
       () => {
         queryClient.invalidateQueries();

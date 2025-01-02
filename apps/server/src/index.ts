@@ -706,7 +706,8 @@ const appRouter = router({
         if (!cluster) {
           throw new Error(`Cluster ${input.objUri} not found`);
         }
-        return cluster;
+        // TODO: We should add a getCluster endpoint instead, because the Cluster and Resource types are different.
+        return cluster as unknown as Resource;
       }
       // normal case for resources
       const object = objects.find((r) => r.objUri === input.objUri);
