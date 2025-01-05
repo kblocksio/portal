@@ -16,7 +16,7 @@
     },
     "readme": {
       "type": "string",
-      "description": "The readme of the organization \n\n@ui kblocks.io/textarea"
+      "description": "The readme of the organization \n\n@ui kblocks.io/markdown"
     }
   }
 }

@@ -1,25 +1,12 @@
 import {
   useReactTable,
-  getCoreRowModel,
-  ColumnFiltersState,
   ColumnSort,
-  getFilteredRowModel,
-  getSortedRowModel,
   flexRender,
-  RowSelectionState,
-  createColumnHelper,
   type TableOptions,
   type Table as ReactTable,
-  type TableState,
+  createColumnHelper,
 } from "@tanstack/react-table";
-import {
-  memo,
-  useEffect,
-  useMemo,
-  useState,
-  type FC,
-  type PropsWithChildren,
-} from "react";
+import { memo, useMemo, useState } from "react";
 import { DataTableColumnHeader } from "./column-header";
 import { LastUpdated } from "../last-updated";
 import { cn, getResourceOutputs } from "@/lib/utils";
@@ -34,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useLocation } from "@tanstack/react-router";
 import { Button } from "@/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover";
 import { ResourceTableToolbar } from "./resource-table-toolbar";
@@ -52,9 +38,10 @@ import { Link } from "../ui/link";
 import type { Resource } from "@kblocks-portal/server";
 import { ResourceIcon } from "@/lib/get-icon";
 import { StatusBadge } from "../status-badge";
-import Outputs from "../outputs";
+import Outputs from "../properties";
 import { ResourceLink } from "../resource-link";
 import { parseBlockUri } from "@kblocks/api";
+import Properties from "../properties";
 
 export const defaultResourceSorting: ColumnSort[] = [
   { id: "kind", desc: false },
@@ -504,7 +491,7 @@ const ResourceOutputs = memo(function ResourceOutputs({
         <PopoverContent onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-col space-y-8">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-              <Outputs outputs={outputs} resource={resource} />
+              <Properties outputs={outputs} resource={resource} />
             </div>
           </div>
         </PopoverContent>

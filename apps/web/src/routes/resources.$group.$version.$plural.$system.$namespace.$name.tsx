@@ -26,8 +26,6 @@ import {
 } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useBreadcrumbs } from "@/app-context";
-import { KeyValueList } from "@/components/resource-key-value-list";
-import Outputs from "@/components/outputs";
 import {
   ResourceTable,
   useResourceTable,
@@ -45,6 +43,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { Skeleton } from "@/components/ui/skeleton";
+import Properties from "@/components/properties";
 
 const DEFAULT_TAB = "details";
 
@@ -385,7 +384,7 @@ function ResourcePage() {
         </TabsList>
         {selectedResource ? (
           <>
-            <TabsContent value="details">
+            <TabsContent value="details" className="h-vh">
               <div className="flex flex-col gap-8">
                 {/* Properties */}
                 {Object.keys(properties).length > 0 && (
@@ -394,9 +393,10 @@ function ResourcePage() {
                       <CardTitle>Properties</CardTitle>
                     </div>
                     <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                      <KeyValueList
+                      <Properties
                         resource={selectedResource}
-                        properties={properties}
+                        outputs={properties}
+                        isProperties
                       />
                     </div>
                   </div>
@@ -411,7 +411,7 @@ function ResourcePage() {
                         <CardTitle>Outputs</CardTitle>
                       </div>
                       <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 sm:grid-cols-[minmax(6rem,_auto)_1fr] sm:gap-x-8">
-                        <Outputs
+                        <Properties
                           outputs={outputs}
                           resource={selectedResource}
                         />
