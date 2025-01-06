@@ -20,7 +20,7 @@ export const MarkdownWrapper = ({
 }) => {
   return (
     <Markdown
-      className={"pb-2"}
+      className="prose prose-sm max-w-none pb-2"
       rehypePlugins={[rehypeRaw]}
       remarkPlugins={[remarkGfm]}
       components={{

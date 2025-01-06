@@ -5,7 +5,7 @@ import { Shell } from "../resource-form/pickers/shell";
 import { PropertyKey, PropertyValue } from "../ui/property";
 import { MarkdownWrapper } from "../markdown";
 
-export const resolveOutputField = ({
+export const resolvePropertyField = ({
   schema,
   value,
   key,
@@ -39,7 +39,9 @@ export const resolveOutputField = ({
         <>
           <PropertyKey>{key}</PropertyKey>
           <PropertyValue>
-            <MarkdownWrapper content={value} />
+            <div className="prose prose-sm max-h-[650px] max-w-full overflow-auto rounded-md p-4">
+              <MarkdownWrapper content={value} />
+            </div>
           </PropertyValue>
         </>
       );

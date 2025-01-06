@@ -3,6 +3,7 @@ import { InstancePicker } from "./instance-picker";
 import { RepoPicker } from "./repo-picker";
 import { OneOfPicker } from "./oneof-picker";
 import { TextAreaPicker } from "./textarea-picker";
+import { MarkdownPicker } from "./markdown-picker";
 
 export const resolvePickerField = ({
   pickerType,
@@ -86,6 +87,18 @@ export const resolvePickerField = ({
     case "textarea": {
       return (
         <TextAreaPicker
+          fieldName={fieldName}
+          required={required}
+          description={description}
+          hideField={hideField}
+          onChange={handleChange}
+          value={value}
+        />
+      );
+    }
+    case "markdown": {
+      return (
+        <MarkdownPicker
           fieldName={fieldName}
           required={required}
           description={description}
