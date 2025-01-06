@@ -64,7 +64,7 @@ This command will install the following on your cluster:
     - `KBLOCKS_SYSTEM_ID` with the selected cluster ID.
     - `KBLOCKS_BACKEND` points to `acmehq.kblocks.io`
     - `KBLOCKS_ACCESS` with the selected access level (`read_write` or `read_only`)
-    - `KBLOCKS_API_KEY` with a tenant-specific API token
+    - `KBLOCKS_PUBSUB_KEY` with a tenant-specific API token
 - Controllers for the system block: `kblocks.io/v1.Cluster`
 - An instance of a `Cluster` object that represents this particular cluster.
 
