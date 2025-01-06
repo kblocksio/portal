@@ -23,6 +23,6 @@ spec:
       - pullrequest
   operator:
     envSecrets:
-      KBLOCKS_API_KEY: kblocks
+      KBLOCKS_PUBSUB_KEY: kblocks
       KBLOCKS_PUBSUB_HOST: kblocks
       KBLOCKS_PUBSUB_PORT: kblocks

@@ -85,5 +85,5 @@ jobs:
       - name: Delete redis keys for environment
         run: |
           source ./secrets/kblocks-cluster.env
-          redis-cli -h $KBLOCKS_PUBSUB_HOST -p $KBLOCKS_PUBSUB_PORT -a $KBLOCKS_API_KEY --scan --pattern "${{ env.ENV_NAME }}*" | xargs -L 100 redis-cli -h $KBLOCKS_PUBSUB_HOST -p $KBLOCKS_PUBSUB_PORT -a $KBLOCKS_API_KEY DEL
+          redis-cli -h $KBLOCKS_PUBSUB_HOST -p $KBLOCKS_PUBSUB_PORT -a $KBLOCKS_PUBSUB_KEY --scan --pattern "${{ env.ENV_NAME }}*" | xargs -L 100 redis-cli -h $KBLOCKS_PUBSUB_HOST -p $KBLOCKS_PUBSUB_PORT -a $KBLOCKS_PUBSUB_KEY DEL
 

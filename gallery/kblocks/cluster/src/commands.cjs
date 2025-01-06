@@ -16,7 +16,7 @@ metadata:
 stringData:
   KBLOCKS_PUBSUB_HOST: __KBLOCKS_PUBSUB_HOST__
   KBLOCKS_PUBSUB_PORT: "__KBLOCKS_PUBSUB_PORT__"
-  KBLOCKS_API_KEY: __KBLOCKS_API_KEY__
+  KBLOCKS_PUBSUB_KEY: __KBLOCKS_PUBSUB_KEY__
   KBLOCKS_SYSTEM_ID: __KBLOCKS_SYSTEM_ID__
   KBLOCKS_STORAGE_PREFIX: __KBLOCKS_STORAGE_PREFIX__
   KBLOCKS_PORTAL_SYSTEM: __KBLOCKS_PORTAL_SYSTEM__
@@ -32,7 +32,7 @@ function fillTemplate(template, variables) {
 
 const object = JSON.parse(fs.readFileSync(process.env.KBLOCKS_OBJECT, "utf8"));
 const outputs = process.env.KBLOCKS_OUTPUTS;
-const adminPassword = process.env.KBLOCKS_API_KEY;
+const adminPassword = process.env.KBLOCKS_PUBSUB_KEY;
 const redisHost = process.env.KBLOCKS_PUBSUB_HOST;
 const redisPort = process.env.KBLOCKS_PUBSUB_PORT;
 const portalSystem = process.env.KBLOCKS_SYSTEM_ID;
@@ -51,7 +51,7 @@ const writeOutputs = (command) => {
 exports.create = async () => {
   // todo create a new user in redis per cluster
   const command = fillTemplate(COMMAND_TEMPLATE, {
-    KBLOCKS_API_KEY: adminPassword,
+    KBLOCKS_PUBSUB_KEY: adminPassword,
     KBLOCKS_PUBSUB_HOST: redisHost,
     KBLOCKS_PUBSUB_PORT: redisPort,
     KBLOCKS_SYSTEM_ID: clusterId,

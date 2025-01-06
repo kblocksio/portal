@@ -31,7 +31,7 @@ env:
       key: OPENAI_API_KEY
   KBLOCKS_PUBSUB_HOST:
     value: "portal-redis.default.svc.cluster.local"
-  KBLOCKS_API_KEY:
+  KBLOCKS_PUBSUB_KEY:
     value: "pass1234"
 {{- end }}
 allowCluster:

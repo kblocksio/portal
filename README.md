@@ -131,7 +131,7 @@ And also the `apps/server/.env` file with these `REDIS_*` variables:
 ```
 KBLOCKS_PUBSUB_HOST=localhost
 KBLOCKS_PUBSUB_PORT=6379
-KBLOCKS_API_KEY=pass1234
+KBLOCKS_PUBSUB_KEY=pass1234
 ```
 
 You can always copy their related `.env.example` files to `.env` and modify the values as needed.

@@ -1,7 +1,7 @@
 import { createClient } from "redis";
 import { getEnv } from "./util";
 
-const KBLOCKS_API_KEY = getEnv("KBLOCKS_API_KEY");
+const KBLOCKS_PUBSUB_KEY = getEnv("KBLOCKS_PUBSUB_KEY");
 const KBLOCKS_PUBSUB_HOST = getEnv("KBLOCKS_PUBSUB_HOST");
 const KBLOCKS_PUBSUB_PORT = process.env.KBLOCKS_PUBSUB_PORT;
 const KBLOCKS_STORAGE_PREFIX = process.env.KBLOCKS_STORAGE_PREFIX;
@@ -43,7 +43,7 @@ export const timestampPrefix = (() => {
 })();
 
 const config = {
-  password: KBLOCKS_API_KEY,
+  password: KBLOCKS_PUBSUB_KEY,
   socket: {
     host: KBLOCKS_PUBSUB_HOST,
     port: KBLOCKS_PUBSUB_PORT ? Number(KBLOCKS_PUBSUB_PORT) : 18284,
