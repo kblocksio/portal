@@ -18,7 +18,7 @@ context=$(kubectl config current-context)
 if [ "$context" == "kind-kind" ]; then
   KBLOCKS_PUBSUB_HOST=portal-redis.default.svc.cluster.local
   KBLOCKS_PUBSUB_KEY="pass1234"
-  KBLOCKS_ACCESS="write"
+  KBLOCKS_ACCESS="read_write"
 fi
 
 echo "KBLOCKS_PUBSUB_HOST: $KBLOCKS_PUBSUB_HOST"
