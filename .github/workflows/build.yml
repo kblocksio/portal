@@ -185,11 +185,10 @@ jobs:
 
       - name: Build and push helm chart
         if: github.event_name == 'push'
-        working-directory: deploy
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: ./scripts/helm-publish.sh ./
+        run: ./scripts/helm-publish.sh ./deploy
 
       - name: Push Supabase database changes
         if: env.ENV_NAME == 'staging'
