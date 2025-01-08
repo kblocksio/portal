@@ -8,8 +8,8 @@ else
   helm_package_path="."
 fi
 
-if [ ! -f "Chart.yaml" ]; then
-  echo "Expected Chart.yaml to exist in the current directory "
+if [ ! -f "$helm_package_path/Chart.yaml" ]; then
+  echo "Expected Chart.yaml to exist in directory $helm_package_path"
   exit 1
 fi
 
