@@ -183,6 +183,14 @@ jobs:
           build-args: |
             ENV=prod
 
+      - name: Build and push helm chart
+        if: github.event_name == 'push'
+        working-directory: deploy
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: ./scripts/helm-publish.sh ./
+
       - name: Push Supabase database changes
         if: env.ENV_NAME == 'staging'
         run: npx dotenv -e ../../secrets/portal.env -- tsx scripts/supabase-push.mts

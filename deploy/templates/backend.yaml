@@ -1,6 +1,4 @@
-{{- $image := required "backend.image is required" .Values.backend.image }}
-{{- $ingressHost := required "ingress.host is required" .Values.ingress.host }}
-{{- $ingressTlsSecret := required "ingress.tls.secret is required" .Values.ingress.tls.secret }}
+{{- $image := default "wingcloudbot/kblocks-backend:latest" .Values.backend.image }}
 {{- $secretName := required "backend.secretName is required" .Values.backend.secretName }}
 
 apiVersion: acme.com/v1
@@ -10,6 +8,9 @@ metadata:
 image: {{ $image }}
 port: 3001
 replicas: 2
+{{ if .Values.ingress.enabled }}
+{{- $ingressHost := required "ingress.host is required" .Values.ingress.host }}
+{{- $ingressTlsSecret := required "ingress.tls.secret is required" .Values.ingress.tls.secret }}
 expose:
   - path: /api(/|$)(.*)
     host: {{ $ingressHost }}
@@ -17,6 +18,7 @@ expose:
       hosts:
         - {{ $ingressHost }}
       secret: {{ $ingressTlsSecret }}
+{{- end }}
 envFrom:
   - secretName: {{ $secretName }}
 {{- if .Values.redis.enabled }}
