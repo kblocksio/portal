@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kblocks-backend
-description: Kblocks backend
+name: kblocks-portal
+description: Kblocks portal
 version: 0.1.0
 type: application
