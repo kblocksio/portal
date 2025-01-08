@@ -1,4 +1,5 @@
 ingress:
+  enabled: false
   host: kblocks.io
   tls:
     secret: kblocks-tls
