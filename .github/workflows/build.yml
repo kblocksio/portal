@@ -156,6 +156,9 @@ jobs:
           ./install-blocks.sh ./kblocks/cluster
           ./install-blocks.sh ./kblocks/organization
 
+      - name: Build packages
+        run: npm run build
+
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
@@ -164,6 +167,18 @@ jobs:
           platforms: linux/arm64
           tags: wingcloudbot/kblocks-backend:latest
           cache-from: type=registry,ref=wingcloudbot/kblocks-backend:latest
+          cache-to: type=inline
+          build-args: |
+            ENV=prod
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          push: ${{ github.event_name == 'push' }}
+          platforms: linux/arm64
+          tags: wingcloudbot/kblocks-frontend:latest
+          cache-from: type=registry,ref=wingcloudbot/kblocks-frontend:latest
           cache-to: type=inline
           build-args: |
             ENV=prod
