@@ -95,6 +95,7 @@ function Catalog() {
           onResourceCreateClick={handleOnResourceCreateClick}
           isLoading={!searchQuery && isLoading}
           onCardClick={handleOnCardClick}
+          searchQuery={searchQuery}
         />
       </div>
     </div>

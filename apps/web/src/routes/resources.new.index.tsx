@@ -75,6 +75,7 @@ function CreateNewResourceCatalog() {
           categories={categories}
           filtereResources={filtereResources}
           onResourceCreateClick={onResourceSelection}
+          searchQuery={searchQuery}
         />
       </div>
     </div>

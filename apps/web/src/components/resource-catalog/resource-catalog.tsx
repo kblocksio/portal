@@ -19,6 +19,7 @@ export interface ResourceCatalogProps {
   onResourceCreateClick: (resource: ResourceType) => void;
   isLoading?: boolean;
   onCardClick?: (resource: ResourceType) => void;
+  searchQuery?: string;
 }
 export const ResourceCatalog = ({
   filtereResources,
@@ -26,6 +27,7 @@ export const ResourceCatalog = ({
   categories,
   onCardClick,
   isLoading,
+  searchQuery,
 }: ResourceCatalogProps) => {
   const typesForCategories = useMemo(() => {
     return Object.keys(categories).map((category) => ({
@@ -45,7 +47,9 @@ export const ResourceCatalog = ({
   ) : filtereResources.length === 0 ? (
     <div className="flex h-16 items-center justify-center">
       <p className="text-muted-foreground">
-        No resource types found for your search
+        {searchQuery
+          ? "No resource types found for your search"
+          : "No resource types found"}
       </p>
     </div>
   ) : (
