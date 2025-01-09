@@ -9,8 +9,7 @@ export type ExtendedResourceType = Omit<ResourceType, "systems"> & {
 };
 
 export const useResourceTypes = () => {
-  return trpc.listTypes.useQuery(undefined, {
-    initialData: {},
+  const { data, isLoading } = trpc.listTypes.useQuery(undefined, {
     select(data): Record<string, ExtendedResourceType> {
       return Object.fromEntries(
         Object.entries(data).map(([key, value]) => [
@@ -26,4 +25,6 @@ export const useResourceTypes = () => {
       );
     },
   });
+
+  return { data, isLoading };
 };

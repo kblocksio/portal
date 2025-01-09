@@ -15,7 +15,7 @@ export const Route = createFileRoute("/catalog/")({
 });
 
 function Catalog() {
-  const resourceTypes = useResourceTypes();
+  const { data: resourceTypes, isLoading } = useResourceTypes();
 
   const categories = trpc.listCategories.useQuery(undefined, {
     initialData: {},
@@ -54,10 +54,11 @@ function Catalog() {
   );
 
   const nonSystemResourceTypes = useMemo(() => {
-    return Object.values(resourceTypes.data).filter(
+    if (!resourceTypes) return [];
+    return Object.values(resourceTypes).filter(
       (item) => !item.group.startsWith("kblocks.io"),
     );
-  }, [resourceTypes.data]);
+  }, [resourceTypes]);
 
   const filteredResourceTypes = useMemo(() => {
     if (!nonSystemResourceTypes) return [];
@@ -92,7 +93,7 @@ function Catalog() {
           categories={categories.data}
           filtereResources={filteredResourceTypes}
           onResourceCreateClick={handleOnResourceCreateClick}
-          isLoading={!searchQuery && Object.keys(resourceTypes).length === 0}
+          isLoading={!searchQuery && isLoading}
           onCardClick={handleOnCardClick}
         />
       </div>
