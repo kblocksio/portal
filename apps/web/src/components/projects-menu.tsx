@@ -57,7 +57,8 @@ export const ProjectItems = ({ objUris }: { objUris: string[] }) => {
     }
 
     const { system } = parseBlockUri(project.objUri);
-    const type = resourceTypes[project.objType];
+    const type = resourceTypes?.[project.objType];
+    if (!type) return;
     createResource(system, type, project).catch((e) => {
       console.error(e);
     });

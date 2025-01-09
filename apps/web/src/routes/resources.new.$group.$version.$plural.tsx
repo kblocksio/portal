@@ -13,7 +13,7 @@ export const Route = createFileRoute("/resources/new/$group/$version/$plural")({
 });
 
 function CreateResourcePage() {
-  const resourceTypes = useResourceTypes();
+  const { data: resourceTypes } = useResourceTypes();
   const { handleCreateOrEdit, isLoading } = useCreateResource();
   const { group, version, plural } = Route.useParams();
   const navigate = useNavigate();
@@ -47,16 +47,15 @@ function CreateResourcePage() {
     return breadcrumbs;
   }, [firstPathSegment]);
 
-  const resourceType = useMemo(
-    () =>
-      Object.values(resourceTypes.data).find(
-        (resourceType) =>
-          resourceType.group === group &&
-          resourceType.version === version &&
-          resourceType.plural === plural,
-      ),
-    [resourceTypes, group, version, plural],
-  );
+  const resourceType = useMemo(() => {
+    if (!resourceTypes) return null;
+    return Object.values(resourceTypes).find(
+      (resourceType) =>
+        resourceType.group === group &&
+        resourceType.version === version &&
+        resourceType.plural === plural,
+    );
+  }, [resourceTypes, group, version, plural]);
 
   const handleCreate = useCallback(
     async (meta: ObjectMetadata, values: any) => {
