@@ -23,6 +23,7 @@ import {
   getResourceProperties,
   getResourceOutputs,
   propertiesBlackList,
+  cn,
 } from "@/lib/utils";
 import { NamespaceBadge } from "@/components/namespace-badge";
 import { useBreadcrumbs } from "@/app-context";
@@ -54,6 +55,9 @@ export const Route = createFileRoute(
 });
 
 function ResourcePage() {
+  const { data: projects } = trpc.listProjects.useQuery(undefined, {
+    initialData: [],
+  });
   const { group, version, plural, system, namespace, name } = Route.useParams();
   const navigate = useNavigate();
   const [deleteInProgress, setDeleteInProgress] = useState(false);
@@ -247,14 +251,20 @@ function ResourcePage() {
           </div>
           <div className="flex shrink-0 space-x-2">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger
+                asChild
+                disabled={!projects || projects.length === 0}
+                className={cn(
+                  !projects || (projects.length === 0 && "opacity-50"),
+                )}
+              >
                 <Button variant="outline">
                   Projects
                   <ChevronsUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <ProjectItems objUris={[objUri]} />
+                <ProjectItems projects={projects} objUris={[objUri]} />
               </DropdownMenuContent>
             </DropdownMenu>
 

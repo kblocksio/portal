@@ -28,17 +28,20 @@ export const ProjectsMenu = ({ objUris }: { objUris: string[] }) => {
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          <ProjectItems objUris={objUris} />
+          <ProjectItems projects={projects} objUris={objUris} />
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
   );
 };
 
-export const ProjectItems = ({ objUris }: { objUris: string[] }) => {
-  const { data: projects } = trpc.listProjects.useQuery(undefined, {
-    initialData: [],
-  });
+export const ProjectItems = ({
+  projects = [],
+  objUris,
+}: {
+  projects: Project[];
+  objUris: string[];
+}) => {
   const { data: resourceTypes } = useResourceTypes();
 
   const isChecked = useCallback(
