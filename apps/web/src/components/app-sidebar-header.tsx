@@ -21,8 +21,8 @@ export const AppSidebarHeader = () => {
   const { setSelectedOrganization } = useAppContext();
 
   const ActiveTeamIcon = useMemo(() => {
-    if (!activeTeam?.icon) return null;
-    return getIconComponent({ icon: activeTeam.icon });
+    if (!activeTeam) return null;
+    return getIconComponent({ icon: activeTeam?.icon });
   }, [activeTeam]);
 
   useEffect(() => {
