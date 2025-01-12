@@ -12,3 +12,13 @@ redis:
 
 localCluster:
   enabled: false
+
+secrets:
+  kblocks:
+    enabled: true
+
+  portal:
+    enabled: true
+
+  gallery:
+    enabled: false
