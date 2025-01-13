@@ -38,6 +38,7 @@ function CreateNewResourceCatalog() {
   );
 
   const filteredResourceTypes = useMemo(() => {
+    if (!resourceTypes) return [];
     return Object.values(resourceTypes).filter((r) => {
       return !r.kind?.endsWith("Ref") && !r.group.startsWith("kblocks.io");
     });

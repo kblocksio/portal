@@ -15,6 +15,7 @@ import { useGitHubInstallations } from "@/hooks/use-github-installations";
 import { linkVariants } from "@/components/ui/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { InputField } from "../input-field";
 
 interface RepoPickerProps {
   initialValue?: string;
@@ -102,6 +103,27 @@ export const RepoPicker = memo(function RepoPicker({
 
   const [chosenRepositoryFullName] = useState(() => initialValue);
   const [changeEnabled, setChangeEnabled] = useState(false);
+
+  if (import.meta.env.VITE_SKIP_AUTH) {
+    return (
+      <Field
+        fieldName={fieldName}
+        description={description}
+        hideField={hideField}
+        required={required}
+      >
+        <InputField
+          required={required}
+          placeholder="Enter repository name (GitHub integration is disabled in DEV mode)"
+          type="text"
+          value={initialValue ?? ""}
+          onChange={(value) => {
+            handleOnSelection?.(value as string);
+          }}
+        />
+      </Field>
+    );
+  }
 
   return (
     <Field
