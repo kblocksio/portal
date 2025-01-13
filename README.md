@@ -63,7 +63,7 @@ repository. Install git-crypt:
 brew install git-crypt
 ```
 
-Download the `git-crypt-key` master key from [1password](https://share.1password.com/s#JumJU7b9C5_Y4AEsKD4sdrSr5R_YZ0zKFMhebeDWkBM).
+Download the `git-crypt-key` master key from [1password](https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=t2dmpkwt5hufldsxzhnnw43d5i&h=wingcloud.1password.com).
 
 Unlock the repository:
 
@@ -71,7 +71,7 @@ Unlock the repository:
 git-crypt unlock /path/to/git-crypt-key
 ```
 
-Setup all of the secrets and certs to your cluster:
+Setup all of the secrets and certs to your cluster. Refer to [docs/enabling-slack-notifications.md](docs/enabling-slack-notifications.md) for more information on how to setup Slack notifications for the cluster.
 
 > Replace `KBLOCKS_SYSTEM_ID` with the system id if you are installing to a non-local cluster
 

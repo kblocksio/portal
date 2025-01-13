@@ -11,7 +11,9 @@ export async function slackNotify(event: WorkerEvent) {
 
   const thread = await getSlackThread(event.requestId);
 
-  console.log(`Sending slack message ${JSON.stringify(message)} to ${slackChannel} with thread ${thread}`);
+  console.log(
+    `Sending slack message ${JSON.stringify(message)} to ${slackChannel} with thread ${thread}`,
+  );
 
   const ctx = await sendSlackMessage(slackChannel, message, thread);
   if (ctx.ts) {
@@ -20,8 +22,21 @@ export async function slackNotify(event: WorkerEvent) {
 }
 
 function formatMessage(event: WorkerEvent): Blocks | undefined {
+  if (event.type !== "LIFECYCLE" && event.type !== "ERROR") {
+    return undefined;
+  }
+
   const objUri = parseBlockUri(event.objUri);
-  const prefix = `*${objUri.plural}* *${objUri.namespace}/${objUri.name}*`;
+
+  let blocks: any[] = [
+    {
+      type: "section",
+      text: {
+        type: "plain_text",
+        text: "An event occurred in your cluster.",
+      },
+    },
+  ];
 
   switch (event.type) {
     case "LIFECYCLE":
@@ -42,29 +57,65 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
         }
       };
 
-      return [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `${icon()} ${prefix} - ${event.event.message}`,
-          },
+      blocks.push({
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: `${icon()} ${event.event.message}`,
         },
-      ];
+      });
+      break;
 
     case "ERROR":
-      if (event.explanation?.blocks) {
-        return event.explanation?.blocks;
-      } else {
-        return [
-          {
-            type: "section",
-            text: { type: "mrkdwn", text: `❌ ${prefix} - ${event.message}` },
-          },
-        ];
-      }
-
-    default:
-      return undefined;
+      blocks.push({
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: `❌ ${event.message}`,
+        },
+      });
+      break;
   }
+
+  const url = `${process.env.WEBSITE_ORIGIN}/resources/${objUri.plural}/${objUri.namespace}/${objUri.name}#details`;
+
+  blocks.push({
+    type: "section",
+    fields: [
+      {
+        type: "mrkdwn",
+        text: `*Name:*\n<${url}|${objUri.name}>`,
+      },
+      {
+        type: "mrkdwn",
+        text: `*Namespace:*\n${objUri.namespace}`,
+      },
+      {
+        type: "mrkdwn",
+        text: `*Type:*\n\`${event.objType}\``,
+      },
+    ],
+  });
+
+  if (event.type === "ERROR" && event.explanation?.blocks) {
+    blocks.push(...event.explanation.blocks);
+  }
+
+  // blocks.push({
+  //   type: "section",
+  //   text: {
+  //     type: "mrkdwn",
+  //     text: `\`\`\`\n${JSON.stringify(event, null, 2)}\n\`\`\``,
+  //   },
+  // });
+
+  blocks.push({
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: `<${url}|View in Kblocks Portal>`,
+    },
+  });
+
+  return blocks;
 }

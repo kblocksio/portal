@@ -1,4 +1,4 @@
-# Slack Token Setup to Send Messages
+# Enabling Slack Notifications
 
 This guide explains how to create a Slack token and use it to allow Kblocks to send messages to Slack.
 
@@ -31,4 +31,4 @@ This guide explains how to create a Slack token and use it to allow Kblocks to s
 
 ## 5. Use the token when deploying the Kblocks backend
 
-Set the token in the `SLACK_API_TOKEN` environment variable in the `backend` service.
+Set the token in the `SLACK_API_TOKEN` and `SLACK_CHANNEL` environment variables in the `secrets/portal.env` file.
