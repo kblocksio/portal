@@ -7,6 +7,9 @@ ingress:
 backend:
   secretName: kblocks-api-secrets
 
+frontend:
+  enabled: true
+
 redis:
   enabled: false
 
