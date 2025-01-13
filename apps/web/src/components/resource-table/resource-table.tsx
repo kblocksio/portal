@@ -85,36 +85,23 @@ const useColumns = (options?: {
         : []),
       columnHelper.display({
         id: "status",
-        cell: (props) => (
-          <div className="flex items-center gap-1.5">
-            <StatusBadge
-              conditions={props.row.original.status?.conditions ?? []}
-              merge
-            />
-          </div>
-        ),
+        cell: (props) => {
+          const children = props.row.original.relationships
+            ?.filter((relationship) => relationship.type === "child")
+            .map((relationship) => relationship.resource);
+
+          return (
+            <div className="flex items-center gap-1.5">
+              <StatusBadge
+                conditions={props.row.original.status?.conditions ?? []}
+                merge
+                children={children}
+              />
+            </div>
+          );
+        },
         size: 0,
         header: () => <></>,
-        // filterFn: (row, columnId, filterValue) => {
-        //   const readyCondition = getReadyCondition(row.original);
-        //   const status =
-        //     readyCondition?.reason === StatusReason.Completed
-        //       ? "Ready"
-        //       : readyCondition?.reason === StatusReason.Error
-        //         ? "Failed"
-        //         : undefined;
-        //   return filterValue.includes(status);
-        // },
-        // sortingFn: (rowA, rowB) => {
-        //   const readyConditionA = getReadyCondition(rowA.original.obj);
-        //   const readyConditionB = getReadyCondition(rowB.original.obj);
-
-        //   if (!readyConditionA?.status || !readyConditionB?.status) {
-        //     return 0;
-        //   }
-
-        //   return readyConditionA.status.localeCompare(readyConditionB.status);
-        // },
       }),
       columnHelper.accessor("kind", {
         header: (props) => (
