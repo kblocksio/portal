@@ -156,3 +156,53 @@ NOTE: The local installation is not using qkube, so don't expect to find the clu
 - To switch back to the local cluster, run `kubectl config use-context kind-kind`.
 
 That's it. Have fun!
+
+## Install from helm chart
+
+### Install the basic kblocks
+
+The basic blocks can be installed to a different cluster than the portal.
+
+If you want to install the basic blocks to the same cluster as the portal, you can skip this secret creation.
+Create a kblocks cluster secret with the following values:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kblocks
+  namespace: kblocks
+type: Opaque
+data:
+  KBLOCKS_ACCESS: read_write
+  KBLOCKS_SYSTEM_ID: your-cluster-name
+  KBLOCKS_PUBSUB_HOST: your-redis-host.com
+  KBLOCKS_PUBSUB_PORT: 18284
+  KBLOCKS_PUBSUB_KEY: your-redis-key
+```
+
+Now, install the basic kblocks:
+
+```sh
+cd gallery
+./install-blocks.sh kblocks/workload
+./install-blocks.sh kblocks/project
+./install-blocks.sh kblocks/cluster
+./install-blocks.sh kblocks/organization
+```
+
+Note that if you didn't install yet the above secret, the blocks will not start.
+Installing the portal helm chart will create the secret.
+
+### Install the portal
+
+Now, install the portal to your cluster.
+Make sure to set the desired variables in the `values.yaml` file.
+For example, if you want to install a local redis instance, you can run the following command:
+
+In the root of the repository, run:
+
+```sh
+helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-domain.com
+```
+

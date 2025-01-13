@@ -1,6 +1,8 @@
+{{- $clusterName := required "localCluster.name is required" .Values.localCluster.name }}
+
 apiVersion: kblocks.io/v1
 kind: Cluster
 metadata:
-  name: {{ .Values.localCluster.name | quote }}
+  name: {{ $clusterName | quote }}
 access: read_write
 description: default cluster
