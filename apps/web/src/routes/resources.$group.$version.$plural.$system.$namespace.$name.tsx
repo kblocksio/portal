@@ -37,7 +37,7 @@ import { cloneDeep, omit } from "lodash";
 import { ProjectItems } from "@/components/projects-menu";
 import { trpc } from "@/trpc";
 import { LocationContext } from "@/location-context";
-import type { Resource } from "@kblocks-portal/server";
+import type { Resource, Relationship, Condition } from "@kblocks-portal/server";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -108,7 +108,8 @@ function ResourcePage() {
 
   const ownerResourceURI = useMemo(() => {
     const relationship = relationships?.find(
-      (relationship) => relationship.type === "parent",
+      (relationship: Resource["relationships"][number]) =>
+        relationship.type === "parent",
     );
 
     return relationship?.resource.objUri;
@@ -167,8 +168,14 @@ function ResourcePage() {
 
   const children = useMemo(() => {
     return relationships
-      ?.filter((relationship) => relationship.type === "child")
-      .map((relationship) => relationship.resource);
+      ?.filter(
+        (relationship: Resource["relationships"][number]) =>
+          relationship.type === "child",
+      )
+      .map(
+        (relationship: Resource["relationships"][number]) =>
+          relationship.resource,
+      );
   }, [relationships]);
 
   useBreadcrumbs(() => {
@@ -313,14 +320,17 @@ function ResourcePage() {
               </p>
               <div className="flex flex-col items-start gap-1 text-xs sm:text-sm">
                 {selectedResource ? (
-                  selectedResource.status?.conditions?.map((condition) => (
-                    <StatusBadge
-                      key={condition.type}
-                      conditions={selectedResource?.status?.conditions ?? []}
-                      showMessage
-                      type={condition.type}
-                    />
-                  ))
+                  selectedResource.status?.conditions?.map(
+                    (condition: Condition) => (
+                      <StatusBadge
+                        key={condition.type}
+                        conditions={selectedResource?.status?.conditions ?? []}
+                        showMessage
+                        type={condition.type}
+                        children={children}
+                      />
+                    ),
+                  )
                 ) : (
                   <Skeleton className="h-4 w-32" />
                 )}
