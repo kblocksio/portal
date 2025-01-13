@@ -29,9 +29,4 @@ spec:
     description: A Kubernetes Custom Resource Definition (CRD) for managing
       containerized workloads with options for environment variables, ingress
       paths, and TLS support.
-  operator:
-    envSecrets:
-      AWS_DEFAULT_REGION: kblocks-secrets
-      AWS_ACCESS_KEY_ID: kblocks-secrets
-      AWS_SECRET_ACCESS_KEY: kblocks-secrets
-      GITHUB_TOKEN: kblocks-secrets
+

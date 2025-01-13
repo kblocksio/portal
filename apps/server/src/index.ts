@@ -794,8 +794,6 @@ const appRouter = router({
 export type AppRouter = typeof appRouter;
 
 const WEBSITE_ORIGIN = getEnv("WEBSITE_ORIGIN");
-const NON_PRIMARY_ENVIRONMENT = process.env.NON_PRIMARY_ENVIRONMENT;
-const GITHUB_CLIENT_ID = getEnv("GITHUB_CLIENT_ID");
 
 const port = process.env.PORT ?? 3001;
 
