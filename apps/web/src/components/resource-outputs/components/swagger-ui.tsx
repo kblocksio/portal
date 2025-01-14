@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PropertyKey, PropertyValue } from "@/components/ui/property";
 import { SwaggerUIDialog } from "@/components/resource-outputs/components/swagger-ui-dialog";
-import SwaggerUI from "swagger-ui-react";
 import "swagger-ui-react/swagger-ui.css";
+
+// Lazy load SwaggerUI
+const SwaggerUI = lazy(() => import("swagger-ui-react"));
 
 export default function SwaggerUIComponent({ spec }: { spec: any }) {
   const [open, setOpen] = useState(false);
@@ -23,7 +25,9 @@ export default function SwaggerUIComponent({ spec }: { spec: any }) {
         </Button>
       </PropertyValue>
       <SwaggerUIDialog isOpen={open} onClose={() => setOpen(false)}>
-        <SwaggerUI spec={spec} />
+        <Suspense fallback={<div>Loading OpenAPI viewer...</div>}>
+          {open && <SwaggerUI spec={spec} />}
+        </Suspense>
       </SwaggerUIDialog>
     </div>
   );

@@ -33,7 +33,7 @@ import {
 } from "@/components/resource-table/resource-table";
 import { RelationshipGraph } from "@/components/relationships/graph";
 import { YamlView } from "@/components/yaml-button";
-import { cloneDeep, omit } from "lodash";
+import { cloneDeep, omit } from "lodash-es";
 import { ProjectItems } from "@/components/projects-menu";
 import { trpc } from "@/trpc";
 import { LocationContext } from "@/location-context";
