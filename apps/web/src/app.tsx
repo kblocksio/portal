@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { trpc } from "./trpc";
 import { ScrollAreaResizeObserver } from "./components/scroll-area-resize-observer.js";
 import { LocationProvider } from "./location-context.js";
-import { throttle } from "lodash";
+import { throttle } from "lodash-es";
 import useWebSocket from "react-use-websocket";
 import type { WorkerEvent } from "@kblocks/api";
 
