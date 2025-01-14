@@ -30,10 +30,21 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
 
   let blocks: any[] = [
     {
+      type: "divider",
+    },
+    {
       type: "section",
       text: {
         type: "plain_text",
         text: "An event occurred in your cluster.",
+      },
+    },
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: objUri.name,
+        emoji: true,
       },
     },
   ];
@@ -58,7 +69,7 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
       };
 
       blocks.push({
-        type: "header",
+        type: "section",
         text: {
           type: "plain_text",
           text: `${icon()} ${event.event.message}`,
@@ -68,7 +79,7 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
 
     case "ERROR":
       blocks.push({
-        type: "header",
+        type: "section",
         text: {
           type: "plain_text",
           text: `❌ ${event.message}`,
@@ -84,15 +95,11 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
     fields: [
       {
         type: "mrkdwn",
-        text: `*Name:*\n<${url}|${objUri.name}>`,
+        text: `*Type:*\n\`${event.objType}\``,
       },
       {
         type: "mrkdwn",
         text: `*Namespace:*\n${objUri.namespace}`,
-      },
-      {
-        type: "mrkdwn",
-        text: `*Type:*\n\`${event.objType}\``,
       },
     ],
   });
@@ -100,14 +107,6 @@ function formatMessage(event: WorkerEvent): Blocks | undefined {
   if (event.type === "ERROR" && event.explanation?.blocks) {
     blocks.push(...event.explanation.blocks);
   }
-
-  // blocks.push({
-  //   type: "section",
-  //   text: {
-  //     type: "mrkdwn",
-  //     text: `\`\`\`\n${JSON.stringify(event, null, 2)}\n\`\`\``,
-  //   },
-  // });
 
   blocks.push({
     type: "section",
