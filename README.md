@@ -2,232 +2,260 @@
 
 ## Installation
 
-Before you start, make sure you have cloned the [portal repository](https://github.com/kblocksio/portal) and run `npm i` in the root of the repository.
+Before you start, make sure you have:
 
-### Install on the same cluster
+1. Cloned the [portal repository](https://github.com/kblocksio/portal).
+2. Run `npm i` in the root of the repository.
 
-Install the basic kblocks required for the portal to work:
+### Install on the Same Cluster
 
-```sh
-cd gallery
-./install-blocks.sh kblocks/workload
-./install-blocks.sh kblocks/project
-./install-blocks.sh kblocks/cluster
-./install-blocks.sh kblocks/organization
-```
+1. **Install the basic Kblocks required for the portal:**
 
-Now, install the portal to your cluster.
+   ```sh
+   cd gallery
+   ./install-blocks.sh kblocks/workload
+   ./install-blocks.sh kblocks/project
+   ./install-blocks.sh kblocks/cluster
+   ./install-blocks.sh kblocks/organization
+   ```
 
-> **Redis Configuration Note:** This command will install a redis instance in your cluster and will set the needed `KBLOCKS_PUBSUB_*` properties values in the secret. In case you choose to install a different redis instance, set the `redis.enabled` property to `false` and set the `KBLOCKS_PUBSUB_*` properties values in the secret after the installation.
+2. **Install the Portal:**
 
-At the root of the repository, run the following command (replace `your-portal-cluster-name` with the name of your cluster and `your-portal-domain.com` with the domain of your portal):
+   > **Redis Configuration Note:**  
+   > The following command will install a Redis instance in your cluster and set the necessary `KBLOCKS_PUBSUB_*` properties in the secret. If you prefer installing a different Redis instance, set `redis.enabled=false` and manually configure the `KBLOCKS_PUBSUB_*` properties in the secret after installation.
 
-```sh
-helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-portal-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-portal-domain.com
-```
+   Replace `your-portal-cluster-name` with your cluster name and `your-portal-domain.com` with your portal’s domain:
 
-### Install the Portal and Kblocks on two different clusters
+   ```sh
+   helm upgrade --install portal ./deploy \
+     --namespace kblocks \
+     --create-namespace \
+     --set localCluster.name=your-portal-cluster-name \
+     --set redis.enabled=true \
+     --set ingress.enabled=true \
+     --set ingress.host=your-portal-domain.com
+   ```
 
-The installation process is basically the same as the one above, however you will need to manually install and configure the kblocks secret in your kblocks cluster in order for the portal to work.
+### Install the Portal and Kblocks on Two Different Clusters
 
-**In your kblocks cluster:**
+The steps are similar, except you’ll need to manually install and configure the Kblocks secret in your **Kblocks** cluster for the portal to work.
 
-Install the basic kblocks required for the portal to work:
+1. **In your Kblocks cluster:**
 
-```sh
-cd gallery
-./install-blocks.sh kblocks/workload
-./install-blocks.sh kblocks/project
-./install-blocks.sh kblocks/cluster
-./install-blocks.sh kblocks/organization
-```
+   ```sh
+   cd gallery
+   ./install-blocks.sh kblocks/workload
+   ./install-blocks.sh kblocks/project
+   ./install-blocks.sh kblocks/cluster
+   ./install-blocks.sh kblocks/organization
+   ```
 
-**In your portal cluster:**
+2. **In your Portal cluster:**
 
-Run the following command to install the portal (replace `your-portal-cluster-name` with the name of your cluster and `your-portal-domain.com` with the domain of your portal):
+   Run the following command (again replacing `your-portal-cluster-name` and `your-portal-domain.com`):
 
-> Note that this time we are setting `secrets.kblocks.enabled` to `false` because we will install the kblocks secret manually in the next step (in the kblocks cluster).
+   > **Note:**
+   >
+   > - `secrets.kblocks.enabled=false` is set because we will manually install the Kblocks secret in the Kblocks cluster.
+   > - If you use a different Redis instance, follow the [Redis Configuration Note](#install-on-the-same-cluster).
 
-> Also note that that if you decide to use a different redis instance you will need to follow [Redis Configuration Note](#redis-configuration-note).
+   ```sh
+   helm upgrade --install portal ./deploy \
+     --namespace kblocks \
+     --create-namespace \
+     --set localCluster.name=your-portal-cluster-name \
+     --set redis.enabled=true \
+     --set ingress.enabled=true \
+     --set ingress.host=your-portal-domain.com \
+     --set secrets.kblocks.enabled=false
+   ```
 
-```sh
-helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-portal-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-portal-domain.com --set secrets.kblocks.enabled=false
-```
+3. **Back in your Kblocks cluster:**
 
-**In your kblocks cluster:**
+   Create the Kblocks secret with the relevant values:
 
-Create the kblocks secret with the relevant values:
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: kblocks
+     namespace: kblocks
+   type: Opaque
+   data:
+     KBLOCKS_ACCESS: read_write
+     KBLOCKS_SYSTEM_ID: your-cluster-name
+     KBLOCKS_PUBSUB_HOST: your-redis-host.com
+     KBLOCKS_PUBSUB_PORT: 18284
+     KBLOCKS_PUBSUB_KEY: your-redis-key
+   ```
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kblocks
-  namespace: kblocks
-type: Opaque
-data:
-  KBLOCKS_ACCESS: read_write
-  KBLOCKS_SYSTEM_ID: your-cluster-name
-  KBLOCKS_PUBSUB_HOST: your-redis-host.com
-  KBLOCKS_PUBSUB_PORT: 18284
-  KBLOCKS_PUBSUB_KEY: your-redis-key
-```
+---
 
 ## Local Setup and Development
 
-## Prerequisites
+### Prerequisites
 
-- [docker](https://www.docker.com/)
+- [Docker](https://www.docker.com/)
 - [kubectl](https://kubernetes.io/docs/reference/kubectl/)
-- [helm](https://helm.sh/)
-- [skaffold](https://skaffold.dev/)
-- [quickube](https://github.com/winglang/quickube)
+- [Helm](https://helm.sh/)
+- [Skaffold](https://skaffold.dev/)
+- [Quickube](https://github.com/winglang/quickube)
 
-## Setup
-
-### 1. Setup your cluster
+### 1. Set Up Your Cluster
 
 This system can be installed into any standard Kubernetes cluster.
 
-If you want to test the portal locally, you can use `kind` to setup the environment.
+If you want to test the portal locally, you can use [`kind`](https://kind.sigs.k8s.io/) to set up your environment.
 
-Go to Docker Desktop settings and under **Resources** set:
+1. Open Docker Desktop settings and under **Resources**, configure:
 
-- CPU limit: 10
-- Memory limit: 20GB
-- Swap: 3GB
-- Virtual disk limit: 800GB
+   - CPU limit: 10
+   - Memory limit: 20 GB
+   - Swap: 3 GB
+   - Virtual disk limit: 800 GB
 
-Install kind (v0.25.0 or above):
+2. Install `kind` (v0.25.0 or above):
 
-```sh
-brew install kind
-```
+   ```sh
+   brew install kind
+   ```
 
-Then, make sure Docker is running and create a kind cluster:
+3. Make sure Docker is running, then create a kind cluster:
 
-```sh
-./scripts/reinstall-kind.sh
-```
+   ```sh
+   ./scripts/reinstall-kind.sh
+   ```
 
-### 2. Login to Docker Hub
+### 2. Log In to Docker Hub
 
-We are using Docker Hub to publish images. Log in with the `wingcloudbot` user and password from
-[1password]:
+We use Docker Hub to publish images. Log in with the `wingcloudbot` user and password from [1Password]:
 
 ```sh
 docker login -u wingcloudbot
 Password: <SEE 1PASSWORD>
 ```
 
-[1password]: https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=lzd45n6b5mraghh53hnq74hccy&h=wingcloud.1password.com
+[1Password]: https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=lzd45n6b5mraghh53hnq74hccy&h=wingcloud.1password.com
 
-### 3. Build the frontend and backend
+### 3. Build the Frontend and Backend
 
 ```sh
 npm i
 npm run build
 ```
 
-### 4. Install secrets
+### 4. Install Secrets
 
-We are using [git-crypt](https://github.com/AGWA/git-crypt) to encrypt our secrets in our
-repository. Install git-crypt:
+We use [git-crypt](https://github.com/AGWA/git-crypt) to encrypt secrets in the repository.
 
-```sh
-brew install git-crypt
-```
+1. Install git-crypt:
 
-Download the `git-crypt-key` master key from [1password](https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=t2dmpkwt5hufldsxzhnnw43d5i&h=wingcloud.1password.com).
+   ```sh
+   brew install git-crypt
+   ```
 
-Unlock the repository:
+2. Download the `git-crypt-key` master key from [1Password](https://start.1password.com/open/i?a=E2C6K5R5T5BZFDLNI34WC55CCU&v=gb5pxjy6oqlfg4rbxjfiwapmwy&i=t2dmpkwt5hufldsxzhnnw43d5i&h=wingcloud.1password.com).
 
-```sh
-git-crypt unlock /path/to/git-crypt-key
-```
+3. Unlock the repository:
 
-Setup all of the secrets and certs to your cluster. Refer to [docs/enabling-slack-notifications.md](docs/enabling-slack-notifications.md) for more information on how to setup Slack notifications for the cluster.
+   ```sh
+   git-crypt unlock /path/to/git-crypt-key
+   ```
 
-> Replace `KBLOCKS_SYSTEM_ID` with the system id if you are installing to a non-local cluster
+4. Set up all secrets and certificates in your cluster. Refer to
+   [docs/enabling-slack-notifications.md](docs/enabling-slack-notifications.md) if you want to enable Slack notifications.
 
-```sh
-export KBLOCKS_SYSTEM_ID=local
-./scripts/install-all-secrets.sh
-```
+   > **If installing to a non-local cluster, replace** `KBLOCKS_SYSTEM_ID` with the appropriate value:
 
-### 6. Install the portal
+   ```sh
+   export KBLOCKS_SYSTEM_ID=local
+   ./scripts/install-all-secrets.sh
+   ```
 
-Then, install the portal to your cluster. This is the command you can use to iterate on the portal
-locally:
+### 6. Install the Portal
+
+Install the portal to your cluster. This command is useful for local iteration:
 
 ```sh
 ./install.sh
 ```
 
-### 7. (Optional) Install demo block gallery
+### 7. (Optional) Install Demo Block Gallery
 
-In this step we will install the demo block gallery. It is not required to install these into the
-same cluster as the portal cluster.
+If you wish, install the demo block gallery (not required to be in the same cluster as the portal):
 
 ```sh
 ./gallery/install-blocks.sh
 ```
 
-Wait for all pods to be READY:
+Then wait for all pods to be READY:
 
 ```sh
 kubectl get pods -n kblocks
 ```
 
-### 8. Deploy demo resources
-
-Install the demo resources to your cluster:
+### 8. Deploy Demo Resources
 
 ```sh
 cd demo && ./install.sh && cd ..
 ```
 
-Now the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
+Afterwards, the portal should be available at [https://localhost.kblocks.io](https://localhost.kblocks.io).
 
 ---
 
-## Local development
+## Local Development
 
-Update the `apps/web/.env` file with the following:
+1. **Update Environment Variables**
 
-```
-VITE_BACKEND_URL=http://localhost:3001
-VITE_WS_URL=ws://localhost:3001/api/events
-VITE_SKIP_AUTH=true
-```
+   In `apps/web/.env`:
 
-And also the `apps/server/.env` file with these `REDIS_*` variables:
+   ```
+   VITE_BACKEND_URL=http://localhost:3001
+   VITE_WS_URL=ws://localhost:3001/api/events
+   VITE_SKIP_AUTH=true
+   ```
 
-```
-KBLOCKS_PUBSUB_HOST=localhost
-KBLOCKS_PUBSUB_PORT=6379
-KBLOCKS_PUBSUB_KEY=pass1234
-```
+   In `apps/server/.env`:
 
-You can always copy their related `.env.example` files to `.env` and modify the values as needed.
+   ```
+   KBLOCKS_PUBSUB_HOST=localhost
+   KBLOCKS_PUBSUB_PORT=6379
+   KBLOCKS_PUBSUB_KEY=pass1234
+   ```
 
-Now run the dev script at the root of the repository:
+   You can copy these from the respective `.env.example` files.
 
-```sh
-npm run dev
-```
+2. **Start the Portal Locally**
 
-This will start the backend and frontend locally, and also forward the Redis ports from the kind cluster.
+   At the root of the repository:
 
-Now, you can visit http://localhost:5173.
+   ```sh
+   npm run dev
+   ```
 
-### Switching between local and staging
+   This will start both the backend and frontend locally, and forward the Redis ports from the kind cluster.  
+   Access the portal at: [http://localhost:5173](http://localhost:5173).
 
-NOTE: The local installation is not using qkube, so don't expect to find the cluster when running `qkube ls`.
+### Switching Between Local and Staging
 
-- To make sure that kubectl is using the right cluster, run `kubectl config current-context`. and make sure
-  it points to `kind-kind`.
-- To switch to the staging cluster, run `qkube use staging.quickube.sh`.
-- To switch back to the local cluster, run `kubectl config use-context kind-kind`.
+- **Check the current cluster context**:
 
-That's it. Have fun!
+  ```sh
+  kubectl config current-context
+  # should be kind-kind for local
+  ```
+
+- **Switch to the staging cluster**:
+
+  ```sh
+  qkube use staging.quickube.sh
+  ```
+
+- **Switch back to the local cluster**:
+
+  ```sh
+  kubectl config use-context kind-kind
+  ```
+
+That’s it! Have fun and happy building!
