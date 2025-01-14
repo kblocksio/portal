@@ -7,6 +7,8 @@ Before you start, make sure you have:
 1. Cloned the [portal repository](https://github.com/kblocksio/portal).
 2. Run `npm i` in the root of the repository.
 
+In both installation methods, in case you would like to connect the portal notifications to Slack, follow the instructions in [enabling-slack-notifications.md](docs/enabling-slack-notifications.md).
+
 ### Install on the Same Cluster
 
 1. **Install the basic Kblocks required for the portal:**
