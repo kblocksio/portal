@@ -35,7 +35,6 @@ const bigVendors = [
   "micromark",
   "micromark-core-components",
   "micromark-core-commmonmark",
-  "@floating-ui",
   "@trpc",
   "entities",
   "react-use-websocket",
