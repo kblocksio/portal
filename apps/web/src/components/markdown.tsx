@@ -5,9 +5,9 @@ import { getIconColors } from "@/lib/get-icon";
 import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { markdownOverrides } from "@/lib/markdown-overides";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import remarkGfm from "remark-gfm";
-import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { ghcolors } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export const MarkdownWrapper = ({
   content,

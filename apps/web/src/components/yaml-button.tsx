@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import yaml from "react-syntax-highlighter/dist/esm/languages/hljs/yaml";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { dump } from "js-yaml";
