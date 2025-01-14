@@ -1,5 +1,80 @@
 # Kblocks Portal
 
+## Installation
+
+Before you start, make sure you have cloned the [portal repository](https://github.com/kblocksio/portal) and run `npm i` in the root of the repository.
+
+### Install on the same cluster
+
+Install the basic kblocks required for the portal to work:
+
+```sh
+cd gallery
+./install-blocks.sh kblocks/workload
+./install-blocks.sh kblocks/project
+./install-blocks.sh kblocks/cluster
+./install-blocks.sh kblocks/organization
+```
+
+Now, install the portal to your cluster.
+
+> **Redis Configuration Note:** This command will install a redis instance in your cluster and will set the needed `KBLOCKS_PUBSUB_*` properties values in the secret. In case you choose to install a different redis instance, set the `redis.enabled` property to `false` and set the `KBLOCKS_PUBSUB_*` properties values in the secret after the installation.
+
+At the root of the repository, run the following command (replace `your-portal-cluster-name` with the name of your cluster and `your-portal-domain.com` with the domain of your portal):
+
+```sh
+helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-portal-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-portal-domain.com
+```
+
+### Install the Portal and Kblocks on two different clusters
+
+The installation process is basically the same as the one above, however you will need to manually install and configure the kblocks secret in your kblocks cluster in order for the portal to work.
+
+**In your kblocks cluster:**
+
+Install the basic kblocks required for the portal to work:
+
+```sh
+cd gallery
+./install-blocks.sh kblocks/workload
+./install-blocks.sh kblocks/project
+./install-blocks.sh kblocks/cluster
+./install-blocks.sh kblocks/organization
+```
+
+**In your portal cluster:**
+
+Run the following command to install the portal (replace `your-portal-cluster-name` with the name of your cluster and `your-portal-domain.com` with the domain of your portal):
+
+> Note that this time we are setting `secrets.kblocks.enabled` to `false` because we will install the kblocks secret manually in the next step (in the kblocks cluster).
+
+> Also note that that if you decide to use a different redis instance you will need to follow [Redis Configuration Note](#redis-configuration-note).
+
+```sh
+helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-portal-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-portal-domain.com --set secrets.kblocks.enabled=false
+```
+
+**In your kblocks cluster:**
+
+Create the kblocks secret with the relevant values:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kblocks
+  namespace: kblocks
+type: Opaque
+data:
+  KBLOCKS_ACCESS: read_write
+  KBLOCKS_SYSTEM_ID: your-cluster-name
+  KBLOCKS_PUBSUB_HOST: your-redis-host.com
+  KBLOCKS_PUBSUB_PORT: 18284
+  KBLOCKS_PUBSUB_KEY: your-redis-key
+```
+
+## Local Setup and Development
+
 ## Prerequisites
 
 - [docker](https://www.docker.com/)
@@ -156,53 +231,3 @@ NOTE: The local installation is not using qkube, so don't expect to find the clu
 - To switch back to the local cluster, run `kubectl config use-context kind-kind`.
 
 That's it. Have fun!
-
-## Install from helm chart
-
-### Install the basic kblocks
-
-The basic blocks can be installed to a different cluster than the portal.
-
-If you want to install the basic blocks to the same cluster as the portal, you can skip this secret creation.
-Create a kblocks cluster secret with the following values:
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kblocks
-  namespace: kblocks
-type: Opaque
-data:
-  KBLOCKS_ACCESS: read_write
-  KBLOCKS_SYSTEM_ID: your-cluster-name
-  KBLOCKS_PUBSUB_HOST: your-redis-host.com
-  KBLOCKS_PUBSUB_PORT: 18284
-  KBLOCKS_PUBSUB_KEY: your-redis-key
-```
-
-Now, install the basic kblocks:
-
-```sh
-cd gallery
-./install-blocks.sh kblocks/workload
-./install-blocks.sh kblocks/project
-./install-blocks.sh kblocks/cluster
-./install-blocks.sh kblocks/organization
-```
-
-Note that if you didn't install yet the above secret, the blocks will not start.
-Installing the portal helm chart will create the secret.
-
-### Install the portal
-
-Now, install the portal to your cluster.
-Make sure to set the desired variables in the `values.yaml` file.
-For example, if you want to install a local redis instance, you can run the following command:
-
-In the root of the repository, run:
-
-```sh
-helm upgrade --install portal ./deploy --namespace kblocks --create-namespace --set localCluster.name=your-cluster-name --set redis.enabled=true --set ingress.enabled=true --set ingress.host=your-domain.com
-```
-
