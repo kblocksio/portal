@@ -31,7 +31,6 @@ const bigVendors = [
   "dompurify",
   "tailwind-merge",
   "ramda",
-  "react-dom",
   "core-js-pure",
   "micromark",
   "micromark-core-components",
