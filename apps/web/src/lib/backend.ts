@@ -7,15 +7,11 @@ import {
 import { ApiObject, parseBlockUri } from "@kblocks/api";
 import type { ExtendedResourceType } from "@/hooks/use-resource-types";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-export const signInUrl = `${BACKEND_URL}/api/auth/sign-in`;
+export const signInUrl = `/api/auth/sign-in`;
 
 export const get = async (path: string, params?: Record<string, string>) => {
   const queryParams = new URLSearchParams(params).toString();
-  const url = queryParams
-    ? `${BACKEND_URL}${path}?${queryParams}`
-    : `${BACKEND_URL}${path}`;
+  const url = queryParams ? `${path}?${queryParams}` : `${path}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(
@@ -27,7 +23,7 @@ export const get = async (path: string, params?: Record<string, string>) => {
 
 export const request = async (method: string, path: string, body?: any) => {
   try {
-    const res = await fetch(`${BACKEND_URL}${path}`, {
+    const res = await fetch(`${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
