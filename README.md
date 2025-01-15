@@ -30,7 +30,7 @@ In both installation methods, in case you would like to connect the portal notif
 
    ```sh
    helm upgrade --install portal ./deploy \
-     --namespace kblocks \
+     --namespace default \
      --create-namespace \
      --set localCluster.name=your-portal-cluster-name \
      --set redis.enabled=true \
