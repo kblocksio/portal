@@ -24,9 +24,9 @@ In both installation methods, in case you would like to connect the portal notif
 2. **Install the Portal:**
 
    > **Redis Configuration Note:**  
-   > The following command will install a Redis instance in your cluster and set the necessary `KBLOCKS_PUBSUB_*` properties in the secret. If you prefer installing a different Redis instance, set `redis.enabled=false` and manually configure the `KBLOCKS_PUBSUB_*` properties in the secret after installation.
+   > The following command will install a Redis instance in your cluster and set the necessary `KBLOCKS_PUBSUB_*` properties in the `kblocks` secret and `KBLOCKS_PUBSUB_HOST` and `KBLOCKS_PUBSUB_KEY` in the portal's `kblocks-api-secrets` secret. If you prefer installing a different Redis instance, set `redis.enabled=false` and manually configure the above properties in each secret after installation.
 
-   Replace `your-portal-cluster-name` with your cluster name and `your-portal-domain.com` with your portal’s domain:
+   Replace `your-portal-cluster-name` with your cluster name and `your-portal-domain.com` with your portal’s domain and run the following command from the root of the repository:
 
    ```sh
    helm upgrade --install portal ./deploy \
@@ -40,9 +40,47 @@ In both installation methods, in case you would like to connect the portal notif
 
 ### Install the Portal and Kblocks on Two Different Clusters
 
-The steps are similar, except you’ll need to manually install and configure the Kblocks secret in your **Kblocks** cluster for the portal to work.
+In this method, you will install the portal and kblocks on two different clusters.
+In order for them to work together, you will need to make sure your redis instance is exposed and available to both clusters.
 
 1. **In your Kblocks cluster:**
+
+   Create a kblocks namespace and secret:
+
+   ```sh
+   cat <<EOF | kubectl apply -f -
+   apiVersion: v1
+   kind: Namespace
+   metadata:
+     name: kblocks
+   ---
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: kblocks
+     namespace: kblocks
+   type: Opaque
+   stringData:
+     KBLOCKS_ACCESS: "read_write"
+     KBLOCKS_SYSTEM_ID: "your-cluster-name"
+     KBLOCKS_PUBSUB_HOST: "your-redis-host.com"
+     KBLOCKS_PUBSUB_PORT: "18284"
+     KBLOCKS_PUBSUB_KEY: "your-redis-key"
+   EOF
+   ```
+
+Install a basic kblock to make sure everything is working:
+
+    ```sh
+    cd gallery
+    ./install-blocks.sh kblocks/workload
+    ```
+
+2. **In your Portal cluster:**
+
+   Go to `/deploy/values.yaml` and set `secrets.portal.pubsubHost` and `secrets.portal.pubsubKey` to the values of your redis instance.
+
+   Install the basics kblocks needed for the portal:
 
    ```sh
    cd gallery
@@ -52,43 +90,16 @@ The steps are similar, except you’ll need to manually install and configure th
    ./install-blocks.sh kblocks/organization
    ```
 
-2. **In your Portal cluster:**
-
-   Run the following command (again replacing `your-portal-cluster-name` and `your-portal-domain.com`):
-
-   > **Note:**
-   >
-   > - `secrets.kblocks.enabled=false` is set because we will manually install the Kblocks secret in the Kblocks cluster.
-   > - If you use a different Redis instance, follow the [Redis Configuration Note](#install-on-the-same-cluster).
+   Run the following command (again replacing `your-portal-cluster-name` and `your-portal-domain.com`) from the root of the repository:
 
    ```sh
    helm upgrade --install portal ./deploy \
      --namespace kblocks \
      --create-namespace \
      --set localCluster.name=your-portal-cluster-name \
-     --set redis.enabled=true \
      --set ingress.enabled=true \
      --set ingress.host=your-portal-domain.com \
      --set secrets.kblocks.enabled=false
-   ```
-
-3. **Back in your Kblocks cluster:**
-
-   Create the Kblocks secret with the relevant values:
-
-   ```yaml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: kblocks
-     namespace: kblocks
-   type: Opaque
-   data:
-     KBLOCKS_ACCESS: read_write
-     KBLOCKS_SYSTEM_ID: your-cluster-name
-     KBLOCKS_PUBSUB_HOST: your-redis-host.com
-     KBLOCKS_PUBSUB_PORT: 18284
-     KBLOCKS_PUBSUB_KEY: your-redis-key
    ```
 
 ---
