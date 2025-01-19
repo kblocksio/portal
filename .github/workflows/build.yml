@@ -153,7 +153,6 @@ jobs:
         run: |
           ./install-blocks.sh ./kblocks/workload
           ./install-blocks.sh ./kblocks/project
-          ./install-blocks.sh ./kblocks/cluster
           ./install-blocks.sh ./kblocks/organization
 
       - name: Build packages
@@ -244,7 +243,6 @@ jobs:
           - argo-app
           - web-service
           - project
-          - cluster
           - organization
           - workload
     steps:

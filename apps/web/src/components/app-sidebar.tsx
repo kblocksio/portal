@@ -41,11 +41,6 @@ export const AppSidebar = () => {
   const adminSidebarItems = useMemo(() => {
     return [
       {
-        title: "Clusters",
-        url: "/clusters",
-        icon: "heroicon://rectangle-group",
-      },
-      {
         title: "Organizations",
         url: "/organizations",
         icon: "heroicon://user-group",

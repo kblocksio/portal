@@ -27,9 +27,6 @@ export const ResourceForm = ({
   initialValues,
   initialMeta,
 }: FormGeneratorProps) => {
-  const { data: clusters } = trpc.listClusters.useQuery(undefined, {
-    initialData: [],
-  });
   const isEnvironmentResourceType = resourceType.group === "kblocks.io";
 
   // create a clone of the schema and remove the status property (the outputs)
@@ -52,12 +49,6 @@ export const ResourceForm = ({
   );
   const [name, setName] = useState<string>(initialMeta?.name ?? "");
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  const isReadOnlyCluster = useMemo(() => {
-    if (isEnvironmentResourceType) return false;
-    const cluster = clusters.find((c) => c.metadata.name === system);
-    return cluster?.access === "read_only";
-  }, [isEnvironmentResourceType, clusters, system]);
 
   // Focus on the name input when it's empty
   useEffect(() => {
@@ -212,20 +203,18 @@ export const ResourceForm = ({
             YAML
           </Button>
         </YamlButton>
-        {!isReadOnlyCluster && (
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {initialValues ? "Updating..." : "Creating..."}
-              </>
-            ) : initialValues ? (
-              "Update"
-            ) : (
-              "Create"
-            )}
-          </Button>
-        )}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {initialValues ? "Updating..." : "Creating..."}
+            </>
+          ) : initialValues ? (
+            "Update"
+          ) : (
+            "Create"
+          )}
+        </Button>
       </div>
     </form>
   );

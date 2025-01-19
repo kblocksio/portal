@@ -123,54 +123,14 @@ export type Resource = ExtendedApiObject & {
   references?: Record<string, ExtendedApiObject & { type?: ResourceType }>;
 };
 
-type ResourceKnownFields = "name" | "kind" | "namespace" | "cluster";
+export type ResourceKnownFields = "name" | "kind" | "namespace" | "cluster";
 
-const getFieldFromResource = (
-  resource: Resource,
-  field: ResourceKnownFields,
-): string => {
-  switch (field) {
-    case "name":
-      return resource.metadata?.name ?? "";
-    case "kind":
-      return resource.kind ?? "";
-    case "namespace":
-      return resource.metadata?.namespace ?? "";
-    case "cluster":
-      const { system } = parseBlockUri(resource.objUri);
-      return system;
-    default:
-      throw new Error(`Unknown field: ${field}`);
-  }
-};
-
-type SortingOptions = {
+export type SortingOptions = {
   id: ResourceKnownFields;
   desc: boolean;
 };
 
-function sortResources(
-  resources: Resource[],
-  sorting: SortingOptions[],
-): Resource[] {
-  return resources.sort((a, b) => {
-    for (const sortOption of sorting) {
-      try {
-        const aField = getFieldFromResource(a, sortOption.id);
-        const bField = getFieldFromResource(b, sortOption.id);
-        const comparison = aField.localeCompare(bField);
-        if (comparison !== 0) {
-          return sortOption.desc ? -comparison : comparison;
-        }
-      } catch (e) {
-        console.error(`Error sorting resources: ${e}`);
-      }
-    }
-    return 0;
-  });
-}
-
-type FilterOptions = {
+export type FilterOptions = {
   text?: string;
   kind?: string;
   name?: string;
@@ -178,81 +138,6 @@ type FilterOptions = {
   namespace?: string;
   projects?: string[];
 };
-
-function filterResources(
-  resources: Resource[],
-  filters: FilterOptions,
-): Resource[] {
-  return resources.filter((resource) => {
-    const { system } = parseBlockUri(resource.objUri);
-
-    // Text search across multiple fields
-    if (filters.text) {
-      const searchText = filters.text.toLowerCase();
-      const searchableText = [
-        resource.metadata?.name,
-        resource.kind,
-        resource.metadata?.namespace,
-        resource.type?.kind,
-        resource.metadata?.annotations?.description,
-        system,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      if (!searchableText.includes(searchText)) {
-        return false;
-      }
-    }
-
-    // Kind filter
-    if (filters.kind && resource.type?.kind !== filters.kind) {
-      return false;
-    }
-
-    // Name filter
-    if (
-      filters.name &&
-      !resource.metadata?.name
-        ?.toLowerCase()
-        .includes(filters.name.toLowerCase())
-    ) {
-      return false;
-    }
-
-    // Cluster filter
-    if (filters.cluster) {
-      if (system !== filters.cluster) {
-        return false;
-      }
-    }
-
-    // Namespace filter
-    if (
-      filters.namespace &&
-      resource.metadata?.namespace !== filters.namespace
-    ) {
-      return false;
-    }
-
-    // Projects filter
-    if (filters.projects?.length) {
-      const resourceProjectNames = resource.projects.map(
-        (p) => p.metadata?.name,
-      );
-      if (
-        !filters.projects.some((projectName) =>
-          resourceProjectNames.includes(projectName),
-        )
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-}
 
 const getExtendedObjects = async (): Promise<ExtendedApiObject[]> => {
   const objects = await getAllObjects();
@@ -339,25 +224,13 @@ const resourcesFromObjects = (
   allObjects: ExtendedApiObject[],
   projects: Project[],
   types: Record<string, ResourceType>,
-  clusters: Cluster[],
   relationships: Record<string, Record<string, Relationship>>,
 ): Resource[] => {
   return allObjects
     .filter((object) => {
-      // first check is this object belongs to a cluster known to the portal
-      const { system } = parseBlockUri(object.objUri);
-      const cluster = Object.values(clusters)?.find(
-        (c) => c.metadata?.name === system,
-      );
-      if (!cluster) {
-        return false;
-      }
-
       return (
         object.objType !== "kblocks.io/v1/projects" &&
-        object.objType !== "kblocks.io/v1/blocks" &&
-        object.objType !== "kblocks.io/v1/clusters" &&
-        object.objType !== "kblocks.io/v1/organizations"
+        object.objType !== "kblocks.io/v1/blocks"
       );
     })
     .map((object) =>
@@ -455,32 +328,13 @@ const organizationsFromObjects = (
 const typesFromObjects = (
   allObjects: ExtendedApiObject[],
 ): Record<string, ResourceType> => {
-  const clusters = clustersFromObjects(allObjects);
-  const clustersNames = Object.values(clusters)?.map((c) => c.metadata?.name);
-  const clusterTypeObject = allObjects.find(
-    (o) =>
-      o.objType === "kblocks.io/v1/blocks" &&
-      o.metadata?.name === "clusters.kblocks.io",
-  );
-  const types = allObjects
+  return allObjects
     .filter((o) => o.objType === "kblocks.io/v1/blocks")
-    .filter((o) => {
-      const { system } = parseBlockUri(o.objUri);
-      return clustersNames.includes(system);
-    })
     .reduce<Record<string, ResourceType>>((acc, object) => {
       const [key, type] = mapTypeFromObject(object);
       acc[key] = type;
       return acc;
     }, {});
-
-  // add cluster type
-  if (clusterTypeObject) {
-    const [key, type] = mapTypeFromObject(clusterTypeObject);
-    types[key] = type;
-  }
-
-  return types;
 };
 
 const relationshipsFromObjects = (
@@ -652,12 +506,10 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
-      const clusters = clustersFromObjects(objects);
       let resources = resourcesFromObjects(
         objects,
         projects,
         types,
-        clusters,
         relationships,
       );
 
@@ -699,17 +551,6 @@ const appRouter = router({
       const projects = projectsFromObjects(objects);
       const types = typesFromObjects(objects);
       const relationships = relationshipsFromObjects(objects, types);
-      const clusters = clustersFromObjects(objects);
-      // special case for clusters TODO: ainvover - move to different endpoint
-      if (input.objUri.indexOf("kblocks.io/v1/clusters") !== -1) {
-        const cluster = clusters.find((c) => c.objUri === input.objUri);
-        if (!cluster) {
-          throw new Error(`Cluster ${input.objUri} not found`);
-        }
-        // TODO: We should add a getCluster endpoint instead, because the Cluster and Resource types are different.
-        return cluster as unknown as Resource;
-      }
-      // normal case for resources
       const object = objects.find((r) => r.objUri === input.objUri);
       if (!object) {
         throw new Error(`Resource ${input.objUri} not found`);
@@ -812,6 +653,7 @@ app.use(
 
 import * as trpcExpress from "@trpc/server/adapters/express";
 import type { WorkerEventTimestampString } from "./api-events";
+import { filterResources, sortResources } from "./filter-and-sorting-utils.js";
 
 app.use(
   "/api/trpc",

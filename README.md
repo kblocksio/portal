@@ -7,89 +7,32 @@ Before you start, make sure you have:
 1. Cloned the [portal repository](https://github.com/kblocksio/portal).
 2. Run `npm i` in the root of the repository.
 
-In both installation methods, in case you would like to connect the portal notifications to Slack, follow the instructions in [enabling-slack-notifications.md](docs/enabling-slack-notifications.md).
+> In case you would like to connect the portal notifications to Slack, follow the instructions in [enabling-slack-notifications.md](docs/enabling-slack-notifications.md).
 
-### Install on the Same Cluster
+**Install the basic Kblocks required for the portal:**
 
-1. **Install the basic Kblocks required for the portal:**
+```sh
+cd gallery
+./install-blocks.sh kblocks/workload
+./install-blocks.sh kblocks/project
+./install-blocks.sh kblocks/organization
+```
 
-   ```sh
-   cd gallery
-   ./install-blocks.sh kblocks/workload
-   ./install-blocks.sh kblocks/project
-   ./install-blocks.sh kblocks/cluster
-   ./install-blocks.sh kblocks/organization
-   ```
+**Install the Portal:**
 
-2. **Install the Portal:**
+> **Redis Configuration Note:**  
+> The following command will install a Redis instance in your cluster and set the necessary `KBLOCKS_PUBSUB_*` properties in the `kblocks` secret and `KBLOCKS_PUBSUB_HOST` and `KBLOCKS_PUBSUB_KEY` in the portal's `kblocks-api-secrets` secret. If you prefer installing a different Redis instance, set `redis.enabled=false` and manually configure the above properties in each secret after installation.
 
-   > **Redis Configuration Note:**  
-   > The following command will install a Redis instance in your cluster and set the necessary `KBLOCKS_PUBSUB_*` properties in the secret. If you prefer installing a different Redis instance, set `redis.enabled=false` and manually configure the `KBLOCKS_PUBSUB_*` properties in the secret after installation.
+Replace `your-portal-cluster-name` with your cluster name and `your-portal-domain.com` with your portal’s domain and run the following command from the root of the repository:
 
-   Replace `your-portal-cluster-name` with your cluster name and `your-portal-domain.com` with your portal’s domain:
-
-   ```sh
-   helm upgrade --install portal ./deploy \
-     --namespace default \
-     --create-namespace \
-     --set localCluster.name=your-portal-cluster-name \
-     --set redis.enabled=true \
-     --set ingress.enabled=true \
-     --set ingress.host=your-portal-domain.com
-   ```
-
-### Install the Portal and Kblocks on Two Different Clusters
-
-The steps are similar, except you’ll need to manually install and configure the Kblocks secret in your **Kblocks** cluster for the portal to work.
-
-1. **In your Kblocks cluster:**
-
-   ```sh
-   cd gallery
-   ./install-blocks.sh kblocks/workload
-   ./install-blocks.sh kblocks/project
-   ./install-blocks.sh kblocks/cluster
-   ./install-blocks.sh kblocks/organization
-   ```
-
-2. **In your Portal cluster:**
-
-   Run the following command (again replacing `your-portal-cluster-name` and `your-portal-domain.com`):
-
-   > **Note:**
-   >
-   > - `secrets.kblocks.enabled=false` is set because we will manually install the Kblocks secret in the Kblocks cluster.
-   > - If you use a different Redis instance, follow the [Redis Configuration Note](#install-on-the-same-cluster).
-
-   ```sh
-   helm upgrade --install portal ./deploy \
-     --namespace kblocks \
-     --create-namespace \
-     --set localCluster.name=your-portal-cluster-name \
-     --set redis.enabled=true \
-     --set ingress.enabled=true \
-     --set ingress.host=your-portal-domain.com \
-     --set secrets.kblocks.enabled=false
-   ```
-
-3. **Back in your Kblocks cluster:**
-
-   Create the Kblocks secret with the relevant values:
-
-   ```yaml
-   apiVersion: v1
-   kind: Secret
-   metadata:
-     name: kblocks
-     namespace: kblocks
-   type: Opaque
-   data:
-     KBLOCKS_ACCESS: read_write
-     KBLOCKS_SYSTEM_ID: your-cluster-name
-     KBLOCKS_PUBSUB_HOST: your-redis-host.com
-     KBLOCKS_PUBSUB_PORT: 18284
-     KBLOCKS_PUBSUB_KEY: your-redis-key
-   ```
+```sh
+helm upgrade --install portal ./deploy \
+  --namespace default \
+  --create-namespace \
+  --set redis.enabled=true \
+  --set ingress.enabled=true \
+  --set ingress.host=your-portal-domain.com
+```
 
 ---
 
