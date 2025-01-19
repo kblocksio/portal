@@ -7,7 +7,9 @@ Before you start, make sure you have:
 1. Cloned the [portal repository](https://github.com/kblocksio/portal).
 2. Run `npm i` in the root of the repository.
 
-> In case you would like to connect the portal notifications to Slack, follow the instructions in [enabling-slack-notifications.md](docs/enabling-slack-notifications.md).
+> Follow [enabling-slack-notifications.md](docs/enabling-slack-notifications.md) to get Slack notifications.
+
+> AI support is enabled by setting `OPENAI_API_KEY` in the `kblocks-api-secrets` secret. This can also be done in the `secrets/portal.env` file before installation.
 
 **Install the basic Kblocks required for the portal:**
 
