@@ -243,7 +243,6 @@ jobs:
           - argo-app
           - web-service
           - project
-          - cluster
           - organization
           - workload
     steps:
