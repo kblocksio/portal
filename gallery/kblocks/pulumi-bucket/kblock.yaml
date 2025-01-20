@@ -2,13 +2,16 @@ apiVersion: kblocks.io/v1
 kind: Block
 metadata:
   name: pulumi-bucket
+  namespace: kblocks
 spec:
   engine: pulumi
-  definition: 
+  definition:
     group: pulumi.kblocks.io
     version: v1
     kind: PulumiBucket
     plural: pulumibuckets
+    categories:
+      - cloud
     readme: README.md
     icon: heroicon://sparkles
     color: yellow
@@ -19,8 +22,18 @@ spec:
   operator:
     workers: 1
     envSecrets:
-      PULUMI_ACCESS_TOKEN: kblocks-secrets
-      AWS_ACCESS_KEY_ID: kblocks-secrets
-      AWS_SECRET_ACCESS_KEY: kblocks-secrets
-      AWS_REGION: kblocks-secrets
-      AWS_DEFAULT_REGION: kblocks-secrets
+      AWS_REGION:
+        key: ORG_AWS_DEFAULT_REGION
+        secret: kblocks-secrets
+      PULUMI_ACCESS_TOKEN:
+        key: PULUMI_ACCESS_TOKEN
+        secret: kblocks-secrets
+      AWS_ACCESS_KEY_ID:
+        key: AWS_ACCESS_KEY_ID
+        secret: kblocks-secrets
+      AWS_SECRET_ACCESS_KEY:
+        key: AWS_SECRET_ACCESS_KEY
+        secret: kblocks-secrets
+      AWS_DEFAULT_REGION:
+        key: AWS_DEFAULT_REGION
+        secret: kblocks-secrets
