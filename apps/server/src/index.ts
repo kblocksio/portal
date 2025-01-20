@@ -230,6 +230,7 @@ const resourcesFromObjects = (
     .filter((object) => {
       return (
         object.objType !== "kblocks.io/v1/projects" &&
+        object.objType !== "kblocks.io/v1/organizations" &&
         object.objType !== "kblocks.io/v1/blocks"
       );
     })
