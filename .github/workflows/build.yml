@@ -236,7 +236,6 @@ jobs:
           - queue
           - quickube
           - redis
-          - empty
           - static-site
           - topic
           - github-workflow
