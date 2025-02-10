@@ -121,7 +121,6 @@ Afterwards, the portal should be available at [https://localhost.kblocks.io](htt
 
    ```
    VITE_BACKEND_URL=http://localhost:3001
-   VITE_WS_URL=ws://localhost:3001/api/events
    VITE_SKIP_AUTH=true
    ```
 

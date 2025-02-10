@@ -79,6 +79,19 @@ portal-redis-664db84547-wkdqc                          1/1     Running   0      
 open https://$KBLOCKS_DOMAIN
 ```
 
+
+### Installing additional blocks
+
+Now that your portal is set up, you can install additional blocks.
+
+Follow the instructions under [kblocks.io](https://kblocks.io) to create a new block, and when
+installing it, make sure to install the block under the `kblocks` namespace:
+
+```sh
+cd my-block
+kb install -n kblocks
+```
+
 ## License
 
 The kblocks portal is not allowed to be used for commercial purposes.

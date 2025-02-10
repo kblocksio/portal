@@ -23,7 +23,9 @@ import useWebSocket from "react-use-websocket";
 import type { WorkerEvent } from "@kblocks/api";
 
 const TRPC_URL = `${location.origin}/api/trpc`;
-const WS_URL = import.meta.env.VITE_WS_URL;
+
+const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
+const WS_URL = import.meta.env.VITE_WS_URL ?? `${WS_PROTOCOL}//${location.host}/api/events`;
 
 export function App({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
