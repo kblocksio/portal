@@ -73,6 +73,18 @@ helm upgrade --install portal ./deploy \
   --set ingress.host=$KBLOCKS_DOMAIN
 ```
 
+### SSL Certificate Installation
+
+If you wish to connect to the portal via HTTPS, you will need to install an SSL certificate to the `kblocks-tls` secret.
+
+You can use this script to install the certificate:
+
+```sh
+./scripts/install-cert.sh .key .pem
+```
+
+> You can download the `.key` and `.pem` files from [DNSimple](https://dnsimple.com/a/137210/domains/kblocks.io/certificates/1864734/installation) (under NGINX).
+
 ### Wait for the portal to be ready
 
 It will take a few minutes for the portal to be ready. Eventually you should see the following pods
