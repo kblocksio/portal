@@ -162,7 +162,11 @@ export async function loadEvents(
 //     total,
 //   };
 // }
-export async function sliceEvents(objUri: string, start: number, end: number) {
+export async function sliceEvents(
+  objUri: string,
+  start: number,
+  end: number,
+): Promise<kblocks.WorkerEvent[]> {
   const redis = await connection();
 
   const key = keyForEvents(objUri);

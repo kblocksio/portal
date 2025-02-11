@@ -22,6 +22,8 @@ import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
 import type { WorkerEventTimestampString } from "@/resource-context";
+import { trpc } from "@/trpc";
+import { useQueryClient } from "@tanstack/react-query";
 
 type GroupHeader = {
   timestamp: Date;
@@ -57,89 +59,280 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
 };
 
 export default function Timeline({
-  events,
+  objUri,
+  limit = 10,
 }: {
-  events: WorkerEventTimestampString[];
+  objUri: string;
   className?: string;
+  limit?: number;
 }) {
-  // const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  // const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  const query = trpc.listEvents.useInfiniteQuery(
+    {
+      objUri,
+      limit,
+    },
+    {
+      // initialCursor: 2,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getPreviousPageParam: (firstPage) => firstPage.previousCursor,
+      // initialData: {
+      //   pages: [],
+      //   pageParams: [],
+      // },
+      maxPages: 10,
+    },
+  );
+
+  const queryClient = useQueryClient();
   // useEffect(() => {
-  //   if (eventGroupIndex === undefined && eventGroups.length > 0) {
-  //     setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
-  //   }
-  // }, [eventGroupIndex, eventGroups]);
-
-  // const canLoadPreviousLogs = useMemo(
-  //   () => eventGroupIndex !== undefined && eventGroupIndex > 0,
-  //   [eventGroupIndex],
-  // );
-
-  // const loadPreviousLogs = useCallback(() => {
-  //   setEventGroupIndex((eventGroupIndex) => {
-  //     if (eventGroupIndex === undefined) {
-  //       return undefined;
-  //     }
-
-  //     return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+  //   queryClient.invalidateQueries({
+  //     predicate: (query) => {
+  //       console.log({ query });
+  //       return false;
+  //     },
   //   });
   // }, []);
+  const utils = trpc.useUtils();
+  const test = useCallback(async () => {
+    // await utils.listEvents.refetch({
+    //   objUri,
+    //   limit,
+    // });
+    // await utils.listEvents.invalidate({
+    //   objUri,
+    //   limit,
+    // });
+    // query.refetch();
+
+    const data = utils.listEvents.getInfiniteData({
+      objUri,
+      limit,
+    });
+    console.log({ data });
+    if (!data) {
+      return;
+    }
+    // utils.listEvents.setInfiniteData(input, updater)
+    const lastPage = data.pages[data.pages.length - 1];
+    // const lastPageParam = data.pageParams[data.pageParams.length - 1];
+    const cursor = lastPage?.total;
+    if (!lastPage || !cursor) {
+      return;
+    }
+    console.log({ lastPage, cursor });
+    const response = await utils.listEvents.fetch({
+      objUri,
+      limit,
+      cursor,
+    });
+    console.log({ response });
+    // utils.listEvents.setInfiniteData(
+    //   {
+    //     objUri,
+    //     limit,
+    //   },
+    //   () => {
+    //     return {
+    //       pages: [lastPage],
+    //       pageParams: [lastPageParam!],
+    //     };
+    //   },
+    // );
+    // await utils.listEvents.invalidate();
+    // const data = utils.listEvents.getInfiniteData({ objUri, limit });
+    // console.log(data);
+    // if (data) {
+    //   const lastPageParam = data.pageParams[data.pageParams.length - 1];
+    //   console.log({ lastPageParam });
+    //   await utils.listEvents.invalidate({
+    //     objUri,
+    //     limit,
+    //     cursor: lastPageParam || undefined,
+    //   });
+    // }
+  }, [objUri, limit, utils]);
+  // useEffect(() => {
+  //   let timeout: NodeJS.Timeout | undefined;
+  //   const call = async () => {
+  //     // queryClient.getQueryData("listEvents")
+  //     // query.fetchNextPage();
+  //     // query.refetch({});
+  //     // queryClient.invalidateQueries({
+  //     //   queryKey: ["listEvents", { objUri, cursor: 10 }],
+  //     // });
+  //     const data = utils.listEvents.getInfiniteData({
+  //       objUri,
+  //       limit,
+  //     });
+  //     // console.log({ data });
+  //     if (!data) {
+  //       return;
+  //     }
+
+  //     // utils.listEvents.setInfiniteData(input, updater)
+  //     const lastPage = data.pages[data.pages.length - 1];
+  //     const lastPageParam = data.pageParams[data.pageParams.length - 1];
+  //     if (!lastPage || !lastPageParam) {
+  //       return;
+  //     }
+  //     utils.listEvents.setInfiniteData(
+  //       {
+  //         objUri,
+  //         limit,
+  //       },
+  //       () => {
+  //         return {
+  //           pages: [lastPage],
+  //           pageParams: [lastPageParam],
+  //         };
+  //       },
+  //     );
+  //     await utils.listEvents.invalidate();
+  //     // console.log({ lastPage, lastParam });
+  //     // if (!lastParam) {
+  //     //   return;
+  //     // }
+  //     // console.log({ lastPage, lastParam });
+  //     // const lastPage = data.pages[pages.length - 1];
+  //     // if (!lastPage) {
+  //     //   return;
+  //     // }
+  //     // const response = await utils.listEvents.fetch({
+  //     //   objUri,
+  //     //   cursor: lastParam,
+  //     //   limit: 10,
+  //     // });
+  //     // console.log(response);
+
+  //     timeout = setTimeout(call, 4_000);
+  //   };
+
+  //   void call();
+
+  //   return () => clearTimeout(timeout);
+  // }, [query]);
+
+  const events = query.data?.pages.flatMap((page) => page.events) ?? [];
+  return (
+    <>
+      <Button onClick={test}>Test</Button>
+      {!query.hasPreviousPage && (
+        <div className="text-muted-foreground py-4 text-sm">
+          There are no older entries to display.
+        </div>
+      )}
+      {query.hasPreviousPage && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => query.fetchPreviousPage()}
+          disabled={query.isFetchingPreviousPage}
+        >
+          Fetch older entries
+        </Button>
+      )}
+
+      <pre className="py-4 text-xs">
+        {events.map((event) => (
+          <LOG_ITEM key={event.cursor} event={event} />
+        ))}
+      </pre>
+
+      {!query.hasNextPage && (
+        <div className="text-muted-foreground py-4 text-sm">
+          You're up to date.
+        </div>
+      )}
+      {query.hasNextPage && (
+        <Button
+          onClick={() => query.fetchNextPage()}
+          disabled={query.isFetchingNextPage}
+        >
+          Fetch newer entries
+        </Button>
+      )}
+    </>
+  );
+
+  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
+  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  useEffect(() => {
+    if (eventGroupIndex === undefined && eventGroups.length > 0) {
+      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+    }
+  }, [eventGroupIndex, eventGroups]);
+
+  const canLoadPreviousLogs = useMemo(
+    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
+    [eventGroupIndex],
+  );
+
+  const loadPreviousLogs = useCallback(() => {
+    setEventGroupIndex((eventGroupIndex) => {
+      if (eventGroupIndex === undefined) {
+        return undefined;
+      }
+
+      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+    });
+  }, []);
 
   // const reversedEventGroups = useMemo(
   //   () => eventGroups.slice(eventGroupIndex).reverse(),
   //   [eventGroups, eventGroupIndex],
   // );
+  const reversedEventGroups = eventGroups;
 
   return (
-    <pre className="text-xs">
-      {events.map((event) => (
-        <LOG_ITEM key={event.cursor} event={event} />
-      ))}
-    </pre>
+    reversedEventGroups.length > 0 && (
+      <div className="flex flex-col gap-1">
+        {reversedEventGroups.map((eventGroup, index) => (
+          <Fragment key={index}>
+            {(index === 0 ||
+              eventGroup.header.timestamp.getDay() !==
+                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+              <div className={cn(index !== 0 && "pt-6")}>
+                <TimeGroupHeader
+                  key={eventGroup.header.timestamp.getDate()}
+                  timestamp={eventGroup.header.timestamp}
+                />
+              </div>
+            )}
+            <EventGroupItem
+              key={index}
+              eventGroup={eventGroup}
+              defaultOpen={index === 0}
+            />
+          </Fragment>
+        ))}
+
+        {canLoadPreviousLogs && (
+          <div className="py-4">
+            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+              Load older entries
+            </Button>
+          </div>
+        )}
+        {!canLoadPreviousLogs && (
+          <div className="text-muted-foreground py-4 text-sm">
+            There are no older entries to display.
+          </div>
+        )}
+      </div>
+    )
   );
-
-  // return (
-  //   reversedEventGroups.length > 0 && (
-  //     <div className="flex flex-col gap-1">
-  //       {reversedEventGroups.map((eventGroup, index) => (
-  //         <Fragment key={index}>
-  //           {(index === 0 ||
-  //             eventGroup.header.timestamp.getDay() !==
-  //               reversedEventGroups[index - 1].header.timestamp.getDay()) && (
-  //             <div className={cn(index !== 0 && "pt-6")}>
-  //               <TimeGroupHeader
-  //                 key={eventGroup.header.timestamp.getDate()}
-  //                 timestamp={eventGroup.header.timestamp}
-  //               />
-  //             </div>
-  //           )}
-  //           <EventGroupItem
-  //             key={index}
-  //             eventGroup={eventGroup}
-  //             defaultOpen={index === 0}
-  //           />
-  //         </Fragment>
-  //       ))}
-
-  //       {canLoadPreviousLogs && (
-  //         <div className="py-4">
-  //           <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-  //             Load older entries
-  //           </Button>
-  //         </div>
-  //       )}
-  //       {!canLoadPreviousLogs && (
-  //         <div className="text-muted-foreground py-4 text-sm">
-  //           There are no older entries to display.
-  //         </div>
-  //       )}
-  //     </div>
-  //   )
-  // );
 }
 
 function LOG_ITEM(props: { event: WorkerEventTimestampString }) {
-  return <span>{JSON.stringify(props.event, undefined, 2)}</span>;
+  if (!props.event.message) {
+    return <></>;
+  }
+
+  return (
+    <span>
+      [{props.event.cursor}] {props.event.message}
+    </span>
+  );
 }
 
 function EventGroupItem({
