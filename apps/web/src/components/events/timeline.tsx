@@ -62,72 +62,84 @@ export default function Timeline({
   events: WorkerEventTimestampString[];
   className?: string;
 }) {
-  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
-  useEffect(() => {
-    if (eventGroupIndex === undefined && eventGroups.length > 0) {
-      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
-    }
-  }, [eventGroupIndex, eventGroups]);
+  // const [eventGroupIndex, setEventGroupIndex] = useState<number>();
+  // const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  // useEffect(() => {
+  //   if (eventGroupIndex === undefined && eventGroups.length > 0) {
+  //     setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+  //   }
+  // }, [eventGroupIndex, eventGroups]);
 
-  const canLoadPreviousLogs = useMemo(
-    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
-    [eventGroupIndex],
-  );
+  // const canLoadPreviousLogs = useMemo(
+  //   () => eventGroupIndex !== undefined && eventGroupIndex > 0,
+  //   [eventGroupIndex],
+  // );
 
-  const loadPreviousLogs = useCallback(() => {
-    setEventGroupIndex((eventGroupIndex) => {
-      if (eventGroupIndex === undefined) {
-        return undefined;
-      }
+  // const loadPreviousLogs = useCallback(() => {
+  //   setEventGroupIndex((eventGroupIndex) => {
+  //     if (eventGroupIndex === undefined) {
+  //       return undefined;
+  //     }
 
-      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
-    });
-  }, []);
+  //     return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+  //   });
+  // }, []);
 
-  const reversedEventGroups = useMemo(
-    () => eventGroups.slice(eventGroupIndex).reverse(),
-    [eventGroups, eventGroupIndex],
-  );
+  // const reversedEventGroups = useMemo(
+  //   () => eventGroups.slice(eventGroupIndex).reverse(),
+  //   [eventGroups, eventGroupIndex],
+  // );
 
   return (
-    reversedEventGroups.length > 0 && (
-      <div className="flex flex-col gap-1">
-        {reversedEventGroups.map((eventGroup, index) => (
-          <Fragment key={index}>
-            {(index === 0 ||
-              eventGroup.header.timestamp.getDay() !==
-                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
-              <div className={cn(index !== 0 && "pt-6")}>
-                <TimeGroupHeader
-                  key={eventGroup.header.timestamp.getDate()}
-                  timestamp={eventGroup.header.timestamp}
-                />
-              </div>
-            )}
-            <EventGroupItem
-              key={index}
-              eventGroup={eventGroup}
-              defaultOpen={index === 0}
-            />
-          </Fragment>
-        ))}
-
-        {canLoadPreviousLogs && (
-          <div className="py-4">
-            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-              Load older entries
-            </Button>
-          </div>
-        )}
-        {!canLoadPreviousLogs && (
-          <div className="text-muted-foreground py-4 text-sm">
-            There are no older entries to display.
-          </div>
-        )}
-      </div>
-    )
+    <pre className="text-xs">
+      {events.map((event) => (
+        <LOG_ITEM key={event.cursor} event={event} />
+      ))}
+    </pre>
   );
+
+  // return (
+  //   reversedEventGroups.length > 0 && (
+  //     <div className="flex flex-col gap-1">
+  //       {reversedEventGroups.map((eventGroup, index) => (
+  //         <Fragment key={index}>
+  //           {(index === 0 ||
+  //             eventGroup.header.timestamp.getDay() !==
+  //               reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+  //             <div className={cn(index !== 0 && "pt-6")}>
+  //               <TimeGroupHeader
+  //                 key={eventGroup.header.timestamp.getDate()}
+  //                 timestamp={eventGroup.header.timestamp}
+  //               />
+  //             </div>
+  //           )}
+  //           <EventGroupItem
+  //             key={index}
+  //             eventGroup={eventGroup}
+  //             defaultOpen={index === 0}
+  //           />
+  //         </Fragment>
+  //       ))}
+
+  //       {canLoadPreviousLogs && (
+  //         <div className="py-4">
+  //           <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+  //             Load older entries
+  //           </Button>
+  //         </div>
+  //       )}
+  //       {!canLoadPreviousLogs && (
+  //         <div className="text-muted-foreground py-4 text-sm">
+  //           There are no older entries to display.
+  //         </div>
+  //       )}
+  //     </div>
+  //   )
+  // );
+}
+
+function LOG_ITEM(props: { event: WorkerEventTimestampString }) {
+  return <span>{JSON.stringify(props.event, undefined, 2)}</span>;
 }
 
 function EventGroupItem({
@@ -227,7 +239,7 @@ const LogSection = ({ events }: { events: LogEvent[] }) => {
   return (
     <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
       {events.map((event, index) => (
-        <LogItem key={index} log={event} />
+        <LogItem key={event.logId ?? index} log={event} />
       ))}
     </div>
   );

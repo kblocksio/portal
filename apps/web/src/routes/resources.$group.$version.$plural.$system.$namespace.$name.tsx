@@ -125,7 +125,7 @@ function ResourcePage() {
       // cursor: 3,
     },
     {
-      // initialCursor: 3,
+      initialCursor: 3,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
       initialData: {

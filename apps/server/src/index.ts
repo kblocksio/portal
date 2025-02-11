@@ -440,40 +440,66 @@ const getObjectHierarchy = (
   };
 };
 
+const MAX_LIMIT = 3;
 const appRouter = router({
   listEvents: publicProcedure
     .input(
       z.object({
         objUri: z.string(),
+        // cursor: z.number().min(0).optional(),
         cursor: z.number().min(0).optional(),
-        limit: z.number().min(1).max(100).optional().default(3),
-        // end: z.number().optional(),
-        // direction: z.enum(["forward", "backward"]).optional().default("forward"),
+        limit: z.number().min(1).max(100).optional().default(MAX_LIMIT),
+        direction: z
+          .enum(["forward", "backward"])
+          .optional()
+          .default("forward"),
       }),
     )
     .query(async ({ input }) => {
-      const { objUri } = input;
-      const cursor = input.cursor ?? -input.limit;
-      const events = await sliceEvents(
-        objUri,
-        cursor,
-        cursor + input.limit - 1,
-      );
-      // let nextCursor: number|undefined;
-      // if (events.length > input.limit) {
-      //   events.pop();
-      //   nextCursor = events[events.length - 1].timestamp;
-      // }
+      const { objUri, direction } = input;
+      // const cursor = input.cursor ?? -input.limit;
       const total = await eventsCount(objUri);
-      const absoluteCursor = cursor < 0 ? total + cursor : cursor;
+      const cursor = input.cursor ?? total - MAX_LIMIT;
+      // const pos =
+      //   direction === "forward"
+      //     ? ([cursor, cursor + input.limit - 1] as const)
+      //     : ([Math.max(0, cursor - input.limit), cursor] as const);
+      const pos =
+        direction === "forward"
+          ? ([cursor, cursor + input.limit - 1] as const)
+          : ([Math.max(0, cursor - input.limit), cursor] as const);
+      const events = await sliceEvents(objUri, ...pos);
+      // const absoluteCursor = cursor < 0 ? total + cursor : cursor;
+      const absoluteCursor = pos[0];
       const nextCursor = absoluteCursor + events.length;
-      const previousCursor = absoluteCursor - input.limit;
+      // const previousCursor = absoluteCursor - input.limit;
+      // const previousCursor = absoluteCursor - events.length;
+      const previousCursor = absoluteCursor - 1;
+      console.log({
+        input,
+        absoluteCursor,
+        cursor,
+        total,
+        limit: input.limit,
+        pos,
+        direction,
+      });
       return {
-        events,
+        events: events.map((event, index) => ({
+          ...event,
+          cursor: absoluteCursor + index,
+        })),
         nextCursor: nextCursor >= total ? undefined : nextCursor,
         // previousCursor: cursor === 0 ? undefined : cursor,
         previousCursor: previousCursor >= 0 ? previousCursor : undefined,
-        meta: { cursor, total, limit: input.limit },
+        meta: {
+          absoluteCursor,
+          cursor,
+          total,
+          limit: input.limit,
+          pos,
+          direction,
+        },
       };
     }),
   listTypes: publicProcedure.query(async () => {
