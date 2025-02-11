@@ -24,6 +24,8 @@ import { AiErrorGuide } from "./ai-error-guide";
 import type { WorkerEventTimestampString } from "@/resource-context";
 import { trpc } from "@/trpc";
 import { useQueryClient } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
+import { getQueryClient } from "@trpc/react-query/shared";
 
 type GroupHeader = {
   timestamp: Date;
@@ -72,150 +74,168 @@ export default function Timeline({
       limit,
     },
     {
-      // initialCursor: 2,
+      initialCursor: -limit,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
-      // initialData: {
-      //   pages: [],
-      //   pageParams: [],
-      // },
-      maxPages: 10,
+      // maxPages: 3,
     },
   );
 
   const queryClient = useQueryClient();
-  // useEffect(() => {
-  //   queryClient.invalidateQueries({
-  //     predicate: (query) => {
-  //       console.log({ query });
-  //       return false;
-  //     },
-  //   });
-  // }, []);
   const utils = trpc.useUtils();
-  const test = useCallback(async () => {
-    // await utils.listEvents.refetch({
-    //   objUri,
-    //   limit,
-    // });
-    // await utils.listEvents.invalidate({
-    //   objUri,
-    //   limit,
-    // });
-    // query.refetch();
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | undefined;
+    const call = async () => {
+      // await query.fetchNextPage();
+      // const lastPage = [...(query.data?.pages ?? [])].pop();
+      try {
+        // console.log(query);
+        // query.refetch({
+        //   refetchPage: (page, index) => {
+        //     console.log("refetching page", page, index);
+        //     return true;
+        //   },
+        // });
+        const data = utils.listEvents.getInfiniteData({
+          objUri,
+          limit,
+        });
+        console.log("getInifiniteData", data);
+        const lastPageParam = data?.pageParams[data.pageParams.length - 1];
+        const lastPage = data?.pages[data.pages.length - 1];
+        if (!lastPage) {
+          return;
+        }
+        console.log("lastPageParam", lastPageParam);
+        console.log("lastPage", lastPage);
+        const shouldRefetch = lastPage.nextCursor === undefined;
+        if (!shouldRefetch) {
+          return;
+        }
+        // const nextCursor = lastPage.total;
+        // const nextCursor = lastPageParam || undefined;
+        const nextCursor = lastPage.cursor;
+        console.log("nextCursor", nextCursor);
+        const newPage = await utils.client.listEvents.query({
+          objUri,
+          limit,
+          cursor: nextCursor,
+        });
+        console.log("newPage", newPage);
+        utils.listEvents.setInfiniteData(
+          {
+            objUri,
+            limit,
+          },
+          (data) => {
+            const pages = data?.pages ?? [];
+            const pageParams = data?.pageParams ?? [];
+            // const lastPage = pages[pages.length - 1];
+            // lastPage.
+            // if (lastPage && lastPage.events.length === 0) {
+            //   const newData = {
+            //     pages: pages.slice(0, -1),
+            //     pageParams: pageParams.slice(0, -1),
+            //   };
+            //   console.dir(newData.pages, { depth: 20 });
+            //   return newData;
+            // }
+            // return data;
+            return {
+              pages: [...pages.slice(0, -1), newPage],
+              pageParams: pageParams,
+            };
+          },
+        );
+        // queryClient.refetchQueries({
+        //   queryKey: getQueryKey(trpc.listEvents, {
+        //     objUri,
+        //     limit,
+        //   }),
+        // });
+        // queryClient.refetchQueries({
+        //   queryKey: ["listEvents", { objUri, limit }],
 
-    const data = utils.listEvents.getInfiniteData({
-      objUri,
-      limit,
-    });
-    console.log({ data });
-    if (!data) {
-      return;
-    }
-    // utils.listEvents.setInfiniteData(input, updater)
-    const lastPage = data.pages[data.pages.length - 1];
-    // const lastPageParam = data.pageParams[data.pageParams.length - 1];
-    const cursor = lastPage?.total;
-    if (!lastPage || !cursor) {
-      return;
-    }
-    console.log({ lastPage, cursor });
-    const response = await utils.listEvents.fetch({
-      objUri,
-      limit,
-      cursor,
-    });
-    console.log({ response });
-    // utils.listEvents.setInfiniteData(
-    //   {
-    //     objUri,
-    //     limit,
-    //   },
-    //   () => {
-    //     return {
-    //       pages: [lastPage],
-    //       pageParams: [lastPageParam!],
-    //     };
-    //   },
-    // );
-    // await utils.listEvents.invalidate();
-    // const data = utils.listEvents.getInfiniteData({ objUri, limit });
-    // console.log(data);
-    // if (data) {
-    //   const lastPageParam = data.pageParams[data.pageParams.length - 1];
-    //   console.log({ lastPageParam });
-    //   await utils.listEvents.invalidate({
-    //     objUri,
-    //     limit,
-    //     cursor: lastPageParam || undefined,
-    //   });
-    // }
-  }, [objUri, limit, utils]);
-  // useEffect(() => {
-  //   let timeout: NodeJS.Timeout | undefined;
-  //   const call = async () => {
-  //     // queryClient.getQueryData("listEvents")
-  //     // query.fetchNextPage();
-  //     // query.refetch({});
-  //     // queryClient.invalidateQueries({
-  //     //   queryKey: ["listEvents", { objUri, cursor: 10 }],
-  //     // });
-  //     const data = utils.listEvents.getInfiniteData({
-  //       objUri,
-  //       limit,
-  //     });
-  //     // console.log({ data });
-  //     if (!data) {
-  //       return;
-  //     }
+        // });
+        // const data = utils.listEvents.getInfiniteData({
+        //   objUri,
+        //   limit,
+        // });
+        // const lastPage = data?.pages[data.pages.length - 1];
+        // if (!lastPage) {
+        //   return;
+        // }
+        // const shouldRefetch = lastPage.nextCursor === undefined;
+        // if (!shouldRefetch) {
+        //   return;
+        // }
+        // const nextCursor = lastPage.total;
+        // console.log("nextCursor", nextCursor);
+        // console.log("lastPage", lastPage, { shouldRefetch });
+        // utils.listEvents.refetch();
 
-  //     // utils.listEvents.setInfiniteData(input, updater)
-  //     const lastPage = data.pages[data.pages.length - 1];
-  //     const lastPageParam = data.pageParams[data.pageParams.length - 1];
-  //     if (!lastPage || !lastPageParam) {
-  //       return;
-  //     }
-  //     utils.listEvents.setInfiniteData(
-  //       {
-  //         objUri,
-  //         limit,
-  //       },
-  //       () => {
-  //         return {
-  //           pages: [lastPage],
-  //           pageParams: [lastPageParam],
-  //         };
-  //       },
-  //     );
-  //     await utils.listEvents.invalidate();
-  //     // console.log({ lastPage, lastParam });
-  //     // if (!lastParam) {
-  //     //   return;
-  //     // }
-  //     // console.log({ lastPage, lastParam });
-  //     // const lastPage = data.pages[pages.length - 1];
-  //     // if (!lastPage) {
-  //     //   return;
-  //     // }
-  //     // const response = await utils.listEvents.fetch({
-  //     //   objUri,
-  //     //   cursor: lastParam,
-  //     //   limit: 10,
-  //     // });
-  //     // console.log(response);
+        // utils.listEvents.refetch({
+        //   objUri,
+        //   limit,
+        // });
+        // const x = await utils.listEvents.fetchInfinite({
+        //   objUri,
+        //   limit,
+        //   cursor: nextCursor,
+        // });
+        // console.log("invalidating");
+        // await utils.listEvents.invalidate({
+        //   objUri,
+        //   limit,
+        // });
+        // await queryClient.invalidateQueries({
+        //   // queryKey: ["listEvents", { objUri, limit }],
+        //   queryKey: ["listEvents"],
+        // });
+        // const x = await queryClient.fetchInfiniteQuery({
+        //   queryKey: ["listEvents.infinite", { objUri, limit }],
+        //   // pageParam: nextCursor,
+        //   initialPageParam: nextCursor,
+        // });
+        // console.log("x", x);
+        // queryClient.invalidateQueries({
+        //   queryKey: ["listEvents.infinite", { objUri, limit }],
+        // });
 
-  //     timeout = setTimeout(call, 4_000);
-  //   };
+        // // Dimiss last page if it's empty.
+        // utils.listEvents.setInfiniteData(
+        //   {
+        //     objUri,
+        //     limit,
+        //   },
+        //   (data) => {
+        //     const pages = data?.pages ?? [];
+        //     const pageParams = data?.pageParams ?? [];
+        //     const lastPage = pages[pages.length - 1];
+        //     if (lastPage && lastPage.events.length === 0) {
+        //       const newData = {
+        //         pages: pages.slice(0, -1),
+        //         pageParams: pageParams.slice(0, -1),
+        //       };
+        //       console.dir(newData.pages, { depth: 20 });
+        //       return newData;
+        //     }
+        //     return data;
+        //   },
+        // );
+      } finally {
+        timeout = setTimeout(call, 2_000);
+      }
+    };
 
-  //   void call();
+    void call();
 
-  //   return () => clearTimeout(timeout);
-  // }, [query]);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   return (
     <>
-      <Button onClick={test}>Test</Button>
       {!query.hasPreviousPage && (
         <div className="text-muted-foreground py-4 text-sm">
           There are no older entries to display.
@@ -245,6 +265,8 @@ export default function Timeline({
       )}
       {query.hasNextPage && (
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => query.fetchNextPage()}
           disabled={query.isFetchingNextPage}
         >

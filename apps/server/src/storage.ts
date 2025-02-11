@@ -133,35 +133,6 @@ export async function loadEvents(
   return values.map((value) => JSON.parse(value));
 }
 
-// export async function sliceEvents(
-//   objUri: string,
-//   cursor: number,
-//   end: number,
-// ): Promise<{
-//   events: kblocks.WorkerEvent[];
-//   nextCursor: number;
-//   total: number;
-// }> {
-//   const redis = await connection();
-
-//   const key = keyForEvents(objUri);
-//   const values = await redis.lRange(key, cursor, end);
-//   if (!values) {
-//     return {
-//       events: [],
-//       nextCursor: 0,
-//       total: 0,
-//     };
-//   }
-
-//   const total = await redis.lLen(key);
-
-//   return {
-//     events: values.map((value) => JSON.parse(value)),
-//     nextCursor: (cursor < 0 ? total + cursor : cursor) + values.length,
-//     total,
-//   };
-// }
 export async function sliceEvents(
   objUri: string,
   start: number,

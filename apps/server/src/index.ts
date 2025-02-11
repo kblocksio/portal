@@ -445,7 +445,7 @@ const appRouter = router({
     .input(
       z.object({
         objUri: z.string(),
-        cursor: z.number().min(0).optional(),
+        cursor: z.number().optional().default(0),
         limit: z.number().min(1).max(100).optional().default(100),
         direction: z
           .enum(["forward", "backward"])
@@ -456,7 +456,11 @@ const appRouter = router({
     .query(async ({ input }) => {
       const { objUri, direction } = input;
       const total = await eventsCount(objUri);
-      const cursor = input.cursor ?? Math.max(0, total - input.limit);
+      // const cursor = input.cursor ?? Math.max(0, total - input.limit);
+      const cursor = Math.max(
+        0,
+        Math.max(input.cursor, total - Math.abs(input.cursor)),
+      );
       const [start, end] =
         direction === "forward"
           ? ([cursor, cursor + input.limit - 1] as const)
@@ -469,8 +473,8 @@ const appRouter = router({
           ...event,
           cursor: start + index,
         })),
-        // nextCursor: nextCursor >= total ? undefined : nextCursor,
-        nextCursor,
+        nextCursor: nextCursor >= total ? undefined : nextCursor,
+        // nextCursor,
         previousCursor: previousCursor >= 0 ? previousCursor : undefined,
         cursor: start,
         total,
