@@ -25,7 +25,8 @@ import type { WorkerEvent } from "@kblocks/api";
 const TRPC_URL = `${location.origin}/api/trpc`;
 
 const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
-const WS_URL = import.meta.env.VITE_WS_URL ?? `${WS_PROTOCOL}//${location.host}/api/events`;
+const WS_URL =
+  import.meta.env.VITE_WS_URL ?? `${WS_PROTOCOL}//${location.host}/api/events`;
 
 export function App({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -52,7 +53,15 @@ export function App({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-compiler/react-compiler
     throttle(
       () => {
-        queryClient.invalidateQueries();
+        // queryClient.invalidateQueries();
+        queryClient.invalidateQueries({
+          queryKey: [
+            "listProjects",
+            "listOrganizations",
+            "listCatalogItems",
+            "getResource",
+          ],
+        });
       },
       2000,
       { leading: true, trailing: true },

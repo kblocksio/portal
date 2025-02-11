@@ -118,17 +118,26 @@ function ResourcePage() {
   const [lastEventCount, setLastEventCount] = useState<number>(-1);
   const [showLogsBadge, setShowLogsBadge] = useState(false);
 
-  const events = trpc.listEvents.useQuery(
+  const events = trpc.listEvents.useInfiniteQuery(
     {
       objUri,
+      // start: -3,
+      // cursor: 3,
     },
     {
-      initialData: [],
+      // initialCursor: 3,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getPreviousPageParam: (firstPage) => firstPage.previousCursor,
+      initialData: {
+        pages: [],
+        pageParams: [],
+      },
     },
   );
+  const eventsList = events.data?.pages.flatMap((page) => page.events);
   useEffect(() => {
-    setShowLogsBadge(events.data.length > lastEventCount);
-    setLastEventCount(events.data.length);
+    setShowLogsBadge(eventsList.length > lastEventCount);
+    setLastEventCount(eventsList.length);
   });
 
   useEffect(() => {
@@ -456,7 +465,19 @@ function ResourcePage() {
               <CardContent className="h-full p-0">
                 {selectedResource && (
                   <div className="pt-4 sm:pt-6">
-                    <Timeline events={events.data} />
+                    <Button
+                      onClick={() => events.fetchPreviousPage()}
+                      disabled={!events.hasPreviousPage}
+                    >
+                      Fetch older entries
+                    </Button>
+                    <Button
+                      onClick={() => events.fetchNextPage()}
+                      disabled={!events.hasNextPage}
+                    >
+                      Fetch newer entries
+                    </Button>
+                    <Timeline events={eventsList} />
                   </div>
                 )}
               </CardContent>

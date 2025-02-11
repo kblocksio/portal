@@ -31,6 +31,8 @@ import {
   getObject,
   resetStorage,
   deleteObject,
+  sliceEvents,
+  eventsCount,
 } from "./storage";
 import { categories } from "./categories";
 
@@ -443,12 +445,36 @@ const appRouter = router({
     .input(
       z.object({
         objUri: z.string(),
+        cursor: z.number().min(0).optional(),
+        limit: z.number().min(1).max(100).optional().default(3),
+        // end: z.number().optional(),
+        // direction: z.enum(["forward", "backward"]).optional().default("forward"),
       }),
     )
     .query(async ({ input }) => {
       const { objUri } = input;
-      const events = await loadEvents(objUri);
-      return events as unknown as WorkerEventTimestampString[];
+      const cursor = input.cursor ?? -input.limit;
+      const events = await sliceEvents(
+        objUri,
+        cursor,
+        cursor + input.limit - 1,
+      );
+      // let nextCursor: number|undefined;
+      // if (events.length > input.limit) {
+      //   events.pop();
+      //   nextCursor = events[events.length - 1].timestamp;
+      // }
+      const total = await eventsCount(objUri);
+      const absoluteCursor = cursor < 0 ? total + cursor : cursor;
+      const nextCursor = absoluteCursor + events.length;
+      const previousCursor = absoluteCursor - input.limit;
+      return {
+        events,
+        nextCursor: nextCursor >= total ? undefined : nextCursor,
+        // previousCursor: cursor === 0 ? undefined : cursor,
+        previousCursor: previousCursor >= 0 ? previousCursor : undefined,
+        meta: { cursor, total, limit: input.limit },
+      };
     }),
   listTypes: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
