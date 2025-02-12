@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import cors from "cors";
 import {
   GetUserResponse,
@@ -679,6 +680,7 @@ startStreamListener();
 
 const { app } = expressWs(express());
 
+app.use(compression());
 app.use(express.json({ limit: "50mb" }));
 app.use(
   cors({
