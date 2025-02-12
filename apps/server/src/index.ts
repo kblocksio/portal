@@ -474,10 +474,8 @@ const appRouter = router({
           cursor: start + index,
         })),
         nextCursor: nextCursor >= total ? undefined : nextCursor,
-        // nextCursor,
         previousCursor: previousCursor >= 0 ? previousCursor : undefined,
         cursor: start,
-        total,
       };
     }),
   listTypes: publicProcedure.query(async () => {

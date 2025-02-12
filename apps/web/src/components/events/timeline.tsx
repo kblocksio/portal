@@ -21,11 +21,17 @@ import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
-import type { WorkerEventTimestampString } from "@/resource-context";
 import { trpc } from "@/trpc";
 import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import { getQueryClient } from "@trpc/react-query/shared";
+import {
+  AnyProcedure,
+  AnyQueryProcedure,
+  inferProcedureInput,
+} from "@trpc/server";
+import { QueryProcedure } from "@trpc/server/unstable-core-do-not-import";
+import { WorkerEventTimestampString } from "@kblocks-portal/server";
 
 type GroupHeader = {
   timestamp: Date;
@@ -60,6 +66,48 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
   return <p className="text-muted-foreground text-xs uppercase">{text}</p>;
 };
 
+// const useRefetchInfiniteQueryLastPage = <T extends AnyQueryProcedure>(
+//   procedure: T,
+//   input: inferProcedureInput<T>,
+// ) => {
+//   const queryClient = useQueryClient();
+//   const utils = trpc.useUtils();
+//   return useCallback(() => {
+//     // // getQueryKey(procedure)
+//     // procedure._def
+//     // const data = procedure.getInfiniteData({
+//     //   objUri,
+//     //   limit,
+//     // });
+//     // const lastPage = data?.pages[data.pages.length - 1];
+//     // if (!lastPage) {
+//     //   return;
+//     // }
+//     // const shouldRefetch = lastPage.nextCursor === undefined;
+//     // if (!shouldRefetch) {
+//     //   return;
+//     // }
+//     // const nextCursor = lastPage.cursor;
+//     // const newPage = await utils.client.listEvents.query({
+//     //   objUri,
+//     //   limit,
+//     //   cursor: nextCursor,
+//     // });
+//     // utils.listEvents.setInfiniteData(
+//     //   {
+//     //     objUri,
+//     //     limit,
+//     //   },
+//     //   (data) => {
+//     //     const pages = data?.pages ?? [];
+//     //     const pageParams = data?.pageParams ?? [];
+//     //     return {
+//     //       pages: [...pages.slice(0, -1), newPage],
+//     //       pageParams,
+//     //     };
+//   }, [queryClient, procedure, input]);
+// };
+
 export default function Timeline({
   objUri,
   limit = 10,
@@ -68,6 +116,11 @@ export default function Timeline({
   className?: string;
   limit?: number;
 }) {
+  // const refetchLastPage = useRefetchInfiniteQueryLastPage(trpc.listEvents, {
+  //   objUri,
+  //   limit,
+  // });
+
   const query = trpc.listEvents.useInfiniteQuery(
     {
       objUri,
@@ -77,165 +130,77 @@ export default function Timeline({
       initialCursor: -limit,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
-      // maxPages: 3,
+      maxPages: 3,
     },
   );
 
-  const queryClient = useQueryClient();
   const utils = trpc.useUtils();
-  useEffect(() => {
-    let timeout: NodeJS.Timeout | undefined;
-    const call = async () => {
-      // await query.fetchNextPage();
-      // const lastPage = [...(query.data?.pages ?? [])].pop();
-      try {
-        // console.log(query);
-        // query.refetch({
-        //   refetchPage: (page, index) => {
-        //     console.log("refetching page", page, index);
-        //     return true;
-        //   },
-        // });
-        const data = utils.listEvents.getInfiniteData({
-          objUri,
-          limit,
-        });
-        console.log("getInifiniteData", data);
-        const lastPageParam = data?.pageParams[data.pageParams.length - 1];
-        const lastPage = data?.pages[data.pages.length - 1];
-        if (!lastPage) {
-          return;
-        }
-        console.log("lastPageParam", lastPageParam);
-        console.log("lastPage", lastPage);
-        const shouldRefetch = lastPage.nextCursor === undefined;
-        if (!shouldRefetch) {
-          return;
-        }
-        // const nextCursor = lastPage.total;
-        // const nextCursor = lastPageParam || undefined;
-        const nextCursor = lastPage.cursor;
-        console.log("nextCursor", nextCursor);
-        const newPage = await utils.client.listEvents.query({
-          objUri,
-          limit,
-          cursor: nextCursor,
-        });
-        console.log("newPage", newPage);
-        utils.listEvents.setInfiniteData(
-          {
-            objUri,
-            limit,
-          },
-          (data) => {
-            const pages = data?.pages ?? [];
-            const pageParams = data?.pageParams ?? [];
-            // const lastPage = pages[pages.length - 1];
-            // lastPage.
-            // if (lastPage && lastPage.events.length === 0) {
-            //   const newData = {
-            //     pages: pages.slice(0, -1),
-            //     pageParams: pageParams.slice(0, -1),
-            //   };
-            //   console.dir(newData.pages, { depth: 20 });
-            //   return newData;
-            // }
-            // return data;
-            return {
-              pages: [...pages.slice(0, -1), newPage],
-              pageParams: pageParams,
-            };
-          },
-        );
-        // queryClient.refetchQueries({
-        //   queryKey: getQueryKey(trpc.listEvents, {
-        //     objUri,
-        //     limit,
-        //   }),
-        // });
-        // queryClient.refetchQueries({
-        //   queryKey: ["listEvents", { objUri, limit }],
+  const refetchLastPage = useCallback(async () => {
+    if (query.isFetching) {
+      return;
+    }
 
-        // });
-        // const data = utils.listEvents.getInfiniteData({
-        //   objUri,
-        //   limit,
-        // });
-        // const lastPage = data?.pages[data.pages.length - 1];
-        // if (!lastPage) {
-        //   return;
-        // }
-        // const shouldRefetch = lastPage.nextCursor === undefined;
-        // if (!shouldRefetch) {
-        //   return;
-        // }
-        // const nextCursor = lastPage.total;
-        // console.log("nextCursor", nextCursor);
-        // console.log("lastPage", lastPage, { shouldRefetch });
-        // utils.listEvents.refetch();
+    const data = utils.listEvents.getInfiniteData({
+      objUri,
+      limit,
+    });
+    console.log("data", data);
+    const lastPage = data?.pages[data.pages.length - 1];
+    if (!lastPage) {
+      return;
+    }
+    const shouldRefetch = lastPage.nextCursor === undefined;
+    if (!shouldRefetch) {
+      return;
+    }
+    const nextCursor = lastPage.cursor;
+    const newPage = await utils.client.listEvents.query({
+      objUri,
+      limit,
+      cursor: nextCursor,
+    });
+    utils.listEvents.setInfiniteData(
+      {
+        objUri,
+        limit,
+      },
+      (data) => {
+        const pages = data?.pages ?? [];
+        const pageParams = data?.pageParams ?? [];
+        return {
+          pages: [...pages.slice(0, -1), newPage],
+          pageParams,
+        };
+      },
+    );
+  }, [query]);
 
-        // utils.listEvents.refetch({
-        //   objUri,
-        //   limit,
-        // });
-        // const x = await utils.listEvents.fetchInfinite({
-        //   objUri,
-        //   limit,
-        //   cursor: nextCursor,
-        // });
-        // console.log("invalidating");
-        // await utils.listEvents.invalidate({
-        //   objUri,
-        //   limit,
-        // });
-        // await queryClient.invalidateQueries({
-        //   // queryKey: ["listEvents", { objUri, limit }],
-        //   queryKey: ["listEvents"],
-        // });
-        // const x = await queryClient.fetchInfiniteQuery({
-        //   queryKey: ["listEvents.infinite", { objUri, limit }],
-        //   // pageParam: nextCursor,
-        //   initialPageParam: nextCursor,
-        // });
-        // console.log("x", x);
-        // queryClient.invalidateQueries({
-        //   queryKey: ["listEvents.infinite", { objUri, limit }],
-        // });
+  // const utils = trpc.useUtils();
+  // useEffect(() => {
+  //   let timeout: NodeJS.Timeout | undefined;
+  //   const call = async () => {
+  //     // const queryKey = getQueryKey(
+  //     //   trpc.listEvents,
+  //     //   { objUri, limit },
+  //     //   "infinite",
+  //     // );
+  //     // console.log("queryKey", queryKey);
+  //     try {
+  //       refetchLastPage();
+  //     } finally {
+  //       timeout = setTimeout(call, 2_000);
+  //     }
+  //   };
 
-        // // Dimiss last page if it's empty.
-        // utils.listEvents.setInfiniteData(
-        //   {
-        //     objUri,
-        //     limit,
-        //   },
-        //   (data) => {
-        //     const pages = data?.pages ?? [];
-        //     const pageParams = data?.pageParams ?? [];
-        //     const lastPage = pages[pages.length - 1];
-        //     if (lastPage && lastPage.events.length === 0) {
-        //       const newData = {
-        //         pages: pages.slice(0, -1),
-        //         pageParams: pageParams.slice(0, -1),
-        //       };
-        //       console.dir(newData.pages, { depth: 20 });
-        //       return newData;
-        //     }
-        //     return data;
-        //   },
-        // );
-      } finally {
-        timeout = setTimeout(call, 2_000);
-      }
-    };
+  //   void call();
 
-    void call();
-
-    return () => clearTimeout(timeout);
-  }, []);
+  //   return () => clearTimeout(timeout);
+  // }, [refetchLastPage]);
 
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   return (
     <>
+      <Button onClick={refetchLastPage}>Refetch last page</Button>
       {!query.hasPreviousPage && (
         <div className="text-muted-foreground py-4 text-sm">
           There are no older entries to display.
@@ -737,7 +702,7 @@ const getMessageColor = (header: GroupHeader) => {
 
 const formatMessage = (message: string) => {
   const first = message.split("\n")[0];
-  return first.replace("Error: Error: ", "Error: ");
+  return first?.replace("Error: Error: ", "Error: ") ?? message;
 };
 
 function formatExplanation(explanation: any): string[] {
