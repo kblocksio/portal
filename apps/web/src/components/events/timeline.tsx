@@ -21,7 +21,8 @@ import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
-import type { WorkerEventTimestampString } from "@/resource-context";
+import { RouterOutput, trpc } from "@/trpc";
+import { useInvalidate } from "@/invalidate-context";
 
 type GroupHeader = {
   timestamp: Date;
@@ -30,9 +31,10 @@ type GroupHeader = {
   message: string;
 };
 
+type EventItem = RouterOutput["listEvents"]["events"][number];
 type EventGroup = {
   header: GroupHeader;
-  events: WorkerEventTimestampString[];
+  events: EventItem[];
   requestId: string;
 };
 
@@ -57,47 +59,118 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
 };
 
 export default function Timeline({
-  events,
+  objUri,
+  limit = 100,
 }: {
-  events: WorkerEventTimestampString[];
+  objUri: string;
   className?: string;
+  limit?: number;
 }) {
-  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
-  useEffect(() => {
-    if (eventGroupIndex === undefined && eventGroups.length > 0) {
-      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+  const query = trpc.listEvents.useInfiniteQuery(
+    {
+      objUri,
+      limit,
+    },
+    {
+      // Cursor is -1 to fetch the last page.
+      initialCursor: -1,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getPreviousPageParam: (firstPage) => firstPage.previousCursor,
+    },
+  );
+
+  // // If the last page contains only a few log entries, it will look empty.
+  // // In order to avoid this, we fetch the previous page once at the beginning.
+  // const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
+  // useEffect(() => {
+  //   if (fetchedPreviousPage) {
+  //     return;
+  //   }
+
+  //   if (query.isFetching) {
+  //     return;
+  //   }
+
+  //   setFetchedPreviousPage(true);
+  //   query.fetchPreviousPage();
+  // }, [fetchedPreviousPage, query.isFetching]);
+
+  // Refetching the last page will query the last page, and manually update
+  // the query data to include the new results. These new results may be:
+  // - New log entries
+  // - New "nextCursor" value
+  const utils = trpc.useUtils();
+  const refetchLastPage = useCallback(async () => {
+    if (query.isFetching) {
+      return;
     }
-  }, [eventGroupIndex, eventGroups]);
 
-  const canLoadPreviousLogs = useMemo(
-    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
-    [eventGroupIndex],
-  );
-
-  const loadPreviousLogs = useCallback(() => {
-    setEventGroupIndex((eventGroupIndex) => {
-      if (eventGroupIndex === undefined) {
-        return undefined;
-      }
-
-      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+    const data = utils.listEvents.getInfiniteData({
+      objUri,
+      limit,
     });
-  }, []);
+    const lastPage = data?.pages[data.pages.length - 1];
+    if (!lastPage) {
+      return;
+    }
+    const shouldRefetch = lastPage.nextCursor === undefined;
+    if (!shouldRefetch) {
+      return;
+    }
+    const nextCursor = lastPage.cursor;
+    const newPage = await utils.client.listEvents.query({
+      objUri,
+      limit,
+      cursor: nextCursor,
+    });
+    utils.listEvents.setInfiniteData(
+      {
+        objUri,
+        limit,
+      },
+      (data) => {
+        const pages = data?.pages ?? [];
+        const pageParams = data?.pageParams ?? [];
+        return {
+          pages: [...pages.slice(0, -1), newPage],
+          pageParams,
+        };
+      },
+    );
+  }, [query]);
 
-  const reversedEventGroups = useMemo(
-    () => eventGroups.slice(eventGroupIndex).reverse(),
-    [eventGroups, eventGroupIndex],
-  );
+  // When something changed on the Kblocks server, we need to refetch the last page.
+  useInvalidate(refetchLastPage);
+
+  const events = query.data?.pages.flatMap((page) => page.events) ?? [];
+  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
 
   return (
-    reversedEventGroups.length > 0 && (
+    <>
+      <div className="pb-4">
+        {!query.hasPreviousPage && (
+          <div className="text-muted-foreground text-sm">
+            There are no older entries to display.
+          </div>
+        )}
+        {query.hasPreviousPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => query.fetchPreviousPage()}
+            disabled={query.isFetchingPreviousPage}
+          >
+            Fetch older entries
+          </Button>
+        )}
+      </div>
+
       <div className="flex flex-col gap-1">
-        {reversedEventGroups.map((eventGroup, index) => (
+        {eventGroups.map((eventGroup, index) => (
           <Fragment key={index}>
             {(index === 0 ||
               eventGroup.header.timestamp.getDay() !==
-                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+                eventGroups[index - 1]?.header.timestamp.getDay()) && (
               <div className={cn(index !== 0 && "pt-6")}>
                 <TimeGroupHeader
                   key={eventGroup.header.timestamp.getDate()}
@@ -106,27 +179,32 @@ export default function Timeline({
               </div>
             )}
             <EventGroupItem
-              key={index}
+              key={eventGroup.requestId}
               eventGroup={eventGroup}
-              defaultOpen={index === 0}
+              defaultOpen={index === eventGroups.length - 1}
             />
           </Fragment>
         ))}
+      </div>
 
-        {canLoadPreviousLogs && (
-          <div className="py-4">
-            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-              Load older entries
-            </Button>
+      <div className="py-4">
+        {!query.hasNextPage && (
+          <div className="text-muted-foreground text-sm">
+            You're up to date.
           </div>
         )}
-        {!canLoadPreviousLogs && (
-          <div className="text-muted-foreground py-4 text-sm">
-            There are no older entries to display.
-          </div>
+        {query.hasNextPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => query.fetchNextPage()}
+            disabled={query.isFetchingNextPage}
+          >
+            Fetch newer entries
+          </Button>
         )}
       </div>
-    )
+    </>
   );
 }
 
@@ -194,6 +272,7 @@ function EventGroupItem({
           </div>
         </div>
       </div>
+
       {isOpen && eventGroup.events.length > 0 && (
         <>
           {showRawEvents && <RawEvents events={eventGroup.events} />}
@@ -204,7 +283,7 @@ function EventGroupItem({
   );
 }
 
-const RawEvents = ({ events }: { events: WorkerEventTimestampString[] }) => {
+const RawEvents = ({ events }: { events: EventItem[] }) => {
   return (
     <div className="mr-4 flex flex-col gap-1 overflow-x-auto rounded-sm bg-gray-100 p-2 font-mono text-xs shadow-md">
       {events.map((e, index) => (
@@ -227,13 +306,13 @@ const LogSection = ({ events }: { events: LogEvent[] }) => {
   return (
     <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
       {events.map((event, index) => (
-        <LogItem key={index} log={event} />
+        <LogItem key={event.logId ?? index} log={event} />
       ))}
     </div>
   );
 };
 
-const Events = ({ events }: { events: WorkerEventTimestampString[] }) => {
+const Events = ({ events }: { events: EventItem[] }) => {
   const items: React.ReactNode[] = [];
   let logEvents: LogEvent[] = [];
 
@@ -399,9 +478,7 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-const renderHeader = (
-  event: WorkerEventTimestampString,
-): Partial<GroupHeader> => {
+const renderHeader = (event: EventItem): Partial<GroupHeader> => {
   switch (event.type) {
     case "LIFECYCLE":
       return {
@@ -429,7 +506,7 @@ const renderHeader = (
   }
 };
 
-function groupEventsByRequestId(events: WorkerEventTimestampString[]) {
+function groupEventsByRequestId(events: EventItem[]) {
   const groups: EventGroup[] = [];
 
   let currentGroup: EventGroup = {
@@ -510,7 +587,7 @@ const getMessageColor = (header: GroupHeader) => {
 
 const formatMessage = (message: string) => {
   const first = message.split("\n")[0];
-  return first.replace("Error: Error: ", "Error: ");
+  return first?.replace("Error: Error: ", "Error: ") ?? message;
 };
 
 function formatExplanation(explanation: any): string[] {

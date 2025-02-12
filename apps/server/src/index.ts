@@ -31,6 +31,8 @@ import {
   getObject,
   resetStorage,
   deleteObject,
+  sliceEvents,
+  eventsCount,
 } from "./storage";
 import { categories } from "./categories";
 
@@ -443,12 +445,46 @@ const appRouter = router({
     .input(
       z.object({
         objUri: z.string(),
+        cursor: z.number().optional().default(0),
+        limit: z.number().min(1).max(100).optional().default(100),
       }),
     )
     .query(async ({ input }) => {
       const { objUri } = input;
-      const events = await loadEvents(objUri);
-      return events as unknown as WorkerEventTimestampString[];
+      const total = await eventsCount(objUri);
+      const pageSize = input.limit;
+      const totalPages = Math.ceil(total / pageSize);
+      const cursor =
+        input.cursor < 0
+          ? Math.max(0, totalPages + input.cursor)
+          : input.cursor;
+      const start = cursor * pageSize;
+      const end = cursor * pageSize + pageSize - 1;
+      const events = await sliceEvents(objUri, start, end);
+      const nextCursor = cursor + 1;
+      const previousCursor = cursor - 1;
+      return {
+        events: events.map((event, index) => ({
+          ...event,
+          eventIndex: start + index,
+        })),
+        nextCursor: nextCursor >= totalPages ? undefined : nextCursor,
+        previousCursor: previousCursor < 0 ? undefined : previousCursor,
+        cursor,
+      };
+    }),
+  countEvents: publicProcedure
+    .input(
+      z.object({
+        objUri: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { objUri } = input;
+      const total = await eventsCount(objUri);
+      return {
+        totalEvents: total,
+      };
     }),
   listTypes: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();

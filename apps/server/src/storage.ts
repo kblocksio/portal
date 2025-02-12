@@ -133,6 +133,25 @@ export async function loadEvents(
   return values.map((value) => JSON.parse(value));
 }
 
+export async function sliceEvents(
+  objUri: string,
+  start: number,
+  end: number,
+): Promise<(kblocks.WorkerEvent & { message?: string })[]> {
+  const redis = await connection();
+
+  const key = keyForEvents(objUri);
+  const events = await redis.lRange(key, start, end);
+  return events.map((value) => JSON.parse(value));
+}
+
+export async function eventsCount(objUri: string): Promise<number> {
+  const redis = await connection();
+
+  const key = keyForEvents(objUri);
+  return await redis.lLen(key);
+}
+
 export async function deleteEvents(objUri: string) {
   const redis = await connection();
 

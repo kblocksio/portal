@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext, useRef } from "react";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronsUpDown, MoreVertical } from "lucide-react";
@@ -115,21 +115,28 @@ function ResourcePage() {
     return relationship?.resource.objUri;
   }, [relationships]);
 
-  const [lastEventCount, setLastEventCount] = useState<number>(-1);
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+  const lastEventCount = useRef(-1);
   const [showLogsBadge, setShowLogsBadge] = useState(false);
 
-  const events = trpc.listEvents.useQuery(
-    {
-      objUri,
-    },
-    {
-      initialData: [],
-    },
-  );
-  useEffect(() => {
-    setShowLogsBadge(events.data.length > lastEventCount);
-    setLastEventCount(events.data.length);
+  const countEvents = trpc.countEvents.useQuery({
+    objUri,
   });
+  useEffect(() => {
+    const totalEvents = countEvents.data?.totalEvents ?? 0;
+    if (totalEvents === 0) {
+      return;
+    }
+    if (lastEventCount.current !== -1 && activeTabRef.current !== "logs") {
+      setShowLogsBadge(totalEvents > lastEventCount.current);
+    } else {
+      setShowLogsBadge(false);
+    }
+    lastEventCount.current = totalEvents;
+  }, [countEvents.data?.totalEvents]);
 
   useEffect(() => {
     if (deleteInProgress && !selectedResource) {
@@ -456,7 +463,7 @@ function ResourcePage() {
               <CardContent className="h-full p-0">
                 {selectedResource && (
                   <div className="pt-4 sm:pt-6">
-                    <Timeline events={events.data} />
+                    <Timeline objUri={objUri} />
                   </div>
                 )}
               </CardContent>
