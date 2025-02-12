@@ -109,7 +109,6 @@ export default function Timeline({
       objUri,
       limit,
     });
-    console.log("data", data);
     const lastPage = data?.pages[data.pages.length - 1];
     if (!lastPage) {
       return;
