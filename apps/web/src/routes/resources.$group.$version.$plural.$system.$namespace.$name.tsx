@@ -327,16 +327,25 @@ function ResourcePage() {
               </p>
               <div className="flex flex-col items-start gap-1 text-xs sm:text-sm">
                 {selectedResource ? (
-                  selectedResource.status?.conditions?.map(
-                    (condition: Condition) => (
-                      <StatusBadge
-                        key={condition.type}
-                        conditions={selectedResource?.status?.conditions ?? []}
-                        showMessage
-                        type={condition.type}
-                        children={children}
-                      />
-                    ),
+                  selectedResource.status?.conditions &&
+                  selectedResource.status?.conditions.length > 0 ? (
+                    selectedResource.status?.conditions?.map(
+                      (condition: Condition) => (
+                        <StatusBadge
+                          key={condition.type}
+                          conditions={
+                            selectedResource?.status?.conditions ?? []
+                          }
+                          showMessage
+                          type={condition.type}
+                          children={children}
+                        />
+                      ),
+                    )
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center self-center">
+                      <StatusBadge conditions={[]} merge children={children} />
+                    </div>
                   )
                 ) : (
                   <Skeleton className="h-4 w-32" />
