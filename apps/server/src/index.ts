@@ -447,34 +447,25 @@ const appRouter = router({
         objUri: z.string(),
         cursor: z.number().optional().default(0),
         limit: z.number().min(1).max(100).optional().default(100),
-        direction: z
-          .enum(["forward", "backward"])
-          .optional()
-          .default("forward"),
       }),
     )
     .query(async ({ input }) => {
-      const { objUri, direction } = input;
+      const { objUri } = input;
       const total = await eventsCount(objUri);
-      // const cursor = input.cursor ?? Math.max(0, total - input.limit);
-      const cursor = Math.max(
-        0,
-        Math.max(input.cursor, total - Math.abs(input.cursor)),
-      );
-      const [start, end] =
-        direction === "forward"
-          ? ([cursor, cursor + input.limit - 1] as const)
-          : ([Math.max(0, cursor - input.limit), cursor] as const);
+      const cursor =
+        input.cursor < 0 ? Math.max(0, total + input.cursor) : input.cursor;
+      const start = cursor;
+      const end = cursor + input.limit - 1;
       const events = await sliceEvents(objUri, start, end);
       const nextCursor = start + events.length;
-      const previousCursor = start - 1;
+      const previousCursor = Math.max(0, start - input.limit);
       return {
         events: events.map((event, index) => ({
           ...event,
           cursor: start + index,
         })),
         nextCursor: nextCursor >= total ? undefined : nextCursor,
-        previousCursor: previousCursor >= 0 ? previousCursor : undefined,
+        previousCursor: start >= 0 ? previousCursor : undefined,
         cursor: start,
       };
     }),
