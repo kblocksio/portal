@@ -22,7 +22,6 @@ import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
 import { RouterOutput, trpc } from "@/trpc";
-import { WorkerEventTimestampString } from "@kblocks-portal/server";
 
 type GroupHeader = {
   timestamp: Date;
@@ -31,9 +30,10 @@ type GroupHeader = {
   message: string;
 };
 
+type EventItem = RouterOutput["listEvents"]["events"][number];
 type EventGroup = {
   header: GroupHeader;
-  events: WorkerEventTimestampString[];
+  events: EventItem[];
   requestId: string;
 };
 
@@ -75,7 +75,6 @@ export default function Timeline({
       initialCursor: -1,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
-      maxPages: 3,
     },
   );
 
@@ -141,6 +140,11 @@ export default function Timeline({
   }, [query]);
 
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
+  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  useEffect(() => {
+    console.log("eventGroups", eventGroups);
+  }, [eventGroups]);
+
   return (
     <>
       <Button onClick={refetchLastPage}>Refetch last page</Button>
@@ -159,12 +163,34 @@ export default function Timeline({
           Fetch older entries
         </Button>
       )}
-
+      {/*
       <pre className="py-4 text-xs">
         {events.map((event) => (
           <LOG_ITEM key={event.eventIndex} event={event} />
         ))}
-      </pre>
+      </pre> */}
+
+      {/* {eventGroups.map((eventGroup) => (
+        <div key={eventGroup.requestId}>
+          {/* <header>
+            <TimeGroupHeader timestamp={eventGroup.header.timestamp} />
+          </header> * /}
+          <EventGroupItem eventGroup={eventGroup} defaultOpen={true} />
+          {/* <pre className="py-4 text-xs">
+            {eventGroup.events.map((event) => (
+              <LOG_ITEM key={event.eventIndex} event={event} />
+            ))}
+          </pre> * /}
+        </div>
+      ))} */}
+
+      {eventGroups.map((eventGroup) => (
+        <EventGroupItem
+          key={eventGroup.requestId}
+          eventGroup={eventGroup}
+          defaultOpen={true}
+        />
+      ))}
 
       {!query.hasNextPage && (
         <div className="text-muted-foreground py-4 text-sm">
@@ -184,76 +210,75 @@ export default function Timeline({
     </>
   );
 
-  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
-  useEffect(() => {
-    if (eventGroupIndex === undefined && eventGroups.length > 0) {
-      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
-    }
-  }, [eventGroupIndex, eventGroups]);
+  // const [eventGroupIndex, setEventGroupIndex] = useState<number>();
+  // const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  // useEffect(() => {
+  //   if (eventGroupIndex === undefined && eventGroups.length > 0) {
+  //     setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+  //   }
+  // }, [eventGroupIndex, eventGroups]);
 
-  const canLoadPreviousLogs = useMemo(
-    () => eventGroupIndex !== undefined && eventGroupIndex > 0,
-    [eventGroupIndex],
-  );
-
-  const loadPreviousLogs = useCallback(() => {
-    setEventGroupIndex((eventGroupIndex) => {
-      if (eventGroupIndex === undefined) {
-        return undefined;
-      }
-
-      return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
-    });
-  }, []);
-
-  // const reversedEventGroups = useMemo(
-  //   () => eventGroups.slice(eventGroupIndex).reverse(),
-  //   [eventGroups, eventGroupIndex],
+  // const canLoadPreviousLogs = useMemo(
+  //   () => eventGroupIndex !== undefined && eventGroupIndex > 0,
+  //   [eventGroupIndex],
   // );
-  const reversedEventGroups = eventGroups;
 
-  return (
-    reversedEventGroups.length > 0 && (
-      <div className="flex flex-col gap-1">
-        {reversedEventGroups.map((eventGroup, index) => (
-          <Fragment key={index}>
-            {(index === 0 ||
-              eventGroup.header.timestamp.getDay() !==
-                reversedEventGroups[index - 1].header.timestamp.getDay()) && (
-              <div className={cn(index !== 0 && "pt-6")}>
-                <TimeGroupHeader
-                  key={eventGroup.header.timestamp.getDate()}
-                  timestamp={eventGroup.header.timestamp}
-                />
-              </div>
-            )}
-            <EventGroupItem
-              key={index}
-              eventGroup={eventGroup}
-              defaultOpen={index === 0}
-            />
-          </Fragment>
-        ))}
+  // const loadPreviousLogs = useCallback(() => {
+  //   setEventGroupIndex((eventGroupIndex) => {
+  //     if (eventGroupIndex === undefined) {
+  //       return undefined;
+  //     }
 
-        {canLoadPreviousLogs && (
-          <div className="py-4">
-            <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-              Load older entries
-            </Button>
-          </div>
-        )}
-        {!canLoadPreviousLogs && (
-          <div className="text-muted-foreground py-4 text-sm">
-            There are no older entries to display.
-          </div>
-        )}
-      </div>
-    )
-  );
+  //     return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
+  //   });
+  // }, []);
+
+  // // const reversedEventGroups = useMemo(
+  // //   () => eventGroups.slice(eventGroupIndex).reverse(),
+  // //   [eventGroups, eventGroupIndex],
+  // // );
+  // const reversedEventGroups = eventGroups;
+
+  // return (
+  //   reversedEventGroups.length > 0 && (
+  //     <div className="flex flex-col gap-1">
+  //       {reversedEventGroups.map((eventGroup, index) => (
+  //         <Fragment key={index}>
+  //           {(index === 0 ||
+  //             eventGroup.header.timestamp.getDay() !==
+  //               reversedEventGroups[index - 1].header.timestamp.getDay()) && (
+  //             <div className={cn(index !== 0 && "pt-6")}>
+  //               <TimeGroupHeader
+  //                 key={eventGroup.header.timestamp.getDate()}
+  //                 timestamp={eventGroup.header.timestamp}
+  //               />
+  //             </div>
+  //           )}
+  //           <EventGroupItem
+  //             key={index}
+  //             eventGroup={eventGroup}
+  //             defaultOpen={index === 0}
+  //           />
+  //         </Fragment>
+  //       ))}
+
+  //       {canLoadPreviousLogs && (
+  //         <div className="py-4">
+  //           <Button onClick={loadPreviousLogs} variant="outline" size="sm">
+  //             Load older entries
+  //           </Button>
+  //         </div>
+  //       )}
+  //       {!canLoadPreviousLogs && (
+  //         <div className="text-muted-foreground py-4 text-sm">
+  //           There are no older entries to display.
+  //         </div>
+  //       )}
+  //     </div>
+  //   )
+  // );
 }
 
-type EventItem = RouterOutput["listEvents"]["events"][number];
 function LOG_ITEM(props: { event: EventItem }) {
   if (!props.event.message) {
     return <></>;
@@ -330,6 +355,7 @@ function EventGroupItem({
           </div>
         </div>
       </div>
+
       {isOpen && eventGroup.events.length > 0 && (
         <>
           {showRawEvents && <RawEvents events={eventGroup.events} />}
@@ -340,7 +366,7 @@ function EventGroupItem({
   );
 }
 
-const RawEvents = ({ events }: { events: WorkerEventTimestampString[] }) => {
+const RawEvents = ({ events }: { events: EventItem[] }) => {
   return (
     <div className="mr-4 flex flex-col gap-1 overflow-x-auto rounded-sm bg-gray-100 p-2 font-mono text-xs shadow-md">
       {events.map((e, index) => (
@@ -369,63 +395,78 @@ const LogSection = ({ events }: { events: LogEvent[] }) => {
   );
 };
 
-const Events = ({ events }: { events: WorkerEventTimestampString[] }) => {
-  const items: React.ReactNode[] = [];
-  let logEvents: LogEvent[] = [];
+const Events = ({ events }: { events: EventItem[] }) => {
+  return (
+    <div className="flex flex-col gap-2 pb-6">
+      <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
+        {events.map(
+          (event) =>
+            event.type === "LOG" && (
+              <LogItem
+                key={event.eventIndex}
+                log={{ ...event, timestamp: new Date(event.timestamp) }}
+              />
+            ),
+        )}
+      </div>
+    </div>
+  );
+  // const items: React.ReactNode[] = [];
+  // let logEvents: LogEvent[] = [];
 
-  events.forEach((event) => {
-    if (
-      event.type !== "LOG" &&
-      event.type != "LIFECYCLE" &&
-      logEvents.length > 0
-    ) {
-      items.push(<LogSection key={items.length} events={logEvents} />);
-      logEvents = [];
-    }
+  // events.forEach((event) => {
+  //   if (
+  //     event.type !== "LOG" &&
+  //     event.type != "LIFECYCLE" &&
+  //     logEvents.length > 0
+  //   ) {
+  //     items.push(<LogSection key={items.length} events={logEvents} />);
+  //     logEvents = [];
+  //   }
 
-    const timestamp = new Date(event.timestamp);
+  //   const timestamp = new Date(event.timestamp);
 
-    switch (event.type) {
-      case "LOG":
-        logEvents.push({
-          ...event,
-          timestamp,
-        });
-        break;
+  //   switch (event.type) {
+  //     case "LOG":
+  //       logEvents.push({
+  //         ...event,
+  //         timestamp,
+  //       });
+  //       break;
 
-      case "ERROR":
-        items.push(
-          <ErrorItem
-            key={items.length}
-            error={{
-              ...event,
-              timestamp,
-            }}
-          />,
-        );
-        break;
+  //     case "ERROR":
+  //       items.push(
+  //         <ErrorItem
+  //           key={items.length}
+  //           error={{
+  //             ...event,
+  //             timestamp,
+  //           }}
+  //         />,
+  //       );
+  //       break;
 
-      case "LIFECYCLE":
-        logEvents.push(
-          renderLogEvent({
-            ...event,
-            timestamp,
-          }),
-        );
-        break;
+  //     case "LIFECYCLE":
+  //       logEvents.push(
+  //         renderLogEvent({
+  //           ...event,
+  //           timestamp,
+  //         }),
+  //       );
+  //       break;
 
-      default:
-        // ignore
-        break;
-    }
-  });
+  //     default:
+  //       // ignore
+  //       break;
+  //   }
+  // });
 
-  if (logEvents.length > 0) {
-    items.push(<LogSection key={items.length} events={logEvents} />);
-    logEvents = [];
-  }
+  // if (logEvents.length > 0) {
+  //   items.push(<LogSection key={items.length} events={logEvents} />);
+  //   logEvents = [];
+  // }
 
-  return <div className="flex flex-col gap-2 pb-6">{items}</div>;
+  // return <div className="flex flex-col gap-2 pb-6">{items}</div>;
 };
 
 const Explanation = ({ explanation }: { explanation: any }) => {
@@ -535,9 +576,7 @@ const getReasonColor = (reason: EventReason) => {
   }
 };
 
-const renderHeader = (
-  event: WorkerEventTimestampString,
-): Partial<GroupHeader> => {
+const renderHeader = (event: EventItem): Partial<GroupHeader> => {
   switch (event.type) {
     case "LIFECYCLE":
       return {
@@ -565,7 +604,7 @@ const renderHeader = (
   }
 };
 
-function groupEventsByRequestId(events: WorkerEventTimestampString[]) {
+function groupEventsByRequestId(events: EventItem[]) {
   const groups: EventGroup[] = [];
 
   let currentGroup: EventGroup = {
