@@ -152,22 +152,15 @@ export default function Timeline({
     <>
       <div className="flex flex-col gap-1">
         {eventGroups.map((eventGroup, index) => (
-          <Fragment key={index}>
+          <Fragment key={eventGroup.requestId}>
             {(index === 0 ||
               eventGroup.header.timestamp.getDay() !==
                 eventGroups[index - 1]?.header.timestamp.getDay()) && (
               <div className={cn(index !== 0 && "pt-6")}>
-                <TimeGroupHeader
-                  key={eventGroup.header.timestamp.getDate()}
-                  timestamp={eventGroup.header.timestamp}
-                />
+                <TimeGroupHeader timestamp={eventGroup.header.timestamp} />
               </div>
             )}
-            <EventGroupItem
-              key={eventGroup.requestId}
-              eventGroup={eventGroup}
-              defaultOpen={index === 0}
-            />
+            <EventGroupItem eventGroup={eventGroup} defaultOpen={index === 0} />
           </Fragment>
         ))}
       </div>
@@ -287,19 +280,20 @@ function sortedKeys(obj: any) {
     }, {});
 }
 
-const LogSection = ({ events }: { events: LogEvent[] }) => {
+const LogSection = ({ events }: { events: IndexedLogEvent[] }) => {
   return (
     <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
-      {events.map((event, index) => (
-        <LogItem key={event.logId ?? index} log={event} />
+      {events.map((event) => (
+        <LogItem key={event.eventIndex} log={event} />
       ))}
     </div>
   );
 };
 
+type IndexedLogEvent = LogEvent & { eventIndex: number };
 const Events = ({ events }: { events: EventItem[] }) => {
   const items: React.ReactNode[] = [];
-  let logEvents: LogEvent[] = [];
+  let logEvents: IndexedLogEvent[] = [];
 
   events.forEach((event) => {
     if (
@@ -307,7 +301,9 @@ const Events = ({ events }: { events: EventItem[] }) => {
       event.type != "LIFECYCLE" &&
       logEvents.length > 0
     ) {
-      items.push(<LogSection key={items.length} events={logEvents} />);
+      items.push(
+        <LogSection key={logEvents[0]?.eventIndex} events={logEvents} />,
+      );
       logEvents = [];
     }
 
@@ -324,7 +320,7 @@ const Events = ({ events }: { events: EventItem[] }) => {
       case "ERROR":
         items.push(
           <ErrorItem
-            key={items.length}
+            key={event.eventIndex}
             error={{
               ...event,
               timestamp,
@@ -334,6 +330,7 @@ const Events = ({ events }: { events: EventItem[] }) => {
         break;
 
       case "LIFECYCLE":
+        // console.log("pushing lifecycle event", event);
         logEvents.push(
           renderLogEvent({
             ...event,
@@ -349,7 +346,9 @@ const Events = ({ events }: { events: EventItem[] }) => {
   });
 
   if (logEvents.length > 0) {
-    items.push(<LogSection key={items.length} events={logEvents} />);
+    items.push(
+      <LogSection key={logEvents[0]?.eventIndex} events={logEvents} />,
+    );
     logEvents = [];
   }
 
@@ -376,8 +375,13 @@ const Explanation = ({ explanation }: { explanation: any }) => {
   );
 };
 
-const ErrorItem = ({ error }: { error: ErrorEvent }) => {
-  const logEvent: LogEvent = {
+const ErrorItem = ({
+  error,
+}: {
+  error: ErrorEvent & { eventIndex: number };
+}) => {
+  const logEvent: IndexedLogEvent = {
+    eventIndex: error.eventIndex,
     requestId: error.requestId,
     type: "LOG",
     level: LogLevel.ERROR,
@@ -395,36 +399,52 @@ const ErrorItem = ({ error }: { error: ErrorEvent }) => {
   );
 };
 
-const LogItem = ({ log }: { log: LogEvent }) => {
-  const LogLine = ({ line }: { line: string }) => {
-    const timestamp = log.timestamp.toLocaleTimeString();
+const LogLine = ({
+  level,
+  line,
+  timestamp,
+  parentLogId,
+}: {
+  level: LogLevel;
+  line: string;
+  timestamp: string;
+  parentLogId?: string;
+}) => {
+  const classes = [];
 
-    const classes = [];
-
-    const colors = {
-      [LogLevel.DEBUG]: [`text-gray-200`, "text-gray-200"],
-      [LogLevel.INFO]: [`text-gray-400`, "text-white"],
-      [LogLevel.WARNING]: [`text-yellow-500`, "text-yellow-200"],
-      [LogLevel.ERROR]: [`text-red-800`, "text-red-500"],
-    };
-
-    const index = !log.parentLogId ? 1 : 0;
-    classes.push(colors[log.level][index]);
-
-    return (
-      <div className="text-xs">
-        <div className="grid grid-cols-[8em_1fr]">
-          <span className="text-gray-600">{timestamp}</span>
-          <span className={cn("whitespace-pre pr-4", classes)}>
-            <pre>{line}</pre>
-          </span>
-        </div>
-      </div>
-    );
+  const colors = {
+    [LogLevel.DEBUG]: [`text-gray-200`, "text-gray-200"],
+    [LogLevel.INFO]: [`text-gray-400`, "text-white"],
+    [LogLevel.WARNING]: [`text-yellow-500`, "text-yellow-200"],
+    [LogLevel.ERROR]: [`text-red-800`, "text-red-500"],
   };
 
-  const lines = log.message.trimEnd().split("\n");
-  return lines.map((line, index) => <LogLine key={index} line={line} />);
+  const index = !parentLogId ? 1 : 0;
+  classes.push(colors[level][index]);
+
+  return (
+    <div className="text-xs">
+      <div className="grid grid-cols-[8em_1fr]">
+        <span className="text-gray-600">{timestamp}</span>
+        <span className={cn("whitespace-pre pr-4", classes)}>
+          <pre>{line}</pre>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const LogItem = ({ log }: { log: IndexedLogEvent }) => {
+  const lines = useMemo(() => log.message.trimEnd().split("\n"), [log.message]);
+  return lines.map((line, index) => (
+    <LogLine
+      key={index}
+      level={log.level}
+      timestamp={log.timestamp.toLocaleTimeString()}
+      line={line}
+      parentLogId={log.parentLogId}
+    />
+  ));
 };
 
 const getReasonIcon = (reason: EventReason) => {
@@ -540,10 +560,13 @@ function groupEventsByRequestId(events: EventItem[]) {
   return groups;
 }
 
-const renderLogEvent = (event: LifecycleEvent): LogEvent => {
+const renderLogEvent = (
+  event: LifecycleEvent & { eventIndex: number },
+): IndexedLogEvent => {
   const level = renderLevel(event.event.reason);
 
   return {
+    eventIndex: event.eventIndex,
     requestId: event.requestId,
     type: "LOG",
     level,
