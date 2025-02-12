@@ -141,153 +141,76 @@ export default function Timeline({
 
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+
+  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
   useEffect(() => {
-    console.log("eventGroups", eventGroups);
-  }, [eventGroups]);
+    if (eventGroupIndex === undefined && eventGroups.length > 0) {
+      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
+    }
+  }, [eventGroupIndex, eventGroups]);
 
   return (
     <>
-      <Button onClick={refetchLastPage}>Refetch last page</Button>
-      {!query.hasPreviousPage && (
-        <div className="text-muted-foreground py-4 text-sm">
-          There are no older entries to display.
+      <div className="pb-4">
+        {!query.hasPreviousPage && (
+          <div className="text-muted-foreground text-sm">
+            There are no older entries to display.
+          </div>
+        )}
+        {query.hasPreviousPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => query.fetchPreviousPage()}
+            disabled={query.isFetchingPreviousPage}
+          >
+            Fetch older entries
+          </Button>
+        )}
+      </div>
+
+      {eventGroups.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {eventGroups.map((eventGroup, index) => (
+            <Fragment key={index}>
+              {(index === 0 ||
+                eventGroup.header.timestamp.getDay() !==
+                  eventGroups[index - 1]?.header.timestamp.getDay()) && (
+                <div className={cn(index !== 0 && "pt-6")}>
+                  <TimeGroupHeader
+                    key={eventGroup.header.timestamp.getDate()}
+                    timestamp={eventGroup.header.timestamp}
+                  />
+                </div>
+              )}
+              <EventGroupItem
+                key={index}
+                eventGroup={eventGroup}
+                defaultOpen={index === 0}
+              />
+            </Fragment>
+          ))}
         </div>
       )}
-      {query.hasPreviousPage && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => query.fetchPreviousPage()}
-          disabled={query.isFetchingPreviousPage}
-        >
-          Fetch older entries
-        </Button>
-      )}
-      {/*
-      <pre className="py-4 text-xs">
-        {events.map((event) => (
-          <LOG_ITEM key={event.eventIndex} event={event} />
-        ))}
-      </pre> */}
 
-      {/* {eventGroups.map((eventGroup) => (
-        <div key={eventGroup.requestId}>
-          {/* <header>
-            <TimeGroupHeader timestamp={eventGroup.header.timestamp} />
-          </header> * /}
-          <EventGroupItem eventGroup={eventGroup} defaultOpen={true} />
-          {/* <pre className="py-4 text-xs">
-            {eventGroup.events.map((event) => (
-              <LOG_ITEM key={event.eventIndex} event={event} />
-            ))}
-          </pre> * /}
-        </div>
-      ))} */}
-
-      {eventGroups.map((eventGroup) => (
-        <EventGroupItem
-          key={eventGroup.requestId}
-          eventGroup={eventGroup}
-          defaultOpen={true}
-        />
-      ))}
-
-      {!query.hasNextPage && (
-        <div className="text-muted-foreground py-4 text-sm">
-          You're up to date.
-        </div>
-      )}
-      {query.hasNextPage && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => query.fetchNextPage()}
-          disabled={query.isFetchingNextPage}
-        >
-          Fetch newer entries
-        </Button>
-      )}
+      <div className="py-4">
+        {!query.hasNextPage && (
+          <div className="text-muted-foreground text-sm">
+            You're up to date.
+          </div>
+        )}
+        {query.hasNextPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => query.fetchNextPage()}
+            disabled={query.isFetchingNextPage}
+          >
+            Fetch newer entries
+          </Button>
+        )}
+      </div>
     </>
-  );
-
-  // const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  // const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
-  // useEffect(() => {
-  //   if (eventGroupIndex === undefined && eventGroups.length > 0) {
-  //     setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
-  //   }
-  // }, [eventGroupIndex, eventGroups]);
-
-  // const canLoadPreviousLogs = useMemo(
-  //   () => eventGroupIndex !== undefined && eventGroupIndex > 0,
-  //   [eventGroupIndex],
-  // );
-
-  // const loadPreviousLogs = useCallback(() => {
-  //   setEventGroupIndex((eventGroupIndex) => {
-  //     if (eventGroupIndex === undefined) {
-  //       return undefined;
-  //     }
-
-  //     return Math.max(0, eventGroupIndex - EVENT_GROUPS_SIZE);
-  //   });
-  // }, []);
-
-  // // const reversedEventGroups = useMemo(
-  // //   () => eventGroups.slice(eventGroupIndex).reverse(),
-  // //   [eventGroups, eventGroupIndex],
-  // // );
-  // const reversedEventGroups = eventGroups;
-
-  // return (
-  //   reversedEventGroups.length > 0 && (
-  //     <div className="flex flex-col gap-1">
-  //       {reversedEventGroups.map((eventGroup, index) => (
-  //         <Fragment key={index}>
-  //           {(index === 0 ||
-  //             eventGroup.header.timestamp.getDay() !==
-  //               reversedEventGroups[index - 1].header.timestamp.getDay()) && (
-  //             <div className={cn(index !== 0 && "pt-6")}>
-  //               <TimeGroupHeader
-  //                 key={eventGroup.header.timestamp.getDate()}
-  //                 timestamp={eventGroup.header.timestamp}
-  //               />
-  //             </div>
-  //           )}
-  //           <EventGroupItem
-  //             key={index}
-  //             eventGroup={eventGroup}
-  //             defaultOpen={index === 0}
-  //           />
-  //         </Fragment>
-  //       ))}
-
-  //       {canLoadPreviousLogs && (
-  //         <div className="py-4">
-  //           <Button onClick={loadPreviousLogs} variant="outline" size="sm">
-  //             Load older entries
-  //           </Button>
-  //         </div>
-  //       )}
-  //       {!canLoadPreviousLogs && (
-  //         <div className="text-muted-foreground py-4 text-sm">
-  //           There are no older entries to display.
-  //         </div>
-  //       )}
-  //     </div>
-  //   )
-  // );
-}
-
-function LOG_ITEM(props: { event: EventItem }) {
-  if (!props.event.message) {
-    return <></>;
-  }
-
-  return (
-    <span>
-      [{props.event.eventIndex}] {props.event.message}
-    </span>
   );
 }
 
