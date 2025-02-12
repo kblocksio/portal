@@ -7,6 +7,8 @@ import type { WorkerEventTimestampString } from "@kblocks-portal/server";
 const useLatestEvent = (objUri: string) => {
   const eventsQuery = trpc.listEvents.useQuery({
     objUri,
+    cursor: -1,
+    limit: 1,
   });
 
   if (!eventsQuery.data) {
@@ -51,7 +53,7 @@ export const LastLogMessage = memo(function LastLogMessage({
   }, [latestEvent]);
 
   return (
-    <div className="relative h-6 min-w-0 flex-grow overflow-hidden rounded bg-gray-100">
+    <div className="relative h-6 min-w-[16rem] flex-grow overflow-hidden rounded bg-gray-100">
       <AnimatePresence>
         {latestEvent && (
           <motion.div

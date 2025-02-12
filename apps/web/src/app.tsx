@@ -64,10 +64,22 @@ export function App({ children }: { children: React.ReactNode }) {
       () => {
         queryClient.invalidateQueries({
           predicate: (query) => {
-            return (
+            // Invalidate all queries except for infinite listEvents.
+            const isListEvents =
               Array.isArray(query.queryKey[0]) &&
-              query.queryKey[0][0] !== "listEvents"
-            );
+              query.queryKey[0][0] === "listEvents";
+
+            const isInfinite =
+              query.queryKey[1] != undefined &&
+              typeof query.queryKey[1] === "object" &&
+              "type" in query.queryKey[1] &&
+              query.queryKey[1].type === "infinite";
+
+            if (isListEvents && isInfinite) {
+              return false;
+            }
+
+            return true;
           },
         });
         emitter.emit("invalidate");
