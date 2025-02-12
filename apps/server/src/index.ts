@@ -473,6 +473,19 @@ const appRouter = router({
         cursor,
       };
     }),
+  countEvents: publicProcedure
+    .input(
+      z.object({
+        objUri: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { objUri } = input;
+      const total = await eventsCount(objUri);
+      return {
+        totalEvents: total,
+      };
+    }),
   listTypes: publicProcedure.query(async () => {
     const objects = await getExtendedObjects();
     const types = typesFromObjects(objects);

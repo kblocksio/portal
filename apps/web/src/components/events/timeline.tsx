@@ -59,7 +59,7 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
 
 export default function Timeline({
   objUri,
-  limit = 10,
+  limit = 100,
 }: {
   objUri: string;
   className?: string;
@@ -78,21 +78,21 @@ export default function Timeline({
     },
   );
 
-  // If the last page contains only a few log entries, it will look empty.
-  // In order to avoid this, we fetch the previous page once at the beginning.
-  const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
-  useEffect(() => {
-    if (fetchedPreviousPage) {
-      return;
-    }
+  // // If the last page contains only a few log entries, it will look empty.
+  // // In order to avoid this, we fetch the previous page once at the beginning.
+  // const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
+  // useEffect(() => {
+  //   if (fetchedPreviousPage) {
+  //     return;
+  //   }
 
-    if (query.isFetching) {
-      return;
-    }
+  //   if (query.isFetching) {
+  //     return;
+  //   }
 
-    setFetchedPreviousPage(true);
-    query.fetchPreviousPage();
-  }, [fetchedPreviousPage, query.isFetching]);
+  //   setFetchedPreviousPage(true);
+  //   query.fetchPreviousPage();
+  // }, [fetchedPreviousPage, query.isFetching]);
 
   // Refetching the last page will query the last page, and manually update
   // the query data to include the new results. These new results may be:
@@ -142,13 +142,6 @@ export default function Timeline({
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
 
-  const [eventGroupIndex, setEventGroupIndex] = useState<number>();
-  useEffect(() => {
-    if (eventGroupIndex === undefined && eventGroups.length > 0) {
-      setEventGroupIndex(Math.max(0, eventGroups.length - EVENT_GROUPS_SIZE));
-    }
-  }, [eventGroupIndex, eventGroups]);
-
   return (
     <>
       <div className="pb-4">
@@ -169,29 +162,27 @@ export default function Timeline({
         )}
       </div>
 
-      {eventGroups.length > 0 && (
-        <div className="flex flex-col gap-1">
-          {eventGroups.map((eventGroup, index) => (
-            <Fragment key={index}>
-              {(index === 0 ||
-                eventGroup.header.timestamp.getDay() !==
-                  eventGroups[index - 1]?.header.timestamp.getDay()) && (
-                <div className={cn(index !== 0 && "pt-6")}>
-                  <TimeGroupHeader
-                    key={eventGroup.header.timestamp.getDate()}
-                    timestamp={eventGroup.header.timestamp}
-                  />
-                </div>
-              )}
-              <EventGroupItem
-                key={index}
-                eventGroup={eventGroup}
-                defaultOpen={index === 0}
-              />
-            </Fragment>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-col gap-1">
+        {eventGroups.map((eventGroup, index) => (
+          <Fragment key={index}>
+            {(index === 0 ||
+              eventGroup.header.timestamp.getDay() !==
+                eventGroups[index - 1]?.header.timestamp.getDay()) && (
+              <div className={cn(index !== 0 && "pt-6")}>
+                <TimeGroupHeader
+                  key={eventGroup.header.timestamp.getDate()}
+                  timestamp={eventGroup.header.timestamp}
+                />
+              </div>
+            )}
+            <EventGroupItem
+              key={eventGroup.requestId}
+              eventGroup={eventGroup}
+              defaultOpen={index === eventGroups.length - 1}
+            />
+          </Fragment>
+        ))}
+      </div>
 
       <div className="py-4">
         {!query.hasNextPage && (
