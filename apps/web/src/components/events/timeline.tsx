@@ -21,16 +21,7 @@ import { MarkdownWrapper } from "../markdown";
 import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
-import { trpc } from "@/trpc";
-import { useQueryClient } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
-import { getQueryClient } from "@trpc/react-query/shared";
-import {
-  AnyProcedure,
-  AnyQueryProcedure,
-  inferProcedureInput,
-} from "@trpc/server";
-import { QueryProcedure } from "@trpc/server/unstable-core-do-not-import";
+import { RouterOutput, trpc } from "@/trpc";
 import { WorkerEventTimestampString } from "@kblocks-portal/server";
 
 type GroupHeader = {
@@ -66,48 +57,6 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
   return <p className="text-muted-foreground text-xs uppercase">{text}</p>;
 };
 
-// const useRefetchInfiniteQueryLastPage = <T extends AnyQueryProcedure>(
-//   procedure: T,
-//   input: inferProcedureInput<T>,
-// ) => {
-//   const queryClient = useQueryClient();
-//   const utils = trpc.useUtils();
-//   return useCallback(() => {
-//     // // getQueryKey(procedure)
-//     // procedure._def
-//     // const data = procedure.getInfiniteData({
-//     //   objUri,
-//     //   limit,
-//     // });
-//     // const lastPage = data?.pages[data.pages.length - 1];
-//     // if (!lastPage) {
-//     //   return;
-//     // }
-//     // const shouldRefetch = lastPage.nextCursor === undefined;
-//     // if (!shouldRefetch) {
-//     //   return;
-//     // }
-//     // const nextCursor = lastPage.cursor;
-//     // const newPage = await utils.client.listEvents.query({
-//     //   objUri,
-//     //   limit,
-//     //   cursor: nextCursor,
-//     // });
-//     // utils.listEvents.setInfiniteData(
-//     //   {
-//     //     objUri,
-//     //     limit,
-//     //   },
-//     //   (data) => {
-//     //     const pages = data?.pages ?? [];
-//     //     const pageParams = data?.pageParams ?? [];
-//     //     return {
-//     //       pages: [...pages.slice(0, -1), newPage],
-//     //       pageParams,
-//     //     };
-//   }, [queryClient, procedure, input]);
-// };
-
 export default function Timeline({
   objUri,
   limit = 10,
@@ -116,24 +65,40 @@ export default function Timeline({
   className?: string;
   limit?: number;
 }) {
-  // const refetchLastPage = useRefetchInfiniteQueryLastPage(trpc.listEvents, {
-  //   objUri,
-  //   limit,
-  // });
-
   const query = trpc.listEvents.useInfiniteQuery(
     {
       objUri,
       limit,
     },
     {
-      initialCursor: -limit,
+      // Cursor is -1 to fetch the last page.
+      initialCursor: -1,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
       maxPages: 3,
     },
   );
 
+  // If the last page contains only a few log entries, it will look empty.
+  // In order to avoid this, we fetch the previous page once at the beginning.
+  const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
+  useEffect(() => {
+    if (fetchedPreviousPage) {
+      return;
+    }
+
+    if (query.isFetching) {
+      return;
+    }
+
+    setFetchedPreviousPage(true);
+    query.fetchPreviousPage();
+  }, [fetchedPreviousPage, query.isFetching]);
+
+  // Refetching the last page will query the last page, and manually update
+  // the query data to include the new results. These new results may be:
+  // - New log entries
+  // - New "nextCursor" value
   const utils = trpc.useUtils();
   const refetchLastPage = useCallback(async () => {
     if (query.isFetching) {
@@ -175,28 +140,6 @@ export default function Timeline({
     );
   }, [query]);
 
-  // const utils = trpc.useUtils();
-  // useEffect(() => {
-  //   let timeout: NodeJS.Timeout | undefined;
-  //   const call = async () => {
-  //     // const queryKey = getQueryKey(
-  //     //   trpc.listEvents,
-  //     //   { objUri, limit },
-  //     //   "infinite",
-  //     // );
-  //     // console.log("queryKey", queryKey);
-  //     try {
-  //       refetchLastPage();
-  //     } finally {
-  //       timeout = setTimeout(call, 2_000);
-  //     }
-  //   };
-
-  //   void call();
-
-  //   return () => clearTimeout(timeout);
-  // }, [refetchLastPage]);
-
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   return (
     <>
@@ -219,7 +162,7 @@ export default function Timeline({
 
       <pre className="py-4 text-xs">
         {events.map((event) => (
-          <LOG_ITEM key={event.cursor} event={event} />
+          <LOG_ITEM key={event.eventIndex} event={event} />
         ))}
       </pre>
 
@@ -310,14 +253,15 @@ export default function Timeline({
   );
 }
 
-function LOG_ITEM(props: { event: WorkerEventTimestampString }) {
+type EventItem = RouterOutput["listEvents"]["events"][number];
+function LOG_ITEM(props: { event: EventItem }) {
   if (!props.event.message) {
     return <></>;
   }
 
   return (
     <span>
-      [{props.event.cursor}] {props.event.message}
+      [{props.event.eventIndex}] {props.event.message}
     </span>
   );
 }

@@ -452,21 +452,25 @@ const appRouter = router({
     .query(async ({ input }) => {
       const { objUri } = input;
       const total = await eventsCount(objUri);
+      const pageSize = input.limit;
+      const totalPages = Math.ceil(total / pageSize);
       const cursor =
-        input.cursor < 0 ? Math.max(0, total + input.cursor) : input.cursor;
-      const start = cursor;
-      const end = cursor + input.limit - 1;
+        input.cursor < 0
+          ? Math.max(0, totalPages + input.cursor)
+          : input.cursor;
+      const start = cursor * pageSize;
+      const end = cursor * pageSize + pageSize - 1;
       const events = await sliceEvents(objUri, start, end);
-      const nextCursor = start + events.length;
-      const previousCursor = Math.max(0, start - input.limit);
+      const nextCursor = cursor + 1;
+      const previousCursor = cursor - 1;
       return {
         events: events.map((event, index) => ({
           ...event,
-          cursor: start + index,
+          eventIndex: start + index,
         })),
-        nextCursor: nextCursor >= total ? undefined : nextCursor,
-        previousCursor: start >= 0 ? previousCursor : undefined,
-        cursor: start,
+        nextCursor: nextCursor >= totalPages ? undefined : nextCursor,
+        previousCursor: previousCursor < 0 ? undefined : previousCursor,
+        cursor,
       };
     }),
   listTypes: publicProcedure.query(async () => {
