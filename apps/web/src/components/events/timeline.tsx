@@ -319,77 +319,62 @@ const LogSection = ({ events }: { events: LogEvent[] }) => {
 };
 
 const Events = ({ events }: { events: EventItem[] }) => {
-  return (
-    <div className="flex flex-col gap-2 pb-6">
-      <div className="mr-4 mt-2 space-y-1 overflow-x-auto rounded-sm bg-slate-800 p-4 font-mono shadow-md">
-        {events.map(
-          (event) =>
-            event.type === "LOG" && (
-              <LogItem
-                key={event.eventIndex}
-                log={{ ...event, timestamp: new Date(event.timestamp) }}
-              />
-            ),
-        )}
-      </div>
-    </div>
-  );
-  // const items: React.ReactNode[] = [];
-  // let logEvents: LogEvent[] = [];
+  const items: React.ReactNode[] = [];
+  let logEvents: LogEvent[] = [];
 
-  // events.forEach((event) => {
-  //   if (
-  //     event.type !== "LOG" &&
-  //     event.type != "LIFECYCLE" &&
-  //     logEvents.length > 0
-  //   ) {
-  //     items.push(<LogSection key={items.length} events={logEvents} />);
-  //     logEvents = [];
-  //   }
+  events.forEach((event) => {
+    if (
+      event.type !== "LOG" &&
+      event.type != "LIFECYCLE" &&
+      logEvents.length > 0
+    ) {
+      items.push(<LogSection key={items.length} events={logEvents} />);
+      logEvents = [];
+    }
 
-  //   const timestamp = new Date(event.timestamp);
+    const timestamp = new Date(event.timestamp);
 
-  //   switch (event.type) {
-  //     case "LOG":
-  //       logEvents.push({
-  //         ...event,
-  //         timestamp,
-  //       });
-  //       break;
+    switch (event.type) {
+      case "LOG":
+        logEvents.push({
+          ...event,
+          timestamp,
+        });
+        break;
 
-  //     case "ERROR":
-  //       items.push(
-  //         <ErrorItem
-  //           key={items.length}
-  //           error={{
-  //             ...event,
-  //             timestamp,
-  //           }}
-  //         />,
-  //       );
-  //       break;
+      case "ERROR":
+        items.push(
+          <ErrorItem
+            key={items.length}
+            error={{
+              ...event,
+              timestamp,
+            }}
+          />,
+        );
+        break;
 
-  //     case "LIFECYCLE":
-  //       logEvents.push(
-  //         renderLogEvent({
-  //           ...event,
-  //           timestamp,
-  //         }),
-  //       );
-  //       break;
+      case "LIFECYCLE":
+        logEvents.push(
+          renderLogEvent({
+            ...event,
+            timestamp,
+          }),
+        );
+        break;
 
-  //     default:
-  //       // ignore
-  //       break;
-  //   }
-  // });
+      default:
+        // ignore
+        break;
+    }
+  });
 
-  // if (logEvents.length > 0) {
-  //   items.push(<LogSection key={items.length} events={logEvents} />);
-  //   logEvents = [];
-  // }
+  if (logEvents.length > 0) {
+    items.push(<LogSection key={items.length} events={logEvents} />);
+    logEvents = [];
+  }
 
-  // return <div className="flex flex-col gap-2 pb-6">{items}</div>;
+  return <div className="flex flex-col gap-2 pb-6">{items}</div>;
 };
 
 const Explanation = ({ explanation }: { explanation: any }) => {
