@@ -79,21 +79,22 @@ export default function Timeline({
     },
   );
 
-  // // If the last page contains only a few log entries, it will look empty.
-  // // In order to avoid this, we fetch the previous page once at the beginning.
-  // const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
-  // useEffect(() => {
-  //   if (fetchedPreviousPage) {
-  //     return;
-  //   }
+  // If the last page contains only a few log entries, it will look empty.
+  // In order to avoid this, we fetch the previous page once at the beginning.
+  // TODO: Remove this workaround by allowing dynamic pages. A dynamic page will use cursors that represent pages but have an offset.
+  const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
+  useEffect(() => {
+    if (fetchedPreviousPage) {
+      return;
+    }
 
-  //   if (query.isFetching) {
-  //     return;
-  //   }
+    if (query.isFetching) {
+      return;
+    }
 
-  //   setFetchedPreviousPage(true);
-  //   query.fetchPreviousPage();
-  // }, [fetchedPreviousPage, query.isFetching]);
+    setFetchedPreviousPage(true);
+    query.fetchPreviousPage();
+  }, [fetchedPreviousPage, query.isFetching]);
 
   // Refetching the last page will query the last page, and manually update
   // the query data to include the new results. These new results may be:
@@ -142,29 +143,13 @@ export default function Timeline({
   // When something changed on the Kblocks server, we need to refetch the last page.
   useInvalidate(refetchLastPage);
 
-  const events = query.data?.pages.flatMap((page) => page.events) ?? [];
-  const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);
+  const eventGroups = useMemo(() => {
+    const allEvents = query.data?.pages.flatMap((page) => page.events) ?? [];
+    return groupEventsByRequestId(allEvents).reverse();
+  }, [query.data]);
 
   return (
     <>
-      <div className="pb-4">
-        {!query.hasPreviousPage && (
-          <div className="text-muted-foreground text-sm">
-            There are no older entries to display.
-          </div>
-        )}
-        {query.hasPreviousPage && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => query.fetchPreviousPage()}
-            disabled={query.isFetchingPreviousPage}
-          >
-            Fetch older entries
-          </Button>
-        )}
-      </div>
-
       <div className="flex flex-col gap-1">
         {eventGroups.map((eventGroup, index) => (
           <Fragment key={index}>
@@ -181,26 +166,26 @@ export default function Timeline({
             <EventGroupItem
               key={eventGroup.requestId}
               eventGroup={eventGroup}
-              defaultOpen={index === eventGroups.length - 1}
+              defaultOpen={index === 0}
             />
           </Fragment>
         ))}
       </div>
 
       <div className="py-4">
-        {!query.hasNextPage && (
-          <div className="text-muted-foreground text-sm">
-            You're up to date.
+        {!query.hasPreviousPage && (
+          <div className="text-muted-foreground text-xs">
+            There are no older entries to display.
           </div>
         )}
-        {query.hasNextPage && (
+        {query.hasPreviousPage && (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => query.fetchNextPage()}
-            disabled={query.isFetchingNextPage}
+            onClick={() => query.fetchPreviousPage()}
+            disabled={query.isFetchingPreviousPage}
           >
-            Fetch newer entries
+            Fetch older entries
           </Button>
         )}
       </div>
