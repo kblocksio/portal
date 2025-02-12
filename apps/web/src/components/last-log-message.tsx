@@ -13,7 +13,7 @@ const useLatestEvent = (objUri: string) => {
     return undefined;
   }
 
-  return eventsQuery.data[eventsQuery.data.length - 1];
+  return eventsQuery.data.events[eventsQuery.data.events.length - 1];
 };
 
 const formatEventMessage = (event: WorkerEventTimestampString) => {
