@@ -22,6 +22,7 @@ import { Timestamp } from "../timestamp";
 import { Button } from "../ui/button";
 import { AiErrorGuide } from "./ai-error-guide";
 import { RouterOutput, trpc } from "@/trpc";
+import { useInvalidate } from "@/invalidate-context";
 
 type GroupHeader = {
   timestamp: Date;
@@ -138,6 +139,9 @@ export default function Timeline({
       },
     );
   }, [query]);
+
+  // When something changed on the Kblocks server, we need to refetch the last page.
+  useInvalidate(refetchLastPage);
 
   const events = query.data?.pages.flatMap((page) => page.events) ?? [];
   const eventGroups = useMemo(() => groupEventsByRequestId(events), [events]);

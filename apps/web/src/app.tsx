@@ -21,6 +21,8 @@ import { LocationProvider } from "./location-context.js";
 import { throttle } from "lodash-es";
 import useWebSocket from "react-use-websocket";
 import type { WorkerEvent } from "@kblocks/api";
+import Emittery from "emittery";
+import { InvalidateProvider } from "./invalidate-context.js";
 
 const TRPC_URL = `${location.origin}/api/trpc`;
 
@@ -48,6 +50,13 @@ export function App({ children }: { children: React.ReactNode }) {
     }),
   );
 
+  const [emitter] = useState(
+    () =>
+      new Emittery<{
+        invalidate: undefined;
+      }>(),
+  );
+
   // Invalidate queries on every message, but throttle the calls to avoid too many requests.
   const invalidateQueries = useCallback(
     // eslint-disable-next-line react-compiler/react-compiler
@@ -55,9 +64,13 @@ export function App({ children }: { children: React.ReactNode }) {
       () => {
         queryClient.invalidateQueries({
           predicate: (query) => {
-            return query.queryKey[0] !== "listEvents";
+            return (
+              Array.isArray(query.queryKey[0]) &&
+              query.queryKey[0][0] !== "listEvents"
+            );
           },
         });
+        emitter.emit("invalidate");
       },
       2000,
       { leading: true, trailing: true },
@@ -92,13 +105,15 @@ export function App({ children }: { children: React.ReactNode }) {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <AppProvider>
-          <UserProvider>
-            <NotificationsProvider>
-              <CreateResourceProvider>{children}</CreateResourceProvider>
-            </NotificationsProvider>
-          </UserProvider>
-        </AppProvider>
+        <InvalidateProvider emitter={emitter}>
+          <AppProvider>
+            <UserProvider>
+              <NotificationsProvider>
+                <CreateResourceProvider>{children}</CreateResourceProvider>
+              </NotificationsProvider>
+            </UserProvider>
+          </AppProvider>
+        </InvalidateProvider>
       </QueryClientProvider>
     </trpc.Provider>
   );
