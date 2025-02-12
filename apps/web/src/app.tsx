@@ -53,14 +53,10 @@ export function App({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-compiler/react-compiler
     throttle(
       () => {
-        // queryClient.invalidateQueries();
         queryClient.invalidateQueries({
-          queryKey: [
-            "listProjects",
-            "listOrganizations",
-            "listCatalogItems",
-            "getResource",
-          ],
+          predicate: (query) => {
+            return query.queryKey[0] !== "listEvents";
+          },
         });
       },
       2000,
