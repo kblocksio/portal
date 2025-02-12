@@ -18,6 +18,14 @@ export const findCondition = (
       return conditions[0];
     }
 
+    if (conditions.length === 0) {
+      return {
+        status: "Pending",
+        reason: StatusReason.Pending,
+        message: "No conditions found",
+      };
+    }
+
     const notReady = conditions.filter((s) => s.status !== "True");
     if (notReady.length > 0) {
       return {
