@@ -47,6 +47,14 @@ export const categories: Record<string, Category> = {
     color: "amber",
     docslink: "https://docs.kblocks.io/categories/cicd",
   },
+  ai: {
+    title: "AI",
+    description:
+      "Resources for building AI applications.",
+    icon: "heroicon://sparkles",
+    color: "purple",
+    docslink: "https://docs.kblocks.io/categories/ai",
+  },
   demo: {
     title: "Demo",
     description:

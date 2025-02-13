@@ -1,0 +1,43 @@
+apiVersion: kblocks.io/v1
+kind: Block
+spec:
+  engine: pulumi
+  definition:
+    description: An example platform building block implemented using Pulumi to
+      provision AWS resources, including EC2 instances, IAM roles, and a VPC.
+    icon: heroicon://sparkles
+    readme: ./README.md
+    schema: src/values.schema.json
+    outputs:
+      - amiId
+      - instanceId
+      - publicDns
+      - publicIp
+      - consoleUrl
+      - chatUrl
+    categories:
+      - ai
+    group: pulumi.kblocks.io
+    version: v1
+    kind: PulumiOllama
+    plural: pulumiollamas
+    singular: pulumiollama
+  operator:
+    envSecrets:
+      AWS_REGION:
+        key: ORG_AWS_DEFAULT_REGION
+        secret: kblocks-secrets
+      PULUMI_ACCESS_TOKEN:
+        key: PULUMI_ACCESS_TOKEN
+        secret: kblocks-secrets
+      AWS_ACCESS_KEY_ID:
+        key: AWS_ACCESS_KEY_ID
+        secret: kblocks-secrets
+      AWS_SECRET_ACCESS_KEY:
+        key: AWS_SECRET_ACCESS_KEY
+        secret: kblocks-secrets
+      AWS_DEFAULT_REGION:
+        key: AWS_DEFAULT_REGION
+        secret: kblocks-secrets
+metadata:
+  name: pulumiollamas.pulumi.kblocks.io
