@@ -4,13 +4,14 @@ import * as command from "@pulumi/command";
 import * as fs from "fs";
 
 const privateKeyBase64 = process.env.SSH_PRIVATE_KEY_BASE64;
-const publicKey = process.env.SSH_PUBLIC_KEY;
+const publicKeyBase64 = process.env.SSH_PUBLIC_KEY_BASE64;
 
-if (!privateKeyBase64 || !publicKey) {
-    throw new Error("SSH_PRIVATE_KEY_BASE64 and SSH_PUBLIC_KEY must be set");
+if (!privateKeyBase64 || !publicKeyBase64) {
+    throw new Error("SSH_PRIVATE_KEY_BASE64 and SSH_PUBLIC_KEY_BASE64 must be set");
 }
 
 const privateKey = Buffer.from(privateKeyBase64, "base64").toString("utf-8");
+const publicKey = Buffer.from(publicKeyBase64, "base64").toString("utf-8");
 
 const role = new aws.iam.Role("Role", {
     assumeRolePolicy: JSON.stringify({

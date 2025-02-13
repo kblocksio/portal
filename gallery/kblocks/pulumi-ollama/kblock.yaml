@@ -30,6 +30,6 @@ spec:
       AWS_SECRET_ACCESS_KEY: kblocks-secrets
       AWS_DEFAULT_REGION: kblocks-secrets
       SSH_PRIVATE_KEY_BASE64: kblocks-secrets
-      SSH_PUBLIC_KEY: kblocks-secrets
+      SSH_PUBLIC_KEY_BASE64: kblocks-secrets
 metadata:
   name: pulumiollamas.pulumi.kblocks.io
