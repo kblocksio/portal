@@ -1,6 +1,6 @@
 # Kblocks Portal
 
-## Installation
+## Portal Installation
 
 This guide will walk you through the steps to install the Kblocks Portal.
 
@@ -8,19 +8,25 @@ This guide will walk you through the steps to install the Kblocks Portal.
 
 Before you start, make sure you have:
 
-1. Have access to a Kubernetes cluster. We recommend
-   [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) with [nginx
-   ingress](https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx) for a local deployment.
+1. Have access to a Kubernetes cluster.
 2. Cloned the [portal repository](https://github.com/kblocksio/portal).
 3. Run `npm i` in the root of the repository.
 
-### Core Block Installation
+For local development, we recommend
+[kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) with [nginx
+ingress](https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx) for a local deployment. 
 
-> Follow [enabling-slack-notifications.md](docs/enabling-slack-notifications.md) to get Slack notifications.
+The following script will install kind, create a cluster, and install the ingress controller and
+also add `demo.kblocks.io` to your `/etc/hosts` file so you can access the portal at
+`https://demo.kblocks.io`.
 
-> AI support is enabled by setting `OPENAI_API_KEY` in the `kblocks-api-secrets` secret. This can also be done in the `secrets/portal.env` file before installation.
+```sh
+./scripts/reinstall-kind.sh
+```
 
-**Install the basic Kblocks required for the portal:**
+### Core Blocks
+
+First, we need to install a bunch of core blocks that are used by the portal itself:
 
 ```sh
 cd gallery
@@ -30,20 +36,29 @@ cd gallery
 cd ..
 ```
 
-### Portal Installation
+### SSL Certificate Setup
 
-> **Redis Configuration Note:**  
-> The following command will install a Redis instance in your cluster and set the necessary
-> `KBLOCKS_PUBSUB_*` properties in the `kblocks` secret and `KBLOCKS_PUBSUB_HOST` and
-> `KBLOCKS_PUBSUB_KEY` in the portal's `kblocks-api-secrets` secret. If you prefer installing a
-> different Redis instance, set `redis.enabled=false` and manually configure the above properties in
-> each secret after installation.
+If you wish to connect to the portal via HTTPS, you will need to install an SSL certificate to the
+`kblocks-tls` secret.
+
+You can use this command to install the certificate:
+
+```sh
+kubectl create secret tls kblocks-tls --key=$key --cert=$cert -n default
+```
+
+> You can download the `.key` and `.pem` files for `*.kblocks.io` from
+> [DNSimple](https://dnsimple.com/a/137210/domains/kblocks.io/certificates/1864734/installation)
+> (under NGINX).
+
+
+### Frontend and Backend
 
 Export the following environment variables:
 
 ```sh
-export KBLOCKS_CLUSTER_NAME=your-portal-cluster-name
-export KBLOCKS_DOMAIN=your-portal-domain.com
+export KBLOCKS_CLUSTER_NAME=localhost
+export KBLOCKS_DOMAIN=localhost.kblocks.io
 ```
 
 Run the following command from the root of the repository:
@@ -79,18 +94,45 @@ portal-redis-664db84547-wkdqc                          1/1     Running   0      
 open https://$KBLOCKS_DOMAIN
 ```
 
-
-### Installing additional blocks
+## Adding Blocks to your Cluster
 
 Now that your portal is set up, you can install additional blocks.
 
-Follow the instructions under [kblocks.io](https://kblocks.io) to create a new block, and when
-installing it, make sure to install the block under the `kblocks` namespace:
+Generally speaking, follow the instructions under [kblocks.io](https://kblocks.io) to create a new
+block, and when installing it, make sure to install the block under the `kblocks` namespace:
 
 ```sh
 cd my-block
 kb install -n kblocks
 ```
+
+This repository includes many example blocks under `gallery`. This script will install all example
+blocks:
+
+```sh
+cd gallery
+./install-blocks.sh
+```
+
+## Additional Customizations
+
+### Slack
+
+Follow [enabling-slack-notifications.md](docs/enabling-slack-notifications.md) to get Slack
+notifications.
+
+### AI
+
+AI support is enabled by setting `OPENAI_API_KEY` in the `kblocks-api-secrets` secret. This can also
+be done in the `secrets/portal.env` file before installation.
+
+### Redis
+
+The above instructions will install a Redis instance in your cluster and set the necessary
+`KBLOCKS_PUBSUB_*` properties in the `kblocks` secret and `KBLOCKS_PUBSUB_HOST` and
+`KBLOCKS_PUBSUB_KEY` in the portal's `kblocks-api-secrets` secret. If you prefer installing a
+different Redis instance, set `redis.enabled=false` and manually configure the above properties in
+each secret after installation.
 
 ## License
 
