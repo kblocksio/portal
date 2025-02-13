@@ -244,6 +244,7 @@ jobs:
           - organization
           - workload
           - pulumi-bucket
+          - pulumi-ollama
     steps:
       - name: Checkout
         uses: actions/checkout@v4
