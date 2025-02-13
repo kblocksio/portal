@@ -23,6 +23,8 @@ spec:
       - publicUrl
       - consoleUrl
   operator:
+    reconcile:
+      enabled: false
     workers: 1
     envSecrets:
       AWS_REGION:
