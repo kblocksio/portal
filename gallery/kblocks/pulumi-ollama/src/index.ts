@@ -3,6 +3,12 @@ import * as aws from "@pulumi/aws";
 import * as command from "@pulumi/command";
 import * as fs from "fs";
 
+const config = new pulumi.Config();
+const region: aws.Region = config.get("region") ?? "us-east-1";
+
+const provider = new aws.Provider("provider", { region });
+const resourceOptions = { provider };
+
 const privateKeyBase64 = process.env.SSH_PRIVATE_KEY_BASE64;
 const publicKeyBase64 = process.env.SSH_PUBLIC_KEY_BASE64;
 
@@ -26,33 +32,33 @@ const role = new aws.iam.Role("Role", {
             },
         ],
     }),
-});
+}, resourceOptions);
 
 new aws.iam.RolePolicyAttachment("RolePolicyAttachment", {
     policyArn: "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
     role: role.name,
-});
+}, resourceOptions);
 
 const instanceProfile = new aws.iam.InstanceProfile("InstanceProfile", {
     role: role.name,
-});
+}, resourceOptions);
 
 const vpc = new aws.ec2.Vpc("Vpc", {
     cidrBlock: "10.0.0.0/16",
     enableDnsHostnames: true,
     enableDnsSupport: true,
-});
+}, resourceOptions);
 
 const subnet = new aws.ec2.Subnet("Subnet", {
     vpcId: vpc.id,
     cidrBlock: "10.0.48.0/20",
     availabilityZone: pulumi.interpolate`${aws.getAvailabilityZones().then(it => it.names[0])}`,
     mapPublicIpOnLaunch: true,
-});
+}, resourceOptions);
 
 const internetGateway = new aws.ec2.InternetGateway("InternetGateway", {
     vpcId: vpc.id,
-});
+}, resourceOptions);
 
 const routeTable = new aws.ec2.RouteTable("RouteTable", {
     vpcId: vpc.id,
@@ -62,12 +68,12 @@ const routeTable = new aws.ec2.RouteTable("RouteTable", {
             gatewayId: internetGateway.id,
         },
     ],
-});
+}, resourceOptions);
 
 new aws.ec2.RouteTableAssociation("RouteTableAssociation", {
     subnetId: subnet.id,
     routeTableId: routeTable.id,
-});
+}, resourceOptions);
 
 const securityGroup = new aws.ec2.SecurityGroup("SecurityGroup", {
     vpcId: vpc.id,
@@ -99,7 +105,7 @@ const securityGroup = new aws.ec2.SecurityGroup("SecurityGroup", {
             cidrBlocks: ["0.0.0.0/0"],
         },
     ],
-});
+}, resourceOptions);
 
 const ami = aws.ec2
     .getAmi({
@@ -120,7 +126,7 @@ const ami = aws.ec2
 
 const keyPair = new aws.ec2.KeyPair("KeyPair", {
     publicKey: publicKey,
-});
+}, resourceOptions);
 
 
 const instance = new aws.ec2.Instance("Instance", {
@@ -138,7 +144,7 @@ const instance = new aws.ec2.Instance("Instance", {
     tags: {
         Name: "ollama-server",
     },
-});
+}, resourceOptions);
 
 const connection = {
     host: instance.publicIp,
@@ -149,7 +155,7 @@ const connection = {
 new command.remote.Command("WaitForCloudInit", {
     connection,
     create: "cloud-init status --wait",
-});
+}, resourceOptions);
 
 export const amiId = ami;
 export const instanceId = instance.id;
