@@ -1,9 +1,9 @@
 apiVersion: kblocks.io/v1
 kind: Organization
 metadata:
-  name: default-organization
-name: My Organization
-description: Default organization
+  name: demo
+name: Demo
+description: Demo Organization
 icon: AudioWaveform
 readme: |
   # Welcome to Kblocks Portal
