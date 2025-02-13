@@ -24,20 +24,12 @@ spec:
     singular: pulumiollama
   operator:
     envSecrets:
-      AWS_REGION:
-        key: ORG_AWS_DEFAULT_REGION
-        secret: kblocks-secrets
-      PULUMI_ACCESS_TOKEN:
-        key: PULUMI_ACCESS_TOKEN
-        secret: kblocks-secrets
-      AWS_ACCESS_KEY_ID:
-        key: AWS_ACCESS_KEY_ID
-        secret: kblocks-secrets
-      AWS_SECRET_ACCESS_KEY:
-        key: AWS_SECRET_ACCESS_KEY
-        secret: kblocks-secrets
-      AWS_DEFAULT_REGION:
-        key: AWS_DEFAULT_REGION
-        secret: kblocks-secrets
+      AWS_REGION: kblocks-secrets
+      PULUMI_ACCESS_TOKEN: kblocks-secrets
+      AWS_ACCESS_KEY_ID: kblocks-secrets
+      AWS_SECRET_ACCESS_KEY: kblocks-secrets
+      AWS_DEFAULT_REGION: kblocks-secrets
+      SSH_PRIVATE_KEY: kblocks-secrets
+      SSH_PUBLIC_KEY: kblocks-secrets
 metadata:
   name: pulumiollamas.pulumi.kblocks.io
