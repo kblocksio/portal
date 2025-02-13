@@ -87,14 +87,7 @@ export const AppSidebar = () => {
         <AppSidebarHeader />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Admin</SidebarGroupLabel>
-          <SidebarMenu>
-            {adminSidebarItems.map((item) => (
-              <SidebarItem key={item.title} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {/* Platform */}
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
@@ -103,6 +96,8 @@ export const AppSidebar = () => {
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Projects */}
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex w-full items-center justify-between">
@@ -138,6 +133,8 @@ export const AppSidebar = () => {
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Catalog */}
         <SidebarGroup>
           <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarMenu>
@@ -146,6 +143,17 @@ export const AppSidebar = () => {
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Admin */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarMenu>
+            {adminSidebarItems.map((item) => (
+              <SidebarItem key={item.title} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
       </SidebarContent>
       {!import.meta.env.VITE_SKIP_AUTH && (
         <SidebarFooter>
