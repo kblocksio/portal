@@ -15,10 +15,13 @@ spec:
     readme: README.md
     icon: heroicon://sparkles
     color: yellow
-    description: kblock pulumi bucket
+    description: A Kubernetes Custom Resource for managing AWS S3 buckets using Pulumi.
     schema: ./src/values.schema.json
     outputs:
       - bucketName
+      - bucketArn
+      - publicUrl
+      - consoleUrl
   operator:
     workers: 1
     envSecrets:
