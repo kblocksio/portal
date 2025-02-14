@@ -8,6 +8,7 @@ describe("getLatestCursor", () => {
       { total: 7, pageSize: 3, page: 3, offset: 2 },
       { total: 7, pageSize: 2, page: 4, offset: 1 },
       { total: 26, pageSize: 20, page: 2, offset: 14 },
+      { total: 30, pageSize: 100, page: 1, offset: 0 },
     ]) {
       expect(getLatestCursor({ total, pageSize })).toEqual({
         page,

@@ -16,7 +16,10 @@ export const getLatestCursor = (options: {
 }): Cursor => {
   const totalPages = Math.ceil(options.total / options.pageSize);
   const page = totalPages;
-  const offset = options.pageSize - (options.total % options.pageSize);
+  const offset =
+    options.total < options.pageSize
+      ? 0
+      : options.pageSize - (options.total % options.pageSize);
   return { page, offset };
 };
 
