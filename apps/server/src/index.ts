@@ -441,37 +441,66 @@ const getObjectHierarchy = (
   };
 };
 
+const CursorSchema = z
+  .string()
+  .regex(/^\d+:\d+$/)
+  .transform((cursor) => {
+    const [page, offset] = cursor.split(":");
+    return {
+      page: Number(page),
+      offset: Number(offset),
+    } as Cursor;
+  });
+
+const stringifyCursor = (cursor: Cursor): string => {
+  return `${cursor.page}:${cursor.offset}`;
+};
+
 const appRouter = router({
   listEvents: publicProcedure
     .input(
       z.object({
         objUri: z.string(),
-        cursor: z.number().optional().default(0),
-        limit: z.number().min(1).max(100).optional().default(100),
+        cursor: CursorSchema.optional(),
+        limit: z.number().min(1).max(100).optional().default(10),
       }),
     )
     .query(async ({ input }) => {
       const { objUri } = input;
       const total = await eventsCount(objUri);
-      const pageSize = input.limit;
-      const totalPages = Math.ceil(total / pageSize);
+
       const cursor =
-        input.cursor < 0
-          ? Math.max(0, totalPages + input.cursor)
-          : input.cursor;
-      const start = cursor * pageSize;
-      const end = cursor * pageSize + pageSize - 1;
-      const events = await sliceEvents(objUri, start, end);
-      const nextCursor = cursor + 1;
-      const previousCursor = cursor - 1;
+        input.cursor ?? getLatestCursor({ total, pageSize: input.limit });
+      const position = getPositionFromCursor(cursor, { pageSize: input.limit });
+      const events = await sliceEvents(objUri, position.start, position.end);
+
+      const totalPages = Math.ceil(total / input.limit);
+      const nextPage = Math.min(cursor.page + 1, totalPages);
+      const nextCursor: Cursor | undefined =
+        nextPage === totalPages
+          ? undefined
+          : {
+              page: nextPage,
+              offset: cursor.offset,
+            };
+      const previousPage = Math.max(cursor.page - 1, 0);
+      const previousCursor: Cursor | undefined =
+        previousPage === 0
+          ? undefined
+          : {
+              page: previousPage,
+              offset: cursor.offset,
+            };
       return {
         events: events.map((event, index) => ({
           ...event,
-          eventIndex: start + index,
+          eventIndex: position.start + index,
         })),
-        nextCursor: nextCursor >= totalPages ? undefined : nextCursor,
-        previousCursor: previousCursor < 0 ? undefined : previousCursor,
-        cursor,
+        cursor: stringifyCursor(cursor),
+        nextCursor: nextCursor ? stringifyCursor(nextCursor) : undefined,
+        previousCursor: previousCursor
+          ? stringifyCursor(previousCursor)
+          : undefined,
       };
     }),
   countEvents: publicProcedure
@@ -693,6 +722,7 @@ app.use(
 import * as trpcExpress from "@trpc/server/adapters/express";
 import type { WorkerEventTimestampString } from "./api-events";
 import { filterResources, sortResources } from "./filter-and-sorting-utils.js";
+import { Cursor, getLatestCursor, getPositionFromCursor } from "./cursor";
 
 app.use(
   "/api/trpc",
