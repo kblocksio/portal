@@ -462,7 +462,7 @@ const appRouter = router({
       z.object({
         objUri: z.string(),
         cursor: CursorSchema.optional(),
-        limit: z.number().min(1).max(100).optional().default(10),
+        limit: z.number().min(1).max(200).optional().default(200),
       }),
     )
     .query(async ({ input }) => {
