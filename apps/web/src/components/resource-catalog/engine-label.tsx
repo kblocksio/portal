@@ -41,6 +41,13 @@ const EngineIcon = ({
         </div>
       );
 
+    case "terraform":
+      return (
+        <div className="flex items-center">
+          <img src="/images/terraform.svg" alt="Terraform" className={className} />
+        </div>
+      );
+  
     case "wing/tf-aws":
       return (
         <div className="flex items-center">
@@ -50,7 +57,7 @@ const EngineIcon = ({
             className={className}
           />
           <img src="/images/aws.svg" alt="AWS" className={className} />
-          <img src="/images/wing.svg" alt="Tofu" className={className} />
+          <img src="/images/wing.svg" alt="Wing" className={className} />
         </div>
       );
 

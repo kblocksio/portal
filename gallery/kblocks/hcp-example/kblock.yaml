@@ -1,0 +1,21 @@
+apiVersion: kblocks.io/v1
+kind: Block
+spec:
+  engine: terraform
+  definition:
+    description: Example of using HashiCorp Cloud Platform to deploy a resource to AWS
+    icon: heroicon://beaker
+    readme: ./README.md
+    schema: src/values.schema.json
+    outputs:
+      - myOutput
+    group: acme.com
+    version: v1
+    kind: HcpExample
+    plural: hcpexamples
+    singular: hcpexample
+  operator:
+    envSecrets:
+      TF_TOKEN_app_terraform_io: kblocks-secrets
+metadata:
+  name: hcpexamples.acme.com
