@@ -14,6 +14,9 @@ spec:
     kind: HcpExample
     plural: hcpexamples
     singular: hcpexample
+    categories: 
+      - demo
+
   operator:
     envSecrets:
       TF_TOKEN_app_terraform_io: kblocks-secrets
