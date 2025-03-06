@@ -1,17 +1,24 @@
 {
   "type": "object",
   "required": [
-    "topicName",
     "region"
   ],
   "properties": {
-    "topicName": {
-      "type": "string",
-      "description": "The name of the SNS topic to be created. Must be unique within the AWS account."
-    },
     "region": {
       "type": "string",
       "description": "The AWS region where the SNS topic should be created. Determines the location where your topic resources reside."
+    },
+    "topicName": {
+      "type": "string",
+      "description": "The name of the SNS topic to be created. Must be unique within the AWS account. If not provided, the name will be generated automatically."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "The display name of the SNS topic. If not provided, the name will be used as the display name."
+    },
+    "fifo": {
+      "type": "boolean",
+      "description": "Whether the SNS topic should be an Amazon SNS FIFO topic. Defaults to false."
     },
     "encrypted": {
       "type": "boolean",
