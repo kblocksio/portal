@@ -234,6 +234,7 @@ jobs:
           - private-service
           - queue
           - quickube
+          - hcp-example
           - redis
           - static-site
           - topic
