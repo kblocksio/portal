@@ -60,41 +60,19 @@ const TimeGroupHeader = (props: { timestamp: Date }) => {
 
 export default function Timeline({
   objUri,
-  limit = 100,
 }: {
   objUri: string;
   className?: string;
-  limit?: number;
 }) {
   const query = trpc.listEvents.useInfiniteQuery(
     {
       objUri,
-      limit,
     },
     {
-      // Cursor is -1 to fetch the last page.
-      initialCursor: -1,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       getPreviousPageParam: (firstPage) => firstPage.previousCursor,
     },
   );
-
-  // If the last page contains only a few log entries, it will look empty.
-  // In order to avoid this, we fetch the previous page once at the beginning.
-  // TODO: Remove this workaround by allowing dynamic pages. A dynamic page will use cursors that represent pages but have an offset.
-  const [fetchedPreviousPage, setFetchedPreviousPage] = useState(false);
-  useEffect(() => {
-    if (fetchedPreviousPage) {
-      return;
-    }
-
-    if (query.isFetching) {
-      return;
-    }
-
-    setFetchedPreviousPage(true);
-    query.fetchPreviousPage();
-  }, [fetchedPreviousPage, query.isFetching]);
 
   // Refetching the last page will query the last page, and manually update
   // the query data to include the new results. These new results may be:
@@ -108,7 +86,6 @@ export default function Timeline({
 
     const data = utils.listEvents.getInfiniteData({
       objUri,
-      limit,
     });
     const lastPage = data?.pages[data.pages.length - 1];
     if (!lastPage) {
@@ -121,13 +98,11 @@ export default function Timeline({
     const nextCursor = lastPage.cursor;
     const newPage = await utils.client.listEvents.query({
       objUri,
-      limit,
       cursor: nextCursor,
     });
     utils.listEvents.setInfiniteData(
       {
         objUri,
-        limit,
       },
       (data) => {
         const pages = data?.pages ?? [];
@@ -166,11 +141,6 @@ export default function Timeline({
       </div>
 
       <div className="py-4">
-        {!query.hasPreviousPage && (
-          <div className="text-muted-foreground text-xs">
-            There are no older entries to display.
-          </div>
-        )}
         {query.hasPreviousPage && (
           <Button
             variant="outline"
